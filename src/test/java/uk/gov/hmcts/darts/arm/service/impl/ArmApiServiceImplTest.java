@@ -4,15 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
+import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
-import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
-import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
-import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
+import uk.gov.hmcts.darts.arm.component.ArmAuthTokenCache;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
@@ -20,7 +18,6 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -43,13 +40,18 @@ class ArmApiServiceImplTest {
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    
+    @Mock
+    private ArmAuthTokenCache armAuthTokenClient;
+    @Mock
+    private ArmRpoClient armRpoClient;
+
     private ArmApiServiceImpl armApiService;
 
     @BeforeEach
     void setUp() {
-        ArmClientService armClientService = new ArmClientServiceImpl(armTokenClient, armApiClient, null);
-        armApiService = new ArmApiServiceImpl(armApiConfigurationProperties, armDataManagementConfiguration, armClientService);
+        ArmClientService armClientService = new ArmClientServiceImpl(armTokenClient, armApiClient, armRpoClient);
+        armApiService = new ArmApiServiceImpl(armApiConfigurationProperties, armDataManagementConfiguration,
+                                              armClientService, armAuthTokenClient);
     }
 
     @Test
@@ -57,8 +59,6 @@ class ArmApiServiceImplTest {
         String bearerToken = "this is the bearer token";
         String username = "username";
         String password = "pass";
-        String armProfile = "profile";
-        String armProfileId = "profileId";
         String externalRecordId = "myexternalrecord";
         OffsetDateTime offsetDateTime = OffsetDateTime.now();
         var refConfScore = RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
@@ -66,20 +66,11 @@ class ArmApiServiceImplTest {
 
         when(armApiConfigurationProperties.getArmUsername()).thenReturn(username);
         when(armApiConfigurationProperties.getArmPassword()).thenReturn(password);
-        when(armApiConfigurationProperties.getArmServiceProfile()).thenReturn(armProfile);
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
 
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder().username(username).password(password).build();
-        ArmTokenResponse response = ArmTokenResponse.builder().accessToken(bearerToken).build();
 
-        when(armTokenClient.getToken(tokenRequest)).thenReturn(response);
-
-        AvailableEntitlementProfile.Profiles profiles = AvailableEntitlementProfile.Profiles.builder().profileId(armProfileId).profileName(armProfile).build();
-        AvailableEntitlementProfile profile = Mockito.mock(AvailableEntitlementProfile.class);
-        when(profile.getProfiles()).thenReturn(List.of(profiles));
-        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armTokenClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
-        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(response);
+        when(armAuthTokenClient.getToken(tokenRequest)).thenReturn(bearerToken);
 
         UpdateMetadataRequest expectedMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
@@ -93,7 +84,7 @@ class ArmApiServiceImplTest {
 
         armApiService.updateMetadata(externalRecordId, offsetDateTime, refConfScore, refConfReason);
 
-        verify(armApiClient, times(1)).updateMetadata(eq("Bearer " + bearerToken), eq(expectedMetadataRequest));
+        verify(armApiClient, times(1)).updateMetadata(eq(bearerToken), eq(expectedMetadataRequest));
     }
 
     @Test
@@ -102,27 +93,16 @@ class ArmApiServiceImplTest {
         String bearerToken = "this is the bearer token";
         String username = "username";
         String password = "pass";
-        String armProfile = "profile";
-        String armProfileId = "profileId";
         String externalRecordId = "myexternalrecord";
         OffsetDateTime offsetDateTime = OffsetDateTime.now();
 
         when(armApiConfigurationProperties.getArmUsername()).thenReturn(username);
         when(armApiConfigurationProperties.getArmPassword()).thenReturn(password);
-        when(armApiConfigurationProperties.getArmServiceProfile()).thenReturn(armProfile);
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
 
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder().username(username).password(password).build();
-        ArmTokenResponse response = ArmTokenResponse.builder().accessToken(bearerToken).build();
 
-        when(armTokenClient.getToken(tokenRequest)).thenReturn(response);
-
-        AvailableEntitlementProfile.Profiles profiles = AvailableEntitlementProfile.Profiles.builder().profileId(armProfileId).profileName(armProfile).build();
-        AvailableEntitlementProfile profile = Mockito.mock(AvailableEntitlementProfile.class);
-        when(profile.getProfiles()).thenReturn(List.of(profiles));
-        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armTokenClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
-        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(response);
+        when(armAuthTokenClient.getToken(tokenRequest)).thenReturn(bearerToken);
 
         UpdateMetadataRequest expectedMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
@@ -138,7 +118,7 @@ class ArmApiServiceImplTest {
         armApiService.updateMetadata(externalRecordId, offsetDateTime, null, null);
 
         // then
-        verify(armApiClient, times(1)).updateMetadata(eq("Bearer " + bearerToken), eq(expectedMetadataRequest));
+        verify(armApiClient, times(1)).updateMetadata(eq(bearerToken), eq(expectedMetadataRequest));
     }
 
     @Test

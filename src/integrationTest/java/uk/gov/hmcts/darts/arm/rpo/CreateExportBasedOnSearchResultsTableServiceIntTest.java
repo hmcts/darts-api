@@ -4,9 +4,10 @@ import org.hamcrest.MatcherAssert;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -32,12 +33,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class CreateExportBasedOnSearchResultsTableServiceIntTest extends PostgresIntegrationBase {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @MockitoBean
     private CurrentTimeHelper currentTimeHelper;
@@ -55,7 +57,7 @@ class CreateExportBasedOnSearchResultsTableServiceIntTest extends PostgresIntegr
         response.setStatus(200);
         response.setIsError(false);
         response.setResponseStatus(0);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         OffsetDateTime pollCreatedTs = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(pollCreatedTs);
@@ -91,7 +93,7 @@ class CreateExportBasedOnSearchResultsTableServiceIntTest extends PostgresIntegr
         response.setStatus(400);
         response.setIsError(false);
         response.setResponseStatus(2);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         OffsetDateTime pollCreatedTs = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(pollCreatedTs);
@@ -124,7 +126,7 @@ class CreateExportBasedOnSearchResultsTableServiceIntTest extends PostgresIntegr
         response.setStatus(400);
         response.setIsError(false);
         response.setResponseStatus(2);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 

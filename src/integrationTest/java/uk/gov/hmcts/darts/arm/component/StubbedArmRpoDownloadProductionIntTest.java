@@ -31,7 +31,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
-@TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=true"})
+@TestPropertySource(properties = {
+    "darts.storage.arm.is-mock-arm-rpo-download-csv=true",
+    "darts.storage.arm-api.enable-arm-v5-2-upgrade=false"
+})
 @SuppressWarnings({"PMD.CloseResource"})
 @Slf4j
 class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
@@ -47,7 +50,6 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
 
     @MockitoBean
     private ArmRpoClient armRpoClient;
-
 
     @BeforeEach
     void setUp() {

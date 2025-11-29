@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +42,7 @@ import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -52,6 +53,9 @@ class ArmRpoPollServiceImplTest {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
     private static final int BATCH_SIZE = 10;
+    private static final String BEARER_TOKEN = "bearerToken";
+
+    //private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
     @Mock
     private ArmRpoApi armRpoApi;
@@ -82,14 +86,15 @@ class ArmRpoPollServiceImplTest {
 
     private static final Integer EXECUTION_ID = 1;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks;
     private final Duration pollDuration = Duration.ofHours(4);
 
     private ArmRpoPollServiceImpl armRpoPollService;
 
     @BeforeEach
     void setUp() {
-        armRpoPollService = new ArmRpoPollServiceImpl(armRpoApi, armApiService, armRpoService, userIdentity, fileOperationService,
+        armRpoHelperMocks = new ArmRpoHelperMocks();
+        armRpoPollService = new ArmRpoPollServiceImpl(armRpoApi, armRpoService, userIdentity, fileOperationService,
                                                       armDataManagementConfiguration, logApi, armRpoUtil, tempProductionFiles, allowableFailedStates,
                                                       inProgressStates);
 
@@ -105,11 +110,10 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldPollSuccessfully_whenSaveBackgroundCompleted() throws IOException {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getSaveBackgroundSearchRpoState());
 
-        String bearerToken = "bearerToken";
-        when(armApiService.getArmBearerToken()).thenReturn(bearerToken);
+        when(armRpoUtil.getBearerToken(any())).thenReturn(BEARER_TOKEN);
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(PRODUCTION_NAME);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(ArmRpoStateEntity.class), any(UserAccountEntity.class)))
@@ -151,10 +155,10 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldPollSuccessfully_whenSaveBackgroundCompletedForManualRun() throws IOException {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getSaveBackgroundSearchRpoState());
 
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoUtil.getBearerToken(any())).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(PRODUCTION_NAME);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(ArmRpoStateEntity.class), any(UserAccountEntity.class))).thenReturn(
@@ -196,10 +200,10 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldPollSuccessfully_whenGetExtendedSearchesByMatterInProgress() throws IOException {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getInProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getGetExtendedSearchesByMatterRpoState());
 
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoUtil.getBearerToken(any())).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(PRODUCTION_NAME);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(ArmRpoStateEntity.class), any(UserAccountEntity.class))).thenReturn(
@@ -241,10 +245,10 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldPollSuccessfully_whenCreateExportBasedOnSearchResultsTableInProgress() throws IOException {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getInProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState());
 
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoUtil.getBearerToken(any())).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(PRODUCTION_NAME);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(ArmRpoStateEntity.class), any(UserAccountEntity.class))).thenReturn(
@@ -286,12 +290,12 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldPollSuccessfully_whenGetExtendedProductionsByMatterInProgressAndSkipsSteps() throws IOException {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getGetExtendedProductionsByMatterRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getInProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getGetExtendedProductionsByMatterRpoState());
         armRpoExecutionDetailEntity.setProductionName(PRODUCTION_NAME);
         armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusMinutes(10));
 
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoUtil.getBearerToken(any())).thenReturn("bearerToken");
         when(armRpoApi.getExtendedProductionsByMatter(anyString(), anyInt(), anyString(), any(UserAccountEntity.class))).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
         InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
@@ -323,10 +327,10 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldPollSuccessfully_whenCreateExportBasedOnSearchResultsTableForManualRun() throws IOException {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getInProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState());
 
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoUtil.getBearerToken(any())).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(PRODUCTION_NAME);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(ArmRpoStateEntity.class), any(UserAccountEntity.class))).thenReturn(
@@ -368,10 +372,10 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldPollSuccessfully_whenDownloadProductionFailedOnPreviousAttemptForManualRun() throws IOException {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getFailedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getDownloadProductionRpoState());
 
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoUtil.getBearerToken(any())).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(PRODUCTION_NAME);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(ArmRpoStateEntity.class), any(UserAccountEntity.class))).thenReturn(
@@ -413,8 +417,8 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldPollNotFindLatestExecutionDetail_OnStepDownloadProductionFailed() {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getFailedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getDownloadProductionRpoState());
 
         // when
         armRpoPollService.pollArmRpo(false, pollDuration, BATCH_SIZE);
@@ -428,8 +432,8 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldPollNotFindLatestExecutionDetailForManualRun_OnStepDownloadProductionInProgress() {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getInProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getDownloadProductionRpoState());
 
         // when
         armRpoPollService.pollArmRpo(true, pollDuration, BATCH_SIZE);
@@ -457,17 +461,17 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldHandleNoBearerToken() {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getSaveBackgroundSearchRpoState());
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
-        when(armApiService.getArmBearerToken()).thenReturn(null);
+        when(armRpoUtil.getBearerToken(any())).thenThrow(new ArmRpoException("Exception occurred while getting bearer token for Poll ARM RPO"));
 
         // when
         armRpoPollService.pollArmRpo(false, pollDuration, BATCH_SIZE);
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verify(armApiService).getArmBearerToken();
+        verify(armRpoUtil, times(1)).getBearerToken(anyString());
         verify(logApi).armRpoPollingFailed(EXECUTION_ID);
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
@@ -475,9 +479,9 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldHandleCreateExportInProgress() {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getSaveBackgroundSearchRpoState());
+        when(armRpoUtil.getBearerToken(any())).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(PRODUCTION_NAME);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(ArmRpoStateEntity.class), any(UserAccountEntity.class)))
@@ -489,7 +493,7 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verify(armApiService).getArmBearerToken();
+        verify(armRpoUtil, times(4)).getBearerToken(anyString());
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
         verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
                                                                  userAccountEntity);
@@ -503,9 +507,9 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldHandleGetExtendedSearchesByMatterGetInProgress() {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getSaveBackgroundSearchRpoState());
+        when(armRpoUtil.getBearerToken(any())).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenThrow(
             ArmRpoInProgressException.class);
 
@@ -514,7 +518,7 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verify(armApiService).getArmBearerToken();
+        verify(armRpoUtil, times(2)).getBearerToken(anyString());
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
         verify(userIdentity).getUserAccount();
 
@@ -524,9 +528,9 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldHandleNoProductionFiles() {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getSaveBackgroundSearchRpoState());
+        when(armRpoUtil.getBearerToken(any())).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(PRODUCTION_NAME);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(ArmRpoStateEntity.class), any(UserAccountEntity.class))).thenReturn(
@@ -540,7 +544,7 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verify(armApiService).getArmBearerToken();
+        verify(armRpoUtil, times(6)).getBearerToken(anyString());
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
         verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
                                                                  userAccountEntity);
@@ -557,9 +561,9 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldHandleExceptionDuringPolling_whenCreateExportBasedOnSearchResultsTableStep() {
         // given
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
-        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getSaveBackgroundSearchRpoState());
+        when(armRpoUtil.getBearerToken(any())).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any(UserAccountEntity.class))).thenReturn(PRODUCTION_NAME);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(ArmRpoStateEntity.class), any(UserAccountEntity.class))).thenReturn(
@@ -572,7 +576,7 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verify(armApiService).getArmBearerToken();
+        verify(armRpoUtil, times(4)).getBearerToken(anyString());
         verify(armRpoApi).getExtendedSearchesByMatter("bearerToken", 1, userAccountEntity);
         verify(armRpoApi).getMasterIndexFieldByRecordClassSchema("bearerToken", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
                                                                  userAccountEntity);
@@ -609,9 +613,11 @@ class ArmRpoPollServiceImplTest {
             .build();
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        if (armRpoHelperMocks != null) {
+            armRpoHelperMocks.close();
+        }
     }
 
 }
