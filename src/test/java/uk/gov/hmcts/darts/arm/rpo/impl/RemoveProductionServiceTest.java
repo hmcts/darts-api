@@ -175,7 +175,7 @@ class RemoveProductionServiceTest {
     }
 
     @Test
-    void removeProduction_shouldRetryOnUnauthorised_thenFail() {
+    void removeProduction_shouldRetryOnUnauthorised_thenFailSecondUnauthorised() {
         // given
         Response response = Response.builder()
             .request(Request.create(Request.HttpMethod.POST, "/removeProduction", java.util.Map.of(), null, StandardCharsets.UTF_8, null))

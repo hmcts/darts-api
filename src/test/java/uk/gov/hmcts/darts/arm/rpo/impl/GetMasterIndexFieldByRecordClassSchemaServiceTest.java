@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.rpo.impl;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -261,31 +262,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField1.setMasterIndexFieldId("1");
-        masterIndexField1.setDisplayName("displayName");
-        masterIndexField1.setPropertyName("propertyName");
-        masterIndexField1.setPropertyType("propertyType");
-        masterIndexField1.setIsMasked(true);
-
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField2.setMasterIndexFieldId("2");
-        masterIndexField2.setDisplayName("displayName");
-        masterIndexField2.setPropertyName("ingestionDate");
-        masterIndexField2.setPropertyType("propertyType");
-        masterIndexField2.setIsMasked(false);
-
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField3 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField3.setMasterIndexFieldId("3");
-        masterIndexField3.setDisplayName("displayName");
-        masterIndexField3.setPropertyName("bf_018");
-        masterIndexField3.setPropertyType("propertyType");
-        masterIndexField3.setIsMasked(false);
-
-        var masterIndexFieldByRecordClassSchemaResponse = new MasterIndexFieldByRecordClassSchemaResponse();
-        masterIndexFieldByRecordClassSchemaResponse.setStatus(200);
-        masterIndexFieldByRecordClassSchemaResponse.setIsError(false);
-        masterIndexFieldByRecordClassSchemaResponse.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2, masterIndexField3));
+        var masterIndexFieldByRecordClassSchemaResponse = getMasterIndexFieldByRecordClassSchemaResponse();
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq("Bearer refreshed"), any(MasterIndexFieldByRecordClassSchemaRequest.class)))
@@ -316,23 +293,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
         verifyNoMoreInteractions(armRpoService);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = ArmRpoStateEnum.class, names = {"GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY",
-        "GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_SECONDARY"}, mode = EnumSource.Mode.INCLUDE)
-    void getMasterIndexFieldByRecordClassSchema_ShouldRetryOnForbidden_WhenResponseIsValid(ArmRpoStateEnum armRpoStateEnum) {
-        // given
-        Response response = Response.builder()
-            .request(Request.create(Request.HttpMethod.POST, "/getMasterIndexFieldByRecordClassSchemaService", java.util.Map.of(), null,
-                                    StandardCharsets.UTF_8, null))
-            .status(403)
-            .reason("Forbidden")
-            .build();
-        FeignException feign403 = FeignException.errorStatus("getMasterIndexFieldByRecordClassSchemaService", response);
-        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq(BEARER_TOKEN), any(MasterIndexFieldByRecordClassSchemaRequest.class))).thenThrow(feign403);
-
-        // armRpoUtil should be asked for a new token
-        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
-
+    private static @NotNull MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchemaResponse() {
         MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
         masterIndexField1.setMasterIndexFieldId("1");
         masterIndexField1.setDisplayName("displayName");
@@ -358,6 +319,65 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
         masterIndexFieldByRecordClassSchemaResponse.setStatus(200);
         masterIndexFieldByRecordClassSchemaResponse.setIsError(false);
         masterIndexFieldByRecordClassSchemaResponse.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2, masterIndexField3));
+        return masterIndexFieldByRecordClassSchemaResponse;
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ArmRpoStateEnum.class, names = {"GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY",
+        "GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_SECONDARY"}, mode = EnumSource.Mode.INCLUDE)
+    void getMasterIndexFieldByRecordClassSchema_ShouldRetryOnUnauthorised_ThenFailSecondUnauthorised(ArmRpoStateEnum armRpoStateEnum) {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getMasterIndexFieldByRecordClassSchemaService", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorised")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getMasterIndexFieldByRecordClassSchemaService", response);
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq(BEARER_TOKEN), any(MasterIndexFieldByRecordClassSchemaRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq("Bearer refreshed"), any(MasterIndexFieldByRecordClassSchemaRequest.class)))
+            .thenThrow(feign401);
+        ArmRpoStateEntity armRpoStateEntity = armRpoHelperMocks.armRpoStateEnumToEntity(armRpoStateEnum);
+
+        // when
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            getMasterIndexFieldByRecordClassSchemaService.getMasterIndexFieldByRecordClassSchema(
+                BEARER_TOKEN, EXECUTION_ID, armRpoStateEntity, userAccount));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Failure during ARM get master index field by record class schema"));
+
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
+                                                         eq(armRpoStateEntity),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getFailedRpoStatus()), eq(userAccount));
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ArmRpoStateEnum.class, names = {"GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY",
+        "GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_SECONDARY"}, mode = EnumSource.Mode.INCLUDE)
+    void getMasterIndexFieldByRecordClassSchema_ShouldRetryOnForbidden_WhenResponseIsValid(ArmRpoStateEnum armRpoStateEnum) {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getMasterIndexFieldByRecordClassSchemaService", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(403)
+            .reason("Forbidden")
+            .build();
+        FeignException feign403 = FeignException.errorStatus("getMasterIndexFieldByRecordClassSchemaService", response);
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq(BEARER_TOKEN), any(MasterIndexFieldByRecordClassSchemaRequest.class))).thenThrow(feign403);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        var masterIndexFieldByRecordClassSchemaResponse = getMasterIndexFieldByRecordClassSchemaResponse();
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(eq("Bearer refreshed"), any(MasterIndexFieldByRecordClassSchemaRequest.class)))

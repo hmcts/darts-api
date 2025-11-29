@@ -122,7 +122,6 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
                                             "ARM service profile not found: " + armApiConfigurationProperties.getArmServiceProfile());
             }
 
-            log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());
             ArmTokenResponse selected = armClientService.selectEntitlementProfile(firstBearer, profileId.get(), emptyRpoRequest);
             String finalAccessToken = selected != null ? selected.getAccessToken() : null;
 
@@ -130,9 +129,7 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
                 throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR,
                                             "ARM selectEntitlementProfile returned empty access token");
             }
-
-            //TODO REMOVE ONCE TESTED
-            log.debug("Fetched ARM Bearer Token : {}", finalAccessToken);
+            
             return String.format("Bearer %s", finalAccessToken);
 
         } catch (FeignException ex) {

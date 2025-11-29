@@ -355,7 +355,7 @@ class SaveBackgroundSearchServiceTest {
     }
 
     @Test
-    void saveBackgroundSearch_shouldRetryOnUnauthorised_thenFail() {
+    void saveBackgroundSearch_shouldRetryOnUnauthorised_thenFailSecondUnauthorised() {
         // given
         Response response = Response.builder()
             .request(Request.create(Request.HttpMethod.POST, "/saveBackgroundSearch", java.util.Map.of(), null, StandardCharsets.UTF_8, null))

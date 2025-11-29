@@ -229,6 +229,37 @@ class DownloadProductionServiceTest {
         verifyNoMoreInteractions(armRpoService);
     }
 
+    @Test
+    void downloadProduction_ShouldRetryOnUnauthorised_ThenFailSecondUnauthorised() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/downloadProduction", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorised")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("downloadProduction", response);
+        when(armRpoDownloadProduction.downloadProduction(eq(BEARER_TOKEN), anyInt(), anyString())).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoDownloadProduction.downloadProduction(eq("Bearer refreshed"), anyInt(), anyString())).thenThrow(feign401);
+
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            downloadProductionService.downloadProduction(BEARER_TOKEN, EXECUTION_ID, "productionExportId", userAccount));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Failure during download production: Error during ARM RPO download production id"));
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
+                                                         eq(armRpoHelperMocks.getDownloadProductionRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelperMocks.getFailedRpoStatus(), userAccount);
+        verifyNoMoreInteractions(armRpoService);
+    }
+
     @AfterEach
     void close() {
         armRpoHelperMocks.close();

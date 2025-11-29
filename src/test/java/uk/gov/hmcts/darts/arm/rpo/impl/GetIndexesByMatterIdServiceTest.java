@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.rpo.impl;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,15 +85,7 @@ class GetIndexesByMatterIdServiceTest {
     @Test
     void getIndexesByMatterId_Success() {
         // given
-        IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
-        response.setStatus(200);
-        response.setIsError(false);
-
-        IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
-        IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
-        indexDetails.setIndexId("indexId");
-        index.setIndexDetails(indexDetails);
-        response.setIndexes(List.of(index));
+        IndexesByMatterIdResponse response = getIndexesByMatterIdResponse("indexId");
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
@@ -212,15 +205,7 @@ class GetIndexesByMatterIdServiceTest {
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
-        IndexesByMatterIdResponse indexesByMatterIdResponse = new IndexesByMatterIdResponse();
-        indexesByMatterIdResponse.setStatus(200);
-        indexesByMatterIdResponse.setIsError(false);
-
-        IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
-        IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
-        indexDetails.setIndexId("indexId");
-        index.setIndexDetails(indexDetails);
-        indexesByMatterIdResponse.setIndexes(List.of(index));
+        IndexesByMatterIdResponse indexesByMatterIdResponse = getIndexesByMatterIdResponse("indexId");
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getIndexesByMatterId(eq("Bearer refreshed"), any(IndexesByMatterIdRequest.class))).thenReturn(indexesByMatterIdResponse);
@@ -239,6 +224,51 @@ class GetIndexesByMatterIdServiceTest {
     }
 
     @Test
+    void getIndexesByMatterId_ShouldRetryOnUnauthorised_ThenFailSecondUnauthorised() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getIndexesByMatterId", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorised")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getIndexesByMatterId", response);
+        when(armRpoClient.getIndexesByMatterId(eq(BEARER_TOKEN), any(IndexesByMatterIdRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        when(armRpoClient.getIndexesByMatterId(eq("Bearer refreshed"), any(IndexesByMatterIdRequest.class))).thenThrow(feign401);
+
+        // when
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            getIndexesByMatterIdService.getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, "matterId", userAccount));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Failure during ARM RPO get indexes by matter ID"));
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
+                                                         eq(armRpoHelperMocks.getGetIndexesByMatterIdRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(armRpoHelperMocks.getFailedRpoStatus()), eq(userAccount));
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    private static @NotNull IndexesByMatterIdResponse getIndexesByMatterIdResponse(String indexId) {
+        IndexesByMatterIdResponse indexesByMatterIdResponse = new IndexesByMatterIdResponse();
+        indexesByMatterIdResponse.setStatus(200);
+        indexesByMatterIdResponse.setIsError(false);
+
+        IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
+        IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
+        indexDetails.setIndexId(indexId);
+        index.setIndexDetails(indexDetails);
+        indexesByMatterIdResponse.setIndexes(List.of(index));
+        return indexesByMatterIdResponse;
+    }
+
+    @Test
     void getIndexesByMatterId_ShouldRetryOnForbidden_WhenResponseIsValid() {
         // given
         Response response = Response.builder()
@@ -253,15 +283,7 @@ class GetIndexesByMatterIdServiceTest {
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken("getIndexesByMatterId");
 
-        IndexesByMatterIdResponse indexesByMatterIdResponse = new IndexesByMatterIdResponse();
-        indexesByMatterIdResponse.setStatus(200);
-        indexesByMatterIdResponse.setIsError(false);
-
-        IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
-        IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
-        indexDetails.setIndexId("indexId");
-        index.setIndexDetails(indexDetails);
-        indexesByMatterIdResponse.setIndexes(List.of(index));
+        IndexesByMatterIdResponse indexesByMatterIdResponse = getIndexesByMatterIdResponse("indexId");
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getIndexesByMatterId(eq("Bearer refreshed"), any(IndexesByMatterIdRequest.class))).thenReturn(indexesByMatterIdResponse);
@@ -317,15 +339,7 @@ class GetIndexesByMatterIdServiceTest {
     @Test
     void getIndexesByMatterId_ThrowsException_WithNullIndexId() {
         // given
-        IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
-        response.setStatus(200);
-        response.setIsError(false);
-
-        IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
-        IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
-        indexDetails.setIndexId(null);
-        index.setIndexDetails(indexDetails);
-        response.setIndexes(List.of(index));
+        IndexesByMatterIdResponse response = getIndexesByMatterIdResponse(null);
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);

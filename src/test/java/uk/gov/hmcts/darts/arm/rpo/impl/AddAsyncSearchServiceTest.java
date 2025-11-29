@@ -342,6 +342,76 @@ class AddAsyncSearchServiceTest {
     }
 
     @Test
+    void addAsyncSearch_ShouldRetryOnUnauthorised_ThenFailSecondUnauthorised() {
+        //  Given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/addAsyncSearch", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("addAsyncSearch", response);
+        when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString())).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        createArmAutomatedTaskEntityAndSetMock();
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        when(armRpoClient.addAsyncSearch(eq("Bearer refreshed"), anyString())).thenThrow(feign401);
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            addAsyncSearchService.addAsyncSearch(TOKEN, EXECUTION_ID, someUserAccount));
+
+        // Then
+        assertThat(exception.getMessage(), containsString("ARM addAsyncSearch: API call failed after retry"));
+        // And verify execution detail state moves to in progress
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getAddAsyncSearchRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify the expected request data has been created
+        verify(armRpoClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
+
+        String jsonRequest = requestCaptor.getValue();
+
+        assertEquals("DARTS_RPO_2025_01_02_12_34_00", parse(jsonRequest)
+            .read("$.name", String.class));
+
+        assertEquals("DARTS_RPO_2025_01_02_12_34_00", parse(jsonRequest)
+            .read("$.searchName", String.class));
+
+        assertEquals(MATTER_ID, parse(jsonRequest)
+            .read("$.matterId", String.class));
+
+        assertEquals(ENTITLEMENT_ID, parse(jsonRequest)
+            .read("$.entitlementId", String.class));
+
+        assertEquals(INDEX_ID, parse(jsonRequest)
+            .read("$.indexId", String.class));
+
+        assertEquals(SORTING_FIELD, parse(jsonRequest)
+            .read("$.sortingField", String.class));
+
+        assertEquals("2024-12-31T11:34:00Z", parse(jsonRequest)
+            .read("$.queryTree.children[1].field.value[0]", String.class));
+
+        assertEquals("2025-01-01T11:34:00Z", parse(jsonRequest)
+            .read("$.queryTree.children[1].field.value[1]", String.class));
+
+        // And verify execution detail status moves to completed as the final operation
+        verify(armRpoService).updateArmRpoStatus(executionDetailCaptor.capture(),
+                                                 eq(armRpoHelperMocks.getFailedRpoStatus()),
+                                                 eq(someUserAccount));
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
     void addAsyncSearch_ShouldRetryOnForbidden_WhenResponseIsValid() {
         //  Given
         Response response = Response.builder()

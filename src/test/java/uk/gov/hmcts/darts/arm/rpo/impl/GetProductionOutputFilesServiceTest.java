@@ -485,6 +485,45 @@ class GetProductionOutputFilesServiceTest {
     }
 
     @Test
+    void getProductionOutputFiles_ShouldRetryOnUnauthorised_ThenFailSecondUnauthorised() {
+        // Given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getProductionOutputFiles", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getProductionOutputFiles", response);
+        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
+
+        when(armRpoClient.getProductionOutputFiles(eq("Bearer refreshed"), any(ProductionOutputFilesRequest.class)))
+            .thenThrow(feign401);
+
+        UserAccountEntity someUserAccount = new UserAccountEntity();
+
+        // When
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            getProductionOutputFilesService.getProductionOutputFiles(TOKEN, EXECUTION_ID, someUserAccount));
+
+        // Then
+        assertThat(exception.getMessage(), containsString("Unauthorized"));
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                         armRpoHelperMocks.getGetProductionOutputFilesRpoState(),
+                                                         armRpoHelperMocks.getInProgressRpoStatus(),
+                                                         someUserAccount);
+
+        // And verify execution detail status moves to failed as the final operation
+        verify(armRpoService).updateArmRpoStatus(armRpoExecutionDetailEntity,
+                                                 armRpoHelperMocks.getFailedRpoStatus(),
+                                                 someUserAccount);
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
     void getProductionOutputFiles_ShouldRetryOnForbidden_WhenResponseIsValid() {
         // Given
         Response response = Response.builder()

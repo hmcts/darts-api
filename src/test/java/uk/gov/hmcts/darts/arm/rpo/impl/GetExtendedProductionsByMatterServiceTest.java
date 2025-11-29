@@ -277,6 +277,38 @@ class GetExtendedProductionsByMatterServiceTest {
         verifyNoMoreInteractions(armRpoService);
     }
 
+    @Test
+    void getExtendedProductionsByMatter_ShouldRetryOnUnauthorised_ThenFailSecondUnauthorised() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getExtendedProductionsByMatter", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorised")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getExtendedProductionsByMatter", response);
+        when(armRpoClient.getExtendedProductionsByMatter(eq("token"), anyString())).thenThrow(feign401);
+        armRpoExecutionDetailEntity.setMatterId("1");
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoClient.getExtendedProductionsByMatter(eq("Bearer refreshed"), anyString())).thenThrow(feign401);
+
+        // when
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            getExtendedProductionsByMatterService.getExtendedProductionsByMatter("token", 1, PRODUCTION_NAME, userAccount));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Failure during ARM RPO Extended Productions By Matter"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getGetExtendedProductionsByMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
     @AfterEach
     void close() {
         armRpoHelperMocks.close();

@@ -301,7 +301,7 @@ class GetStorageAccountsServiceTest {
     }
 
     @Test
-    void getStorageAccounts_shouldRetryOnUnauthorised_thenFail() {
+    void getStorageAccounts_shouldRetryOnUnauthorised_thenFailSecondUnauthorised() {
         // given
         Response response = Response.builder()
             .request(Request.create(Request.HttpMethod.POST, "/getStorageAccounts", java.util.Map.of(), null, StandardCharsets.UTF_8, null))

@@ -8,7 +8,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
@@ -72,7 +72,7 @@ public class SaveBackgroundSearchServiceImpl implements SaveBackgroundSearchServ
     private BaseRpoResponse getBaseRpoResponse(UserAccountEntity userAccount, FeignException feignException, StringBuilder errorMessage,
                                                ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         String feignResponse = feignException.contentUTF8();
-        if (StringUtils.isEmpty(feignResponse)) {
+        if (ObjectUtils.isEmpty(feignResponse)) {
             throw armRpoUtil.handleFailureAndCreateException(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException).toString(),
                                                              armRpoExecutionDetailEntity, userAccount);
         }

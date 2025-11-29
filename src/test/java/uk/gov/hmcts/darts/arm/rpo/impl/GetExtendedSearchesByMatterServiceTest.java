@@ -79,17 +79,7 @@ class GetExtendedSearchesByMatterServiceTest {
     @Test
     void getExtendedSearchesByMatter_Success() {
         // given
-        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
-        extendedSearchesByMatterResponse.setStatus(200);
-        extendedSearchesByMatterResponse.setIsError(false);
-        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
-        search.setSearchId(SEARCH_ID);
-        search.setTotalCount(4);
-        search.setName(PRODUCTION_NAME);
-        search.setIsSaved(true);
-        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
-        searchDetail.setSearch(search);
-        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = getExtendedSearchesByMatterResponse(SEARCH_ID, true);
 
         armRpoExecutionDetailEntity.setMatterId("1");
 
@@ -113,17 +103,8 @@ class GetExtendedSearchesByMatterServiceTest {
     @Test
     void getExtendedSearchesByMatter_ThrowsException_WhenIsSavedFalse() {
         // given
-        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
-        extendedSearchesByMatterResponse.setStatus(200);
-        extendedSearchesByMatterResponse.setIsError(false);
-        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
-        search.setSearchId(SEARCH_ID);
-        search.setTotalCount(4);
-        search.setName(PRODUCTION_NAME);
-        search.setIsSaved(false);
-        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
-        searchDetail.setSearch(search);
-        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = getExtendedSearchesByMatterResponse(SEARCH_ID,
+                                                                                                                false);
 
         armRpoExecutionDetailEntity.setMatterId("1");
 
@@ -147,17 +128,7 @@ class GetExtendedSearchesByMatterServiceTest {
     @Test
     void getExtendedSearchesByMatter_ThrowsException_WhenIsSavedNull() {
         // given
-        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
-        extendedSearchesByMatterResponse.setStatus(200);
-        extendedSearchesByMatterResponse.setIsError(false);
-        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
-        search.setSearchId(SEARCH_ID);
-        search.setTotalCount(4);
-        search.setName(PRODUCTION_NAME);
-        search.setIsSaved(null);
-        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
-        searchDetail.setSearch(search);
-        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = getExtendedSearchesByMatterResponse();
 
         armRpoExecutionDetailEntity.setMatterId("1");
 
@@ -306,15 +277,7 @@ class GetExtendedSearchesByMatterServiceTest {
     @Test
     void getExtendedSearchesByMatter_ThrowsException_WithMissingTotalCount() {
         // given
-        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
-        extendedSearchesByMatterResponse.setStatus(200);
-        extendedSearchesByMatterResponse.setIsError(false);
-        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
-        search.setSearchId(SEARCH_ID);
-        search.setName(PRODUCTION_NAME);
-        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
-        searchDetail.setSearch(search);
-        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = getSearchesByMatterResponse();
         when(armRpoClient.getExtendedSearchesByMatter(anyString(), anyString())).thenReturn(extendedSearchesByMatterResponse);
         armRpoExecutionDetailEntity.setMatterId("1");
 
@@ -452,6 +415,41 @@ class GetExtendedSearchesByMatterServiceTest {
     }
 
     @Test
+    void getExtendedSearchesByMatter_ShouldRetryOnUnauthorised_ThenFailSecondUnauthorised() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/getExtendedSearchesByMatter", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorised")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("getExtendedSearchesByMatter", response);
+        when(armRpoClient.getExtendedSearchesByMatter(eq("token"), anyString())).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        armRpoExecutionDetailEntity.setMatterId("1");
+
+        when(armRpoClient.getExtendedSearchesByMatter(eq("Bearer refreshed"), any())).thenThrow(feign401);
+
+        // when
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            getExtendedSearchesByMatterService.getExtendedSearchesByMatter("token", 1, userAccount));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Failure during ARM RPO getExtendedSearchesByMatter"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(ArmRpoExecutionDetailEntity.class),
+                                                         eq(armRpoHelperMocks.getGetExtendedSearchesByMatterRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any(UserAccountEntity.class));
+        verify(armRpoService).updateArmRpoStatus(any(ArmRpoExecutionDetailEntity.class), eq(armRpoHelperMocks.getFailedRpoStatus()),
+                                                 any(UserAccountEntity.class));
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
     void getExtendedSearchesByMatter_ShouldRetryOnUnauthorised_WhenResponseIsValid() {
         // given
         Response response = Response.builder()
@@ -466,17 +464,7 @@ class GetExtendedSearchesByMatterServiceTest {
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
-        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
-        extendedSearchesByMatterResponse.setStatus(200);
-        extendedSearchesByMatterResponse.setIsError(false);
-        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
-        search.setSearchId(SEARCH_ID);
-        search.setTotalCount(4);
-        search.setName(PRODUCTION_NAME);
-        search.setIsSaved(true);
-        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
-        searchDetail.setSearch(search);
-        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = getExtendedSearchesByMatterResponse(SEARCH_ID, true);
 
         armRpoExecutionDetailEntity.setMatterId("1");
 
@@ -512,17 +500,8 @@ class GetExtendedSearchesByMatterServiceTest {
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
-        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
-        extendedSearchesByMatterResponse.setStatus(200);
-        extendedSearchesByMatterResponse.setIsError(false);
-        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
-        search.setSearchId(SEARCH_ID);
-        search.setTotalCount(4);
-        search.setName(PRODUCTION_NAME);
-        search.setIsSaved(true);
-        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
-        searchDetail.setSearch(search);
-        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = getExtendedSearchesByMatterResponse(SEARCH_ID,
+                                                                                                                true);
 
         armRpoExecutionDetailEntity.setMatterId("1");
 
@@ -547,4 +526,46 @@ class GetExtendedSearchesByMatterServiceTest {
     void close() {
         armRpoHelperMocks.close();
     }
+
+    private ExtendedSearchesByMatterResponse getExtendedSearchesByMatterResponse() {
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
+        extendedSearchesByMatterResponse.setStatus(200);
+        extendedSearchesByMatterResponse.setIsError(false);
+        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
+        search.setSearchId(SEARCH_ID);
+        search.setName(PRODUCTION_NAME);
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
+        searchDetail.setSearch(search);
+        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+        return extendedSearchesByMatterResponse;
+    }
+
+    private ExtendedSearchesByMatterResponse getSearchesByMatterResponse() {
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
+        extendedSearchesByMatterResponse.setStatus(200);
+        extendedSearchesByMatterResponse.setIsError(false);
+        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
+        search.setSearchId(SEARCH_ID);
+        search.setName(PRODUCTION_NAME);
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
+        searchDetail.setSearch(search);
+        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+        return extendedSearchesByMatterResponse;
+    }
+
+    private ExtendedSearchesByMatterResponse getExtendedSearchesByMatterResponse(String searchId, boolean isSaved) {
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
+        extendedSearchesByMatterResponse.setStatus(200);
+        extendedSearchesByMatterResponse.setIsError(false);
+        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
+        search.setSearchId(searchId);
+        search.setTotalCount(4);
+        search.setName(PRODUCTION_NAME);
+        search.setIsSaved(isSaved);
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
+        searchDetail.setSearch(search);
+        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+        return extendedSearchesByMatterResponse;
+    }
+
 }

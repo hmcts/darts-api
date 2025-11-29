@@ -284,7 +284,7 @@ class GetProfileEntitlementsServiceTest {
     }
 
     @Test
-    void getProfileEntitlements_shouldRetryOnUnauthorised_thenFail() {
+    void getProfileEntitlements_shouldRetryOnUnauthorised_thenFailSecondUnauthorised() {
         //  Given
         Response response = Response.builder()
             .request(Request.create(Request.HttpMethod.POST, "/getProfileEntitlements", java.util.Map.of(), null, StandardCharsets.UTF_8, null))

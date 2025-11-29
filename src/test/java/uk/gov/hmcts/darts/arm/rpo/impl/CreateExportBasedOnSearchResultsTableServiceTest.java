@@ -661,6 +661,39 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         verifyNoMoreInteractions(armRpoService);
     }
 
+    @Test
+    void createExportBasedOnSearchResultsTable_ShouldRetryOnUnauthorised_ThenFailSecondUnauthorised() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/createExportBasedOnSearchResultsTable", java.util.Map.of(), null,
+                                    StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorised")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("createExportBasedOnSearchResultsTable", response);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("token"), any())).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("Bearer refreshed"), any())).thenThrow(feign401);
+        List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
+
+        // when
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            createExportBasedOnSearchResultsTableCheckService.createExportBasedOnSearchResultsTable(
+                BEARER_TOKEN, 1, headerColumns, PRODUCTION_NAME, pollDuration, userAccount));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Failure during ARM createExportBasedOnSearchResultsTable"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
     private String getFeignResponseAsString(String status, boolean isError, String responseStatus) {
         return "{\n"
             + "  \"status\": \"" + status + "\",\n"

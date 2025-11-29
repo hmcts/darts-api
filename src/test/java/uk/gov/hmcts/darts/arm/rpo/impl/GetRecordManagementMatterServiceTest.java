@@ -187,7 +187,7 @@ class GetRecordManagementMatterServiceTest {
     }
 
     @Test
-    void getRecordManagementMatter_ShouldRetryOnUnauthorised_ThenFail() {
+    void getRecordManagementMatter_ShouldRetryOnUnauthorised_ThenFailSecondUnauthorised() {
         // given
         Response response = Response.builder()
             .request(Request.create(Request.HttpMethod.POST, "/getRecordManagementMatter", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
