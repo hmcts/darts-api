@@ -527,19 +527,6 @@ class GetExtendedSearchesByMatterServiceTest {
         armRpoHelperMocks.close();
     }
 
-    private ExtendedSearchesByMatterResponse getExtendedSearchesByMatterResponse() {
-        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
-        extendedSearchesByMatterResponse.setStatus(200);
-        extendedSearchesByMatterResponse.setIsError(false);
-        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
-        search.setSearchId(SEARCH_ID);
-        search.setName(PRODUCTION_NAME);
-        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
-        searchDetail.setSearch(search);
-        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
-        return extendedSearchesByMatterResponse;
-    }
-
     private ExtendedSearchesByMatterResponse getSearchesByMatterResponse() {
         ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
         extendedSearchesByMatterResponse.setStatus(200);
@@ -553,6 +540,19 @@ class GetExtendedSearchesByMatterServiceTest {
         return extendedSearchesByMatterResponse;
     }
 
+    private ExtendedSearchesByMatterResponse getExtendedSearchesByMatterResponse() {
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
+        extendedSearchesByMatterResponse.setStatus(200);
+        extendedSearchesByMatterResponse.setIsError(false);
+        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
+        search.setSearchId(SEARCH_ID);
+        search.setName(PRODUCTION_NAME);
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
+        searchDetail.setSearch(search);
+        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+        return extendedSearchesByMatterResponse;
+    }
+    
     private ExtendedSearchesByMatterResponse getExtendedSearchesByMatterResponse(String searchId, boolean isSaved) {
         ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
         extendedSearchesByMatterResponse.setStatus(200);
