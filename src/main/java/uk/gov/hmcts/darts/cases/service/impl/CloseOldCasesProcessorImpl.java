@@ -47,7 +47,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
     private final AuthorisationApi authorisationApi;
 
     @Value("${darts.retention.close-open-cases-older-than-years}")
-    long years;
+    private long years;
 
     @Override
     public void closeCases(int batchSize) {
