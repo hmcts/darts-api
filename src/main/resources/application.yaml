@@ -258,7 +258,7 @@ darts:
       continuation-token-duration: PT60M
       is-mock-arm-rpo-download-csv: ${IS_MOCK_ARM_RPO_DOWNLOAD_CSV:false}
       arm-missing-response-duration: 24h
-      arm-token-cache-expiry: 10m
+      arm-token-cache-expiry: PT10M
 
     arm-api:
       arm-username: ${ARM_USERNAME:}
