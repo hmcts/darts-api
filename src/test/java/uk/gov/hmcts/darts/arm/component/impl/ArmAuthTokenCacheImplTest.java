@@ -51,8 +51,6 @@ class ArmAuthTokenCacheImplTest {
     @Mock
     private ArmApiConfigurationProperties armApiConfigurationProperties;
 
-    private final ArmTokenRequest exampleRequest = ArmTokenRequest.builder().build();
-
     private final ArmTokenRequest armTokenRequest = ArmTokenRequest.builder()
         .username(USERNAME)
         .password(PASSWORD)
@@ -61,7 +59,6 @@ class ArmAuthTokenCacheImplTest {
     @BeforeEach
     void setUp() {
         armClientService = mock(ArmClientService.class);
-        armApiConfigurationProperties = mock(ArmApiConfigurationProperties.class);
         lenient().when(armApiConfigurationProperties.getArmServiceProfile()).thenReturn(SERVICE_PROFILE);
 
         cache = new ArmAuthTokenCacheImpl(armClientService, armApiConfigurationProperties);
@@ -244,7 +241,7 @@ class ArmAuthTokenCacheImplTest {
     @Test
     void fetchFreshBearerToken_successfulFlow_returnsFinalBearer() {
         //given
-        when(armClientService.getToken(exampleRequest)).thenReturn(tokenResponse("initialToken"));
+        when(armClientService.getToken(armTokenRequest)).thenReturn(tokenResponse("initialToken"));
 
         // initial available profiles returns matching profile
         when(armClientService.availableEntitlementProfiles(eq("Bearer initialToken"), any(EmptyRpoRequest.class)))
@@ -255,11 +252,11 @@ class ArmAuthTokenCacheImplTest {
             .thenReturn(tokenResponse("finalToken"));
 
         // when
-        String result = cache.getToken(exampleRequest);
+        String result = cache.getToken(armTokenRequest);
 
         // then
         assertThat(result).isEqualTo("Bearer finalToken");
-        verify(armClientService).getToken(exampleRequest);
+        verify(armClientService).getToken(armTokenRequest);
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
         verify(armClientService).availableEntitlementProfiles("Bearer initialToken", emptyRpoRequest);
         verify(armClientService).selectEntitlementProfile("Bearer initialToken", "profile-123", emptyRpoRequest);
@@ -268,42 +265,42 @@ class ArmAuthTokenCacheImplTest {
     @Test
     void fetchFreshBearerToken_initialTokenMissing_throwsDartsApiException() {
         // initial token response with null/empty access token should throw
-        when(armClientService.getToken(exampleRequest)).thenReturn(tokenResponse(""));
+        when(armClientService.getToken(armTokenRequest)).thenReturn(tokenResponse(""));
 
-        assertThatThrownBy(() -> cache.getToken(exampleRequest))
+        assertThatThrownBy(() -> cache.getToken(armTokenRequest))
             .isInstanceOf(DartsApiException.class)
             .hasMessageContaining("ARM token returned empty access token");
 
-        verify(armClientService).getToken(exampleRequest);
+        verify(armClientService).getToken(armTokenRequest);
         verifyNoMoreInteractions(armClientService);
     }
 
     @Test
     void fetchFreshBearerToken_profileNotFound_throwsDartsApiException() {
-        when(armClientService.getToken(exampleRequest)).thenReturn(tokenResponse("initialToken"));
+        when(armClientService.getToken(armTokenRequest)).thenReturn(tokenResponse("initialToken"));
         // returned profile name doesn't match expected
         when(armClientService.availableEntitlementProfiles(eq("Bearer initialToken"), any(EmptyRpoRequest.class)))
             .thenReturn(profiles("OTHER_PROFILE", "id-1", false));
 
-        assertThatThrownBy(() -> cache.getToken(exampleRequest))
+        assertThatThrownBy(() -> cache.getToken(armTokenRequest))
             .isInstanceOf(DartsApiException.class)
             .hasMessageContaining("ARM service profile not found");
     }
 
     @Test
     void fetchFreshBearerToken_selectEntitlementProfileReturnsEmpty_throwsDartsApiException() {
-        when(armClientService.getToken(exampleRequest)).thenReturn(tokenResponse("initialToken"));
+        when(armClientService.getToken(armTokenRequest)).thenReturn(tokenResponse("initialToken"));
         when(armClientService.availableEntitlementProfiles(eq("Bearer initialToken"), any(EmptyRpoRequest.class)))
             .thenReturn(profiles("MY_SERVICE_PROFILE", "profile-xyz", false));
 
-        assertThatThrownBy(() -> cache.getToken(exampleRequest))
+        assertThatThrownBy(() -> cache.getToken(armTokenRequest))
             .isInstanceOf(DartsApiException.class)
             .hasMessageContaining("Internal server error. ARM service profile not found: DARTS_SERVICE_PROFILE");
     }
 
     @Test
     void getAvailableEntitlementProfiles_otherFeignException_rethrows() {
-        when(armClientService.getToken(exampleRequest)).thenReturn(tokenResponse("initialToken"));
+        when(armClientService.getToken(armTokenRequest)).thenReturn(tokenResponse("initialToken"));
 
         FeignException feign500 = mock(FeignException.class);
         when(feign500.status()).thenReturn(500);
@@ -311,24 +308,14 @@ class ArmAuthTokenCacheImplTest {
         when(armClientService.availableEntitlementProfiles(eq("Bearer initialToken"), any(EmptyRpoRequest.class)))
             .thenThrow(feign500);
 
-        assertThatThrownBy(() -> cache.getToken(exampleRequest))
+        assertThatThrownBy(() -> cache.getToken(armTokenRequest))
             .isInstanceOf(FeignException.class);
 
         // no retry in this case
-        verify(armClientService, times(1)).getToken(exampleRequest);
+        verify(armClientService, times(1)).getToken(armTokenRequest);
         verify(armClientService, times(1)).availableEntitlementProfiles(eq("Bearer initialToken"), any(EmptyRpoRequest.class));
     }
 
-    private AvailableEntitlementProfile profilesWith(String name, String id) {
-        return AvailableEntitlementProfile.builder()
-            .isError(false)
-            .profiles(List.of(
-                AvailableEntitlementProfile.Profiles.builder()
-                    .profileName(name)
-                    .profileId(id)
-                    .build()))
-            .build();
-    }
 
     private ArmTokenResponse tokenResponse(String accessToken) {
         return ArmTokenResponse.builder()
@@ -338,9 +325,18 @@ class ArmAuthTokenCacheImplTest {
             .build();
     }
 
-    private AvailableEntitlementProfile profiles(String profileNameToReturn, String profileId, boolean isError) {
-        AvailableEntitlementProfile availableEntitlementProfile = profilesWith(profileNameToReturn, profileId);
-        availableEntitlementProfile.setError(isError);
-        return availableEntitlementProfile;
+    private AvailableEntitlementProfile profilesWith(String name, String id) {
+        return profiles(name, id, false);
+    }
+
+    private AvailableEntitlementProfile profiles(String profileName, String profileId, boolean isError) {
+        return AvailableEntitlementProfile.builder()
+            .isError(isError)
+            .profiles(List.of(
+                AvailableEntitlementProfile.Profiles.builder()
+                    .profileName(profileName)
+                    .profileId(profileId)
+                    .build()))
+            .build();
     }
 }
