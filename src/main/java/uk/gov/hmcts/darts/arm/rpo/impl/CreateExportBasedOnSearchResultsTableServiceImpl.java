@@ -42,7 +42,6 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
     private final CurrentTimeHelper currentTimeHelper;
     private final ObjectMapper objectMapper;
 
-
     @Override
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
                                                          List<MasterIndexFieldByRecordClassSchema> headerColumns,
@@ -109,7 +108,7 @@ public class CreateExportBasedOnSearchResultsTableServiceImpl implements CreateE
         return baseRpoResponse;
     }
 
-    @SuppressWarnings("PMD.CyclomaticComplexity")//TODO - refactor to reduce complexity when this is next edited
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     private boolean processCreateExportBasedOnSearchResultsTableResponse(UserAccountEntity userAccount,
                                                                          BaseRpoResponse baseRpoResponse,
                                                                          StringBuilder errorMessage,
