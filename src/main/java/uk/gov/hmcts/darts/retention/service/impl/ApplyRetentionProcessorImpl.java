@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
+import uk.gov.hmcts.darts.retention.service.RetentionService;
 
 import java.time.Duration;
 import java.util.HashSet;
@@ -56,6 +57,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
         private final CaseRetentionRepository caseRetentionRepository;
         private final CurrentTimeHelper currentTimeHelper;
         private final CaseRepository caseRepository;
+        private final RetentionService retentionService;
 
         @Transactional
         public void process(Set<Integer> processedCases, int caseRetentionEntitiesId) {
@@ -74,7 +76,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
             caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
             caseRetentionEntity.setCurrentState(CaseRetentionStatus.COMPLETE.name());
-
+            retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCaseEntity, caseRetentionEntity.getConfidenceCategory());
             courtCaseEntity.setRetentionUpdated(true);
             courtCaseEntity.setRetentionRetries(0);
 
