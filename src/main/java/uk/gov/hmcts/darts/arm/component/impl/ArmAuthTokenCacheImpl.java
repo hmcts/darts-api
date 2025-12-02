@@ -35,13 +35,13 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
      * Allows callers to dump a bad token so next call will refresh.
      */
     @Override
-    @CacheEvict(value = ARM_TOKEN_CACHE_NAME, allEntries = true)
+    @CacheEvict(value = ARM_TOKEN_CACHE_NAME, allEntries = true, cacheManager = "armRedisCacheManager")
     public void evictToken() {
         log.warn("Evicting ARM token from cache");
     }
 
     @Override
-    @Cacheable(ARM_TOKEN_CACHE_NAME)
+    @Cacheable(value = ARM_TOKEN_CACHE_NAME, cacheManager = "armRedisCacheManager")
     public String getToken(ArmTokenRequest armTokenRequest) {
         return fetchFreshBearerToken(armTokenRequest);
     }
