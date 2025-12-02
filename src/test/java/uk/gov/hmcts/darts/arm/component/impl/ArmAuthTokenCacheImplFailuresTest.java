@@ -8,9 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -23,7 +20,6 @@ import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -35,20 +31,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.startsWith;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
 
-@SuppressWarnings({"unchecked", "PMD.DoNotUseThreads", "PMD.CloseResource"})
+@SuppressWarnings({"PMD.DoNotUseThreads", "PMD.CloseResource"})
 @ExtendWith(MockitoExtension.class)
 class ArmAuthTokenCacheImplFailuresTest {
 
@@ -56,25 +46,19 @@ class ArmAuthTokenCacheImplFailuresTest {
     private static final String PROFILE_ID = "PID-123";
 
     @Mock
-    private StringRedisTemplate redisTemplate;
-    @Mock
-    private ValueOperations<String, String> valueOps;
-    @Mock
     private ArmClientService armClientService;
     @Mock
     private ArmApiConfigurationProperties props;
 
-    private ArmAuthTokenCache cache; // SUT
+    private ArmAuthTokenCache cache;
 
     private ArmTokenRequest tokenReq;
 
     @BeforeEach
     void setUp() {
-        ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager(ARM_TOKEN_CACHE_NAME);
-        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOps);
         lenient().when(props.getArmServiceProfile()).thenReturn(SERVICE_PROFILE);
 
-        cache = new ArmAuthTokenCacheImpl(cacheManager, redisTemplate, armClientService, props);
+        cache = new ArmAuthTokenCacheImpl(armClientService, props);
 
         tokenReq = ArmTokenRequest.builder()
             .username("service.user@justice.gov.uk")
@@ -84,7 +68,6 @@ class ArmAuthTokenCacheImplFailuresTest {
 
     @Test
     void getToken_throwsException_whenOAuthTokenIsEmpty() {
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
         when(armClientService.getToken(any(ArmTokenRequest.class)))
             .thenReturn(armToken(null)); // empty access token
 
@@ -95,7 +78,6 @@ class ArmAuthTokenCacheImplFailuresTest {
 
     @Test
     void getToken_throwsException_whenProfilesResponseIsErrorOrEmpty() {
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
         when(armClientService.getToken(any(ArmTokenRequest.class)))
             .thenReturn(armToken("oauth-T1"));
 
@@ -110,7 +92,6 @@ class ArmAuthTokenCacheImplFailuresTest {
 
     @Test
     void getToken_throwsException_whenServiceProfileNotFound() {
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
         when(armClientService.getToken(any(ArmTokenRequest.class)))
             .thenReturn(armToken("oauth-T1"));
 
@@ -125,7 +106,6 @@ class ArmAuthTokenCacheImplFailuresTest {
 
     @Test
     void getToken_throwsException_whenSelectEntitlementReturnsEmptyAccessToken() {
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
         when(armClientService.getToken(any(ArmTokenRequest.class)))
             .thenReturn(armToken("oauth-T1"));
 
@@ -142,7 +122,6 @@ class ArmAuthTokenCacheImplFailuresTest {
 
     @Test
     void getToken_throwsException_fromOAuthCall() {
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
         when(armClientService.getToken(any(ArmTokenRequest.class)))
             .thenThrow(new RestClientException("arm down"));
 
@@ -167,9 +146,6 @@ class ArmAuthTokenCacheImplFailuresTest {
         when(armClientService.selectEntitlementProfile(anyString(), eq(PROFILE_ID), any(EmptyRpoRequest.class)))
             .thenReturn(armToken("final-T"));
 
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class)))
-            .thenReturn(true);
-
         String bearer = cache.getToken(tokenReq);
         assertThat(bearer).isEqualTo("Bearer final-T");
 
@@ -193,9 +169,6 @@ class ArmAuthTokenCacheImplFailuresTest {
         when(armClientService.selectEntitlementProfile(anyString(), eq(PROFILE_ID), any(EmptyRpoRequest.class)))
             .thenReturn(armToken("final-T"));
 
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class)))
-            .thenReturn(true);
-
         String bearer = cache.getToken(tokenReq);
         assertThat(bearer).isEqualTo("Bearer final-T");
 
@@ -206,7 +179,6 @@ class ArmAuthTokenCacheImplFailuresTest {
 
     @Test
     void getToken_returnsBearerToken_withoutRetry() {
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
         when(armClientService.getToken(any(ArmTokenRequest.class)))
             .thenReturn(armToken("oauth-T1"));
 
@@ -223,10 +195,6 @@ class ArmAuthTokenCacheImplFailuresTest {
 
     @Test
     void getToken_returnsBearerToken_whenLockAcquireThrowsException() {
-        // lock acquisition itself throws; code should fail-open and still fetch
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class)))
-            .thenThrow(new RuntimeException("redis hiccup"));
-
         stubHappyPath("oauth-X", "final-Z");
 
         String token = cache.getToken(tokenReq);
@@ -238,53 +206,8 @@ class ArmAuthTokenCacheImplFailuresTest {
     }
 
     @Test
-    void getToken_returnsBearerToken_releaseLockExceptionIsSwallowed() {
-        // Acquire ok, then simulate delete failure on release
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class)))
-            .thenReturn(true);
-        doThrow(new RuntimeException("delete failed")).when(redisTemplate).delete(startsWith("lock:arm-token"));
-
-        stubHappyPath("oauth-X", "final-Z");
-
-        String token = cache.getToken(tokenReq);
-        assertThat(token).isEqualTo("Bearer final-Z");
-    }
-
-    @Test
-    void getToken_returnsBearerToken_withNullCacheManagerAndFallsBackToDirectFetchWithNoCacheUsed() {
-        // Use a mock CacheManager that returns null for getCache
-        var concurrentMapCacheManager = mock(ConcurrentMapCacheManager.class);
-        when(concurrentMapCacheManager.getCache(anyString())).thenReturn(null);
-
-        // fresh ArmAuthTokenCache with null-cache behaviour
-        var armAuthTokenCache = new ArmAuthTokenCacheImpl(concurrentMapCacheManager, redisTemplate, armClientService, props);
-
-        // normal fetch chain; no caching
-        stubHappyPath("oauth-T1", "final-T2");
-
-        String token = armAuthTokenCache.getToken(tokenReq);
-        assertThat(token).isEqualTo("Bearer final-T2");
-
-        // calling again should force another full refresh (no cache available)
-        when(armClientService.getToken(any(ArmTokenRequest.class)))
-            .thenReturn(armToken("oauth-T3"));
-        when(armClientService.selectEntitlementProfile(anyString(), eq(PROFILE_ID), any(EmptyRpoRequest.class)))
-            .thenReturn(armToken("final-T4"));
-
-        String token2 = armAuthTokenCache.getToken(tokenReq);
-        assertThat(token2).isEqualTo("Bearer final-T4");
-
-        // prove no cache puts happened by verifying Cache never used
-        verify(concurrentMapCacheManager, atLeastOnce()).getCache(ARM_TOKEN_CACHE_NAME);
-    }
-
-    @Test
     @Timeout(3)
     void getToken_holdsLockAcrossThreads_withConcurrentMissesAndOnlyOneRefresh() throws InterruptedException {
-        // first contender acquires lock, the rest see it as held
-        when(valueOps.setIfAbsent(startsWith("lock:arm-token"), anyString(), any(Duration.class)))
-            .thenReturn(true).thenReturn(false).thenReturn(false).thenReturn(false);
-
         when(armClientService.getToken(any(ArmTokenRequest.class)))
             .thenAnswer(inv -> {
                 Thread.sleep(120);
@@ -321,21 +244,6 @@ class ArmAuthTokenCacheImplFailuresTest {
     }
 
     @Test
-    void getToken_returnsBearerToken_whenCacheHitSkipsNetworkCalls() {
-        // First call populates cache
-        stubHappyPath("oauth-A", "final-B");
-        String first = cache.getToken(tokenReq);
-        assertThat(first).isEqualTo("Bearer final-B");
-
-        // Reset ARM stubs to fail if called again (proves cache hit)
-        reset(armClientService);
-        String second = cache.getToken(tokenReq);
-        assertThat(second).isEqualTo("Bearer final-B");
-
-        verifyNoInteractions(armClientService);
-    }
-
-    @Test
     void getToken_returnsBearerToken_whenFirstTokenEvictedAndRemovesCachedEntryAndNextCallRefetches() {
         // Populate cache via first refresh
         stubHappyPath("oauth-A", "final-B");
@@ -345,8 +253,6 @@ class ArmAuthTokenCacheImplFailuresTest {
         // Evict and assert second refresh chain happens
         cache.evictToken();
 
-        // set up new values to prove refetch
-        when(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
         when(armClientService.getToken(any(ArmTokenRequest.class))).thenReturn(armToken("oauth-C"));
         when(armClientService.availableEntitlementProfiles(anyString(), any(EmptyRpoRequest.class))).thenReturn(profilesWith(SERVICE_PROFILE, PROFILE_ID));
         when(armClientService.selectEntitlementProfile(anyString(), eq(PROFILE_ID), any(EmptyRpoRequest.class))).thenReturn(armToken("final-D"));

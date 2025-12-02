@@ -5,10 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
@@ -18,7 +16,6 @@ import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -26,20 +23,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
 
-@SuppressWarnings({"unchecked", "PMD.DoNotUseThreads", "PMD.CloseResource"})
+@SuppressWarnings({"PMD.DoNotUseThreads", "PMD.CloseResource"})
 @ExtendWith(MockitoExtension.class)
 class ArmAuthTokenCacheImplTest {
 
@@ -47,9 +45,13 @@ class ArmAuthTokenCacheImplTest {
     private static final String USERNAME = "test.user@justice.gov.uk";
     private static final String PASSWORD = "secret";
 
-    private StringRedisTemplate redisTemplate;
     private ArmClientService armClientService;
     private ArmAuthTokenCache cache;
+
+    @Mock
+    private ArmApiConfigurationProperties armApiConfigurationProperties;
+
+    private final ArmTokenRequest exampleRequest = ArmTokenRequest.builder().build();
 
     private final ArmTokenRequest armTokenRequest = ArmTokenRequest.builder()
         .username(USERNAME)
@@ -58,20 +60,15 @@ class ArmAuthTokenCacheImplTest {
 
     @BeforeEach
     void setUp() {
-        ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager(ARM_TOKEN_CACHE_NAME);
-        redisTemplate = mock(StringRedisTemplate.class);
-        ValueOperations<String, String> valueOps = mock(ValueOperations.class);
-        when(redisTemplate.opsForValue()).thenReturn(valueOps);
-
         armClientService = mock(ArmClientService.class);
-        ArmApiConfigurationProperties armApiConfigurationProperties = mock(ArmApiConfigurationProperties.class);
-        when(armApiConfigurationProperties.getArmServiceProfile()).thenReturn(SERVICE_PROFILE);
+        armApiConfigurationProperties = mock(ArmApiConfigurationProperties.class);
+        lenient().when(armApiConfigurationProperties.getArmServiceProfile()).thenReturn(SERVICE_PROFILE);
 
-        cache = new ArmAuthTokenCacheImpl(cacheManager, redisTemplate, armClientService, armApiConfigurationProperties);
+        cache = new ArmAuthTokenCacheImpl(armClientService, armApiConfigurationProperties);
     }
 
     @Test
-    void getToken_ReturnsToken_WhenFirstCallFetchesAndCachesThenSubsequentCallsHitCache() {
+    void getToken_ReturnsToken_WhenFirstCallFetchesAndCachesThenSubsequentCallsHitsCache() {
         ArmTokenResponse tokenResponse = tokenResponse("bearer-token");
         when(armClientService.getToken(armTokenRequest)).thenReturn(tokenResponse);
 
@@ -81,22 +78,15 @@ class ArmAuthTokenCacheImplTest {
         when(armClientService.selectEntitlementProfile(anyString(), eq("PID-123"), any(EmptyRpoRequest.class)))
             .thenReturn(tokenResponse("final-T2"));
 
-        // no lock contention in this simple path
-        when(redisTemplate.opsForValue().setIfAbsent(anyString(), anyString(), any(Duration.class)))
-            .thenReturn(true);
-
-
         String token1 = cache.getToken(armTokenRequest);
         String token2 = cache.getToken(armTokenRequest);
-
 
         assertThat(token1).isEqualTo("Bearer final-T2");
         assertThat(token2).isEqualTo("Bearer final-T2");
 
-        // Only one full refresh happened; second call read from cache
-        verify(armClientService, times(1)).getToken(any(ArmTokenRequest.class));
-        verify(armClientService, times(1)).availableEntitlementProfiles(anyString(), any(EmptyRpoRequest.class));
-        verify(armClientService, times(1)).selectEntitlementProfile(anyString(), anyString(), any(EmptyRpoRequest.class));
+        verify(armClientService, times(2)).getToken(any(ArmTokenRequest.class));
+        verify(armClientService, times(2)).availableEntitlementProfiles(anyString(), any(EmptyRpoRequest.class));
+        verify(armClientService, times(2)).selectEntitlementProfile(anyString(), anyString(), any(EmptyRpoRequest.class));
     }
 
     @Test
@@ -110,9 +100,6 @@ class ArmAuthTokenCacheImplTest {
         // Fix: match the actual arguments used in production code
         when(armClientService.selectEntitlementProfile(eq("Bearer bearer-token"), eq("PID-123"), any(EmptyRpoRequest.class)))
             .thenReturn(null);
-
-        when(redisTemplate.opsForValue().setIfAbsent(anyString(), anyString(), any(Duration.class)))
-            .thenReturn(true);
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> cache.getToken(armTokenRequest));
 
@@ -131,9 +118,6 @@ class ArmAuthTokenCacheImplTest {
         when(armClientService.selectEntitlementProfile(eq("Bearer bearer-token"), eq("PID-123"), any(EmptyRpoRequest.class)))
             .thenReturn(ArmTokenResponse.builder().build());
 
-        when(redisTemplate.opsForValue().setIfAbsent(anyString(), anyString(), any(Duration.class)))
-            .thenReturn(true);
-
         DartsApiException exception = assertThrows(DartsApiException.class, () -> cache.getToken(armTokenRequest));
 
         assertEquals("Internal server error. ARM selectEntitlementProfile returned empty access token", exception.getMessage());
@@ -141,13 +125,6 @@ class ArmAuthTokenCacheImplTest {
 
     @Test
     void getToken_ReturnsToken_WhenConcurrentMissesResultInSingleRefreshAcrossThreads() throws InterruptedException {
-        // Arrange: lock behaviour – first thread gets the lock; others fail to acquire
-        when(redisTemplate.opsForValue().setIfAbsent(startsWith("lock:arm-token"), anyString(), any(Duration.class)))
-            .thenReturn(true)   // first contender acquires
-            .thenReturn(false)  // others see lock held
-            .thenReturn(false)
-            .thenReturn(false);
-
         // Simulate a bit of latency during refresh so other threads stack up
         when(armClientService.getToken(any(ArmTokenRequest.class)))
             .thenAnswer(inv -> {
@@ -217,9 +194,6 @@ class ArmAuthTokenCacheImplTest {
         when(armClientService.selectEntitlementProfile(anyString(), eq("PID-123"), any(EmptyRpoRequest.class)))
             .thenReturn(tokenResponse("final-T2"));
 
-        when(redisTemplate.opsForValue().setIfAbsent(anyString(), anyString(), any(Duration.class)))
-            .thenReturn(true);
-
         String token = cache.getToken(armTokenRequest);
 
         assertThat(token).isEqualTo("Bearer final-T2");
@@ -232,9 +206,6 @@ class ArmAuthTokenCacheImplTest {
 
     @Test
     void evictToken_ForcesNextCallToRefetch() {
-        when(redisTemplate.opsForValue().setIfAbsent(anyString(), anyString(), any(Duration.class)))
-            .thenReturn(true);
-
         when(armClientService.getToken(any(ArmTokenRequest.class)))
             .thenReturn(tokenResponse("token"), tokenResponse("token2"));
 
@@ -270,6 +241,84 @@ class ArmAuthTokenCacheImplTest {
         order.verify(armClientService).selectEntitlementProfile(anyString(), anyString(), any(EmptyRpoRequest.class));
     }
 
+    @Test
+    void fetchFreshBearerToken_successfulFlow_returnsFinalBearer() {
+        //given
+        when(armClientService.getToken(exampleRequest)).thenReturn(tokenResponse("initialToken"));
+
+        // initial available profiles returns matching profile
+        when(armClientService.availableEntitlementProfiles(eq("Bearer initialToken"), any(EmptyRpoRequest.class)))
+            .thenReturn(profiles("DARTS_SERVICE_PROFILE", "profile-123", false));
+
+        // select profile returns final token
+        when(armClientService.selectEntitlementProfile(eq("Bearer initialToken"), eq("profile-123"), any(EmptyRpoRequest.class)))
+            .thenReturn(tokenResponse("finalToken"));
+
+        // when
+        String result = cache.getToken(exampleRequest);
+
+        // then
+        assertThat(result).isEqualTo("Bearer finalToken");
+        verify(armClientService).getToken(exampleRequest);
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+        verify(armClientService).availableEntitlementProfiles("Bearer initialToken", emptyRpoRequest);
+        verify(armClientService).selectEntitlementProfile("Bearer initialToken", "profile-123", emptyRpoRequest);
+    }
+
+    @Test
+    void fetchFreshBearerToken_initialTokenMissing_throwsDartsApiException() {
+        // initial token response with null/empty access token should throw
+        when(armClientService.getToken(exampleRequest)).thenReturn(tokenResponse(""));
+
+        assertThatThrownBy(() -> cache.getToken(exampleRequest))
+            .isInstanceOf(DartsApiException.class)
+            .hasMessageContaining("ARM token returned empty access token");
+
+        verify(armClientService).getToken(exampleRequest);
+        verifyNoMoreInteractions(armClientService);
+    }
+
+    @Test
+    void fetchFreshBearerToken_profileNotFound_throwsDartsApiException() {
+        when(armClientService.getToken(exampleRequest)).thenReturn(tokenResponse("initialToken"));
+        // returned profile name doesn't match expected
+        when(armClientService.availableEntitlementProfiles(eq("Bearer initialToken"), any(EmptyRpoRequest.class)))
+            .thenReturn(profiles("OTHER_PROFILE", "id-1", false));
+
+        assertThatThrownBy(() -> cache.getToken(exampleRequest))
+            .isInstanceOf(DartsApiException.class)
+            .hasMessageContaining("ARM service profile not found");
+    }
+
+    @Test
+    void fetchFreshBearerToken_selectEntitlementProfileReturnsEmpty_throwsDartsApiException() {
+        when(armClientService.getToken(exampleRequest)).thenReturn(tokenResponse("initialToken"));
+        when(armClientService.availableEntitlementProfiles(eq("Bearer initialToken"), any(EmptyRpoRequest.class)))
+            .thenReturn(profiles("MY_SERVICE_PROFILE", "profile-xyz", false));
+
+        assertThatThrownBy(() -> cache.getToken(exampleRequest))
+            .isInstanceOf(DartsApiException.class)
+            .hasMessageContaining("Internal server error. ARM service profile not found: DARTS_SERVICE_PROFILE");
+    }
+
+    @Test
+    void getAvailableEntitlementProfiles_otherFeignException_rethrows() {
+        when(armClientService.getToken(exampleRequest)).thenReturn(tokenResponse("initialToken"));
+
+        FeignException feign500 = mock(FeignException.class);
+        when(feign500.status()).thenReturn(500);
+
+        when(armClientService.availableEntitlementProfiles(eq("Bearer initialToken"), any(EmptyRpoRequest.class)))
+            .thenThrow(feign500);
+
+        assertThatThrownBy(() -> cache.getToken(exampleRequest))
+            .isInstanceOf(FeignException.class);
+
+        // no retry in this case
+        verify(armClientService, times(1)).getToken(exampleRequest);
+        verify(armClientService, times(1)).availableEntitlementProfiles(eq("Bearer initialToken"), any(EmptyRpoRequest.class));
+    }
+
     private AvailableEntitlementProfile profilesWith(String name, String id) {
         return AvailableEntitlementProfile.builder()
             .isError(false)
@@ -289,4 +338,9 @@ class ArmAuthTokenCacheImplTest {
             .build();
     }
 
+    private AvailableEntitlementProfile profiles(String profileNameToReturn, String profileId, boolean isError) {
+        AvailableEntitlementProfile availableEntitlementProfile = profilesWith(profileNameToReturn, profileId);
+        availableEntitlementProfile.setError(isError);
+        return availableEntitlementProfile;
+    }
 }

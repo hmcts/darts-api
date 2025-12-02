@@ -24,7 +24,7 @@ public class ArmRedisCacheConfiguration {
     @Value("${darts.storage.arm.arm-token-cache-expiry}")
     private Duration armTokenCacheExpiry;
 
-    @Bean
+    @Bean("armRedisCacheManager")
     public CacheManager armRedisCacheManager(RedisConnectionFactory connectionFactory) {
         var keySerializer = new StringRedisSerializer();
         var valueSerializer = new StringRedisSerializer(); // token is a String
