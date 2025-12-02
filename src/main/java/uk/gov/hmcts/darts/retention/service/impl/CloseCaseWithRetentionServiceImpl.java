@@ -94,9 +94,7 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
     private void closeCase(DartsEvent dartsEvent, CourtCaseEntity courtCase) {
         courtCase.setClosed(TRUE);
         courtCase.setCaseClosedTimestamp(dartsEvent.getDateTime());
-        caseRepository.saveAndFlush(
-            retentionApi.updateCourtCaseConfidenceAttributesForRetention(courtCase, RetentionConfidenceCategoryEnum.CASE_CLOSED)
-        );
+        caseRepository.saveAndFlush(courtCase);
     }
 
     private void updateExistingRetention(CaseManagementRetentionEntity caseManagementRetentionEntity, CaseRetentionEntity existingCaseRetention,

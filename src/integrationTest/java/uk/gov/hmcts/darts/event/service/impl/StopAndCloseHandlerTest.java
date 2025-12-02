@@ -72,10 +72,10 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     private EventDispatcher eventDispatcher;
 
     @Autowired
-    NodeRegisterStub nodeRegisterStub;
+    private NodeRegisterStub nodeRegisterStub;
 
     @Autowired
-    ApplyRetentionProcessor applyRetentionProcessor;
+    private ApplyRetentionProcessor applyRetentionProcessor;
 
     @MockitoBean
     private CurrentTimeHelper currentTimeHelper;
@@ -323,9 +323,9 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         assertEquals(testTime, persistedCase.getCaseClosedTimestamp());
         assertTrue(persistedCase.getClosed());
-        assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
-        assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
+        assertNull(persistedCase.getRetConfReason());
+        assertNull(persistedCase.getRetConfScore());
+        assertNull(persistedCase.getRetConfUpdatedTs());
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, testTime.toLocalDate());
 
@@ -422,9 +422,9 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         assertTrue(persistedCase.getClosed());
         assertEquals(eventTime, persistedCase.getCaseClosedTimestamp());
-        assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
-        assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
+        assertNull(persistedCase.getRetConfReason());
+        assertNull(persistedCase.getRetConfScore());
+        assertNull(persistedCase.getRetConfUpdatedTs());
 
         // apply retention and check it was applied correctly
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now().plusMonths(1));
@@ -510,9 +510,9 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         assertTrue(persistedCase.getClosed());
         assertEquals(eventTime, persistedCase.getCaseClosedTimestamp());
-        assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
-        assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
+        assertNull(persistedCase.getRetConfReason());
+        assertNull(persistedCase.getRetConfScore());
+        assertNull(persistedCase.getRetConfUpdatedTs());
 
         // apply retention and check it was applied correctly
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now().plusMonths(1));
@@ -614,9 +614,9 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         var persistedCase = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).get();
         assertTrue(persistedCase.getClosed());
         assertEquals(eventTime, persistedCase.getCaseClosedTimestamp());
-        assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
-        assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
+        assertNull(persistedCase.getRetConfReason());
+        assertNull(persistedCase.getRetConfScore());
+        assertNull(persistedCase.getRetConfUpdatedTs());
 
         // apply retention and check it was applied correctly
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now().plusMonths(1));
@@ -680,9 +680,9 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         var persistedCase = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).get();
         assertTrue(persistedCase.getClosed());
         assertEquals(eventTime, persistedCase.getCaseClosedTimestamp());
-        assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
-        assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
+        assertNull(persistedCase.getRetConfReason());
+        assertNull(persistedCase.getRetConfScore());
+        assertNull(persistedCase.getRetConfUpdatedTs());
 
         List<EventEntity> eventsForHearing = dartsDatabase.getEventRepository().findAllByHearingId(hearing.getId());
         assertEquals(2, eventsForHearing.size());
