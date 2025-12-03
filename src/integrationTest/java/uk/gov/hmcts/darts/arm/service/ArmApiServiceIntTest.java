@@ -10,6 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
@@ -40,12 +45,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
 
 @Isolated
 @TestPropertySource(properties = {
     "darts.storage.arm-api.version5-2.api.api-base-url=http://localhost:${wiremock.server.port}",
     "darts.storage.arm-api.enable-arm-v5-2-upgrade=false"
 })
+@Profile("in-memory-caching")
 class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
@@ -70,6 +77,14 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @TestConfiguration
+    static class TestCacheConfig {
+        @Bean(name = "armRedisCacheManager")
+        public CacheManager armRedisCacheManager() {
+            return new ConcurrentMapCacheManager(ARM_TOKEN_CACHE_NAME);
+        }
+    }
 
     @BeforeEach
     void setup() {
