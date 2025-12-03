@@ -215,7 +215,6 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         assertNotNull(updatedArmRpoExecutionDetailEntity);
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
-        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
 
         verify(armApiBaseClient).getExtendedSearchesByMatter(any(), any());
         verify(armApiBaseClient).getMasterIndexFieldByRecordClassSchema(any(), any());
