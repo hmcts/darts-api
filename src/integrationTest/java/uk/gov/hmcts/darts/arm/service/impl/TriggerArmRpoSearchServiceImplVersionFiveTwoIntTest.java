@@ -6,10 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -30,6 +27,7 @@ import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.nio.charset.StandardCharsets;
@@ -44,13 +42,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
 
 @Isolated
 @TestPropertySource(properties = {
     "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
 })
 @Profile("in-memory-caching")
+@Import(InMemoryTestCache.class)
 class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBase {
 
     @MockitoBean
@@ -62,14 +60,6 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
 
     @Autowired
     private TriggerArmRpoSearchServiceImpl triggerArmRpoSearchServiceImpl;
-
-    @TestConfiguration
-    static class TestCacheConfig {
-        @Bean(name = "armRedisCacheManager")
-        public CacheManager armRedisCacheManager() {
-            return new ConcurrentMapCacheManager(ARM_TOKEN_CACHE_NAME);
-        }
-    }
 
     @BeforeEach
     void setUp() {

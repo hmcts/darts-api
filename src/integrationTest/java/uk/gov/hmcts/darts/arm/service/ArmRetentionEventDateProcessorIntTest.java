@@ -5,10 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -40,6 +37,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestAnnotationEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 
@@ -63,13 +61,13 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @Slf4j
 @TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 @Profile("in-memory-caching")
+@Import(InMemoryTestCache.class)
 class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DOCUMENT_RETENTION_DATE_TIME =
@@ -106,14 +104,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     private ArmRetentionEventDateCalculatorAutomatedTaskConfig automatedTaskConfigurationProperties;
 
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
-
-    @TestConfiguration
-    static class TestCacheConfig {
-        @Bean(name = "armRedisCacheManager")
-        public CacheManager armRedisCacheManager() {
-            return new ConcurrentMapCacheManager(ARM_TOKEN_CACHE_NAME);
-        }
-    }
 
     @BeforeEach
     void setupData() {
