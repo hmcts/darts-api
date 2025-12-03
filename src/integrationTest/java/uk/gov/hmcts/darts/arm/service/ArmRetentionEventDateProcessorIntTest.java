@@ -121,7 +121,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                                                                                 armRetentionEventDateCalculator,
                                                                                 automatedTaskConfigurationProperties);
 
-        String bearerToken = "bearer";
+        String bearerToken = "some-bearer";
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder()
             .username(armApiConfigurationProperties.getArmUsername())
             .password(armApiConfigurationProperties.getArmPassword())
