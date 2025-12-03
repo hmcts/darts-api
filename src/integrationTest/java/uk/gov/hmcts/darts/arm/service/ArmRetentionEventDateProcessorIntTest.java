@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRetentionEventDateProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.config.ArmRedisCacheConfiguration;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
@@ -61,6 +63,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
+@Import(ArmRedisCacheConfiguration.class)
 @Slf4j
 @TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
@@ -99,8 +102,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     private ArmRetentionEventDateCalculatorAutomatedTaskConfig automatedTaskConfigurationProperties;
 
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
-
-    private static final String BEARER_TOKEN = "bearer";
 
     @BeforeEach
     void setupData() {
@@ -184,7 +185,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                           .build())
             .useGuidsForFields(false)
             .build();
-        verify(armApiBaseClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+        verify(armApiBaseClient, times(1)).updateMetadata("Bearer some-token", expectedMetadataRequest);
 
     }
 
@@ -300,7 +301,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                           .build())
             .useGuidsForFields(false)
             .build();
-        verify(armApiBaseClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+        verify(armApiBaseClient, times(1)).updateMetadata("Bearer some-token", expectedMetadataRequest);
 
     }
 
@@ -372,7 +373,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                           .build())
             .useGuidsForFields(false)
             .build();
-        verify(armApiBaseClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+        verify(armApiBaseClient, times(1)).updateMetadata("Bearer some-token", expectedMetadataRequest);
     }
 
     @Test
@@ -425,7 +426,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .useGuidsForFields(false)
             .build();
 
-        verify(armApiBaseClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+        verify(armApiBaseClient, times(1)).updateMetadata("Bearer some-token", expectedMetadataRequest);
     }
 
     @Test

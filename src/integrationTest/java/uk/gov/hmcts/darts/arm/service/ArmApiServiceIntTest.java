@@ -7,6 +7,7 @@ import feign.FeignException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.TestPropertySource;
@@ -38,9 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@Isolated
 @TestPropertySource(properties = {
     "darts.storage.arm-api.version5-2.api.api-base-url=http://localhost:${wiremock.server.port}",
     "darts.storage.arm-api.enable-arm-v5-2-upgrade=false"
@@ -53,9 +54,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     private static final String ARM_ERROR_BODY = """
         { "itemId": "00000000-0000-0000-0000-000000000000", "cabinetId": 0, ...}
         """;
-    public static final String BINARY_CONTENT = "some binary content";
-
-    private ArmTokenRequest armTokenRequest;
+    private static final String BINARY_CONTENT = "some binary content";
 
     @Autowired
     private ArmApiService armApiService;
@@ -74,7 +73,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     @BeforeEach
     void setup() {
-        armTokenRequest = ArmTokenRequest.builder()
+        ArmTokenRequest armTokenRequest = ArmTokenRequest.builder()
             .username("some-username")
             .password("some-password")
             .build();
@@ -131,8 +130,6 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
-        verify(armTokenClient).getToken(armTokenRequest);
-
         WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
                             .withHeader("Authorization", new RegexPattern(bearerAuth))
                             .withRequestBody(equalToJson(dummyRequest)));

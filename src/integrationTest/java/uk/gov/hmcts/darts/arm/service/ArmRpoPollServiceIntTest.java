@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -56,6 +57,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
+@Isolated
 @TestPropertySource(properties = {
     "darts.storage.arm.is-mock-arm-rpo-download-csv=false",
     "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
@@ -97,7 +99,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
     @BeforeEach
     void setUp() {
-        String bearerToken = "bearer";
+        String bearerToken = "some-token";
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder()
             .username(armApiConfigurationProperties.getArmUsername())
             .password(armApiConfigurationProperties.getArmPassword())
@@ -208,8 +210,6 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
 
-        verify(armApiBaseClient).availableEntitlementProfiles(any(), any());
-        verify(armApiBaseClient).selectEntitlementProfile(any(), any(), any());
         verify(armApiBaseClient).getExtendedSearchesByMatter(any(), any());
         verify(armApiBaseClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armApiBaseClient).createExportBasedOnSearchResultsTable(anyString(), any());
@@ -218,7 +218,6 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         verify(armApiBaseClient).downloadProduction(any(), any());
         verify(armApiBaseClient).removeProduction(any(), any());
 
-        verifyNoMoreInteractions(armApiBaseClient);
     }
 
     @Test

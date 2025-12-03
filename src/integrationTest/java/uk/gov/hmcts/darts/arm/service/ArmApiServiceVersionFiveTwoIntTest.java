@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.arm.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
@@ -13,6 +15,7 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.common.config.ArmRedisCacheConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -31,6 +34,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@Isolated
+@Import(ArmRedisCacheConfiguration.class)
 @TestPropertySource(properties = {
     "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
 })
@@ -55,7 +60,7 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
             .password("some-password")
             .build();
         ArmTokenResponse armTokenResponse = getArmTokenResponse();
-        String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
+        String bearerToken = String.format("Bearer %s", "some-token");
         when(armAuthClient.getToken(armTokenRequest))
             .thenReturn(armTokenResponse);
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
@@ -101,15 +106,8 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
         // then
         assertEquals(updateMetadataResponse, responseToTest);
 
-        verify(armAuthClient).getToken(any());
-
-        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-
-        verify(armApiBaseClient).availableEntitlementProfiles(bearerAuth, emptyRpoRequest);
-        verify(armApiBaseClient).selectEntitlementProfile(bearerAuth, "some-profile-id", emptyRpoRequest);
         verify(armApiBaseClient).updateMetadata(bearerAuth, updateMetadataRequest);
 
-        verifyNoMoreInteractions(armAuthClient);
         verifyNoMoreInteractions(armApiBaseClient);
 
     }
