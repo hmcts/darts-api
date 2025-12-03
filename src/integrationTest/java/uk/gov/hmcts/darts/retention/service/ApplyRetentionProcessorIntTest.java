@@ -7,7 +7,11 @@ import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.retention.service.impl.ApplyRetentionProcessorImpl;
+import uk.gov.hmcts.darts.retention.util.RetentionConfidenceCategoryUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -16,17 +20,22 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 class ApplyRetentionProcessorIntTest extends IntegrationBase {
 
+    private static final OffsetDateTime CASE_CLOSED_TIME = OffsetDateTime.now().minusDays(8);
+    private static final String RETAIN_UNTIL = "2030-01-01T12:00Z";
+
     @Autowired
-    CaseRetentionRepository caseRetentionRepository;
+    private CaseRetentionRepository caseRetentionRepository;
     @Autowired
-    ApplyRetentionProcessorImpl applyRetentionProcessor;
-    CourtCaseEntity courtCase;
+    private ApplyRetentionProcessorImpl applyRetentionProcessor;
+    @Autowired
+    private RetentionConfidenceCategoryUtil retentionConfidenceCategoryUtil;
+    private CourtCaseEntity courtCase;
 
     @BeforeEach
     void setUp() {
@@ -34,24 +43,27 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
             "a courthouse",
             "a case"
         );
-        OffsetDateTime caseClosedTime = OffsetDateTime.now().minusDays(8);
         courtCase.setClosed(true);
-        courtCase.setCaseClosedTimestamp(caseClosedTime);
+        courtCase.setCaseClosedTimestamp(CASE_CLOSED_TIME);
         dartsDatabase.save(courtCase);
 
-        OffsetDateTime retainUntilDate = OffsetDateTime.parse("2030-01-01T12:00Z");
+        OffsetDateTime retainUntilDate = OffsetDateTime.parse(RETAIN_UNTIL);
 
         CaseRetentionEntity caseRetentionEntity = dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.PENDING, retainUntilDate, false);
-        caseRetentionEntity.setCreatedDateTime(caseClosedTime);
+        caseRetentionEntity.setCreatedDateTime(CASE_CLOSED_TIME);
         caseRetentionRepository.saveAndFlush(caseRetentionEntity);
 
+        retentionConfidenceCategoryUtil.createAndSaveRetentionConfidenceCategoryMappings();
     }
 
     @Test
-    void testCaseRetentionChangeState() {
+    void processApplyRetention_ShouldSucceed() {
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.getFirst();
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntity.getCurrentState());
+        caseRetentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
+
+        caseRetentionRepository.saveAndFlush(caseRetentionEntity);
 
         applyRetentionProcessor.processApplyRetention(1000);
 
@@ -65,13 +77,18 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
                          OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS));
             assertEquals(CaseRetentionStatus.COMPLETE.name(), caseRetentionEntityPostUpdate.getCurrentState());
 
-            assertTrue(caseRetentionEntityPostUpdate.getCourtCase().isRetentionUpdated());
-            assertEquals(0, caseRetentionEntityPostUpdate.getCourtCase().getRetentionRetries());
+            CourtCaseEntity courtCaseEntity = caseRetentionEntityPostUpdate.getCourtCase();
+            assertTrue(courtCaseEntity.isRetentionUpdated());
+            assertEquals(0, courtCaseEntity.getRetentionRetries());
+            assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, courtCaseEntity.getRetConfReason());
+            assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, courtCaseEntity.getRetConfScore());
+            assertNotNull(courtCaseEntity.getRetConfUpdatedTs());
+
         });
     }
 
     @Test
-    void testCaseCloseDateWithRecordInsideCoolOff() {
+    void processApplyRetention_ShouldNotApplyRetention_WhenCloseDateWithRecordInsideCoolOff() {
         OffsetDateTime caseClosedTime = OffsetDateTime.now().minusDays(6);
         courtCase.setCaseClosedTimestamp(caseClosedTime);
         dartsDatabase.save(courtCase);
@@ -97,8 +114,8 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void givenMultipleCaseRetentionsApplyMostRecent() {
-        OffsetDateTime retainUntilDate = OffsetDateTime.parse("2030-01-01T12:00Z");
+    void processApplyRetention_MultipleCaseRetentionsApplyMostRecent() {
+        OffsetDateTime retainUntilDate = OffsetDateTime.parse(RETAIN_UNTIL);
 
         CaseRetentionEntity caseRetentionEntity = dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.PENDING, retainUntilDate, false);
         caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now().minusDays(9));

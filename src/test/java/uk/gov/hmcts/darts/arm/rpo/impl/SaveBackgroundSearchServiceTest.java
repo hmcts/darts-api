@@ -1,7 +1,8 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,14 +12,19 @@ import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoSearchNoResultsException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
+import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.nio.charset.StandardCharsets;
+
+import static java.util.Collections.emptyMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,23 +48,27 @@ class SaveBackgroundSearchServiceTest {
 
     private UserAccountEntity userAccount;
     private static final Integer EXECUTION_ID = 1;
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks;
 
     @BeforeEach
     void setUp() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
         userAccount = new UserAccountEntity();
 
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
 
+        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
+        ObjectMapper objectMapper = objectMapperConfig.objectMapper();
+
         ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
-        saveBackgroundSearchService = new SaveBackgroundSearchServiceImpl(armClientService, armRpoService, armRpoUtil);
+        saveBackgroundSearchService = new SaveBackgroundSearchServiceImpl(armClientService, armRpoService, armRpoUtil, objectMapper);
     }
 
     @Test
-    void saveBackgroundSearchReturnsSuccess() {
+    void saveBackgroundSearch_ReturnsSuccess() {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(200);
@@ -70,15 +80,15 @@ class SaveBackgroundSearchServiceTest {
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
     @Test
-    void saveBackgroundSearchReturnsInvalidStatus() {
+    void saveBackgroundSearch_ReturnsInvalidStatus() {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(400);
@@ -94,15 +104,15 @@ class SaveBackgroundSearchServiceTest {
             "Failure during ARM save background search: ARM RPO API failed with status - 400 BAD_REQUEST and response"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
     @Test
-    void saveBackgroundSearchThrowsFeignException() {
+    void saveBackgroundSearch_ThrowsFeignException() {
         // given
         when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
             .thenThrow(FeignException.class);
@@ -116,15 +126,15 @@ class SaveBackgroundSearchServiceTest {
             "Failure during ARM save background search: Unable to save background search"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
     @Test
-    void getStorageAccountsReturnsNullResponse() {
+    void saveBackgroundSearch_ReturnsNullResponse() {
         // given
         when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
 
@@ -137,15 +147,15 @@ class SaveBackgroundSearchServiceTest {
             "Failure during ARM save background search: ARM RPO API response is invalid - null"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
     @Test
-    void getStorageAccountsReturnsNullStatusHttpResponse() {
+    void saveBackgroundSearch_ReturnsNullStatusHttpResponse() {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setIsError(true);
@@ -160,15 +170,15 @@ class SaveBackgroundSearchServiceTest {
             "Failure during ARM save background search: ARM RPO API response is invalid"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
     @Test
-    void getStorageAccountsReturnsNullIsErrorResponse() {
+    void saveBackgroundSearch_ReturnsNullIsErrorResponse() {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(200);
@@ -183,15 +193,15 @@ class SaveBackgroundSearchServiceTest {
             "Failure during ARM save background search: ARM RPO API response is invalid"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
     @Test
-    void getStorageAccountsReturnsInvalidHttpStatusResponse() {
+    void saveBackgroundSearch_ReturnsInvalidHttpStatusResponse() {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(-1);
@@ -206,16 +216,105 @@ class SaveBackgroundSearchServiceTest {
             "Failure during ARM save background search: ARM RPO API response is invalid"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
                                                          any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
+    @Test
+    void saveBackgroundSearch_ThrowsFeignBadRequestExceptionWithMessage() {
+        // given
+        FeignException feignException = FeignException.errorStatus(
+            "saveBackgroundSearch",
+            feign.Response.builder()
+                .status(400)
+                .reason("Bad Request")
+                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
+                .body("Search with no results", StandardCharsets.UTF_8)
+                .build()
+        );
+        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
+            .thenThrow(feignException);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount)
+        );
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString("Search with no results"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void saveBackgroundSearch_ThrowsFeignBadRequestExceptionWithJsonMessage() {
+        // given
+        String jsonResponse = "{\"status\":400,\"isError\":true,\"responseStatus\":1,\"message\":\"Search with no results cannot be saved\"}";
+        FeignException feignException = FeignException.errorStatus(
+            "saveBackgroundSearch",
+            feign.Response.builder()
+                .status(400)
+                .reason("Bad Request")
+                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
+                .body(jsonResponse, StandardCharsets.UTF_8)
+                .build()
+        );
+        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
+            .thenThrow(feignException);
+
+        // when
+        ArmRpoSearchNoResultsException armRpoException = assertThrows(ArmRpoSearchNoResultsException.class, () ->
+            saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount)
+        );
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString("RPO endpoint search returned no results for execution id 1"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void saveBackgroundSearch_ThrowsFeignExceptionWithJsonMessage() {
+        // given
+        String jsonResponse = "{\"status\":500,\"isError\":true,\"responseStatus\":1}";
+        FeignException feignException = FeignException.errorStatus(
+            "saveBackgroundSearch",
+            feign.Response.builder()
+                .status(500)
+                .reason("Bad Request")
+                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
+                .body(jsonResponse, StandardCharsets.UTF_8)
+                .build()
+        );
+        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
+            .thenThrow(feignException);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount)
+        );
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString("Failure during ARM save background search: Unable to save background search"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()), any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @AfterEach
+    void close() {
+        armRpoHelperMocks.close();
     }
 
 }

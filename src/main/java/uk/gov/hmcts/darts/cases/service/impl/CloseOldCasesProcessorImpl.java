@@ -47,7 +47,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
     private final AuthorisationApi authorisationApi;
 
     @Value("${darts.retention.close-open-cases-older-than-years}")
-    long years;
+    private long years;
 
     @Override
     public void closeCases(int batchSize) {
@@ -132,7 +132,6 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                                                   UserAccountEntity userAccount) {
             courtCase.setClosed(TRUE);
             courtCase.setCaseClosedTimestamp(caseClosedDate);
-            retentionApi.updateCourtCaseConfidenceAttributesForRetention(courtCase, retentionConfidenceCategory);
             caseService.saveCase(courtCase);
             log.info("Closed court case id {}", courtCase.getId());
 
