@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
@@ -33,6 +34,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @Slf4j
+@Isolated
 class ArmRpoServiceIntTest extends PostgresIntegrationBase {
 
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);

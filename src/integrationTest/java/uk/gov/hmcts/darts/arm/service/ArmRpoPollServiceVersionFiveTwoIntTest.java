@@ -171,6 +171,8 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.getArmRpoStatus().getId());
 
+        verify(armApiBaseClient).availableEntitlementProfiles(any(), any());
+        verify(armApiBaseClient).selectEntitlementProfile(any(), anyString(), any());
         verify(armApiBaseClient).getExtendedSearchesByMatter(any(), any());
         verify(armApiBaseClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armApiBaseClient).createExportBasedOnSearchResultsTable(anyString(), any());
@@ -216,7 +218,10 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         assertNotNull(updatedArmRpoExecutionDetailEntity);
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
 
+        verify(armApiBaseClient).availableEntitlementProfiles("Bearer some-token", emptyRpoRequest);
+        verify(armApiBaseClient).selectEntitlementProfile("Bearer some-token", "some-profile-id", emptyRpoRequest);
         verify(armApiBaseClient).getExtendedSearchesByMatter(any(), any());
         verify(armApiBaseClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armApiBaseClient).createExportBasedOnSearchResultsTable(anyString(), any());

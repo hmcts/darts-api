@@ -88,14 +88,14 @@ class ArmAuthTokenCacheImplTest {
 
     @Test
     void getToken_ThrowsException_WhenReturnedProfileIsNull() {
-        ArmTokenResponse tokenResponse = tokenResponse("bearer-token");
+        ArmTokenResponse tokenResponse = tokenResponse("some-token");
         when(armClientService.getToken(armTokenRequest)).thenReturn(tokenResponse);
 
         when(armClientService.availableEntitlementProfiles(anyString(), any(EmptyRpoRequest.class)))
             .thenReturn(profilesWith(SERVICE_PROFILE, "PID-123"));
 
         // Fix: match the actual arguments used in production code
-        when(armClientService.selectEntitlementProfile(eq("Bearer bearer-token"), eq("PID-123"), any(EmptyRpoRequest.class)))
+        when(armClientService.selectEntitlementProfile(eq("Bearer some-token"), eq("PID-123"), any(EmptyRpoRequest.class)))
             .thenReturn(null);
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> cache.getToken(armTokenRequest));

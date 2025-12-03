@@ -5,10 +5,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -19,6 +16,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
+import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.List;
@@ -27,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.util.ArmRedisConstants.ARM_TOKEN_CACHE_NAME;
 
 @TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 @Isolated
 @Profile("in-memory-caching")
+@Import(InMemoryTestCache.class)
 class ArmAuthTokenCacheIntTest extends IntegrationBase {
 
     @Autowired
@@ -44,14 +42,6 @@ class ArmAuthTokenCacheIntTest extends IntegrationBase {
     private ArmAuthClient armAuthClient;
     @MockitoBean
     private ArmApiBaseClient armApiBaseClient;
-
-    @TestConfiguration
-    static class TestCacheConfig {
-        @Bean(name = "armRedisCacheManager")
-        public CacheManager armRedisCacheManager() {
-            return new ConcurrentMapCacheManager(ARM_TOKEN_CACHE_NAME);
-        }
-    }
 
     @BeforeEach
     void setUp() {
