@@ -42,6 +42,7 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
 
     @Override
     @Cacheable(value = ARM_TOKEN_CACHE_NAME, cacheManager = "armRedisCacheManager", sync = true)
+    @SuppressWarnings("PMD.AvoidSynchronizedAtMethodLevel")
     public synchronized String getToken(ArmTokenRequest armTokenRequest) {
         return fetchFreshBearerToken(armTokenRequest);
     }
