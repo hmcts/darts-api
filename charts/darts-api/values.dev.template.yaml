@@ -3,9 +3,9 @@ java:
   releaseNameOverride: '{{ .Release.Name }}-api'
   # Don't modify below here
   image: ${IMAGE_NAME}
-  devmemoryRequests: "2Gi"
+  devmemoryRequests: "4Gi"
   devcpuRequests: "250m"
-  devmemoryLimits: "4Gi"
+  devmemoryLimits: "8Gi"
   devcpuLimits: "1500m"
   livenessTimeout: 10
   readinessTimeout: 10
