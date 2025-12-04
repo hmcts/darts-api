@@ -140,7 +140,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId) {
         AudioNonAccessedResponse nonAccessedResponse = new AudioNonAccessedResponse();
-        nonAccessedResponse.setCount(mediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(userId, COMPLETED));
+        nonAccessedResponse.setCount(mediaRequestRepository.countTransformedEntitiesByCurrentOwnerIdAndStatusNotAccessed(userId, COMPLETED));
         return nonAccessedResponse;
     }
 

@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.service.CaseManagementRetentionService;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -83,8 +82,6 @@ class CloseCaseWithRetentionServiceImplTest {
             .thenReturn(Optional.empty());
         when(caseRetentionRepository.findLatestPendingRetention(courtCase))
             .thenReturn(Optional.empty());
-        when(retentionApi.updateCourtCaseConfidenceAttributesForRetention(courtCase, RetentionConfidenceCategoryEnum.CASE_CLOSED))
-            .thenReturn(courtCase);
         when(authorisationApi.getCurrentUser()).thenReturn(mock(UserAccountEntity.class));
 
         service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
