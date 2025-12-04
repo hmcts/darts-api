@@ -41,7 +41,7 @@ public class ArmAuthTokenCacheImpl implements ArmAuthTokenCache {
     }
 
     @Override
-    @Cacheable(value = ARM_TOKEN_CACHE_NAME, cacheManager = "armRedisCacheManager")
+    @Cacheable(value = ARM_TOKEN_CACHE_NAME, cacheManager = "armRedisCacheManager", sync = true)
     public String getToken(ArmTokenRequest armTokenRequest) {
         return fetchFreshBearerToken(armTokenRequest);
     }
