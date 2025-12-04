@@ -4,9 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
@@ -21,13 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class GetExtendedProductionsByMatterServiceIntTest extends IntegrationBase {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
     public static final String END_PRODUCTION_TIME = "2025-01-16T12:30:09.9129726+00:00";
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private GetExtendedProductionsByMatterService getExtendedProductionsByMatterService;
@@ -53,7 +55,7 @@ class GetExtendedProductionsByMatterServiceIntTest extends IntegrationBase {
         productions.setEndProductionTime(END_PRODUCTION_TIME);
         extendedProductionsByMatterResponse.setProductions(List.of(productions));
 
-        when(armRpoClient.getExtendedProductionsByMatter(any(), any())).thenReturn(extendedProductionsByMatterResponse);
+        when(armApiBaseClient.getExtendedProductionsByMatter(any(), any())).thenReturn(extendedProductionsByMatterResponse);
 
         var bearerAuth = "Bearer some-token";
 
@@ -77,7 +79,7 @@ class GetExtendedProductionsByMatterServiceIntTest extends IntegrationBase {
         ExtendedProductionsByMatterResponse.Productions productions = getProductions();
         extendedProductionsByMatterResponse.setProductions(List.of(productions));
 
-        when(armRpoClient.getExtendedProductionsByMatter(any(), any())).thenReturn(extendedProductionsByMatterResponse);
+        when(armApiBaseClient.getExtendedProductionsByMatter(any(), any())).thenReturn(extendedProductionsByMatterResponse);
 
         var bearerAuth = "Bearer some-token";
 

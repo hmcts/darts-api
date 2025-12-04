@@ -4,6 +4,7 @@ import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
@@ -19,6 +20,7 @@ import static java.util.Objects.isNull;
 @Service
 @AllArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.PreserveStackTrace"})
 public class GetRecordManagementMatterServiceImpl implements GetRecordManagementMatterService {
 
     private static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
@@ -36,12 +38,26 @@ public class GetRecordManagementMatterServiceImpl implements GetRecordManagement
 
         StringBuilder errorMessage = new StringBuilder(96).append("Failure during ARM RPO getRecordManagementMatter: ");
         RecordManagementMatterResponse recordManagementMatterResponse;
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
         try {
-            EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
             recordManagementMatterResponse = armClientService.getRecordManagementMatter(bearerToken, emptyRpoRequest);
-        } catch (FeignException e) {
-            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
-            throw armRpoUtil.handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount, e);
+        } catch (FeignException feignException) {
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException.getMessage()).toString(), feignException);
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("getRecordManagementMatter");
+                    recordManagementMatterResponse = armClientService.getRecordManagementMatter(refreshedBearer, emptyRpoRequest);
+                } catch (FeignException retryEx) {
+                    throw armRpoUtil.handleFailureAndCreateException(
+                        errorMessage.append("API call failed after retry: ").append(retryEx.getMessage()).toString(),
+                        armRpoExecutionDetailEntity, userAccount);
+                }
+            } else {
+                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException.getMessage()).toString(),
+                                                                 armRpoExecutionDetailEntity, userAccount);
+            }
         }
         log.info("ARM RPO Response - RecordManagementMatterResponse: {}", recordManagementMatterResponse);
         armRpoUtil.handleResponseStatus(userAccount, recordManagementMatterResponse, errorMessage, armRpoExecutionDetailEntity);

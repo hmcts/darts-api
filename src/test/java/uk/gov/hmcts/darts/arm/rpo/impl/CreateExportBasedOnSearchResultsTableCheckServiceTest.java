@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
@@ -27,15 +28,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CreateExportBasedOnSearchResultsTableCheckServiceTest {
+    private static final Integer EXECUTION_ID = 1;
 
     @Mock
     private ArmRpoClient armRpoClient;
-
+    @Mock
+    private ArmApiService armApiService;
     @Mock
     private ArmRpoService armRpoService;
 
@@ -46,16 +50,17 @@ class CreateExportBasedOnSearchResultsTableCheckServiceTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    private static final Integer EXECUTION_ID = 1;
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private final Duration pollDuration = Duration.ofHours(4);
 
     @BeforeEach
     void setUp() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
+        ArmRpoUtil armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
+
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
 
         createExportBasedOnSearchResultsTableService = new CreateExportBasedOnSearchResultsTableServiceImpl(
@@ -112,8 +117,8 @@ class CreateExportBasedOnSearchResultsTableCheckServiceTest {
         return response;
     }
 
-    @AfterAll
-    static void close() {
-        ARM_RPO_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        armRpoHelperMocks.close();
     }
 }
