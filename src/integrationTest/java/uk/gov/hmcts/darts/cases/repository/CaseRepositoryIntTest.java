@@ -37,7 +37,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
     private CaseRepository caseRepository;
 
     @Test
-    void findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan_ReturnsResults() {
+    void findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan_ShouldReturnsResults() {
         // given
         caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setRetentionUpdated(true);
@@ -69,7 +69,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    void findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan_caseHasNoAssocaitedCaseRetentionEntity_shouldNotReturn() {
+    void findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan_ShouldNotReturn_WhenCaseHasNoAssociatedCaseRetentionEntity() {
         // given
         caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setRetentionUpdated(true);
@@ -82,7 +82,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    void findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan_oneCaseHasMultipleRetentionObjects_shouldOnlyReturnIdOnce() {
+    void findIdsByIsRetentionUpdatedTrueAndRetentionRetriesLessThan_ShouldOnlyReturnIdOnce_WhereOneCaseHasMultipleRetentionObjects() {
         // given
         var matchingCase = caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setRetentionUpdated(true);
@@ -106,7 +106,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
 
     @Test
-    void findCasesIdsNeedingCaseDocumentGenerated_ReturnsMatchingCases() {
+    void findCasesIdsNeedingCaseDocumentGenerated_ShouldReturnsMatchingCases() {
         // given
         caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
