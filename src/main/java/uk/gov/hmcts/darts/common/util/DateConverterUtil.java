@@ -46,5 +46,10 @@ public class DateConverterUtil {
         ZonedDateTime zonedDateTime = toZonedDateTime(offsetDateTime);
         return toLocalDateTime(zonedDateTime);
     }
+    
+    public LocalDate toLocalDate(OffsetDateTime offsetDateTime) {
+        ZonedDateTime zonedDateTime = toZonedDateTime(offsetDateTime);
+        return zonedDateTime.toLocalDate();
+    }
 
 }

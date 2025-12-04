@@ -157,10 +157,95 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
+    @Test
+    void closeCases_shouldCloseBasedOnCloseEventDate_whenBstAndEventDateAfter11pm() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+        
+        LocalDateTime nowLocalDateTime = LocalDateTime.of(2025, 8, 25, 0, 0, 0);
+        OffsetDateTime nowOffsetDateTime = OffsetDateTime.of(2025, 8, 25, 0, 0, 0, 0, ZoneOffset.UTC);
+
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", nowLocalDateTime);
+
+        // Close date is 24th Aug 2025 23:58 UTC which is 25th Aug 2025 00:58 BST
+        OffsetDateTime closeDate = OffsetDateTime.of(2025, 8, 24, 23, 58, 0, 0, ZoneOffset.UTC);
+
+        EventEntity eventEntity1 = dartsDatabase.getEventStub().createEvent(hearing, 8);//Re-examination
+        eventEntity1.setCreatedDateTime(nowOffsetDateTime.minusYears(7).plusDays(10));
+        EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 214);//case closed
+        eventEntity2.setCreatedDateTime(closeDate);
+        EventEntity eventEntity3 = dartsDatabase.getEventStub().createEvent(hearing, 23);//Application: No case to answer
+        eventEntity3.setCreatedDateTime(nowOffsetDateTime.minusYears(7).plusDays(5));
+        dartsDatabase.saveAll(eventEntity1, eventEntity2, eventEntity3);
+
+        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+        courtCaseEntity.setCreatedDateTime(nowOffsetDateTime.minusYears(10));
+        dartsDatabase.getCaseRepository().save(courtCaseEntity);
+        assertFalse(courtCaseEntity.getClosed());
+
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
+
+        CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
+        assert updatedCourtCaseEntity != null;
+        assertTrue(updatedCourtCaseEntity.getClosed());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES),
+                     updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
+        assertNull(updatedCourtCaseEntity.getRetConfUpdatedTs());
+        assertNull(updatedCourtCaseEntity.getRetConfScore());
+        assertNull(updatedCourtCaseEntity.getRetConfReason());
+        CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
+        assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
+        // add one day to close date as close date is 24th Aug in UTC but 25th Aug BST and retain until should be 25th Aug + 7 years
+        assertEquals(closeDate.plusYears(7).plusDays(1).truncatedTo(ChronoUnit.DAYS), caseRetentionEntity.getRetainUntil());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
+    }
+
+    @Test
+    void closeCases_shouldCloseBasedOnCloseEventDate_whenGmtAndEventDateAfter11pm() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
+        LocalDateTime nowLocalDateTime = LocalDateTime.of(2025, 12, 20, 0, 0, 0);
+        OffsetDateTime nowOffsetDateTime = OffsetDateTime.of(2025, 12, 20, 0, 0, 0, 0, ZoneOffset.UTC);
+
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", nowLocalDateTime);
+        
+        OffsetDateTime closeDate = OffsetDateTime.of(2025, 12, 20, 23, 58, 0, 0, ZoneOffset.UTC);
+
+        EventEntity eventEntity1 = dartsDatabase.getEventStub().createEvent(hearing, 8);//Re-examination
+        eventEntity1.setCreatedDateTime(nowOffsetDateTime.minusYears(7).plusDays(10));
+        EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 214);//case closed
+        eventEntity2.setCreatedDateTime(closeDate);
+        EventEntity eventEntity3 = dartsDatabase.getEventStub().createEvent(hearing, 23);//Application: No case to answer
+        eventEntity3.setCreatedDateTime(nowOffsetDateTime.minusYears(7).plusDays(5));
+        dartsDatabase.saveAll(eventEntity1, eventEntity2, eventEntity3);
+
+        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+        courtCaseEntity.setCreatedDateTime(nowOffsetDateTime.minusYears(10));
+        dartsDatabase.getCaseRepository().save(courtCaseEntity);
+        assertFalse(courtCaseEntity.getClosed());
+
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
+
+        CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
+        assert updatedCourtCaseEntity != null;
+        assertTrue(updatedCourtCaseEntity.getClosed());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES),
+                     updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
+        assertNull(updatedCourtCaseEntity.getRetConfUpdatedTs());
+        assertNull(updatedCourtCaseEntity.getRetConfScore());
+        assertNull(updatedCourtCaseEntity.getRetConfReason());
+        CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
+        assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
+        // Close date is 20th Dec 23:58 in UTC so retain until is 20th Dec + 7 years when in GMT
+        assertEquals(closeDate.plusYears(7).truncatedTo(ChronoUnit.DAYS), caseRetentionEntity.getRetainUntil());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
+    }
+
     private CaseRetentionEntity getCaseRetentionEagerLoaded() {
         return dartsDatabase.getTransactionalUtil().executeInTransaction(() -> {
             CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().getFirst();
-            caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey();//Force entitty to load
+            caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey();//Force entity to load
             return caseRetentionEntity;
         });
     }
