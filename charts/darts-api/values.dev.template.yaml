@@ -3,12 +3,13 @@ java:
   releaseNameOverride: '{{ .Release.Name }}-api'
   # Don't modify below here
   image: ${IMAGE_NAME}
-  devmemoryRequests: "1Gi"
+  devmemoryRequests: "2Gi"
   devcpuRequests: "250m"
-  devmemoryLimits: "2Gi"
+  devmemoryLimits: "4Gi"
   devcpuLimits: "1500m"
   livenessTimeout: 10
   readinessTimeout: 10
+  startupTimeout: 10
   ingressHost: ${SERVICE_FQDN}
   aadIdentityName: darts
   global:
