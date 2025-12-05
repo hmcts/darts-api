@@ -109,6 +109,7 @@ java:
           alias: ARM_STORAGE_ACCOUNT_NAME
 
   environment:
+    JAVA_TOOL_OPTIONS: "-Xms6g -Xmx6g"
     ENABLE_FLYWAY: true
     MANUAL_DELETION_ENABLED: true
     CASE_EXPIRY_DELETION_ENABLED: true
