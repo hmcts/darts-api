@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 
 import java.time.LocalDateTime;
@@ -30,7 +29,6 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -57,7 +55,6 @@ class CloseOldCasesProcessorImplTest {
     private CaseService caseService;
 
     private UserAccountEntity userAccountEntity;
-
 
     private CloseOldCasesProcessor closeOldCasesProcessor;
 
@@ -96,11 +93,8 @@ class CloseOldCasesProcessorImplTest {
         when(caseService.getCourtCaseById(1)).thenReturn(courtCase);
 
         CaseRetentionEntity caseRetention = createRetentionEntity(courtCase, userAccountEntity);
-        when(retentionApi.createRetention(any(),any(), any(), any(), any(), any(), any())).thenReturn(caseRetention);
+        when(retentionApi.createRetention(any(), any(), any(), any(), any(), any(), any())).thenReturn(caseRetention);
         assertFalse(courtCase.getClosed());
-
-        when(retentionApi.updateCourtCaseConfidenceAttributesForRetention(any(), eq(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED)))
-            .thenReturn(courtCase);
 
         // when
         closeOldCasesProcessor.closeCases(2);
