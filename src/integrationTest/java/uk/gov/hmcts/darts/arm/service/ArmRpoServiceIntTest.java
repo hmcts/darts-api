@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_REPLAY;
@@ -243,6 +244,46 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         ExternalObjectDirectoryEntity foundMedia6 = foundMediaList6.getFirst();
         assertEquals(ARM_REPLAY.getId(), foundMedia6.getStatus().getId());
         assertNotNull(foundMedia6.getInputUploadProcessedTs());
+
+    }
+
+    @Test
+    void reconcileArmRpoCsvData_FailsDets() {
+        // given
+        ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
+            .save(createObjectStateRecordEntity(111L));
+        dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
+        var externalObjectDirectory = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media1,
+            ARM_RPO_PENDING,
+            ARM,
+            UUID.randomUUID().toString()
+        );
+        externalObjectDirectory.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(30));
+        externalObjectDirectory.setOsrUuid(objectStateRecordEntity.getUuid());
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory);
+        objectStateRecordEntity.setArmEodId(123L);
+        dartsDatabase.getObjectStateRecordRepository().saveAndFlush(objectStateRecordEntity);
+
+        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
+
+        File file = TestUtils.getFile("tests/arm/rpo/armRpoCsvData.csv");
+
+        // when
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), 2);
+
+        // then
+        List<ExternalObjectDirectoryEntity> foundMediaList1 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
+        assertEquals(1, foundMediaList1.size());
+        ExternalObjectDirectoryEntity foundMedia1 = foundMediaList1.getFirst();
+        assertEquals(STORED.getId(), foundMedia1.getStatus().getId());
+
+        var osrRef = foundMedia1.getObjectStateRecordEntity();
+        assertNotNull(osrRef);
+        var osr = dartsDatabase.getObjectStateRecordRepository().findById(osrRef.getUuid()).get();
+        assertNull(osr.getFlagFileStoredInArm());
+        assertNull(osr.getDateFileStoredInArm());
 
     }
 
