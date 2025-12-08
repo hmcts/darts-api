@@ -48,6 +48,7 @@ import static java.util.Objects.nonNull;
 @Service
 @AllArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class ArmRpoServiceImpl implements ArmRpoService {
 
     private static final String ARM_RPO_EXECUTION_DETAIL_NOT_FOUND = "ArmRpoExecutionDetail not found";
