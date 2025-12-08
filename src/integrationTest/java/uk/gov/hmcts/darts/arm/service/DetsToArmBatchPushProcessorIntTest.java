@@ -35,7 +35,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DAT
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
-
 class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
 
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
@@ -48,7 +47,6 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
 
     @Autowired
     private DetsToArmBatchPushProcessor detsToArmBatchPushProcessor;
-
 
     @BeforeEach
     void setupData() {

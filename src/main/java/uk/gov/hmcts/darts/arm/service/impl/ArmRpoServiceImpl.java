@@ -19,11 +19,14 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.util.CsvFileUtil;
 import uk.gov.hmcts.darts.util.DateTimeHelper;
@@ -36,6 +39,8 @@ import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
@@ -45,7 +50,7 @@ import static java.util.Objects.nonNull;
 @Slf4j
 public class ArmRpoServiceImpl implements ArmRpoService {
 
-    public static final String ARM_RPO_EXECUTION_DETAIL_NOT_FOUND = "ArmRpoExecutionDetail not found";
+    private static final String ARM_RPO_EXECUTION_DETAIL_NOT_FOUND = "ArmRpoExecutionDetail not found";
     private static final String ADD_ASYNC_SEARCH_RELATED_TASK_NAME = "ProcessE2EArmRpoPending";
     private static final String CLIENT_IDENTIFIER_CSV_HEADER = "Client Identifier";
 
@@ -53,6 +58,8 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     private final EntityManager entityManager;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final CurrentTimeHelper currentTimeHelper;
+    private final ObjectStateRecordRepository objectStateRecordRepository;
 
     @Override
     @Transactional
@@ -143,6 +150,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             externalObjectDirectoryEntity -> {
                 if (csvEodList.contains(externalObjectDirectoryEntity.getId())) {
                     externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
+                    updateObjectStateRecordForEod(externalObjectDirectoryEntity);
                 } else {
                     externalObjectDirectoryEntity.setStatus(EodHelper.armReplayStatus());
                 }
@@ -158,6 +166,27 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         }
 
         externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
+    }
+
+    private void updateObjectStateRecordForEod(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        if (nonNull(externalObjectDirectoryEntity.getObjectStateRecordEntity())) {
+            try {
+                var objectStateRecordEntity = getObjectStateRecord(externalObjectDirectoryEntity.getId()).get();
+                objectStateRecordEntity.setFlagFileStoredInArm(true);
+                objectStateRecordEntity.setDateFileStoredInArm(currentTimeHelper.currentOffsetDateTime());
+                objectStateRecordRepository.saveAndFlush(objectStateRecordEntity);
+            } catch (NoSuchElementException e) {
+                log.error("Error updating ObjectStateRecord for EOD {}", externalObjectDirectoryEntity.getId(), e);
+            }
+        }
+    }
+
+    private Optional<ObjectStateRecordEntity> getObjectStateRecord(long armEod) {
+        Optional<ObjectStateRecordEntity> osrOptional = objectStateRecordRepository.findByArmEodId(armEod);
+        if (osrOptional.isEmpty()) {
+            log.error("Object State Record not found for Arm EOD {}", armEod);
+        }
+        return osrOptional;
     }
 
     private static List<Long> getEodsListFromCsvFiles(List<File> csvFiles, StringBuilder errorMessage) {
