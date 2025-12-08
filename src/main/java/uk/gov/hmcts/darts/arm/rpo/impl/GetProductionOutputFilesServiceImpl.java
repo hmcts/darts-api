@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
@@ -27,6 +28,7 @@ import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS
 @Service
 @AllArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.PreserveStackTrace"})
 public class GetProductionOutputFilesServiceImpl implements GetProductionOutputFilesService {
 
     private final ArmClientService armClientService;
@@ -54,9 +56,25 @@ public class GetProductionOutputFilesServiceImpl implements GetProductionOutputF
         ProductionOutputFilesResponse productionOutputFilesResponse;
         try {
             productionOutputFilesResponse = armClientService.getProductionOutputFiles(bearerToken, createProductionOutputFilesRequest(productionId));
-        } catch (FeignException e) {
-            throw armRpoUtil.handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ").append(e).toString(),
-                                                             executionDetail, userAccount);
+        } catch (FeignException feignException) {
+            log.error(exceptionMessageBuilder.append("Unable to get ARM RPO response ").append(feignException.getMessage()).toString(), feignException);
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("getProductionOutputFiles");
+                    productionOutputFilesResponse = armClientService.getProductionOutputFiles(
+                        refreshedBearer, createProductionOutputFilesRequest(productionId));
+                } catch (FeignException retryEx) {
+                    throw armRpoUtil.handleFailureAndCreateException(
+                        exceptionMessageBuilder.append("API call failed after retry: ").append(retryEx.getMessage()).toString(),
+                        executionDetail, userAccount);
+                }
+            } else {
+                throw armRpoUtil.handleFailureAndCreateException(
+                    exceptionMessageBuilder.append("API call failed: ").append(feignException.getMessage()).toString(),
+                    executionDetail, userAccount);
+            }
         }
         log.info("ARM RPO Response - ProductionOutputFilesResponse: {}", productionOutputFilesResponse);
         return processProductionOutputFilesResponse(userAccount, productionOutputFilesResponse, exceptionMessageBuilder, executionDetail);

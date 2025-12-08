@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
@@ -22,6 +23,7 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.PreserveStackTrace"})
 public class GetStorageAccountsServiceImpl implements GetStorageAccountsService {
 
     private final ArmClientService armClientService;
@@ -35,15 +37,29 @@ public class GetStorageAccountsServiceImpl implements GetStorageAccountsService 
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getStorageAccountsRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
-        StringBuilder errorMessage = new StringBuilder("Failure during ARM get storage accounts: ");
+        StringBuilder errorMessage = new StringBuilder(70);
+        errorMessage.append("Failure during ARM get storage accounts: ");
         StorageAccountResponse storageAccountResponse;
+        StorageAccountRequest storageAccountRequest = createStorageAccountRequest();
         try {
-            StorageAccountRequest storageAccountRequest = createStorageAccountRequest();
             storageAccountResponse = armClientService.getStorageAccounts(bearerToken, storageAccountRequest);
-
-        } catch (FeignException e) {
-            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
-            throw armRpoUtil.handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        } catch (FeignException feignException) {
+            log.error(errorMessage.append(ArmRpoUtil.UNABLE_TO_GET_ARM_RPO_RESPONSE).append(feignException.getMessage()).toString(), feignException);
+            int status = feignException.status();
+            // If unauthorized or forbidden, retry once with a refreshed token
+            if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                try {
+                    String refreshedBearer = armRpoUtil.retryGetBearerToken("getStorageAccounts");
+                    storageAccountResponse = armClientService.getStorageAccounts(refreshedBearer, storageAccountRequest);
+                } catch (FeignException retryEx) {
+                    throw armRpoUtil.handleFailureAndCreateException(
+                        errorMessage.append("API call failed after retry: ").append(retryEx.getMessage()).toString(),
+                        armRpoExecutionDetailEntity, userAccount);
+                }
+            } else {
+                throw armRpoUtil.handleFailureAndCreateException(errorMessage.append("API call failed: ").append(feignException.getMessage()).toString(),
+                                                                 armRpoExecutionDetailEntity, userAccount);
+            }
         }
         log.info("ARM RPO Response - StorageAccountResponse: {}", storageAccountResponse);
         processGetStorageAccountsResponse(userAccount, storageAccountResponse, errorMessage, armRpoExecutionDetailEntity);
