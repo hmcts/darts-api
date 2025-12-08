@@ -9,7 +9,7 @@ java:
   devcpuLimits: "1500m"
   livenessTimeout: 10
   readinessTimeout: 10
-  startupTimeout: 10
+  startupTimeout: 30
   ingressHost: ${SERVICE_FQDN}
   aadIdentityName: darts
   global:
@@ -110,6 +110,7 @@ java:
 
   environment:
     JAVA_TOOL_OPTIONS: "-Xms6g -Xmx6g"
+    DARTS_API_DB_POOL_SIZE: "100"
     ENABLE_FLYWAY: true
     MANUAL_DELETION_ENABLED: true
     CASE_EXPIRY_DELETION_ENABLED: true
