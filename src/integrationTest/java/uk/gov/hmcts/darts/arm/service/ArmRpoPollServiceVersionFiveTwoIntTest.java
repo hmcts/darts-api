@@ -6,9 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
@@ -23,13 +27,13 @@ import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceWrapper;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRpoPollServiceImpl;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
+import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.File;
@@ -56,6 +60,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
+@Isolated
 @TestPropertySource(properties = {
     """
         darts.storage.arm-api.enable-arm-v5-2-upgrade=true
@@ -63,6 +68,8 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
         """
 })
 @Slf4j
+@Profile("in-memory-caching")
+@Import(InMemoryTestCache.class)
 class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
 
     private static final String PRODUCTIONEXPORTFILE_CSV = "tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv";
@@ -85,7 +92,7 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
     private ArmApiBaseClient armApiBaseClient;
     @MockitoBean
     private ArmAuthClient armAuthClient;
-    @MockitoBean
+    @MockitoSpyBean
     private ArmRpoUtil armRpoUtil;
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
@@ -94,13 +101,11 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
     private int batchSize = 10;
 
     @Autowired
-    private ArmClientServiceWrapper armClientService;
-    @Autowired
     private ArmRpoPollServiceImpl armRpoPollService;
 
     @BeforeEach
     void setUp() {
-        String bearerToken = "bearer";
+        String bearerToken = "some-token";
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder()
             .username(armApiConfigurationProperties.getArmUsername())
             .password(armApiConfigurationProperties.getArmPassword())
@@ -166,11 +171,6 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.getArmRpoStatus().getId());
 
-        verify(armAuthClient).getToken(any());
-        verifyNoMoreInteractions(armAuthClient);
-
-        verify(armApiBaseClient).availableEntitlementProfiles(anyString(), any());
-        verify(armApiBaseClient).selectEntitlementProfile(anyString(), anyString(), any());
         verify(armApiBaseClient).getExtendedSearchesByMatter(any(), any());
         verify(armApiBaseClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armApiBaseClient).createExportBasedOnSearchResultsTable(anyString(), any());
@@ -178,7 +178,6 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         verify(armApiBaseClient).getProductionOutputFiles(any(), any());
         verify(armApiBaseClient).downloadProduction(any(), any());
         verify(armApiBaseClient).removeProduction(any(), any());
-        verifyNoMoreInteractions(armApiBaseClient);
 
     }
 
@@ -217,11 +216,6 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
 
-        verify(armAuthClient).getToken(any());
-        verifyNoMoreInteractions(armAuthClient);
-
-        verify(armApiBaseClient).availableEntitlementProfiles(anyString(), any());
-        verify(armApiBaseClient).selectEntitlementProfile(anyString(), anyString(), any());
         verify(armApiBaseClient).getExtendedSearchesByMatter(any(), any());
         verify(armApiBaseClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armApiBaseClient).createExportBasedOnSearchResultsTable(anyString(), any());
@@ -230,7 +224,6 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         verify(armApiBaseClient).downloadProduction(any(), any());
         verify(armApiBaseClient).removeProduction(any(), any());
 
-        verifyNoMoreInteractions(armApiBaseClient);
     }
 
     @Test
@@ -260,11 +253,6 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         assertEquals(ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.inProgressRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
 
-        verify(armAuthClient).getToken(any());
-        verifyNoMoreInteractions(armAuthClient);
-
-        verify(armApiBaseClient).availableEntitlementProfiles(anyString(), any());
-        verify(armApiBaseClient).selectEntitlementProfile(anyString(), anyString(), any());
         verify(armApiBaseClient).getExtendedSearchesByMatter(any(), any());
         verify(armApiBaseClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armApiBaseClient).createExportBasedOnSearchResultsTable(anyString(), any());
@@ -313,11 +301,6 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
                      updatedArmRpoExecutionDetailEntity.get().getPollingCreatedAt().truncatedTo(ChronoUnit.SECONDS));
         assertThat(updatedArmRpoExecutionDetailEntity.get().getProductionName()).contains(PRODUCTION_NAME);
 
-        verify(armAuthClient).getToken(any());
-        verifyNoMoreInteractions(armAuthClient);
-
-        verify(armApiBaseClient).availableEntitlementProfiles(anyString(), any());
-        verify(armApiBaseClient).selectEntitlementProfile(anyString(), anyString(), any());
         verify(armApiBaseClient).getExtendedSearchesByMatter(any(), any());
         verify(armApiBaseClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armApiBaseClient).createExportBasedOnSearchResultsTable(anyString(), any());
@@ -365,11 +348,6 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
 
-        verify(armAuthClient).getToken(any());
-        verifyNoMoreInteractions(armAuthClient);
-
-        verify(armApiBaseClient).availableEntitlementProfiles(anyString(), any());
-        verify(armApiBaseClient).selectEntitlementProfile(anyString(), anyString(), any());
         verify(armApiBaseClient).getExtendedSearchesByMatter(any(), any());
         verify(armApiBaseClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armApiBaseClient).createExportBasedOnSearchResultsTable(anyString(), any());
@@ -417,11 +395,6 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
 
-        verify(armAuthClient).getToken(any());
-        verifyNoMoreInteractions(armAuthClient);
-
-        verify(armApiBaseClient).availableEntitlementProfiles(anyString(), any());
-        verify(armApiBaseClient).selectEntitlementProfile(anyString(), anyString(), any());
         verify(armApiBaseClient).getExtendedSearchesByMatter(any(), any());
         verify(armApiBaseClient).getMasterIndexFieldByRecordClassSchema(any(), any());
         verify(armApiBaseClient).createExportBasedOnSearchResultsTable(anyString(), any());

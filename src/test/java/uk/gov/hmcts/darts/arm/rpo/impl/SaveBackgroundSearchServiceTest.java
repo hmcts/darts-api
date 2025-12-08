@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoSearchNoResultsException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
@@ -31,23 +34,30 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.CloseResource"})
 class SaveBackgroundSearchServiceTest {
+
+    private static final Integer EXECUTION_ID = 1;
 
     @Mock
     private ArmRpoClient armRpoClient;
 
     @Mock
     private ArmRpoService armRpoService;
+    @Mock
+    private ArmApiService armApiService;
 
+    private ArmRpoUtil armRpoUtil;
     private SaveBackgroundSearchServiceImpl saveBackgroundSearchService;
 
     private UserAccountEntity userAccount;
-    private static final Integer EXECUTION_ID = 1;
     private ArmRpoHelperMocks armRpoHelperMocks;
 
     @BeforeEach
@@ -58,11 +68,10 @@ class SaveBackgroundSearchServiceTest {
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
-
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
-        ArmRpoUtil armRpoUtil = new ArmRpoUtil(armRpoService);
+        armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
         ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
         saveBackgroundSearchService = new SaveBackgroundSearchServiceImpl(armClientService, armRpoService, armRpoUtil, objectMapper);
     }
@@ -228,10 +237,10 @@ class SaveBackgroundSearchServiceTest {
         // given
         FeignException feignException = FeignException.errorStatus(
             "saveBackgroundSearch",
-            feign.Response.builder()
+            Response.builder()
                 .status(400)
                 .reason("Bad Request")
-                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
+                .request(Request.create(Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
                 .body("Search with no results", StandardCharsets.UTF_8)
                 .build()
         );
@@ -258,10 +267,10 @@ class SaveBackgroundSearchServiceTest {
         String jsonResponse = "{\"status\":400,\"isError\":true,\"responseStatus\":1,\"message\":\"Search with no results cannot be saved\"}";
         FeignException feignException = FeignException.errorStatus(
             "saveBackgroundSearch",
-            feign.Response.builder()
+            Response.builder()
                 .status(400)
                 .reason("Bad Request")
-                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
+                .request(Request.create(Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
                 .body(jsonResponse, StandardCharsets.UTF_8)
                 .build()
         );
@@ -288,10 +297,10 @@ class SaveBackgroundSearchServiceTest {
         String jsonResponse = "{\"status\":500,\"isError\":true,\"responseStatus\":1}";
         FeignException feignException = FeignException.errorStatus(
             "saveBackgroundSearch",
-            feign.Response.builder()
+            Response.builder()
                 .status(500)
                 .reason("Bad Request")
-                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
+                .request(Request.create(Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
                 .body(jsonResponse, StandardCharsets.UTF_8)
                 .build()
         );
@@ -309,6 +318,104 @@ class SaveBackgroundSearchServiceTest {
                                                          eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
                                                          eq(armRpoHelperMocks.getInProgressRpoStatus()), any());
         verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void saveBackgroundSearch_shouldRetryOnUnauthorised_thenSucceed() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/saveBackgroundSearch", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("saveBackgroundSearch", response);
+
+        // First call throws 401
+        when(armRpoClient.saveBackgroundSearch(eq("token"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
+        saveBackgroundSearchResponse.setStatus(200);
+        saveBackgroundSearchResponse.setIsError(false);
+        when(armRpoClient.saveBackgroundSearch(eq("Bearer refreshed"), any(SaveBackgroundSearchRequest.class))).thenReturn(saveBackgroundSearchResponse);
+
+        // when
+        saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount);
+
+        // then
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void saveBackgroundSearch_shouldRetryOnUnauthorised_thenFailSecondUnauthorised() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/saveBackgroundSearch", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(401)
+            .reason("Unauthorized")
+            .build();
+        FeignException feign401 = FeignException.errorStatus("saveBackgroundSearch", response);
+
+        // First call throws 401
+        when(armRpoClient.saveBackgroundSearch(eq("token"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        when(armRpoClient.saveBackgroundSearch(eq("Bearer refreshed"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
+
+        // when
+        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
+            saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount));
+
+        // then
+        assertThat(exception.getMessage(), containsString("Unauthorized"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void saveBackgroundSearch_shouldRetryOnForbidden_thenSucceed() {
+        // given
+        Response response = Response.builder()
+            .request(Request.create(Request.HttpMethod.POST, "/saveBackgroundSearch", java.util.Map.of(), null, StandardCharsets.UTF_8, null))
+            .status(403)
+            .reason("Forbidden")
+            .build();
+        FeignException feign403 = FeignException.errorStatus("saveBackgroundSearch", response);
+
+        // First call throws 403
+        when(armRpoClient.saveBackgroundSearch(eq("token"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign403);
+
+        // armRpoUtil should be asked for a new token
+        doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
+
+        SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
+        saveBackgroundSearchResponse.setStatus(200);
+        saveBackgroundSearchResponse.setIsError(false);
+        when(armRpoClient.saveBackgroundSearch(eq("Bearer refreshed"), any(SaveBackgroundSearchRequest.class))).thenReturn(saveBackgroundSearchResponse);
+
+        // when
+        saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount);
+
+        // then
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(armRpoHelperMocks.getSaveBackgroundSearchRpoState()),
+                                                         eq(armRpoHelperMocks.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelperMocks.getCompletedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
     }
 

@@ -2,7 +2,10 @@ package uk.gov.hmcts.darts.arm.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
@@ -16,6 +19,7 @@ import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.IOException;
@@ -28,11 +32,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@Isolated
 @TestPropertySource(properties = {
     "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
 })
+@Profile("in-memory-caching")
+@Import(InMemoryTestCache.class)
 class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
 
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
@@ -54,7 +62,7 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
             .password("some-password")
             .build();
         ArmTokenResponse armTokenResponse = getArmTokenResponse();
-        String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
+        String bearerToken = String.format("Bearer %s", "some-token");
         when(armAuthClient.getToken(armTokenRequest))
             .thenReturn(armTokenResponse);
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
@@ -98,9 +106,16 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // then
-        verify(armAuthClient).getToken(any());
-
         assertEquals(updateMetadataResponse, responseToTest);
+
+        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
+
+        verify(armApiBaseClient).availableEntitlementProfiles(bearerAuth, emptyRpoRequest);
+        verify(armApiBaseClient).selectEntitlementProfile(bearerAuth, "some-profile-id", emptyRpoRequest);
+        verify(armApiBaseClient).updateMetadata(bearerAuth, updateMetadataRequest);
+
+        verifyNoMoreInteractions(armApiBaseClient);
+
     }
 
     @Test
@@ -138,7 +153,9 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
-        verify(armAuthClient).getToken(any());
+        verify(armApiBaseClient).updateMetadata(bearerAuth, updateMetadataRequest);
+        verifyNoMoreInteractions(armAuthClient);
+        verifyNoMoreInteractions(armApiBaseClient);
 
         assertEquals(updateMetadataResponse, responseToTest);
     }
@@ -163,7 +180,9 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
         try (DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)) {
 
             // Then
-            verify(armAuthClient).getToken(any());
+            verify(armApiBaseClient).downloadArmData(any(), any(), any(), any());
+            verifyNoMoreInteractions(armAuthClient);
+            verifyNoMoreInteractions(armApiBaseClient);
 
             assertThat(downloadResponseMetaData.getResource().getInputStream().readAllBytes()).isEqualTo(binaryData);
         }

@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.TriggerArmRpoSearchService;
+import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -24,6 +25,7 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
     private final ArmApiService armApiService;
     private final UserIdentity userIdentity;
     private final LogApi logApi;
+    private final ArmRpoUtil armRpoUtil;
 
     /**
      * This method integrates various ARM RPO API calls to ultimately trigger a search. The results of that search are then processed by another automated
@@ -45,28 +47,40 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
             executionId = armRpoService.createArmRpoExecutionDetailEntity(userAccountEntity).getId();
 
             // armBearerToken may be null, but we'll let the lower level service methods deal with that by handling the resultant HTTP exception
-            final String armBearerToken = armApiService.getArmBearerToken();
-
-            armRpoApi.getRecordManagementMatter(armBearerToken, executionId, userAccountEntity);
+            armRpoApi.getRecordManagementMatter(armRpoUtil.getBearerToken("getRecordManagementMatter"),
+                                                executionId,
+                                                userAccountEntity);
 
             // We expect getRecordManagementMatter() to populate the matter id as a side effect, so refresh the entity to get the updated value
             final String matterId = armRpoService.getArmRpoExecutionDetailEntity(executionId).getMatterId();
 
-            armRpoApi.getIndexesByMatterId(armBearerToken, executionId, matterId, userAccountEntity);
+            armRpoApi.getIndexesByMatterId(armRpoUtil.getBearerToken("getIndexesByMatterId"),
+                                           executionId,
+                                           matterId,
+                                           userAccountEntity);
 
-            armRpoApi.getStorageAccounts(armBearerToken, executionId, userAccountEntity);
+            armRpoApi.getStorageAccounts(armRpoUtil.getBearerToken("getStorageAccounts"),
+                                         executionId,
+                                         userAccountEntity);
 
-            armRpoApi.getProfileEntitlements(armBearerToken, executionId, userAccountEntity);
+            armRpoApi.getProfileEntitlements(armRpoUtil.getBearerToken("getProfileEntitlements"),
+                                             executionId,
+                                             userAccountEntity);
 
-            armRpoApi.getMasterIndexFieldByRecordClassSchema(armBearerToken,
+            armRpoApi.getMasterIndexFieldByRecordClassSchema(armRpoUtil.getBearerToken("getMasterIndexFieldByRecordClassSchema"),
                                                              executionId,
                                                              ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(),
                                                              userAccountEntity);
 
-            String searchName = armRpoApi.addAsyncSearch(armBearerToken, executionId, userAccountEntity);
+            String searchName = armRpoApi.addAsyncSearch(armRpoUtil.getBearerToken("addAsyncSearch"),
+                                                         executionId,
+                                                         userAccountEntity);
             sleep(threadSleepDuration);
 
-            armRpoApi.saveBackgroundSearch(armBearerToken, executionId, searchName, userAccountEntity);
+            armRpoApi.saveBackgroundSearch(armRpoUtil.getBearerToken("saveBackgroundSearch"),
+                                           executionId,
+                                           searchName,
+                                           userAccountEntity);
 
             log.info("ARM RPO search flow completed successfully");
             logApi.armRpoSearchSuccessful(executionId);

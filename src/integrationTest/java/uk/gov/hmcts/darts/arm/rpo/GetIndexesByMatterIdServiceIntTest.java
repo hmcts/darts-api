@@ -4,9 +4,10 @@ package uk.gov.hmcts.darts.arm.rpo;
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -24,13 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class GetIndexesByMatterIdServiceIntTest extends IntegrationBase {
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private GetIndexesByMatterIdService getIndexesByMatterIdService;
-
 
     @Test
     void getIndexesByMatterIdSuccess() {
@@ -46,7 +47,7 @@ class GetIndexesByMatterIdServiceIntTest extends IntegrationBase {
         index.setIndexDetails(indexDetails);
         response.setIndexes(List.of(index));
 
-        when(armRpoClient.getIndexesByMatterId(any(), any())).thenReturn(response);
+        when(armApiBaseClient.getIndexesByMatterId(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -74,7 +75,7 @@ class GetIndexesByMatterIdServiceIntTest extends IntegrationBase {
         IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
         response.setStatus(200);
         response.setIsError(false);
-        when(armRpoClient.getIndexesByMatterId(any(), any())).thenReturn(response);
+        when(armApiBaseClient.getIndexesByMatterId(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -101,7 +102,7 @@ class GetIndexesByMatterIdServiceIntTest extends IntegrationBase {
     void getIndexesByMatterIdFailsWhenClientReturns400Error() {
 
         // given
-        when(armRpoClient.getIndexesByMatterId(any(), any())).thenThrow(FeignException.BadRequest.class);
+        when(armApiBaseClient.getIndexesByMatterId(any(), any())).thenThrow(FeignException.BadRequest.class);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();

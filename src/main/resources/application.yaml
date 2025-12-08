@@ -258,6 +258,7 @@ darts:
       continuation-token-duration: PT60M
       is-mock-arm-rpo-download-csv: ${IS_MOCK_ARM_RPO_DOWNLOAD_CSV:false}
       arm-missing-response-duration: 24h
+      arm-token-cache-expiry: PT10M
 
     arm-api:
       arm-username: ${ARM_USERNAME:}
@@ -290,7 +291,7 @@ darts:
         get-extended-productions-by-matter: /api/v1/getExtendedProductionsByMatter
         download-production-path: /api/v1/downloadProduction/{productionExportFileID}/false
 
-      enable-arm-v5-2-upgrade: ${ENABLE_ARM_V5_2_UPGRADE:false}
+      enable-arm-v5-2-upgrade: ${ENABLE_ARM_V5_2_UPGRADE:true}
 
       version5-2:
         authentication:

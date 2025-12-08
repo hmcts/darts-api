@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -25,12 +25,15 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=false"})
+@TestPropertySource(properties = {
+    "darts.storage.arm.is-mock-arm-rpo-download-csv=false",
+    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
+})
 @SuppressWarnings("PMD.CloseResource")
 class DownloadProductionServiceIntTest extends IntegrationBase {
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private DownloadProductionService downloadProductionService;
@@ -44,7 +47,7 @@ class DownloadProductionServiceIntTest extends IntegrationBase {
         feign.Response.Body body = mock(feign.Response.Body.class);
         when(response.body()).thenReturn(body);
         when(body.asInputStream()).thenReturn(inputStream);
-        when(armRpoClient.downloadProduction(anyString(), anyString())).thenReturn(response);
+        when(armApiBaseClient.downloadProduction(anyString(), anyString())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -70,7 +73,7 @@ class DownloadProductionServiceIntTest extends IntegrationBase {
     @Test
     void downloadProductionThrowsFeignException() {
         // given
-        when(armRpoClient.downloadProduction(anyString(), anyString())).thenThrow(FeignException.class);
+        when(armApiBaseClient.downloadProduction(anyString(), anyString())).thenThrow(FeignException.class);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
