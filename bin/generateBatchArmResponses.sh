@@ -78,7 +78,7 @@ addNewResponses () {
         exit 1
       fi
 
-      if [ "$option" == "4"]
+      if [ "$option" == "4" ]
       then
         read -p 'enter IL error status 2: ' errorStatus2
         if [ -z "$errorStatus2" ]
