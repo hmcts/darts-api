@@ -18,6 +18,7 @@ public enum RetentionConfidenceReasonEnum {
     MAX_MEDIA_CLOSED,
     CASE_CREATION_CLOSED,
 
+    // Migration values
     CASE_CLOSED_EXACT,
     CASE_CLOSED_P3_WITHIN,
     CASE_CLOSED_WITHIN,
