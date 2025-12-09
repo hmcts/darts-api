@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.ExcessivePublicCount", "PMD.UseUnderscoresInNumericLiterals"})
 public enum RetentionConfidenceCategoryEnum {
 
     // Modernised values
@@ -36,7 +37,7 @@ public enum RetentionConfidenceCategoryEnum {
     LEGACY_MAX_EVENT_CLOSED_62(62),
     LEGACY_MAX_MEDIA_CLOSED_63(63),
     LEGACY_CASE_CREATION_CLOSED_64(64),
-    
+
     CASE_CLOSED_EXACT_10111000(10111000),
     CASE_CLOSED_EXACT_10111020(10111020),
     CASE_CLOSED_EXACT_10111060(10111060),
@@ -435,7 +436,6 @@ public enum RetentionConfidenceCategoryEnum {
     CASE_CREATION_10571170(10571170);
 
     private final Integer id;
-
 
 }
 
