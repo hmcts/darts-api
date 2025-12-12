@@ -110,7 +110,7 @@ java:
 
   environment:
     JAVA_TOOL_OPTIONS: "-Xms6g -Xmx6g"
-    DARTS_API_DB_POOL_SIZE: "100"
+    DARTS_API_DB_POOL_SIZE: "50"
     ENABLE_FLYWAY: true
     MANUAL_DELETION_ENABLED: true
     CASE_EXPIRY_DELETION_ENABLED: true
@@ -221,10 +221,10 @@ function:
   minReplicaCount: 0
   maxReplicaCount: 2
   scalingStrategy: accurate
-  devmemoryRequests: 500Mi
-  devcpuRequests: 500m
-  devmemoryLimits: 4Gi
-  devcpuLimits: 4
+  # devmemoryRequests: 500Mi
+  # devcpuRequests: 500m
+  # devmemoryLimits: 4Gi
+  #devcpuLimits: 4
   global:
     enableKeyVaults: true
   keyVaults:
