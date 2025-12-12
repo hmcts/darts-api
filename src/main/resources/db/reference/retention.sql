@@ -75,6 +75,9 @@
 --     wk_case_best_values_post_p1.subtype
 --     wk_case_correction.closed_date_subtype
 --     remove rownum from wk_case_best_values_p1 & wk_case_best_values_post_p1
+--v33  add ret_conf_score, ret_conf_reason, merge_action_group & merge_action_subgroup to wk_case_correction
+--     remove processed_ts from retention_process_log
+--     add process_start_ts, process_end_ts, is_court_case_updated to retention_process_log
 
 
 SET ROLE DARTS_OWNER;
@@ -88,6 +91,7 @@ SET SEARCH_PATH TO darts;
 -- retention_policy_type_heritage_mapping RHM
 -- rps_retainer                           RPR
 -- retention_policy_type                  RPT
+-- retention_process_log                  RPL
 
 -- cc_dets                                CCD
 -- cmr_dets                               CMD
@@ -396,6 +400,10 @@ CREATE TABLE wk_case_correction
 ,has_warrant                   BOOLEAN
 ,warrant_before_sentencing     BOOLEAN
 ,case_closed_before_sentencing BOOLEAN
+,ret_conf_score                INTEGER
+,ret_conf_reason               CHARACTER VARYING
+,merge_action_group            INTEGER
+,merge_action_subgroup         INTEGER
 ) TABLESPACE pg_default;
 
 CREATE TABLE wk_case_best_values_p1
@@ -511,7 +519,9 @@ CREATE TABLE retention_process_log
 (cas_id                         INTEGER
 ,cr_row_count                   INTEGER
 ,cmr_row_count                  INTEGER
-,processed_ts                   TIMESTAMP WITH TIME ZONE
+,process_start_ts               TIMESTAMP WITH TIME ZONE
+,process_end_ts                 TIMESTAMP WITH TIME ZONE
+,is_court_case_updated          BOOLEAN
 ,status                         CHARACTER VARYING(10)
 ,message                        CHARACTER VARYING
 ) TABLESPACE pg_default;
