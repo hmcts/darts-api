@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_REPLAY;
@@ -153,14 +155,20 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         externalObjectDirectoryEntity2.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(6));
         dartsDatabase.save(externalObjectDirectoryEntity2);
 
+        ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
+            .save(createObjectStateRecordEntity(111L));
+        dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
         var externalObjectDirectoryEntity3 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             media3,
             ARM_RPO_PENDING,
             ARM,
             UUID.randomUUID().toString()
         );
-        externalObjectDirectoryEntity3.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(26));
-        dartsDatabase.save(externalObjectDirectoryEntity3);
+        externalObjectDirectoryEntity3.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(30));
+        externalObjectDirectoryEntity3.setOsrUuid(objectStateRecordEntity.getUuid());
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity3);
+        objectStateRecordEntity.setArmEodId(externalObjectDirectoryEntity3.getId());
+        dartsDatabase.getObjectStateRecordRepository().saveAndFlush(objectStateRecordEntity);
 
         var externalObjectDirectoryEntity4 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             media4,
@@ -189,8 +197,6 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         externalObjectDirectoryEntity6.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(28));
         dartsDatabase.save(externalObjectDirectoryEntity6);
 
-        log.info("eod 1: {}, eod 2: {}", externalObjectDirectoryEntity1.getId(), externalObjectDirectoryEntity2.getId());
-
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
 
         File file = TestUtils.getFile("tests/arm/rpo/armRpoCsvData.csv");
@@ -214,8 +220,13 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         List<ExternalObjectDirectoryEntity> foundMediaList3 = dartsDatabase.getExternalObjectDirectoryRepository()
             .findByMediaAndExternalLocationType(media3, dartsDatabase.getExternalLocationTypeEntity(ARM));
         assertEquals(1, foundMediaList3.size());
-        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList1.getFirst();
+        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.getFirst();
         assertEquals(STORED.getId(), foundMedia3.getStatus().getId());
+        var osrRef = foundMedia3.getObjectStateRecordEntity();
+        assertNotNull(osrRef);
+        var osr = dartsDatabase.getObjectStateRecordRepository().findById(osrRef.getUuid()).get();
+        assertEquals(true, osr.getFlagFileStoredInArm());
+        assertNotNull(osr.getDateFileStoredInArm());
 
         List<ExternalObjectDirectoryEntity> foundMediaList4 = dartsDatabase.getExternalObjectDirectoryRepository()
             .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
@@ -235,6 +246,47 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         assertNotNull(foundMedia6.getInputUploadProcessedTs());
 
     }
+
+    @Test
+    void reconcileArmRpoCsvData_FailsDets() {
+        // given
+        ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
+            .save(createObjectStateRecordEntity(111L));
+        dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
+        var externalObjectDirectory = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media1,
+            ARM_RPO_PENDING,
+            ARM,
+            UUID.randomUUID().toString()
+        );
+        externalObjectDirectory.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(30));
+        externalObjectDirectory.setOsrUuid(objectStateRecordEntity.getUuid());
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory);
+        objectStateRecordEntity.setArmEodId(123L);
+        dartsDatabase.getObjectStateRecordRepository().saveAndFlush(objectStateRecordEntity);
+
+        armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.now());
+
+        File file = TestUtils.getFile("tests/arm/rpo/armRpoCsvData.csv");
+
+        // when
+        armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file), 2);
+
+        // then
+        List<ExternalObjectDirectoryEntity> foundMediaList1 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
+        assertEquals(1, foundMediaList1.size());
+        ExternalObjectDirectoryEntity foundMedia1 = foundMediaList1.getFirst();
+        assertEquals(STORED.getId(), foundMedia1.getStatus().getId());
+
+        var osrRef = foundMedia1.getObjectStateRecordEntity();
+        assertNotNull(osrRef);
+        var osr = dartsDatabase.getObjectStateRecordRepository().findById(osrRef.getUuid()).get();
+        assertNull(osr.getFlagFileStoredInArm());
+        assertNull(osr.getDateFileStoredInArm());
+
+    }
+
 
     @Test
     void reconcileArmRpoCsvData_DoesNothing_WhenIngestionDateOutsideOfRange() {
@@ -363,6 +415,12 @@ class ArmRpoServiceIntTest extends PostgresIntegrationBase {
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(ARM_RPO_PENDING.getId(), foundMedia.getStatus().getId());
+    }
+
+    private ObjectStateRecordEntity createObjectStateRecordEntity(long osrUuid) {
+        ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
+        objectStateRecordEntity.setUuid(osrUuid);
+        return objectStateRecordEntity;
     }
 
 }
