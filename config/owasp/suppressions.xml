@@ -15,11 +15,5 @@
     </notes>
     <vulnerabilityName>CVE-2023-34047</vulnerabilityName>
   </suppress>
-  <suppress>
-    <notes>False positive
-      project does not contain json-java
-    </notes>
-    <cve>CVE-2023-5072</cve>
-  </suppress>
   <!--End of false positives section -->
 </suppressions>
