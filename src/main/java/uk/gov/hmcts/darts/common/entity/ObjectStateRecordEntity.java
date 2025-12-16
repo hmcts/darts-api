@@ -131,4 +131,10 @@ public class ObjectStateRecordEntity {
     @Column(name = "dal_id")
     private Integer dalId;
 
+    @Column(name = "flag_file_stored_in_arm")
+    private Boolean flagFileStoredInArm;
+
+    @Column(name = "date_file_stored_in_arm")
+    private OffsetDateTime dateFileStoredInArm;
+
 }
