@@ -11,6 +11,7 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -48,12 +49,12 @@ class ArmRetentionEventDateProcessorImplTest {
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
     private ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
-
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
-
     @Mock
     private ArmRetentionEventDateCalculatorAutomatedTaskConfig automatedTaskConfigurationProperties;
+    @Mock
+    private ArmApiService armApiService;
 
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
@@ -70,7 +71,8 @@ class ArmRetentionEventDateProcessorImplTest {
         armRetentionEventDateProcessor = new ArmRetentionEventDateProcessorImpl(
             externalObjectDirectoryRepository,
             armRetentionEventDateCalculator,
-            automatedTaskConfigurationProperties);
+            automatedTaskConfigurationProperties,
+            armApiService);
 
         externalObjectDirectoryEntity = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
             media,
@@ -79,6 +81,8 @@ class ArmRetentionEventDateProcessorImplTest {
             UUID.randomUUID().toString());
         externalObjectDirectoryEntity.setUpdateRetention(true);
         lenient().when(automatedTaskConfigurationProperties.getThreads()).thenReturn(1);
+
+        lenient().when(armApiService.getArmBearerToken()).thenReturn("bearer token");
     }
 
     @AfterEach
