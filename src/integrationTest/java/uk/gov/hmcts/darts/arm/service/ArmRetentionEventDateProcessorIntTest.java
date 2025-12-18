@@ -103,13 +103,17 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     @Autowired
     private ArmRetentionEventDateCalculatorAutomatedTaskConfig automatedTaskConfigurationProperties;
 
+    @Autowired
+    private ArmApiService armApiService;
+
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
     @BeforeEach
     void setupData() {
         armRetentionEventDateProcessor = new ArmRetentionEventDateProcessorImpl(externalObjectDirectoryRepository,
                                                                                 armRetentionEventDateCalculator,
-                                                                                automatedTaskConfigurationProperties);
+                                                                                automatedTaskConfigurationProperties,
+                                                                                armApiService);
 
         String bearerToken = "some-token";
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder()
