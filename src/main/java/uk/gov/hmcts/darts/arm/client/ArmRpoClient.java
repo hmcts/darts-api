@@ -59,7 +59,7 @@ public interface ArmRpoClient {
     ) //NOSONAR
     MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchema(@RequestHeader(AUTHORIZATION) String bearerAuth, //NOSONAR
                                                                                        @RequestBody MasterIndexFieldByRecordClassSchemaRequest  //NOSONAR
-                                                                                            masterIndexFieldByRecordClassSchemaRequest); //NOSONAR
+                                                                                           masterIndexFieldByRecordClassSchemaRequest); //NOSONAR
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-profile-entitlements-path}", //NOSONAR
         consumes = APPLICATION_JSON_VALUE, //NOSONAR
@@ -107,8 +107,8 @@ public interface ArmRpoClient {
         produces = APPLICATION_JSON_VALUE //NOSONAR
     ) //NOSONAR
     CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTable(@RequestHeader(AUTHORIZATION) String bearerToken, //NOSONAR
-                                                                                        @RequestBody 
-                                                                                            CreateExportBasedOnSearchResultsTableRequest request); //NOSONAR
+                                                                                        @RequestBody
+                                                                                        CreateExportBasedOnSearchResultsTableRequest request); //NOSONAR
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.remove-production-path}", //NOSONAR
         consumes = APPLICATION_JSON_VALUE, //NOSONAR

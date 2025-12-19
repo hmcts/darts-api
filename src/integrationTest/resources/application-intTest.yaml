@@ -85,13 +85,29 @@ darts:
       url: http://localhost:${wiremock.server.port}
       arm-service-entitlement: some-entitlement
       arm-storage-account-name: some-account-name
-      enable-arm-v5-2-upgrade: false
+      enable-arm-v5-2-upgrade: true
       version5-2:
         authentication:
           auth-base-url: http://localhost:${wiremock.server.port}
         api:
           api-base-url: http://localhost:${wiremock.server.port}
-
+          available-entitlement-profiles-path: /v1/availableEntitlementProfiles
+          select-entitlement-profile-path: /v1/selectEntitlementProfile/{profile_id}
+          update-metadata-path: /v3/UpdateMetadata
+          download-data-path: /v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
+          get-record-management-matter-path: /v1/getRecordManagementMatter
+          get-storage-accounts-path: /v1/getStorageAccounts
+          get-indexes-by-matter-id-path: /v1/getIndexesByMatterId
+          get-master-index-field-by-record-class-schema-path: /v1/getMasterIndexFieldByRecordClassSchema
+          get-profile-entitlements-path: /v1/getProfileEntitlements
+          add-async-search-path: /v1/addAsyncSearchRM
+          save-background-search-path: /v1/SaveBackgroundSearch
+          create-export-based-on-search-results-table-path: /v1/CreateExportBasedOnSearchResultsTable
+          get-extended-searches-by-matter-path: /v1/getExtendedSearchesByMatter
+          get-production-output-files-path: /v1/getProductionOutputFiles
+          remove-production-path: /v1/removeProduction
+          get-extended-productions-by-matter: /v1/getExtendedProductionsByMatter
+          download-production-path: /v1/downloadProduction/{productionExportFileID}/false
     arm:
       temp-blob-workspace: ${java.io.tmpdir}/armworkspace
       max-continuation-batch-size: 10

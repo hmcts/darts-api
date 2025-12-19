@@ -2,9 +2,10 @@ package uk.gov.hmcts.darts.arm.rpo;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -19,22 +20,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
 class SaveBackgroundSearchServiceIntTest extends IntegrationBase {
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
     private SaveBackgroundSearchService saveBackgroundSearchService;
-    
+
     @Test
-    void saveBackgroundSearchSuccess() {
+    void saveBackgroundSearch_ReturnsSuccess() {
 
         // given
         SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
         response.setStatus(200);
         response.setIsError(false);
-        when(armRpoClient.saveBackgroundSearch(any(), any())).thenReturn(response);
+        when(armApiBaseClient.saveBackgroundSearch(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -55,13 +57,13 @@ class SaveBackgroundSearchServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void saveBackgroundSearchReturnsResponseWithInvalidStatus() {
+    void saveBackgroundSearch_ReturnsResponseWithInvalidStatus() {
 
         // given
         SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
         response.setStatus(400);
         response.setIsError(true);
-        when(armRpoClient.saveBackgroundSearch(any(), any())).thenReturn(response);
+        when(armApiBaseClient.saveBackgroundSearch(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -87,12 +89,73 @@ class SaveBackgroundSearchServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void saveBackgroundSearchReturnsResponseWithNullStatus() {
+    void saveBackgroundSearch_ReturnsResponseWithNullStatus() {
 
         // given
         SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
         response.setIsError(false);
-        when(armRpoClient.saveBackgroundSearch(any(), any())).thenReturn(response);
+        when(armApiBaseClient.saveBackgroundSearch(any(), any())).thenReturn(response);
+
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
+        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
+        var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        var bearerAuth = "Bearer some-token";
+
+        // when
+        ArmRpoException armRpoException = assertThrows(
+            ArmRpoException.class,
+            () -> saveBackgroundSearchService.saveBackgroundSearch(bearerAuth, armRpoExecutionDetail.getId(), "searchName", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM save background search: ARM RPO API response is invalid"));
+
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
+        assertEquals(ArmRpoStateEnum.SAVE_BACKGROUND_SEARCH.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+        assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
+
+    }
+
+    @Test
+    void saveBackgroundSearch_ReturnsResponseWithEmptyResponse() {
+
+        // given
+        SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
+        when(armApiBaseClient.saveBackgroundSearch(any(), any())).thenReturn(response);
+
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
+        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
+        var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        var bearerAuth = "Bearer some-token";
+
+        // when
+        ArmRpoException armRpoException = assertThrows(
+            ArmRpoException.class,
+            () -> saveBackgroundSearchService.saveBackgroundSearch(bearerAuth, armRpoExecutionDetail.getId(), "searchName", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM save background search: ARM RPO API response is invalid"));
+
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
+        assertEquals(ArmRpoStateEnum.SAVE_BACKGROUND_SEARCH.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+        assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
+
+    }
+
+    @Test
+    void saveBackgroundSearch_ReturnsResponseWithIllegalStatus() {
+
+        // given
+        SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
+        response.setStatus(9_876_543);
+        when(armApiBaseClient.saveBackgroundSearch(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();

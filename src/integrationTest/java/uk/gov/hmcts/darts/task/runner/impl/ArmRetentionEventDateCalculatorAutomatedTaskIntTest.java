@@ -2,20 +2,24 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmApiClient;
-import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 
@@ -39,6 +43,9 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
+@Profile("in-memory-caching")
+@Import(InMemoryTestCache.class)
 class ArmRetentionEventDateCalculatorAutomatedTaskIntTest extends PostgresIntegrationBase {
     private static final String BEARER_TOKEN = "bearer";
 
@@ -58,9 +65,9 @@ class ArmRetentionEventDateCalculatorAutomatedTaskIntTest extends PostgresIntegr
     private ArmApiConfigurationProperties armApiConfigurationProperties;
 
     @MockitoBean
-    private ArmApiClient armApiClient;
+    private ArmApiBaseClient armApiBaseClient;
     @MockitoBean
-    private ArmTokenClient armTokenClient;
+    private ArmAuthClient armAuthClient;
 
     @Autowired
     private ArmRetentionEventDateCalculatorAutomatedTask armRetentionEventDateCalculatorAutomatedTask;
@@ -100,15 +107,15 @@ class ArmRetentionEventDateCalculatorAutomatedTaskIntTest extends PostgresIntegr
 
         UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
         ArmTokenRequest armTokenRequest = createTokenRequest();
-        when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
+        when(armApiBaseClient.updateMetadata(any(), any())).thenReturn(response);
 
         ArmTokenResponse armTokenResponse = createArmTokenResponse();
-        when(armTokenClient.getToken(armTokenRequest)).thenReturn(armTokenResponse);
+        when(armAuthClient.getToken(armTokenRequest)).thenReturn(armTokenResponse);
 
         AvailableEntitlementProfile availableEntitlementProfile = createAvailableEntitlementProfile();
-        when(armTokenClient.availableEntitlementProfiles(any(), any())).thenReturn(availableEntitlementProfile);
+        when(armApiBaseClient.availableEntitlementProfiles(any(), any())).thenReturn(availableEntitlementProfile);
 
-        when(armTokenClient.selectEntitlementProfile(any(), any(), any())).thenReturn(armTokenResponse);
+        when(armApiBaseClient.selectEntitlementProfile(any(), any(), any())).thenReturn(armTokenResponse);
 
         armRetentionEventDateCalculatorAutomatedTask.preRunTask();
 
@@ -129,7 +136,7 @@ class ArmRetentionEventDateCalculatorAutomatedTaskIntTest extends PostgresIntegr
                           .build())
             .useGuidsForFields(false)
             .build();
-        verify(armApiClient).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+        verify(armApiBaseClient).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
 
     }
 
@@ -167,11 +174,11 @@ class ArmRetentionEventDateCalculatorAutomatedTaskIntTest extends PostgresIntegr
         dartsPersistence.save(armEod);
 
         ArmTokenResponse armTokenResponse = createArmTokenResponse();
-        when(armTokenClient.getToken(any())).thenReturn(armTokenResponse);
+        when(armAuthClient.getToken(any())).thenReturn(armTokenResponse);
         // Simulate InterruptedException
         doAnswer(invocation -> {
             throw new InterruptedException("Simulated interruption");
-        }).when(armTokenClient).getToken(any());
+        }).when(armAuthClient).getToken(any());
 
         armRetentionEventDateCalculatorAutomatedTask.preRunTask();
 
@@ -182,7 +189,7 @@ class ArmRetentionEventDateCalculatorAutomatedTaskIntTest extends PostgresIntegr
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
         assertTrue(persistedEod.isUpdateRetention());
         // Verify that the updateMetadata method was not called
-        verifyNoInteractions(armApiClient);
+        verifyNoInteractions(armApiBaseClient);
     }
 
     private AvailableEntitlementProfile createAvailableEntitlementProfile() {

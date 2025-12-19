@@ -1,9 +1,13 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import feign.FeignException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
@@ -19,24 +23,32 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static java.util.Collections.emptyMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+@Isolated
 @TestPropertySource(properties = {
     "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
 })
+@Profile("in-memory-caching")
+@Import(InMemoryTestCache.class)
 class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBase {
 
     @MockitoBean
@@ -83,7 +95,7 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
         when(armApiBaseClient.getProfileEntitlementResponse(anyString(), any()))
             .thenReturn(getProfileEntitlementResponse());
         when(armApiBaseClient.getMasterIndexFieldByRecordClassSchema(anyString(), any()))
-            .thenReturn(getMasterIndexFieldByRecordClassSchemaResponse("propertyName1", "propertyName2"));
+            .thenReturn(getMasterIndexFieldByRecordClassSchemaResponse("propertyName1", "ingestionDate"));
         when(armApiBaseClient.addAsyncSearch(anyString(), any()))
             .thenReturn(getAsyncSearchResponse());
         when(armApiBaseClient.saveBackgroundSearch(anyString(), any()))
@@ -97,6 +109,50 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
             .findLatestByCreatedDateTimeDesc().orElseThrow();
 
         assertNotNull(armRpoExecutionDetailEntity.getId());
+        assertEquals(ArmRpoHelper.saveBackgroundSearchRpoState().getId(), armRpoExecutionDetailEntity.getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), armRpoExecutionDetailEntity.getArmRpoStatus().getId());
+    }
+
+    @Test
+    void triggerArmRpoSearch_shouldFail_when() {
+
+        // given
+        RecordManagementMatterResponse recordManagementMatterResponse = getRecordManagementMatterResponse();
+        when(armApiBaseClient.getRecordManagementMatter(anyString(), any()))
+            .thenReturn(recordManagementMatterResponse);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any()))
+            .thenReturn(getIndexesByMatterIdResponse());
+        when(armApiBaseClient.getStorageAccounts(anyString(), any()))
+            .thenReturn(getStorageAccounts());
+        when(armApiBaseClient.getProfileEntitlementResponse(anyString(), any()))
+            .thenReturn(getProfileEntitlementResponse());
+        when(armApiBaseClient.getMasterIndexFieldByRecordClassSchema(anyString(), any()))
+            .thenReturn(getMasterIndexFieldByRecordClassSchemaResponse("propertyName1", "ingestionDate"));
+        when(armApiBaseClient.addAsyncSearch(anyString(), any()))
+            .thenReturn(getAsyncSearchResponse());
+
+        String jsonResponse = "{\"status\":400,\"isError\":true,\"responseStatus\":1,\"message\":\"Search with no results cannot be saved\"}";
+        FeignException feignException = FeignException.errorStatus(
+            "saveBackgroundSearch",
+            feign.Response.builder()
+                .status(400)
+                .reason("Bad Request")
+                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
+                .body(jsonResponse, StandardCharsets.UTF_8)
+                .build()
+        );
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any()))
+            .thenThrow(feignException);
+
+        // when
+        triggerArmRpoSearchServiceImpl.triggerArmRpoSearch(Duration.of(1, ChronoUnit.SECONDS));
+
+        // then
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository()
+            .findLatestByCreatedDateTimeDesc().orElseThrow();
+
+        assertEquals(ArmRpoHelper.saveBackgroundSearchRpoState().getId(), armRpoExecutionDetailEntity.getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.failedRpoStatus().getId(), armRpoExecutionDetailEntity.getArmRpoStatus().getId());
 
     }
 
@@ -148,8 +204,8 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
 
     private ProfileEntitlementResponse getProfileEntitlementResponse() {
         ProfileEntitlementResponse.ProfileEntitlement profileEntitlement = new ProfileEntitlementResponse.ProfileEntitlement();
-        profileEntitlement.setName("ENTITLEMENT_NAME");
-        profileEntitlement.setEntitlementId("ENTITLEMENT_ID");
+        profileEntitlement.setName("some-entitlement");
+        profileEntitlement.setEntitlementId("some-entitlement");
 
         ProfileEntitlementResponse profileEntitlementResponse = new ProfileEntitlementResponse();
         profileEntitlementResponse.setStatus(200);

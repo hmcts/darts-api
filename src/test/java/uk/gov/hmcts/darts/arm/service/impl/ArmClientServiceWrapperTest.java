@@ -39,6 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ArmClientServiceWrapperTest {
+    
     private ArmAuthClient armAuthClient;
     private ArmApiBaseClient armApiClient;
     private ArmClientServiceWrapper service;
