@@ -109,7 +109,6 @@ java:
           alias: ARM_STORAGE_ACCOUNT_NAME
 
   environment:
-    JAVA_TOOL_OPTIONS: "-Xms6g -Xmx6g"
     DARTS_API_DB_POOL_SIZE: "80"
     ENABLE_FLYWAY: true
     MANUAL_DELETION_ENABLED: true
