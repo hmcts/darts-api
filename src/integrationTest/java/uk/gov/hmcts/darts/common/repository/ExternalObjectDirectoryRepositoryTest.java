@@ -65,7 +65,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         // set up the test data
         generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
-        // exercise the logic
+        // when
         List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -74,7 +74,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
                 Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertFindIdsIn2StorageLocationsBeforeTimeExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
                                                                   entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
@@ -84,7 +84,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         int setupHoursBeforeCurrentTime = 26;
 
-        // setup the test data
+        // given
         generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
@@ -97,7 +97,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                                                   ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
                                                   Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertFindIdsIn2StorageLocationsBeforeTimeExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
                                                                   entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
@@ -107,12 +107,12 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         int setupHoursBeforeCurrentTime = 24;
 
-        // setup the test data
+        // given
         generateDataWithAnnotationForInbound(setupHoursBeforeCurrentTime);
 
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
-        // exercise the logic
+        // when
         List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -120,7 +120,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours), ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex(),
                 Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertFindIdsIn2StorageLocationsBeforeTimeExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
                                                                   entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
@@ -131,10 +131,10 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         int setupArmHoursBeforeCurrentTime = 24;
         int setupUnstructuredWeeksBeforeCurrentTime = 4;
 
-        // setup the test data
+        // given
         generateDataWithAnnotationForUnstructured(setupArmHoursBeforeCurrentTime, setupUnstructuredWeeksBeforeCurrentTime);
 
-        // exercise the logic
+        // when
         List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -143,7 +143,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime),
                 Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertFindIdsIn2StorageLocationsBeforeTimeExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
                                                                   entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
@@ -154,10 +154,10 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         int setupArmHoursBeforeCurrentTime = 24;
         int setupUnstructuredWeeksBeforeCurrentTime = 4;
 
-        // setup the test data
+        // given
         generateDataWithAnnotationForUnstructured(setupArmHoursBeforeCurrentTime, setupUnstructuredWeeksBeforeCurrentTime);
 
-        // exercise the logic
+        // when
         List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -166,7 +166,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime + 1),
                 Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertTrue(results.isEmpty());
     }
 
@@ -175,12 +175,12 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         int setupHoursBeforeCurrentTime = 22;
 
-        // setup the test data
+        // given
         generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
         int hourDurationBeyondHours = 24; // which no records are
 
-        // exercise the logic
+        // when
         List<Long> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -189,7 +189,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
                 Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertTrue(results.isEmpty());
     }
 
@@ -672,13 +672,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByAnnotationDocumentIdAndExternalLocationTypes_ShouldReturnArmEod() {
-        AnnotationDocumentEntity annotationDocumentArm =
-            dartsPersistence.save(
-                PersistableFactory.getAnnotationDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        AnnotationDocumentEntity annotationDocumentArm = createAnnotationDocument();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -687,13 +681,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .getEntity();
         dartsPersistence.save(eodArm);
 
-        AnnotationDocumentEntity annotationDocumentDets =
-            dartsPersistence.save(
-                PersistableFactory.getAnnotationDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        AnnotationDocumentEntity annotationDocumentDets = createAnnotationDocument();
         ExternalObjectDirectoryEntity eodDets = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.detsLocation())
@@ -714,13 +702,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByAnnotationDocumentIdAndExternalLocationTypes_ShouldReturnDetsEod() {
-        AnnotationDocumentEntity annotationDocumentArm =
-            dartsPersistence.save(
-                PersistableFactory.getAnnotationDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        AnnotationDocumentEntity annotationDocumentArm = createAnnotationDocument();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -729,13 +711,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .getEntity();
         dartsPersistence.save(eodArm);
 
-        AnnotationDocumentEntity annotationDocumentDets =
-            dartsPersistence.save(
-                PersistableFactory.getAnnotationDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        AnnotationDocumentEntity annotationDocumentDets = createAnnotationDocument();
         ExternalObjectDirectoryEntity eodDets = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.detsLocation())
@@ -756,13 +732,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByAnnotationDocumentIdAndExternalLocationTypes_ShouldReturnArmAndDetsEods() {
-        AnnotationDocumentEntity annotationDocument =
-            dartsPersistence.save(
-                PersistableFactory.getAnnotationDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        AnnotationDocumentEntity annotationDocument = createAnnotationDocument();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -791,13 +761,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByTranscriptionDocumentIdAndExternalLocationTypes_ShouldReturnArmEod() {
-        TranscriptionDocumentEntity transcriptionDocumentArm =
-            dartsPersistence.save(
-                PersistableFactory.getTranscriptionDocument()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        TranscriptionDocumentEntity transcriptionDocumentArm = createTranscriptionDocumentEntity();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -806,13 +770,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .getEntity();
         dartsPersistence.save(eodArm);
 
-        TranscriptionDocumentEntity transcriptionDocumentDets =
-            dartsPersistence.save(
-                PersistableFactory.getTranscriptionDocument()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        TranscriptionDocumentEntity transcriptionDocumentDets = createTranscriptionDocumentEntity();
         ExternalObjectDirectoryEntity eodDets = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.detsLocation())
@@ -830,13 +788,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByTranscriptionDocumentIdAndExternalLocationTypes_ShouldReturnDetsEod() {
-        TranscriptionDocumentEntity transcriptionDocumentArm =
-            dartsPersistence.save(
-                PersistableFactory.getTranscriptionDocument()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        TranscriptionDocumentEntity transcriptionDocumentArm = createTranscriptionDocumentEntity();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -845,13 +797,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .getEntity();
         dartsPersistence.save(eodArm);
 
-        TranscriptionDocumentEntity transcriptionDocumentDets =
-            dartsPersistence.save(
-                PersistableFactory.getTranscriptionDocument()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        TranscriptionDocumentEntity transcriptionDocumentDets = createTranscriptionDocumentEntity();
         ExternalObjectDirectoryEntity eodDets = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.detsLocation())
@@ -869,13 +815,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByTranscriptionDocumentIdAndExternalLocationTypes_ShouldReturnArmAndDetsEod() {
-        TranscriptionDocumentEntity transcriptionDocument =
-            dartsPersistence.save(
-                PersistableFactory.getTranscriptionDocument()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        TranscriptionDocumentEntity transcriptionDocument = createTranscriptionDocumentEntity();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -900,13 +840,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByMediaIdAndExternalLocationTypes_ShouldReturnArmEod() {
-        MediaEntity mediaArm =
-            dartsPersistence.save(
-                PersistableFactory.getMediaTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        MediaEntity mediaArm = getMediaEntity();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -915,13 +849,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .getEntity();
         dartsPersistence.save(eodArm);
 
-        MediaEntity mediaDets =
-            dartsPersistence.save(
-                PersistableFactory.getMediaTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        MediaEntity mediaDets = getMediaEntity();
         ExternalObjectDirectoryEntity eodDets = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.detsLocation())
@@ -939,13 +867,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByMediaIdAndExternalLocationTypes_ShouldReturnDetsEod() {
-        MediaEntity mediaArm =
-            dartsPersistence.save(
-                PersistableFactory.getMediaTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        MediaEntity mediaArm = getMediaEntity();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -954,13 +876,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .getEntity();
         dartsPersistence.save(eodArm);
 
-        MediaEntity mediaDets =
-            dartsPersistence.save(
-                PersistableFactory.getMediaTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        MediaEntity mediaDets = getMediaEntity();
         ExternalObjectDirectoryEntity eodDets = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.detsLocation())
@@ -978,13 +894,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByMediaIdAndExternalLocationTypes_ShouldReturnArmAndDetsEod() {
-        MediaEntity media =
-            dartsPersistence.save(
-                PersistableFactory.getMediaTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        MediaEntity media = getMediaEntity();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -1010,13 +920,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByCaseDocumentIdAndExternalLocationTypes_ShouldReturnArmEod() {
-        CaseDocumentEntity caseDocumentArm =
-            dartsPersistence.save(
-                PersistableFactory.getCaseDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        CaseDocumentEntity caseDocumentArm = createCaseDocumentEntity();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -1025,13 +929,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .getEntity();
         dartsPersistence.save(eodArm);
 
-        CaseDocumentEntity caseDocumentDets =
-            dartsPersistence.save(
-                PersistableFactory.getCaseDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        CaseDocumentEntity caseDocumentDets = createCaseDocumentEntity();
         ExternalObjectDirectoryEntity eodDets = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.detsLocation())
@@ -1049,13 +947,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByCaseDocumentIdAndExternalLocationTypes_ShouldReturnDetsEod() {
-        CaseDocumentEntity caseDocumentArm =
-            dartsPersistence.save(
-                PersistableFactory.getCaseDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        CaseDocumentEntity caseDocumentArm = createCaseDocumentEntity();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -1064,13 +956,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .getEntity();
         dartsPersistence.save(eodArm);
 
-        CaseDocumentEntity caseDocumentDets =
-            dartsPersistence.save(
-                PersistableFactory.getCaseDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        CaseDocumentEntity caseDocumentDets = createCaseDocumentEntity();
         ExternalObjectDirectoryEntity eodDets = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.detsLocation())
@@ -1088,13 +974,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void findByCaseDocumentIdAndExternalLocationTypes_ShouldReturnArmAndDetsEod() {
-        CaseDocumentEntity caseDocument =
-            dartsPersistence.save(
-                PersistableFactory.getCaseDocumentTestData()
-                    .someMinimalBuilder()
-                    .build()
-                    .getEntity()
-            );
+        CaseDocumentEntity caseDocument = createCaseDocumentEntity();
         ExternalObjectDirectoryEntity eodArm = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder()
             .externalLocationType(EodHelper.armLocation())
@@ -1116,6 +996,168 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         assertThat(results).hasSize(2);
 
+    }
+
+    @Test
+    void findEodsIdsInOtherStorageLastModifiedBefore_ReturnsExpectedResults() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // given
+        OffsetDateTime lastModifiedDateTimeInScope = OffsetDateTime.now().minusDays(8);
+        MediaEntity media1 = getMediaEntity();
+        ExternalObjectDirectoryEntity armMediaEod = createExternalObjectDirectoryEntity(media1, EodHelper.armLocation(), lastModifiedDateTimeInScope);
+        ExternalObjectDirectoryEntity detsMediaEod = createExternalObjectDirectoryEntity(media1, EodHelper.detsLocation(), lastModifiedDateTimeInScope);
+
+        AnnotationDocumentEntity annotationDocument = createAnnotationDocument();
+        ExternalObjectDirectoryEntity armAnnotationEod = createExternalObjectDirectoryEntity(annotationDocument, EodHelper.armLocation(),
+                                                                                             lastModifiedDateTimeInScope);
+        ExternalObjectDirectoryEntity detsAnnotationEod = createExternalObjectDirectoryEntity(annotationDocument, EodHelper.detsLocation(),
+                                                                                              lastModifiedDateTimeInScope);
+
+        TranscriptionDocumentEntity transcriptionDocument = createTranscriptionDocumentEntity();
+        ExternalObjectDirectoryEntity armTranscriptionEod = createExternalObjectDirectoryEntity(transcriptionDocument, EodHelper.armLocation(),
+                                                                                                lastModifiedDateTimeInScope);
+        ExternalObjectDirectoryEntity detsTranscriptionEod = createExternalObjectDirectoryEntity(transcriptionDocument, EodHelper.detsLocation(),
+                                                                                                 lastModifiedDateTimeInScope);
+        CaseDocumentEntity caseDocument = createCaseDocumentEntity();
+        ExternalObjectDirectoryEntity armCaseEod = createExternalObjectDirectoryEntity(caseDocument, EodHelper.armLocation(),
+                                                                                       lastModifiedDateTimeInScope);
+        ExternalObjectDirectoryEntity detsCaseEod = createExternalObjectDirectoryEntity(caseDocument, EodHelper.detsLocation(),
+                                                                                        lastModifiedDateTimeInScope);
+
+
+        MediaEntity media2 = getMediaEntity();
+        OffsetDateTime now = OffsetDateTime.now();
+        ExternalObjectDirectoryEntity armMediaEodNotInScope = createExternalObjectDirectoryEntity(media2, EodHelper.armLocation(), now);
+        ExternalObjectDirectoryEntity detsMediaEodNotInScope = createExternalObjectDirectoryEntity(media2, EodHelper.detsLocation(), now);
+
+        MediaEntity media3 = getMediaEntity();
+        ExternalObjectDirectoryEntity detsMediaEodInScopeNoMatchingArmEod = createExternalObjectDirectoryEntity(media3, EodHelper.detsLocation(),
+                                                                                                                lastModifiedDateTimeInScope);
+
+        OffsetDateTime lastModifiedDateTime = OffsetDateTime.now().minusDays(7);
+
+        // when
+        List<Long> results = externalObjectDirectoryRepository.findEodIdsInOtherStorageLastModifiedBefore(
+            EodHelper.storedStatus().getId(),
+            EodHelper.detsLocation().getId(),
+            EodHelper.armLocation().getId(),
+            lastModifiedDateTime,
+            Limit.of(5)
+        );
+
+        // then
+        assertEquals(4, results.size());
+        assertThat(results).contains(detsMediaEod.getId(),
+                                     detsAnnotationEod.getId(),
+                                     detsTranscriptionEod.getId(),
+                                     detsCaseEod.getId());
+        assertThat(results).doesNotContain(
+            armMediaEod.getId(),
+            armMediaEodNotInScope.getId(),
+            detsMediaEodNotInScope.getId(),
+            detsMediaEodInScopeNoMatchingArmEod.getId(),
+            armAnnotationEod.getId(),
+            armTranscriptionEod.getId(),
+            armCaseEod.getId()
+        );
+    }
+
+    private CaseDocumentEntity createCaseDocumentEntity() {
+        return dartsPersistence.save(
+            PersistableFactory.getCaseDocumentTestData()
+                .someMinimalBuilder()
+                .build()
+                .getEntity()
+        );
+    }
+
+    private TranscriptionDocumentEntity createTranscriptionDocumentEntity() {
+        return dartsPersistence.save(
+            PersistableFactory.getTranscriptionDocument()
+                .someMinimalBuilder()
+                .build()
+                .getEntity()
+        );
+    }
+
+    private AnnotationDocumentEntity createAnnotationDocument() {
+        return dartsPersistence.save(
+            PersistableFactory.getAnnotationDocumentTestData()
+                .someMinimalBuilder()
+                .build()
+                .getEntity()
+        );
+    }
+
+    private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(MediaEntity media,
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                              OffsetDateTime lastModifiedDateTime)
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder()
+            .externalLocationType(externalLocationTypeEntity)
+            .media(media)
+            .build()
+            .getEntity();
+        var savedEod = dartsPersistence.save(eod);
+        return externalObjectDirectoryStub.applyLastModifiedDate(savedEod, lastModifiedDateTime);
+    }
+
+    private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(TranscriptionDocumentEntity transcriptionDocumentEntity,
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                              OffsetDateTime lastModifiedDateTime)
+
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder()
+            .externalLocationType(externalLocationTypeEntity)
+            .transcriptionDocumentEntity(transcriptionDocumentEntity)
+            .lastModifiedDateTime(lastModifiedDateTime)
+            .build()
+            .getEntity();
+        var savedEod = dartsPersistence.save(eod);
+
+        return externalObjectDirectoryStub.applyLastModifiedDate(savedEod, lastModifiedDateTime);
+    }
+
+    private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(AnnotationDocumentEntity annotationDocumentEntity,
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                              OffsetDateTime lastModifiedDateTime)
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder()
+            .externalLocationType(externalLocationTypeEntity)
+            .annotationDocumentEntity(annotationDocumentEntity)
+            .lastModifiedDateTime(lastModifiedDateTime)
+            .build()
+            .getEntity();
+        var savedEod = dartsPersistence.save(eod);
+
+        return externalObjectDirectoryStub.applyLastModifiedDate(savedEod, lastModifiedDateTime);
+    }
+
+    private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(CaseDocumentEntity caseDocumentEntity,
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                              OffsetDateTime lastModifiedDateTime)
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        ExternalObjectDirectoryEntity eod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder()
+            .externalLocationType(externalLocationTypeEntity)
+            .caseDocument(caseDocumentEntity)
+            .lastModifiedDateTime(lastModifiedDateTime)
+            .build()
+            .getEntity();
+        var savedEod = dartsPersistence.save(eod);
+
+        return externalObjectDirectoryStub.applyLastModifiedDate(savedEod, lastModifiedDateTime);
+    }
+
+    private MediaEntity getMediaEntity() {
+        return dartsPersistence.save(
+            PersistableFactory.getMediaTestData()
+                .someMinimalBuilder()
+                .build()
+                .getEntity()
+        );
     }
 
     private void assertFindIdsIn2StorageLocationsBeforeTimeExpectedResults(
@@ -1233,13 +1275,11 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours;
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour;
         externalObjectDirectoryEntitiesNotRelevant
-            = externalObjectDirectoryStub
-            .generateWithStatusAndMediaLocation(
-                ExternalLocationTypeEnum.INBOUND, ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.empty());
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.INBOUND, ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.empty());
         externalObjectDirectoryEntities
-            = externalObjectDirectoryStub
-            .generateWithStatusAndMediaLocation(
-                ExternalLocationTypeEnum.INBOUND, STORED, numberOfRecordsToGenerate, Optional.empty());
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.INBOUND, STORED, numberOfRecordsToGenerate, Optional.empty());
         entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
 
@@ -1257,5 +1297,4 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         // assert that the test has inserted the data into the database
         assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
     }
-
 }

@@ -44,7 +44,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Component
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.GodClass")
 @Getter
 public class ExternalObjectDirectoryStub {
 
@@ -297,6 +296,7 @@ public class ExternalObjectDirectoryStub {
 
     /**
      * Creates an ExternalObjectDirectoryEntity with random values.
+     *
      * @deprecated use new PersistableFactory builders
      */
     @Deprecated
@@ -447,6 +447,17 @@ public class ExternalObjectDirectoryStub {
             entityListResult.add(newExternalObjectDirectory);
         }
         return entityListResult;
+    }
+
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public ExternalObjectDirectoryEntity applyLastModifiedDate(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                               OffsetDateTime dateToSet)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        ExternalObjectDirectoryEntity newExternalObjectDirectory = dartsDatabaseSaveStub.save(externalObjectDirectory);
+
+        dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, dateToSet);
+
+        return eodRepository.getReferenceById(newExternalObjectDirectory.getId());
     }
 
     @Transactional
