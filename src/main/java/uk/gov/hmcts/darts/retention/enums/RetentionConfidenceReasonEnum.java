@@ -16,5 +16,15 @@ public enum RetentionConfidenceReasonEnum {
     // Legacy values
     MAX_EVENT_CLOSED,
     MAX_MEDIA_CLOSED,
-    CASE_CREATION_CLOSED;
+    CASE_CREATION_CLOSED,
+
+    // Migration values
+    CASE_CLOSED_EXACT,
+    CASE_CLOSED_P3_WITHIN,
+    CASE_CLOSED_WITHIN,
+    CASE_CREATION,
+    MAX_EVENT_LATEST,
+    MAX_EVENT_OUTWITH,
+    MAX_LOG_LATEST,
+    MEDIA_LATEST;
 }
