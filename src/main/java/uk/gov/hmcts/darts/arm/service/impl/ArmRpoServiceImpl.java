@@ -143,20 +143,12 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             );
             log.info("Found number of elements {}, total elements {}, total pages {} for batch size {}",
                      pages.getNumberOfElements(), pages.getTotalElements(), pages.getTotalPages(), batchSize);
-            externalObjectDirectoryEntities.addAll(pages.getContent());
+            List<ExternalObjectDirectoryEntity> content = pages.getContent();
+            externalObjectDirectoryEntities.addAll(content);
+            updateEodStatus(externalObjectDirectoryEntities, csvEodList);
             pageRequest = pageRequest.next();
         } while (pages.hasNext());
 
-        externalObjectDirectoryEntities.forEach(
-            externalObjectDirectoryEntity -> {
-                if (csvEodList.contains(externalObjectDirectoryEntity.getId())) {
-                    externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
-                    updateObjectStateRecordForEod(externalObjectDirectoryEntity);
-                } else {
-                    externalObjectDirectoryEntity.setStatus(EodHelper.armReplayStatus());
-                }
-            }
-        );
 
         List<Long> missingEods = csvEodList.stream()
             .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
@@ -165,8 +157,21 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         if (CollectionUtils.isNotEmpty(missingEods)) {
             log.warn("Unable to process the following EODs {} found in the CSV but not in filtered DB list", missingEods);
         }
+    }
 
-        externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
+    private void updateEodStatus(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities, List<Long> csvEodList) {
+        externalObjectDirectoryEntities.forEach(
+            externalObjectDirectoryEntity -> {
+                if (csvEodList.contains(externalObjectDirectoryEntity.getId())) {
+                    externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
+                    externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
+                    updateObjectStateRecordForEod(externalObjectDirectoryEntity);
+                } else {
+                    externalObjectDirectoryEntity.setStatus(EodHelper.armReplayStatus());
+                    externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
+                }
+            }
+        );
     }
 
     private void updateObjectStateRecordForEod(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
@@ -175,7 +180,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                 var objectStateRecordEntity = getObjectStateRecord(externalObjectDirectoryEntity.getId()).get();
                 objectStateRecordEntity.setFlagFileStoredInArm(true);
                 objectStateRecordEntity.setDateFileStoredInArm(currentTimeHelper.currentOffsetDateTime());
-                objectStateRecordRepository.saveAndFlush(objectStateRecordEntity);
+                objectStateRecordRepository.save(objectStateRecordEntity);
             } catch (NoSuchElementException e) {
                 log.error("Error updating ObjectStateRecord for EOD {}", externalObjectDirectoryEntity.getId(), e);
             }
