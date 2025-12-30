@@ -321,17 +321,17 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             if (previousStatus == null
                 || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
                 || ARM_INGESTION.getId().equals(previousStatus.getId())) {
-                //Instant start = Instant.now();
-                //log.info("ARM PERFORMANCE PUSH START for DETS EOD {} started at {}", armExternalObjectDirectory.getId(), start);
+                Instant start = Instant.now();
+                log.info("ARM PERFORMANCE PUSH START for DETS EOD {} started at {}", armExternalObjectDirectory.getId(), start);
 
-                //log.info("About to push raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
+                log.info("About to push raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
                 armDataManagementApi.copyDetsBlobDataToArm(detsExternalObjectDirectory.getExternalLocation(), filename);
-                //log.info("Pushed raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
+                log.info("Pushed raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
 
-                //Instant finish = Instant.now();
-                //long timeElapsed = Duration.between(start, finish).toMillis();
-                //log.info("ARM PERFORMANCE PUSH END for DETS EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
-                //log.info("ARM PERFORMANCE PUSH ELAPSED TIME for DETS EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
+                Instant finish = Instant.now();
+                long timeElapsed = Duration.between(start, finish).toMillis();
+                log.info("ARM PERFORMANCE PUSH END for DETS EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
+                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for DETS EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
 
                 armExternalObjectDirectory.setChecksum(detsExternalObjectDirectory.getChecksum());
                 armExternalObjectDirectory.setExternalLocation(UUID.randomUUID().toString());

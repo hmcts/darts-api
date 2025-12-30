@@ -66,7 +66,7 @@ public class DetsApiServiceImpl implements DetsApiService {
             blobClient.downloadStream(downloadOS);
             Date downloadEndDate = new Date();
             downloadResponseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.DETS);
-            log.debug("Downloading of DETS guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+            log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
             return downloadResponseMetaData;
         } catch (IOException e) {
             throw new FileNotDownloadedException(blobId, configuration.getContainerName(), "File not downloaded from DETS", e);
@@ -133,10 +133,10 @@ public class DetsApiServiceImpl implements DetsApiService {
                                                         StandardCharsets.UTF_8.toString());
             String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
 
-            //log.info("Dets copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);
+            log.info("Dets copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);
             azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
-            //log.info("Dets copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
-            //configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid, blobPathAndName);
+            log.info("Dets copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
+                     configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid, blobPathAndName);
         } catch (Exception e) {
             throw new DartsException(String.format("Exception DETS copying file from '%s' to '%s'. Source location: %s",
                                                    configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid), e);
