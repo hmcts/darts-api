@@ -617,9 +617,9 @@ darts:
     unallocated-case-regex: ${UNALLOCATED_CASE_REGEX:.*\d{8}-\d{6}.*}
   feature-flag:
     logging:
-      enable-arm-rpo-feature-flag-logs: ${ENABLE_ARM_RPO_FEATURE_FLAG_LOGS:false}
-      enable-dets-to-arm-push-feature-flag-logs: ${ENABLE_DETS_TO_ARM_PUSH_FEATURE_FLAG_LOGS:false}
-      enable-dets-to-arm-pull-feature-flag-logs: ${ENABLE_DETS_TO_ARM_PULL_FEATURE_FLAG_LOGS:false}
+      arm-rpo-feature-flag-logs-enabled: ${ARM_RPO_FEATURE_FLAG_LOGS_ENABLED:false}
+      dets-to-arm-push-feature-flag-logs-enabled: ${DETS_TO_ARM_PUSH_FEATURE_FLAG_LOGS_ENABLED:false}
+      arm-pull-feature-flag-logs-enabled: ${ARM_PULL_FEATURE_FLAG_LOGS_ENABLED:false}
 
 dbMigration:
   # When true, the app will run DB migration on startup.

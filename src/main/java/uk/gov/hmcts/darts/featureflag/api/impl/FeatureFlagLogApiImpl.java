@@ -15,17 +15,17 @@ public class FeatureFlagLogApiImpl implements FeatureFlagLogApi {
 
     @Override
     public void logArmRpo(String logMessage) {
-        logIfEnabled(featureFlagLoggingConfig.isEnableArmRpoFeatureFlagLogs(), logMessage);
+        logIfEnabled(featureFlagLoggingConfig.isArmRpoFeatureFlagLogsEnabled(), logMessage);
     }
 
     @Override
     public void logDetsToArmPush(String logMessage) {
-        logIfEnabled(featureFlagLoggingConfig.isEnableDetsToArmPushFeatureFlagLogs(), logMessage);
+        logIfEnabled(featureFlagLoggingConfig.isDetsToArmPushFeatureFlagLogsEnabled(), logMessage);
     }
 
     @Override
-    public void logDetsToArmPull(String logMessage) {
-        logIfEnabled(featureFlagLoggingConfig.isEnableDetsToArmPullFeatureFlagLogs(), logMessage);
+    public void logArmPull(String logMessage) {
+        logIfEnabled(featureFlagLoggingConfig.isArmPullFeatureFlagLogsEnabled(), logMessage);
     }
 
     private void logIfEnabled(boolean isEnabled, String logMessage) {
