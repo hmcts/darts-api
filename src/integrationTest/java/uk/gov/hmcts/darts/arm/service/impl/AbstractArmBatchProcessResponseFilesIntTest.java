@@ -126,6 +126,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     protected static final Integer BATCH_SIZE = 10;
     protected OffsetDateTime inputUploadProcessedTimestamp;
     protected AsyncTaskConfig asyncTaskConfig;
+    @Autowired
     protected FeatureFlagLogApiImpl featureFlagLogApi;
 
     @BeforeEach
