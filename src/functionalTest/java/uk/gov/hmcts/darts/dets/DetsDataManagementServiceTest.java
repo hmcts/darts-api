@@ -41,7 +41,7 @@ class DetsDataManagementServiceTest {
     private String armContainerName;
     @Value("${darts.storage.arm.folders.submission}")
     private String armSubmissionDropZone;
-    
+
     @SneakyThrows
     @Test
     void fetchBinaryDataFromBlobStorage() {
@@ -57,7 +57,6 @@ class DetsDataManagementServiceTest {
         boolean deleted = dataManagementService.deleteBlobDataFromContainer(uuid);
         assertTrue(deleted);
     }
-
 
     @Test
     void copyDetsBlobDataToArm() throws AzureDeleteBlobException {
@@ -79,7 +78,26 @@ class DetsDataManagementServiceTest {
     }
 
     @Test
-    void copyNonExistingDetsBlobDataToArm() throws AzureDeleteBlobException {
+    void copyDetsBlobDataToArm_EncodesFilename() throws AzureDeleteBlobException {
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        var blobFilename = dataManagementService.saveBlobData(data, "fileshare999#123456789#80#03#18#d8.mpg2");
+
+        String filename = String.format("functional_test_%s", UUID.randomUUID());
+        String blobPathAndName = armSubmissionDropZone + filename;
+
+        dataManagementService.copyDetsBlobDataToArm(blobFilename, blobPathAndName);
+
+        boolean deleted = dataManagementService.deleteBlobDataFromContainer(blobFilename);
+
+        armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+        assertTrue(deleted, "Failed to delete DETS blob " + blobFilename);
+
+    }
+
+    @Test
+    void copyNonExistingDetsBlobDataToArm() {
         var uuid = UUID.randomUUID().toString();
 
         String filename = String.format("functional_test_%s", UUID.randomUUID());

@@ -10,6 +10,8 @@ public interface DetsApiService {
 
     String saveBlobData(BinaryData binaryData);
 
+    String saveBlobData(BinaryData binaryData, String fileName);
+
     boolean deleteBlobDataFromContainer(String blobId) throws AzureDeleteBlobException;
 
     void copyDetsBlobDataToArm(String detsUuid, String blobPathAndName);

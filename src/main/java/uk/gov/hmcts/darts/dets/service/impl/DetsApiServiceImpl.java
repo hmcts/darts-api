@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.util.AzureCopyUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -64,7 +66,7 @@ public class DetsApiServiceImpl implements DetsApiService {
             blobClient.downloadStream(downloadOS);
             Date downloadEndDate = new Date();
             downloadResponseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.DETS);
-            log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+            log.debug("Downloading of DETS guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
             return downloadResponseMetaData;
         } catch (IOException e) {
             throw new FileNotDownloadedException(blobId, configuration.getContainerName(), "File not downloaded from DETS", e);
@@ -80,6 +82,16 @@ public class DetsApiServiceImpl implements DetsApiService {
         BlobClient client = blobServiceFactory.getBlobClient(containerClient, uniqueBlobId);
         client.upload(binaryData);
         return uniqueBlobId;
+    }
+
+    @Override
+    public String saveBlobData(BinaryData binaryData, String fileName) {
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClientWithSasEndpoint(configuration.getSasEndpoint());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(configuration.getContainerName(), serviceClient);
+
+        BlobClient client = blobServiceFactory.getBlobClient(containerClient, fileName);
+        client.upload(binaryData);
+        return client.getBlobName();
     }
 
     @Override
@@ -116,13 +128,15 @@ public class DetsApiServiceImpl implements DetsApiService {
         try {
             String sourceContainerSasUrl = configuration.getSasEndpoint();
             String destinationContainerSasUrl = armDataManagementConfiguration.getSasEndpoint();
-            String sourceBlobSasUrl = buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, detsUuid);
+
+            String sourceBlobSasUrl = URLEncoder.encode(buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, detsUuid),
+                                                        StandardCharsets.UTF_8.toString());
             String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
 
-            log.info("Dets copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);
+            //log.info("Dets copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);
             azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
-            log.info("Dets copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
-                     configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid, blobPathAndName);
+            //log.info("Dets copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
+            //configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid, blobPathAndName);
         } catch (Exception e) {
             throw new DartsException(String.format("Exception DETS copying file from '%s' to '%s'. Source location: %s",
                                                    configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid), e);

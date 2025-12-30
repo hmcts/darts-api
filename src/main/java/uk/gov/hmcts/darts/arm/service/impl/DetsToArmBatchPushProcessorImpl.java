@@ -31,8 +31,6 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.DetsToArmPushAutomatedTaskConfig;
 import uk.gov.hmcts.darts.util.AsyncUtil;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,22 +66,22 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
 
 
     @Override
-    @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
+    @SuppressWarnings("PMD.DoNotUseThreads")
     public void processDetsToArm(int taskBatchSize) {
         log.info("Started running DETS ARM Batch Push processing at: {}", OffsetDateTime.now());
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.detsLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
         List<Long> eodsForTransfer = getDetsEodEntitiesToSendToArm(eodSourceLocation,
-                                                                      EodHelper.armLocation(),
-                                                                      taskBatchSize);
+                                                                   EodHelper.armLocation(),
+                                                                   taskBatchSize);
 
         log.info("Found {} DETS pending entities to process from source '{}' out of batch size {}",
                  eodsForTransfer.size(), eodSourceLocation.getDescription(), taskBatchSize);
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
             //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
             List<List<Long>> batchesForArm = ListUtils.partition(eodsForTransfer,
-                                                                    detsToArmProcessorConfiguration.getMaxArmManifestItems());
+                                                                 detsToArmProcessorConfiguration.getMaxArmManifestItems());
             UserAccountEntity userAccount = userIdentity.getUserAccount();
 
             AtomicInteger batchCounter = new AtomicInteger(1);
@@ -121,7 +119,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     }
 
     List<Long> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
-                                                ExternalLocationTypeEntity armLocation, int maxResultSize) {
+                                             ExternalLocationTypeEntity armLocation, int maxResultSize) {
         ObjectRecordStatusEntity armRawStatusFailed = EodHelper.failedArmRawDataStatus();
         ObjectRecordStatusEntity armManifestFailed = EodHelper.failedArmManifestFileStatus();
 
@@ -323,17 +321,17 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             if (previousStatus == null
                 || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
                 || ARM_INGESTION.getId().equals(previousStatus.getId())) {
-                Instant start = Instant.now();
-                log.info("ARM PERFORMANCE PUSH START for DETS EOD {} started at {}", armExternalObjectDirectory.getId(), start);
+                //Instant start = Instant.now();
+                //log.info("ARM PERFORMANCE PUSH START for DETS EOD {} started at {}", armExternalObjectDirectory.getId(), start);
 
-                log.info("About to push raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
+                //log.info("About to push raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
                 armDataManagementApi.copyDetsBlobDataToArm(detsExternalObjectDirectory.getExternalLocation(), filename);
-                log.info("Pushed raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
+                //log.info("Pushed raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
 
-                Instant finish = Instant.now();
-                long timeElapsed = Duration.between(start, finish).toMillis();
-                log.info("ARM PERFORMANCE PUSH END for DETS EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
-                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for DETS EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
+                //Instant finish = Instant.now();
+                //long timeElapsed = Duration.between(start, finish).toMillis();
+                //log.info("ARM PERFORMANCE PUSH END for DETS EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
+                //log.info("ARM PERFORMANCE PUSH ELAPSED TIME for DETS EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
 
                 armExternalObjectDirectory.setChecksum(detsExternalObjectDirectory.getChecksum());
                 armExternalObjectDirectory.setExternalLocation(UUID.randomUUID().toString());
