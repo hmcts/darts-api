@@ -615,6 +615,12 @@ darts:
     cases:
       defendant-name-char-limit: 600
     unallocated-case-regex: ${UNALLOCATED_CASE_REGEX:.*\d{8}-\d{6}.*}
+  feature-flag:
+    logging:
+      enable-arm-rpo-feature-flag-logs: ${ENABLE_ARM_RPO_FEATURE_FLAG_LOGS:false}
+      enable-dets-to-arm-push-feature-flag-logs: ${ENABLE_DETS_TO_ARM_PUSH_FEATURE_FLAG_LOGS:false}
+      enable-dets-to-arm-pull-feature-flag-logs: ${ENABLE_DETS_TO_ARM_PULL_FEATURE_FLAG_LOGS:false}
+
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
