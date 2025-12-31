@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
+import uk.gov.hmcts.darts.featureflag.api.impl.FeatureFlagLogApiImpl;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.io.IOException;
@@ -42,6 +43,8 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
     private DetsDataManagementConfiguration detsDataManagementConfiguration;
     @Autowired
     private ObjectStateRecordRepository osrRepository;
+    @Autowired
+    private FeatureFlagLogApiImpl featureFlagLogApi;
 
     @BeforeEach
     void setupData() {
@@ -57,7 +60,8 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
             logApi,
             deleteArmResponseFilesHelper,
             detsDataManagementConfiguration,
-            osrRepository
+            osrRepository,
+            featureFlagLogApi
         );
     }
 
