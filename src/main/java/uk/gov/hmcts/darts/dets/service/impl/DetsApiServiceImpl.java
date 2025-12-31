@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -24,8 +25,6 @@ import uk.gov.hmcts.darts.util.AzureCopyUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -129,8 +128,11 @@ public class DetsApiServiceImpl implements DetsApiService {
             String sourceContainerSasUrl = configuration.getSasEndpoint();
             String destinationContainerSasUrl = armDataManagementConfiguration.getSasEndpoint();
 
-            String sourceBlobSasUrl = buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl,
-                                                      URLEncoder.encode(detsUuid, StandardCharsets.UTF_8));
+            if (detsUuid.contains("#")) {
+                log.info("DETS copy - encoding special characters in filename '{}'", detsUuid);
+                detsUuid = HtmlUtils.htmlEscape(detsUuid);
+            }
+            String sourceBlobSasUrl = buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, detsUuid);
             String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
 
             log.info("Dets copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);

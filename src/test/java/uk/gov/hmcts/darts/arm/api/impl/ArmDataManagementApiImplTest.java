@@ -20,7 +20,6 @@ import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.dets.api.impl.DetsDataManagementApiImpl;
 
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -153,7 +152,6 @@ class ArmDataManagementApiImplTest {
 
         String detsUuid = UUID.randomUUID().toString();
         String filename = "fileshare999#123456789#80#03#18#d8.mpg2";
-        System.out.println(URLEncoder.encode(filename, StandardCharsets.UTF_8));
         when(armDataManagementConfiguration.getFolders().getSubmission()).thenReturn("DARTS/submission/");
 
         armDataManagementApi.copyDetsBlobDataToArm(detsUuid, filename);
