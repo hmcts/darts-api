@@ -6,7 +6,6 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
-import com.mysema.commons.lang.URLEncoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -128,7 +127,7 @@ public class DetsApiServiceImpl implements DetsApiService {
             String sourceContainerSasUrl = configuration.getSasEndpoint();
             String destinationContainerSasUrl = armDataManagementConfiguration.getSasEndpoint();
 
-            String sourceBlobSasUrl = URLEncoder.encodeURL(buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, detsUuid));
+            String sourceBlobSasUrl = "\"" + buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, detsUuid) + "\"";
             String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
 
             log.info("Dets copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);
