@@ -143,12 +143,17 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             );
             log.info("Found number of elements {}, total elements {}, total pages {} for batch size {}",
                      pages.getNumberOfElements(), pages.getTotalElements(), pages.getTotalPages(), batchSize);
-            List<ExternalObjectDirectoryEntity> content = pages.getContent();
-            externalObjectDirectoryEntities.addAll(content);
-            updateEodStatus(externalObjectDirectoryEntities, csvEodList);
+            externalObjectDirectoryEntities.addAll(pages.getContent());
             pageRequest = pageRequest.next();
         } while (pages.hasNext());
 
+        // update EOD status in batches
+        int total = externalObjectDirectoryEntities.size();
+        for (int i = 0; i < total; i += batchSize) {
+            int end = Math.min(i + batchSize, total);
+            List<ExternalObjectDirectoryEntity> batch = externalObjectDirectoryEntities.subList(i, end);
+            updateEodStatus(batch, csvEodList);
+        }
 
         List<Long> missingEods = csvEodList.stream()
             .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
