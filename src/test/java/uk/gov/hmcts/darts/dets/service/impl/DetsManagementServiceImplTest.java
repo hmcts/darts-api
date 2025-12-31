@@ -69,10 +69,10 @@ class DetsManagementServiceImplTest {
     }
 
     @Test
-    void saveBlobData_ShouldSaveBlobData_Usingfilename() {
+    void saveBlobData_ShouldSaveBlobData_UsingFilename() {
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
-        
+
         String filename = "tempfile.mp2";
         dataManagementService.saveBlobData(BINARY_DATA, filename);
 
@@ -81,7 +81,7 @@ class DetsManagementServiceImplTest {
     }
 
     @Test
-    void saveBlobData_ShouldSaveBlobData_UsingUUID() {
+    void saveBlobData_ShouldSaveBlobData_UsingUuid() {
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
