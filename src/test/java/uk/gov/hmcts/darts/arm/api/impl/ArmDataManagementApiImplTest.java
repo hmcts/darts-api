@@ -149,7 +149,7 @@ class ArmDataManagementApiImplTest {
     }
 
     @Test
-    void copyDetsBlobDataToArm_() {
+    void copyDetsBlobDataToArm_EncodesFilename() {
 
         String detsUuid = UUID.randomUUID().toString();
         String filename = "fileshare999#123456789#80#03#18#d8.mpg2";
@@ -159,6 +159,6 @@ class ArmDataManagementApiImplTest {
         armDataManagementApi.copyDetsBlobDataToArm(detsUuid, filename);
 
         verify(detsDataManagementApi).copyDetsBlobDataToArm(detsUuid, "DARTS/submission/" + filename);
-        
+
     }
 }
