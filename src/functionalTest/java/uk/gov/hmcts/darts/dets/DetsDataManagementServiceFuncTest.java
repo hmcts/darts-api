@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles({"dev", "h2db"})
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-class DetsDataManagementServiceTest {
+class DetsDataManagementServiceFuncTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
 
