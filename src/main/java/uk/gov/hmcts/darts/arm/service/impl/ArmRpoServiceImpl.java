@@ -178,7 +178,6 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             }
         );
         externalObjectDirectoryRepository.flush();
-        objectStateRecordRepository.flush();
     }
 
     private void updateObjectStateRecordForEod(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
