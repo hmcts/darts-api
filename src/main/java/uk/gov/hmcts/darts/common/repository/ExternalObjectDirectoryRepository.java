@@ -427,17 +427,24 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         value = """
-            SELECT eod1.eod_id
-            FROM darts.external_object_directory eod1
-            WHERE eod1.ors_id = :status
-            AND eod1.elt_id = :type
-            AND eod1.med_id IS NOT NULL
-            AND NOT EXISTS (
-                SELECT 1
-                FROM darts.external_object_directory eod2
-                WHERE eod2.elt_id = :notExistsLocation
-                AND eod1.med_id = eod2.med_id
+            WITH filtered_eod AS (
+                SELECT eod_id, med_id, last_modified_ts
+                FROM darts.external_object_directory
+                WHERE ors_id = :status
+                AND elt_id = :type
+                AND med_id IS NOT NULL
+                ),
+            med_ids_to_exclude AS (
+                SELECT DISTINCT med_id
+                FROM darts.external_object_directory
+                WHERE elt_id = :notExistsLocation
+                AND med_id IS NOT NULL
             )
+            SELECT f.eod_id
+              FROM filtered_eod f
+                       LEFT JOIN med_ids_to_exclude mediaToExclude ON f.med_id = mediaToExclude.med_id
+              WHERE mediaToExclude.med_id IS NULL
+              ORDER BY f.last_modified_ts
             FETCH FIRST :limitRecords rows only
             """,
         nativeQuery = true
