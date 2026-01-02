@@ -127,7 +127,13 @@ public class DetsApiServiceImpl implements DetsApiService {
             String sourceContainerSasUrl = configuration.getSasEndpoint();
             String destinationContainerSasUrl = armDataManagementConfiguration.getSasEndpoint();
 
-            String sourceBlobSasUrl = "\"" + buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, detsUuid) + "\"";
+            String sourceBlobName = detsUuid;
+            if (detsUuid.contains("#")) {
+                // encode special characters in the filename to avoid copy failure
+                sourceBlobName = detsUuid.replace("#", "%23");
+            }
+
+            String sourceBlobSasUrl = buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, sourceBlobName);
             String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
 
             log.info("Dets copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);
