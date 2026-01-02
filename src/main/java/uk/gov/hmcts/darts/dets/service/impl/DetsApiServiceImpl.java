@@ -130,7 +130,7 @@ public class DetsApiServiceImpl implements DetsApiService {
             String sourceBlobName = detsUuid;
             if (detsUuid.contains("#")) {
                 // encode special characters in the filename to avoid copy failure
-                sourceBlobName = detsUuid.replace("#", "%23");
+                sourceBlobName = detsUuid.replaceAll("#", "%23");
             }
 
             String sourceBlobSasUrl = buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, sourceBlobName);
