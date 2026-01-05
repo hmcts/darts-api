@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.util.AzureCopyUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -39,11 +41,8 @@ import static org.springframework.http.HttpStatus.valueOf;
 public class DetsApiServiceImpl implements DetsApiService {
 
     private final DataManagementAzureClientFactory blobServiceFactory;
-
     private final DetsDataManagementConfiguration configuration;
-
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
-
     private final AzureCopyUtil azureCopyUtil;
 
     @Override
@@ -127,11 +126,7 @@ public class DetsApiServiceImpl implements DetsApiService {
             String sourceContainerSasUrl = configuration.getSasEndpoint();
             String destinationContainerSasUrl = armDataManagementConfiguration.getSasEndpoint();
 
-            String sourceBlobName = detsUuid;
-            if (detsUuid.contains("#")) {
-                // encode special characters in the filename to avoid copy failure
-                sourceBlobName = detsUuid.replaceAll("#", "%23");
-            }
+            String sourceBlobName = URLEncoder.encode(detsUuid, StandardCharsets.UTF_8);
 
             String sourceBlobSasUrl = buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, sourceBlobName);
             String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
