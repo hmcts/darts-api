@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.dets.service.impl;
 
+import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.util.AzureCopyUtil;
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unchecked")
 class DetsApiServiceImplTest {
 
     private static final String DETS_UUID = "dets-uuid";
@@ -141,4 +144,86 @@ class DetsApiServiceImplTest {
             detsApiService.copyDetsBlobDataToArm(DETS_UUID, BLOB_PATH_AND_NAME)
         );
     }
+
+    @Test
+    void deleteBlobDataFromContainer_shouldReturnTrue_whenDeleteIsSuccessful() throws Exception {
+        BlobServiceClient serviceClient = mock(BlobServiceClient.class);
+        BlobContainerClient containerClient = mock(BlobContainerClient.class);
+        BlobClient blobClient = mock(BlobClient.class);
+        Response<Boolean> response = mock(Response.class);
+
+        when(detsDataManagementConfiguration.getSasEndpoint()).thenReturn(TEST_SAS_URL_ENDPOINT);
+        when(detsDataManagementConfiguration.getContainerName()).thenReturn(BLOB_CONTAINER_NAME);
+        when(detsDataManagementConfiguration.getDeleteTimeout()).thenReturn(30);
+        when(dataManagementFactory.getBlobServiceClientWithSasEndpoint(TEST_SAS_URL_ENDPOINT)).thenReturn(serviceClient);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(containerClient);
+        when(dataManagementFactory.getBlobClient(containerClient, BLOB_ID)).thenReturn(blobClient);
+        when(response.getStatusCode()).thenReturn(204);
+        when(response.getValue()).thenReturn(true);
+        when(blobClient.deleteIfExistsWithResponse(any(), any(), any(), any())).thenReturn(response);
+
+        boolean result = detsApiService.deleteBlobDataFromContainer(BLOB_ID);
+
+        assertEquals(true, result);
+    }
+
+    @Test
+    void deleteBlobDataFromContainer_shouldReturnFalse_whenBlobNotFound() throws Exception {
+        BlobServiceClient serviceClient = mock(BlobServiceClient.class);
+        BlobContainerClient containerClient = mock(BlobContainerClient.class);
+        BlobClient blobClient = mock(BlobClient.class);
+        Response<Boolean> response = mock(Response.class);
+
+        when(detsDataManagementConfiguration.getSasEndpoint()).thenReturn(TEST_SAS_URL_ENDPOINT);
+        when(detsDataManagementConfiguration.getContainerName()).thenReturn(BLOB_CONTAINER_NAME);
+        when(detsDataManagementConfiguration.getDeleteTimeout()).thenReturn(30);
+        when(dataManagementFactory.getBlobServiceClientWithSasEndpoint(TEST_SAS_URL_ENDPOINT)).thenReturn(serviceClient);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(containerClient);
+        when(dataManagementFactory.getBlobClient(containerClient, BLOB_ID)).thenReturn(blobClient);
+        when(response.getStatusCode()).thenReturn(404);
+        when(response.getValue()).thenReturn(false);
+        when(blobClient.deleteIfExistsWithResponse(any(), any(), any(), any())).thenReturn(response);
+
+        boolean result = detsApiService.deleteBlobDataFromContainer(BLOB_ID);
+
+        assertEquals(false, result);
+    }
+
+    @Test
+    void deleteBlobDataFromContainer_shouldThrowAzureDeleteBlobException_whenNon2xxStatus() {
+        BlobServiceClient serviceClient = mock(BlobServiceClient.class);
+        BlobContainerClient containerClient = mock(BlobContainerClient.class);
+        BlobClient blobClient = mock(BlobClient.class);
+        Response<Boolean> response = mock(Response.class);
+
+        when(detsDataManagementConfiguration.getSasEndpoint()).thenReturn(TEST_SAS_URL_ENDPOINT);
+        when(detsDataManagementConfiguration.getContainerName()).thenReturn(BLOB_CONTAINER_NAME);
+        when(detsDataManagementConfiguration.getDeleteTimeout()).thenReturn(30);
+        when(dataManagementFactory.getBlobServiceClientWithSasEndpoint(TEST_SAS_URL_ENDPOINT)).thenReturn(serviceClient);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(containerClient);
+        when(dataManagementFactory.getBlobClient(containerClient, BLOB_ID)).thenReturn(blobClient);
+        when(response.getStatusCode()).thenReturn(500);
+        when(blobClient.deleteIfExistsWithResponse(any(), any(), any(), any())).thenReturn(response);
+
+        assertThrows(AzureDeleteBlobException.class, () -> detsApiService.deleteBlobDataFromContainer(BLOB_ID));
+    }
+
+    @Test
+    void deleteBlobDataFromContainer_shouldThrowAzureDeleteBlobException_whenRuntimeException() {
+        BlobServiceClient serviceClient = mock(BlobServiceClient.class);
+        BlobContainerClient containerClient = mock(BlobContainerClient.class);
+        BlobClient blobClient = mock(BlobClient.class);
+
+        when(detsDataManagementConfiguration.getSasEndpoint()).thenReturn(TEST_SAS_URL_ENDPOINT);
+        when(detsDataManagementConfiguration.getContainerName()).thenReturn(BLOB_CONTAINER_NAME);
+        when(detsDataManagementConfiguration.getDeleteTimeout()).thenReturn(30);
+        when(dataManagementFactory.getBlobServiceClientWithSasEndpoint(TEST_SAS_URL_ENDPOINT)).thenReturn(serviceClient);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(containerClient);
+        when(dataManagementFactory.getBlobClient(containerClient, BLOB_ID)).thenReturn(blobClient);
+        when(blobClient.deleteIfExistsWithResponse(any(), any(), any(), any()))
+            .thenThrow(new RuntimeException("delete failed"));
+
+        assertThrows(AzureDeleteBlobException.class, () -> detsApiService.deleteBlobDataFromContainer(BLOB_ID));
+    }
+
 }
