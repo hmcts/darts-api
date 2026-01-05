@@ -5,20 +5,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.Duration;
@@ -35,6 +39,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
+@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
+@Profile("in-memory-caching")
+@Import(InMemoryTestCache.class)
 @SpringBootTest
 @TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=false"})
 @Slf4j
@@ -52,7 +59,9 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
     @MockitoBean
     private UserIdentity userIdentity;
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmAuthClient armAuthClient;
+    @MockitoBean
+    private ArmApiBaseClient armApiBaseClient;
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private final Duration  waitDuration = Duration.ofDays(30);  
@@ -66,16 +75,15 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         RemoveProductionResponse response = new RemoveProductionResponse();
         response.setStatus(200);
         response.setIsError(false);
-        when(armRpoClient.removeProduction(any(), any())).thenReturn(response);
+        when(armApiBaseClient.removeProduction(any(), any())).thenReturn(response);
         
-        // TODO rework bearer token after DMP-5303 is done
-        String bearerToken = "bearer";
+        String bearerToken = "some-token";
         ArmTokenRequest tokenRequest = ArmTokenRequest.builder()
             .username(armApiConfigurationProperties.getArmUsername())
             .password(armApiConfigurationProperties.getArmPassword())
             .build();
         ArmTokenResponse tokenResponse = ArmTokenResponse.builder().accessToken(bearerToken).build();
-        when(armTokenClient.getToken(tokenRequest)).thenReturn(tokenResponse);
+        when(armAuthClient.getToken(tokenRequest)).thenReturn(tokenResponse);
 
         String armProfileId = "profileId";
         AvailableEntitlementProfile profile = AvailableEntitlementProfile.builder()
@@ -85,8 +93,8 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
                                   .build()))
             .build();
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armTokenClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
-        when(armTokenClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(tokenResponse);
+        when(armApiBaseClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
+        when(armApiBaseClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(tokenResponse);
 
         UserAccountEntity userAccountEntity = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
@@ -117,8 +125,7 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         assertNotNull(updatedArmRpoExecutionDetailEntity);
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
-        verify(armRpoClient).removeProduction(any(), any());
-        verifyNoMoreInteractions(armRpoClient);
+        verify(armApiBaseClient).removeProduction(any(), any());
     }
 
     @Test
@@ -145,8 +152,8 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         assertNotNull(updatedArmRpoExecutionDetailEntity);
         assertEquals(ArmRpoHelper.saveBackgroundSearchRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.failedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
-        verify(armRpoClient, times(0)).removeProduction(any(), any());
-        verifyNoMoreInteractions(armRpoClient);
+        verify(armApiBaseClient, times(0)).removeProduction(any(), any());
+        verifyNoMoreInteractions(armApiBaseClient);
     }
 
     @Test
@@ -173,8 +180,8 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         assertNotNull(updatedArmRpoExecutionDetailEntity);
         assertEquals(ArmRpoHelper.saveBackgroundSearchRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
-        verify(armRpoClient, times(0)).removeProduction(any(), any());
-        verifyNoMoreInteractions(armRpoClient);
+        verify(armApiBaseClient, times(0)).removeProduction(any(), any());
+        verifyNoMoreInteractions(armApiBaseClient);
     }
     
     
