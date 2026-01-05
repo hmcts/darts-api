@@ -212,6 +212,7 @@ class ArmRpoServiceImplTest {
             any());
         verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntity1);
         verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntity2);
+        verify(externalObjectDirectoryRepository).flush();
         verifyNoMoreInteractions(externalObjectDirectoryRepository);
     }
 
