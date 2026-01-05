@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.RemoveRpoProductionsService;
+import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
 class RemoveRpoProductionsServiceImplTest {
     
     private static final int BATCH_SIZE = 50;
+    private static final String BEARER_TOKEN = "some token";
     
     @Mock
     private RemoveRpoProductionsService removeRpoProductionsService;
@@ -45,6 +47,8 @@ class RemoveRpoProductionsServiceImplTest {
     private UserIdentity userIdentity;
     @Mock
     private ArmRpoService armRpoService;
+    @Mock
+    private ArmRpoUtil armRpoUtil;
 
     @Mock
     private UserAccountEntity userAccountEntity;
@@ -58,12 +62,13 @@ class RemoveRpoProductionsServiceImplTest {
     @BeforeEach
     void setUp() {
         removeRpoProductionsService = new RemoveRpoProductionsServiceImpl(armRpoExecutionDetailRepository,
-            armApiService, logApi, armRpoApi, userIdentity, armRpoService);
+            armApiService, logApi, armRpoApi, userIdentity, armRpoService, armRpoUtil);
 
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
         
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
+        lenient().when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
     }
     
     @Test
@@ -73,14 +78,13 @@ class RemoveRpoProductionsServiceImplTest {
             eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
             any(OffsetDateTime.class)
         )).thenReturn(java.util.List.of(EXECUTION_ID));
-        String bearerToken = "bearerToken";
-        when(armApiService.getArmBearerToken()).thenReturn(bearerToken);
+        when(armRpoUtil.getBearerToken(any())).thenReturn(BEARER_TOKEN);
         
         // when
         removeRpoProductionsService.removeOldArmRpoProductions(false, waitDuration, BATCH_SIZE);
 
         // then
-        verify(armRpoApi).removeProduction(bearerToken, 1, userAccountEntity);
+        verify(armRpoApi).removeProduction(BEARER_TOKEN, 1, userAccountEntity);
         verify(logApi).removeOldArmRpoProductionsSuccessful(EXECUTION_ID);
     }
     
@@ -124,8 +128,6 @@ class RemoveRpoProductionsServiceImplTest {
     @Test
     void removeOldArmRpoProductions_ShouldHandleException_WhenArmApiServiceThrowsException() {
         // given
-        String bearerToken = "bearerToken";
-        when(armApiService.getArmBearerToken()).thenReturn(bearerToken);
         when(armRpoService.findIdsByStatusAndLastModifiedDateTimeAfter(
             eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
             any(OffsetDateTime.class)
