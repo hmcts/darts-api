@@ -36,18 +36,18 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
 
 
     @Override
-    public void removeOldArmRpoProductions(boolean isManualRun, Duration duration, int batchSize) {
+    public void removeOldArmRpoProductions(boolean isManualRun, Duration waitDuration, int batchSize) {
         log.info("Removing ARM RPO productions - isManualRun: {}, duration: {}, batchSize: {}",
-                 isManualRun, duration, batchSize);
+                 isManualRun, waitDuration, batchSize);
         List<Integer> ardIdsToRemove;
         UserAccountEntity userAccount;
         try {
-            log.info("Finding ARM RPO executions with status FAILED older than: {}", duration);
+            log.info("Finding ARM RPO executions with status FAILED older than: {}", waitDuration);
             ardIdsToRemove = armRpoService.findIdsByStatusAndLastModifiedDateTimeAfter(
-                statusOf(FAILED), OffsetDateTime.now().minus(duration)
+                statusOf(FAILED), OffsetDateTime.now().minus(waitDuration)
             );
             if (ardIdsToRemove.isEmpty()) {
-                log.info("No ARM RPO productions found to remove older than: {}", duration);
+                log.info("No ARM RPO productions found to remove older than: {}", waitDuration);
                 return;
             }
             userAccount = userIdentity.getUserAccount();
