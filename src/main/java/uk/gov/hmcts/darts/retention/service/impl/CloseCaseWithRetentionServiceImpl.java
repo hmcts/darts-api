@@ -116,6 +116,7 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         existingCaseRetention.setLastModifiedBy(currentUser);
         existingCaseRetention.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
         caseRetentionRepository.save(existingCaseRetention);
+        
     }
 
     private void createRetention(CaseManagementRetentionEntity caseManagementRetentionEntity,
