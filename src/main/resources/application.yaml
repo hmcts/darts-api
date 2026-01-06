@@ -554,7 +554,7 @@ darts:
         threads: 20
         async-timeout: 40M
       remove-old-arm-rpo-productions:
-        duration: 30d
+        wait-duration: 30d
         system-user-email: system_RemoveOldArmRpoProductions@hmcts.net
         lock:
           at-least-for: PT1M

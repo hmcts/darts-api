@@ -5,6 +5,6 @@ import java.time.Duration;
 @FunctionalInterface
 public interface RemoveRpoProductionsService {
     
-    void removeOldArmRpoProductions(boolean isManualRun, Duration duration, int batchSize);
+    void removeOldArmRpoProductions(boolean isManualRun, Duration waitDuration, int batchSize);
     
 }
