@@ -84,8 +84,7 @@ class DetsDataManagementServiceFuncTest {
 
         var blobFilename = dataManagementService.saveBlobData(data, "functional_test_fileshare999#123456789#80#03#18#d8.mpg2");
 
-        String filename = String.format("functional_test_%s", UUID.randomUUID());
-        String blobPathAndName = armSubmissionDropZone + filename;
+        String blobPathAndName = armSubmissionDropZone + blobFilename;
 
         dataManagementService.copyDetsBlobDataToArm(blobFilename, blobPathAndName);
 
