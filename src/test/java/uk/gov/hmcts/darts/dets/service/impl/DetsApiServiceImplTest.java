@@ -23,7 +23,9 @@ import uk.gov.hmcts.darts.util.AzureCopyUtil;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -164,7 +166,7 @@ class DetsApiServiceImplTest {
 
         boolean result = detsApiService.deleteBlobDataFromContainer(BLOB_ID);
 
-        assertEquals(true, result);
+        assertTrue(result);
     }
 
     @Test
@@ -186,7 +188,7 @@ class DetsApiServiceImplTest {
 
         boolean result = detsApiService.deleteBlobDataFromContainer(BLOB_ID);
 
-        assertEquals(false, result);
+        assertFalse(result);
     }
 
     @Test
