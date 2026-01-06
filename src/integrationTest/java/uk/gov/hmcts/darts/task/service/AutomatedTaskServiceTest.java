@@ -82,7 +82,7 @@ import uk.gov.hmcts.darts.task.runner.impl.RemoveOldArmRpoProductionsAutomatedTa
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
-import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 
 import java.time.LocalDateTime;
@@ -100,7 +100,7 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @Slf4j
-class AutomatedTaskServiceTest extends PostgresIntegrationBase {
+class AutomatedTaskServiceTest extends IntegrationBase {
 
     @Autowired
     private AutomatedTaskService automatedTaskService;
