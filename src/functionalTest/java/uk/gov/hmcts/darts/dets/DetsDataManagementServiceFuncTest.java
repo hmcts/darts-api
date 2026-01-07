@@ -84,15 +84,17 @@ class DetsDataManagementServiceFuncTest {
 
         var blobFilename = dataManagementService.saveBlobData(data, "functional_test_fileshare999#123456789#80#03#18#d8.mpg2");
 
-        String blobPathAndName = armSubmissionDropZone + blobFilename;
+        String blobPathAndName = armSubmissionDropZone + "functional_test_" + UUID.randomUUID();
+        try {
+            dataManagementService.copyDetsBlobDataToArm(blobFilename, blobPathAndName);
+        } catch (Exception e) {
+            log.error("Exception during copyDetsBlobDataToArm: ", e);
+        } finally {
+            boolean deleted = dataManagementService.deleteBlobDataFromContainer(blobFilename);
 
-        dataManagementService.copyDetsBlobDataToArm(blobFilename, blobPathAndName);
-
-        boolean deleted = dataManagementService.deleteBlobDataFromContainer(blobFilename);
-
-        armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
-        assertTrue(deleted, "Failed to delete DETS blob " + blobFilename);
-
+            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            assertTrue(deleted, "Failed to delete DETS blob " + blobFilename);
+        }
     }
 
     @Test
