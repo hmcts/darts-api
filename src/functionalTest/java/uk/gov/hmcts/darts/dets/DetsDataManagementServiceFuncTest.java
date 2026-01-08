@@ -20,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -98,7 +97,6 @@ class DetsDataManagementServiceFuncTest {
             armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
             assertTrue(deleted, "Failed to delete DETS blob " + blobFilename);
         }
-        assertFalse(true, "copyDetsBlobDataToArm should not have thrown an exception");
     }
 
     @Test
