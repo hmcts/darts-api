@@ -210,7 +210,10 @@ class ArmRpoServiceImplTest {
             eq(OffsetDateTime.parse("2025-01-31T11:34Z")),
             eq(OffsetDateTime.parse("2025-02-01T11:34Z")),
             any());
-        verify(externalObjectDirectoryRepository).saveAllAndFlush(externalObjectDirectoryEntities);
+        verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntity1);
+        verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntity2);
+        verify(externalObjectDirectoryRepository).flush();
+        verifyNoMoreInteractions(externalObjectDirectoryRepository);
     }
 
     @Test
@@ -229,8 +232,7 @@ class ArmRpoServiceImplTest {
             armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, csvFiles, BATCH_SIZE));
 
         // then
-        assertThat(armRpoException.getMessage(), containsString(
-            "Unable to find CSV file for Reconciliation "));
+        assertThat(armRpoException.getMessage(), containsString("Unable to find CSV file for Reconciliation "));
     }
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity(Long id) {
