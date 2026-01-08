@@ -77,7 +77,6 @@ class DetsDataManagementServiceFuncTest {
 
     }
 
-    @SuppressWarnings({"PMD.UnnecessaryBooleanAssertion"})
     @Test
     void copyDetsBlobDataToArm_EncodesFilename() throws AzureDeleteBlobException {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
