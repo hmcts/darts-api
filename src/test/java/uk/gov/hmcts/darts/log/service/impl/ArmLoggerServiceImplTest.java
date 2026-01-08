@@ -158,5 +158,37 @@ class ArmLoggerServiceImplTest {
         assertEquals(1, errorLogs.size());
         assertEquals(logEntry, errorLogs.getFirst());
     }
+    
+    @Test
+    void removeOldArmRpoProductionsSuccessful_shouldLogInfoWithExecutionId_whenProvidedWithExecutionId() {
+        armLoggerService.removeOldArmRpoProductionsSuccessful(EXECUTION_ID);
 
+        var logEntry = String.format("ARM RPO Removal - Successfully completed for execution Id = %s", EXECUTION_ID);
+
+        List<String> infoLogs = logCaptor.getInfoLogs();
+        assertEquals(1, infoLogs.size());
+        assertEquals(logEntry, infoLogs.getFirst());
+    }
+    
+    @Test
+    void removeOldArmRpoProductionsFailedForBatch_shouldLogErrorForBatchRemoval_whenNoExecutionIdProvided() {
+        armLoggerService.removeOldArmRpoProductionsFailed();
+
+        var logEntry = "ARM RPO Removal - Failed before processing individual execution IDs";
+
+        List<String> errorLogs = logCaptor.getErrorLogs();
+        assertEquals(1, errorLogs.size());
+        assertEquals(logEntry, errorLogs.getFirst());
+    }
+    
+    @Test
+    void removeOldArmRpoProductionsFailed_shouldLogErrorWithExecutionId_whenProvidedWithExecutionId() {
+        armLoggerService.removeOldArmRpoProductionsFailed(EXECUTION_ID);
+
+        var logEntry = String.format("ARM RPO Removal - Failed for ARD_ID= %s", EXECUTION_ID);
+
+        List<String> errorLogs = logCaptor.getErrorLogs();
+        assertEquals(1, errorLogs.size());
+        assertEquals(logEntry, errorLogs.getFirst());
+    }
 }
