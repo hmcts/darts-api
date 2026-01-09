@@ -1686,7 +1686,7 @@ components:
           description: 'The person that requested the media'
           maxLength: 2000
         requested_at_from:
-          type: date
+          type: date 
           description: 'The start date range that the media was requested'
         requested_at_to:
           type: date
