@@ -87,9 +87,6 @@ class DetsDataManagementServiceFuncTest {
         String blobPathAndName = armSubmissionDropZone + "functional_test_" + UUID.randomUUID();
         try {
             dataManagementService.copyDetsBlobDataToArm(blobFilename, blobPathAndName);
-        } catch (Exception e) {
-            log.error("Exception during copyDetsBlobDataToArm: ", e);
-            throw e;
         } finally {
             boolean deleted = dataManagementService.deleteBlobDataFromContainer(blobFilename);
 
