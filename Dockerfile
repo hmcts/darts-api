@@ -10,7 +10,7 @@ WORKDIR /usr/local/bin
 ADD lib/ffmpeg-release-amd64-static.tar.xz /usr/local/bin
 RUN cp -p ffmpeg*/ffmpeg /usr/bin
 
-ADD lib/azcopy_linux_amd64_10.31.1.tar.gz /usr/local/bin
+ADD lib/azcopy_linux_amd64_10.24.0.tar.gz /usr/local/bin
 RUN cp -p azcopy*/azcopy /usr/bin
 RUN chmod 777 /usr/bin/azcopy
 
