@@ -146,4 +146,18 @@ class ArmDataManagementApiImplTest {
 
         verify(detsDataManagementApi).copyDetsBlobDataToArm(detsUuid, "DARTS/submission/" + filename);
     }
+
+    @Test
+    void copyDetsBlobDataToArm_EncodesFilename() {
+
+        String source = "fileshare999#123456789#80#03#18#d8.mpg2";
+        String destination = "someFile";
+
+        when(armDataManagementConfiguration.getFolders().getSubmission()).thenReturn("DARTS/submission/");
+
+        armDataManagementApi.copyDetsBlobDataToArm(source, destination);
+
+        verify(detsDataManagementApi).copyDetsBlobDataToArm(source, "DARTS/submission/" + destination);
+
+    }
 }
