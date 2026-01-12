@@ -22,7 +22,7 @@ public class AzureCopyUtil {
     private static final String COPY_COMMAND = "copy";
     private final DataManagementConfiguration config;
 
-    @SuppressWarnings("PMD.DoNotUseThreads")//TODO - refactor to avoid using Thread.sleep() when this is next edited
+    @SuppressWarnings("PMD.DoNotUseThreads")
     public void copy(String source, String destination) {
         try {
             List<String> command = buildCommand(source, destination);
@@ -30,8 +30,6 @@ public class AzureCopyUtil {
             builder.command(command);
             var startTime = Instant.now();
             log.info("Copy of blob started at {}", startTime);
-            //TODO: remove this log.info once we are confident that the command is being built correctly
-            log.info("Executing command: {}", builder.command());
             builder.redirectErrorStream(true);
             Process process = builder.start();
             int exitValue = process.waitFor();
