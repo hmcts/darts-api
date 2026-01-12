@@ -14,8 +14,8 @@ import org.springframework.validation.annotation.Validated;
 @Configuration
 public class FeatureFlagLoggingConfig {
 
-    private boolean enableArmRpoFeatureFlagLogs;
-    private boolean enableDetsToArmPushFeatureFlagLogs;
-    private boolean enableDetsToArmPullFeatureFlagLogs;
-    
+    private boolean armRpoFeatureFlagLogsEnabled;
+    private boolean detsToArmPushFeatureFlagLogsEnabled;
+    private boolean armPullFeatureFlagLogsEnabled;
+
 }
