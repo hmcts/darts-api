@@ -52,6 +52,21 @@ echo "Restoring PR database ($PR_DATABASE)..."
 # make the password available for psql
 export PGPASSWORD="$PR_PASSWORD"
 # drop the darts schema
+
+
+pg_dump -h darts-api-test.postgres.database.azure.com -p 5432 -U pgadmin -n darts -d darts -f ./dartstestbackup.sql
+
+psql -h darts-api-test.postgres.database.azure.com -U pgadmin -d darts -c "DROP SCHEMA IF EXISTS darts CASCADE" &> /dev/null
+
+psql -h darts-api-test.postgres.database.azure.com -U pgadmin -d darts -L /opt/temp/darts/darts-api-test-restore.log < /opt/temp/darts/dartstestbackup_postdataload.sql &> /opt/temp/darts/darts-api-test-stdout.log
+
+
+DUMP_FILE="/tmp/darts-api-stg-dump.sql"
+RESTORE_LOG_FILE="/opt/temp/darts/darts-api-test-restore.log"
+RESTORE_OUTPUT="/opt/temp/darts/darts-api-test-stdout.log"
+
+
+psql -h darts-api-test.postgres.database.azure.com -p 5432 -U pgadmin -n darts -d darts
 psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -c "DROP SCHEMA IF EXISTS $SCHEMA CASCADE" &> /dev/null
 # restore from the dump file
 psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -L $RESTORE_LOG_FILE < $DUMP_FILE &> $RESTORE_OUTPUT

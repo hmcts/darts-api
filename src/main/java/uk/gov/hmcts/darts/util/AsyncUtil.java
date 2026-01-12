@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 @Slf4j
 @SuppressWarnings("PMD.DoNotUseThreads")//Required for async processing
@@ -39,15 +40,29 @@ public final class AsyncUtil {
 
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
                                                  AsyncTaskConfig config) throws InterruptedException {
-        invokeAllAwaitTermination(tasks, config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
+        invokeAllAwaitTermination(tasks, config.useVirtualThreads(), config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
     }
 
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
                                                  int threads, long timeout, TimeUnit timeUnit) throws InterruptedException {
-        log.info("Starting {} tasks with {} threads", tasks.size(), threads);
+        invokeAllAwaitTermination(tasks, false, threads, timeout, timeUnit);
+    }
+
+    public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
+                                                 boolean useVirtualThreads,
+                                                 int threads, long timeout, TimeUnit timeUnit) throws InterruptedException {
+        log.info("Starting {} tasks with {} threads", useVirtualThreads ? "virtual" : tasks.size(), threads);
         SecurityContext callingThreadContext = SecurityContextHolder.getContext();
 
-        try (ExecutorService rawPool = Executors.newVirtualThreadPerTaskExecutor();
+        Supplier<ExecutorService> executorServiceSupplier = () -> {
+            if (useVirtualThreads) {
+                return Executors.newVirtualThreadPerTaskExecutor();
+            } else {
+                return Executors.newFixedThreadPool(threads);
+            }
+        };
+
+        try (ExecutorService rawPool = executorServiceSupplier.get();
              ExecutorService executor = new DelegatingSecurityContextExecutorService(rawPool, callingThreadContext)) {
             List<Future<Void>> futures;
             try {

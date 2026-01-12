@@ -474,6 +474,7 @@ darts:
           at-least-for: PT1M
           at-most-for: PT90M
         async-timeout: 90M
+        use-virtual-threads: true
       external-datastore-deleter:
         system-user-email: system_ExternalDataStoreDeleter@hmcts.net
         transient-object-directory-delete-buffer: 90d

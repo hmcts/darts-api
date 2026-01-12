@@ -20,5 +20,10 @@ public class UnstructuredToArmProcessorConfiguration implements AsyncTaskConfig 
     private int maxArmSingleModeItems;
     private int threads;
     private Duration asyncTimeout;
+    private boolean useVirtualThreads;
 
+    @Override
+    public boolean useVirtualThreads() {
+        return useVirtualThreads;
+    }
 }
