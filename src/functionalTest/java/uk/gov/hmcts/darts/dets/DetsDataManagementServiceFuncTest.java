@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles({"dev", "h2db"})
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-class DetsDataManagementServiceTest {
+class DetsDataManagementServiceFuncTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
 
@@ -41,7 +41,7 @@ class DetsDataManagementServiceTest {
     private String armContainerName;
     @Value("${darts.storage.arm.folders.submission}")
     private String armSubmissionDropZone;
-    
+
     @SneakyThrows
     @Test
     void fetchBinaryDataFromBlobStorage() {
@@ -57,7 +57,6 @@ class DetsDataManagementServiceTest {
         boolean deleted = dataManagementService.deleteBlobDataFromContainer(uuid);
         assertTrue(deleted);
     }
-
 
     @Test
     void copyDetsBlobDataToArm() throws AzureDeleteBlobException {
@@ -79,7 +78,25 @@ class DetsDataManagementServiceTest {
     }
 
     @Test
-    void copyNonExistingDetsBlobDataToArm() throws AzureDeleteBlobException {
+    void copyDetsBlobDataToArm_EncodesFilename() throws AzureDeleteBlobException {
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        var blobFilename = dataManagementService.saveBlobData(data, "functional_test_fileshare999#123456789#80#03#18#d8.mpg2");
+
+        String blobPathAndName = armSubmissionDropZone + "functional_test_" + UUID.randomUUID();
+        try {
+            dataManagementService.copyDetsBlobDataToArm(blobFilename, blobPathAndName);
+        } finally {
+            boolean deleted = dataManagementService.deleteBlobDataFromContainer(blobFilename);
+
+            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            assertTrue(deleted, "Failed to delete DETS blob " + blobFilename);
+        }
+    }
+
+    @Test
+    void copyNonExistingDetsBlobDataToArm() {
         var uuid = UUID.randomUUID().toString();
 
         String filename = String.format("functional_test_%s", UUID.randomUUID());
