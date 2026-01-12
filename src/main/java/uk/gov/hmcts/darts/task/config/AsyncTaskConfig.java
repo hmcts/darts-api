@@ -8,6 +8,6 @@ public interface AsyncTaskConfig {
 
     Duration getAsyncTimeout();
 
-    boolean useVirtualThreads();
+    boolean isUseVirtualThreads();
 
 }

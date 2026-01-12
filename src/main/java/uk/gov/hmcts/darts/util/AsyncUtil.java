@@ -40,7 +40,7 @@ public final class AsyncUtil {
 
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
                                                  AsyncTaskConfig config) throws InterruptedException {
-        invokeAllAwaitTermination(tasks, config.useVirtualThreads(), config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
+        invokeAllAwaitTermination(tasks, config.isUseVirtualThreads(), config.getThreads(), config.getAsyncTimeout().toMillis(), TimeUnit.MILLISECONDS);
     }
 
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
