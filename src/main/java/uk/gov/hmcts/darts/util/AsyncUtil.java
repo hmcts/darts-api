@@ -1,15 +1,19 @@
 package uk.gov.hmcts.darts.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
 
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @SuppressWarnings("PMD.DoNotUseThreads")//Required for async processing
@@ -41,19 +45,51 @@ public final class AsyncUtil {
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
                                                  int threads, long timeout, TimeUnit timeUnit) throws InterruptedException {
         log.info("Starting {} tasks with {} threads", tasks.size(), threads);
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        //Add authentication to each task as auth is thread local
-        List<Callable<Void>> tasksWithAuth = tasks.stream()
-            .map(voidCallable -> (Callable<Void>) () -> {
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                return voidCallable.call();
-            })
-            .toList();
+        SecurityContext callingThreadContext = SecurityContextHolder.getContext();
 
-        try (ExecutorService executorService = Executors.newFixedThreadPool(threads)) {
-            executorService.invokeAll(tasksWithAuth, timeout, timeUnit);
-            shutdownAndAwaitTermination(executorService, timeout, timeUnit);
+        try (ExecutorService rawPool = Executors.newVirtualThreadPerTaskExecutor();
+             ExecutorService executor = new DelegatingSecurityContextExecutorService(rawPool, callingThreadContext)) {
+            List<Future<Void>> futures;
+            try {
+                futures = executor.invokeAll(tasks, timeout, timeUnit);
+            } finally {
+                shutdownAndAwaitTermination(executor, timeout, timeUnit);
+                executor.shutdownNow(); // ensure we don't keep threads alive after scheduled run
+            }
+
+            if (log.isInfoEnabled()) {
+                logMetrics(futures);
+            }
+            log.info("All async tasks completed");
         }
-        log.info("All async tasks completed");
+    }
+
+    private static void logMetrics(List<Future<Void>> futures) throws InterruptedException {
+        int cancelled = 0;
+        int failed = 0;
+
+        for (Future<Void> f : futures) {
+            if (f.isCancelled()) {
+                cancelled++;
+                continue;
+            }
+            try {
+                f.get(0, TimeUnit.MILLISECONDS); // already done; just harvest exception
+            } catch (ExecutionException e) {
+                failed++;
+                log.error("Async task failed", e.getCause());
+            } catch (TimeoutException impossible) {
+                // Shouldn't happen because invokeAll already returned.
+                log.error("Unexpected timeout when harvesting async task result", impossible);
+            }
+        }
+
+        if (cancelled > 0) {
+            log.warn("{} tasks were cancelled (timeout likely hit)", cancelled);
+        }
+        if (failed > 0) {
+            log.warn("{} tasks failed", failed);
+        }
+
     }
 }
