@@ -73,12 +73,7 @@ public class DetsApiServiceImpl implements DetsApiService {
     @Override
     public String saveBlobData(BinaryData binaryData) {
         String uniqueBlobId = UUID.randomUUID().toString();
-        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClientWithSasEndpoint(configuration.getSasEndpoint());
-        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(configuration.getContainerName(), serviceClient);
-
-        BlobClient client = blobServiceFactory.getBlobClient(containerClient, uniqueBlobId);
-        client.upload(binaryData);
-        return uniqueBlobId;
+        return saveBlobData(binaryData, uniqueBlobId);
     }
 
     @Override
