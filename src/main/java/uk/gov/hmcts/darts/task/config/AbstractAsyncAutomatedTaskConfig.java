@@ -13,4 +13,5 @@ public class AbstractAsyncAutomatedTaskConfig extends AbstractAutomatedTaskConfi
     implements AsyncTaskConfig {
     private int threads;
     private Duration asyncTimeout;
+    private boolean useVirtualThreads;
 }
