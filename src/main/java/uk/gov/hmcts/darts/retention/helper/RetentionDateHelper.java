@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
 
@@ -37,7 +38,7 @@ public class RetentionDateHelper {
 
     public LocalDate getRetentionDateForPolicy(CourtCaseEntity courtCase, RetentionPolicyEnum policy) {
         RetentionPolicyTypeEntity retentionPolicy = getRetentionPolicy(policy);
-        return applyPolicyString(courtCase.getCaseClosedTimestamp().toLocalDate(), retentionPolicy.getDuration());
+        return applyPolicyString(DateConverterUtil.toLocalDate(courtCase.getCaseClosedTimestamp()), retentionPolicy.getDuration());
     }
 
     public RetentionPolicyTypeEntity getRetentionPolicy(RetentionPolicyEnum policy) {
