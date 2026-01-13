@@ -42,7 +42,8 @@ public enum AutomatedTaskName {
     ARM_RPO_REPLAY_TASK_NAME("ArmRpoReplay", Constants.AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE),
     ARM_MISSING_RESPONSE_REPLY_TASK_NAME("ArmMissingResponseReplay"),
     DETS_CLEANUP_ARM_RESPONSE_FILES("DETSCleanupArmResponseFiles"),
-    MEDIA_REQUEST_CLEANUP("MediaRequestCleanUp");
+    MEDIA_REQUEST_CLEANUP("MediaRequestCleanUp"),
+    REMOVE_OLD_ARM_RPO_PRODUCTIONS("RemoveOldArmRpoProductions");
 
     private final String taskName;
     private final String conditionalOnSpEL;
