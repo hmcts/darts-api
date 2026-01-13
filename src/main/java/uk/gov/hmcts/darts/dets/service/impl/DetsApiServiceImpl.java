@@ -2,9 +2,12 @@ package uk.gov.hmcts.darts.dets.service.impl;
 
 import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
+import com.azure.core.util.polling.PollResponse;
+import com.azure.core.util.polling.SyncPoller;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlobCopyInfo;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -127,7 +130,24 @@ public class DetsApiServiceImpl implements DetsApiService {
             String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
 
             log.info("Dets copy from '{}' to '{}' source name '{}'", sourceBlobSasUrl, destinationBlobSasUrl, sourceBlobName);
-            azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
+
+            BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClientWithSasEndpoint(destinationContainerSasUrl);
+            BlobContainerClient destinationContainerClient = blobServiceFactory.getBlobContainerClient(armDataManagementConfiguration.getContainerName(),
+                                                                                                       serviceClient);
+            BlobClient client = blobServiceFactory.getBlobClient(destinationContainerClient, blobPathAndName);
+
+            SyncPoller<BlobCopyInfo, Void> copy = client.beginCopy(sourceBlobSasUrl, Duration.ofMillis(50));
+            PollResponse<BlobCopyInfo> result = copy.waitForCompletion();
+            if (result.getValue().getError() != null) {
+                String errorMessage = String.format(
+                    "Failed to execute azcopy from source: '%s' to destination '%s'- error exit value. Error: %s",
+                    sourceBlobName,
+                    blobPathAndName,
+                    result.getValue().getError());
+                log.error(errorMessage);
+                throw new DartsException(errorMessage);
+            }
+
             log.info("Dets copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
                      configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid, blobPathAndName);
         } catch (Exception e) {
