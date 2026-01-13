@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.Duration;
@@ -36,8 +35,6 @@ class RemoveRpoProductionsServiceImplTest {
     @Mock
     private RemoveRpoProductionsService removeRpoProductionsService;
     @Mock
-    private ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
-    @Mock
     private ArmApiService armApiService;
     @Mock
     LogApi logApi;
@@ -49,7 +46,6 @@ class RemoveRpoProductionsServiceImplTest {
     private ArmRpoService armRpoService;
     @Mock
     private ArmRpoUtil armRpoUtil;
-
     @Mock
     private UserAccountEntity userAccountEntity;
 
@@ -61,8 +57,8 @@ class RemoveRpoProductionsServiceImplTest {
     
     @BeforeEach
     void setUp() {
-        removeRpoProductionsService = new RemoveRpoProductionsServiceImpl(armRpoExecutionDetailRepository,
-            armApiService, logApi, armRpoApi, userIdentity, armRpoService, armRpoUtil);
+        removeRpoProductionsService = new RemoveRpoProductionsServiceImpl(
+              logApi, userIdentity, armRpoService, armRpoUtil, armRpoApi);
 
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
         
@@ -132,6 +128,7 @@ class RemoveRpoProductionsServiceImplTest {
             eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
             any(OffsetDateTime.class)
         )).thenReturn(java.util.List.of(EXECUTION_ID));
+        
         doThrow(new RuntimeException("Mocked RuntimeException"))
             .when(armRpoApi)
             .removeProduction(any(), any(), any());

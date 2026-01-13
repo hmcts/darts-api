@@ -1,10 +1,11 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
-import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.RemoveRpoProductionsService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
@@ -12,7 +13,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
-import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.Duration;
@@ -26,13 +26,12 @@ import static uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum.FAILED;
 @Slf4j
 public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsService {
 
-    private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
-    private final ArmApiService armApiService;
+
     private final LogApi logApi;
-    private final ArmRpoApi armRpoApi;
     private final UserIdentity userIdentity;
     private final ArmRpoService armRpoService;
     private final ArmRpoUtil armRpoUtil;
+    private final ArmRpoApi armRpoApi;
 
 
     @Override
@@ -40,7 +39,6 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
         log.info("Removing ARM RPO productions - isManualRun: {}, duration: {}, batchSize: {}",
                  isManualRun, waitDuration, batchSize);
         List<Integer> ardIdsToRemove;
-        UserAccountEntity userAccount;
         try {
             log.info("Finding ARM RPO executions with status FAILED older than: {}", waitDuration);
             ardIdsToRemove = armRpoService.findIdsByStatusAndLastModifiedDateTimeAfter(
@@ -50,22 +48,36 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
                 log.info("No ARM RPO productions found to remove older than: {}", waitDuration);
                 return;
             }
-            userAccount = userIdentity.getUserAccount();
+            
         } catch (Exception e) {
             log.warn("Exception occurred while preparing to remove ARM RPO productions: {}", e.getMessage(), e);
             logApi.removeOldArmRpoProductionsFailed();
             return;
         }
-
-        for (Integer ardId : ardIdsToRemove) {
+        removeProductionsBatch(ardIdsToRemove, userIdentity.getUserAccount());
+    }
+    
+    private void removeProductionsBatch(List<Integer> ardIds, UserAccountEntity userAccount) {
+        for (Integer ardId : ardIds) {
             try {
                 log.info("Removing ARM RPO production for ard_id: {}", ardId);
                 armRpoApi.removeProduction(armRpoUtil.getBearerToken("removeProduction"), ardId, userAccount);
                 logApi.removeOldArmRpoProductionsSuccessful(ardId);
-            } catch (Exception e) {
+            } catch (FeignException feignException) {
+                int status = feignException.status();
+                // If unauthorized or forbidden, retry once with a refreshed token
+                if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+                    try {
+                        String refreshedBearer = armRpoUtil.retryGetBearerToken("removeProduction");
+                        armRpoApi.removeProduction(refreshedBearer, ardId, userAccount);
+                    } catch (FeignException retryEx) {
+                        logApi.removeOldArmRpoProductionsFailed(ardId);
+                    }
+                }
+            } catch (Exception ex) {
+                log.error("Error while polling removing old RPO production", ex);
                 logApi.removeOldArmRpoProductionsFailed(ardId);
             }
-            
         }
     }
     
