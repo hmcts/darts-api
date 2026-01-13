@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
@@ -103,7 +104,7 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         existingCaseRetention.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
 
         OffsetDateTime eventTimestamp = dartsEvent.getDateTime();
-        LocalDate eventDate = eventTimestamp.toLocalDate();
+        LocalDate eventDate = DateConverterUtil.toLocalDate(eventTimestamp);
         LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,
                                                                        dartsEventRetentionPolicy.getCaseTotalSentence(),
                                                                        caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
@@ -116,6 +117,7 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         existingCaseRetention.setLastModifiedBy(currentUser);
         existingCaseRetention.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
         caseRetentionRepository.save(existingCaseRetention);
+
     }
 
     private void createRetention(CaseManagementRetentionEntity caseManagementRetentionEntity,
@@ -131,7 +133,7 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         caseRetentionEntity.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
         caseRetentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
         OffsetDateTime eventTimestamp = dartsEvent.getDateTime();
-        LocalDate eventDate = eventTimestamp.toLocalDate();
+        LocalDate eventDate = DateConverterUtil.toLocalDate(eventTimestamp);
         LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,
                                                                        dartsEventRetentionPolicy.getCaseTotalSentence(),
                                                                        caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
@@ -143,6 +145,7 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         caseRetentionEntity.setCreatedBy(currentUser);
         caseRetentionEntity.setLastModifiedBy(currentUser);
         caseRetentionRepository.save(caseRetentionEntity);
+
     }
 
 }
