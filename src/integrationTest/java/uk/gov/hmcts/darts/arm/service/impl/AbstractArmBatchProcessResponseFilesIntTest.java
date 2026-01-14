@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.featureflag.api.impl.FeatureFlagLogApiImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -125,6 +126,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     protected static final Integer BATCH_SIZE = 10;
     protected OffsetDateTime inputUploadProcessedTimestamp;
     protected AsyncTaskConfig asyncTaskConfig;
+    @Autowired
+    protected FeatureFlagLogApiImpl featureFlagLogApi;
 
     @BeforeEach
     void setup() {

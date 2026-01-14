@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.featureflag.api.impl.FeatureFlagLogApiImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
 import uk.gov.hmcts.darts.util.AsyncUtil;
@@ -108,6 +109,8 @@ class ArmBatchProcessResponseFilesImplTest {
     private DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
     @Mock
     private AsyncTaskConfig asyncTaskConfig;
+    @Mock
+    private FeatureFlagLogApiImpl featureFlagLogApi;
 
     private ArmBatchProcessResponseFilesImplProtectedMethodSupport armBatchProcessResponseFiles;
     private ObjectMapper objectMapper;
@@ -132,10 +135,10 @@ class ArmBatchProcessResponseFilesImplTest {
             currentTimeHelper,
             externalObjectDirectoryService,
             logApi,
-            deleteArmResponseFilesHelper
+            deleteArmResponseFilesHelper,
+            featureFlagLogApi
         ));
-
-
+        
     }
 
     @BeforeAll
@@ -521,7 +524,8 @@ class ArmBatchProcessResponseFilesImplTest {
             currentTimeHelper,
             externalObjectDirectoryService,
             logApi,
-            deleteArmResponseFilesHelper
+            deleteArmResponseFilesHelper,
+            featureFlagLogApi
         );
         String timestamp = "2023-06-10T14:08:28.316382+00:00";
         ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
@@ -611,7 +615,8 @@ class ArmBatchProcessResponseFilesImplTest {
             currentTimeHelper,
             externalObjectDirectoryService,
             logApi,
-            deleteArmResponseFilesHelper
+            deleteArmResponseFilesHelper,
+            featureFlagLogApi
         );
         String timestamp = "2023-06-10T14:08:28+00:00";
         ArmResponseInputUploadFileRecord inputUploadFileRecord = new ArmResponseInputUploadFileRecord();
@@ -637,7 +642,8 @@ class ArmBatchProcessResponseFilesImplTest {
             currentTimeHelper,
             externalObjectDirectoryService,
             logApi,
-            deleteArmResponseFilesHelper
+            deleteArmResponseFilesHelper,
+            featureFlagLogApi
         );
     }
 
@@ -649,9 +655,11 @@ class ArmBatchProcessResponseFilesImplTest {
                                                                       UserIdentity userIdentity,
                                                                       CurrentTimeHelper currentTimeHelper,
                                                                       ExternalObjectDirectoryService externalObjectDirectoryService, LogApi logApi,
-                                                                      DeleteArmResponseFilesHelper deleteArmResponseFilesHelper) {
+                                                                      DeleteArmResponseFilesHelper deleteArmResponseFilesHelper,
+                                                                      FeatureFlagLogApiImpl featureFlagLogApi) {
             super(externalObjectDirectoryRepository, armDataManagementApi, fileOperationService, armDataManagementConfiguration,
-                  objectMapper, userIdentity, currentTimeHelper, externalObjectDirectoryService, logApi, deleteArmResponseFilesHelper);
+                  objectMapper, userIdentity, currentTimeHelper, externalObjectDirectoryService, logApi, deleteArmResponseFilesHelper,
+                  featureFlagLogApi);
         }
 
         @Override

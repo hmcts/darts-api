@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.featureflag.api.impl.FeatureFlagLogApiImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.DetsToArmPushAutomatedTaskConfig;
 import uk.gov.hmcts.darts.util.AsyncUtil;
@@ -65,7 +66,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     private final CurrentTimeHelper currentTimeHelper;
     private final ExternalObjectDirectoryService externalObjectDirectoryService;
     private final DetsToArmPushAutomatedTaskConfig automatedTaskConfigurationProperties;
-
+    private final FeatureFlagLogApiImpl featureFlagLogApi;
 
     @Override
     @SuppressWarnings("PMD.DoNotUseThreads")
@@ -324,7 +325,10 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                 || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
                 || ARM_INGESTION.getId().equals(previousStatus.getId())) {
                 Instant start = Instant.now();
-                log.info("ARM PERFORMANCE PUSH START for DETS EOD {} started at {}", armExternalObjectDirectory.getId(), start);
+
+                String logMessage = String.format("ARM PERFORMANCE PUSH START for DETS EOD %s started at %s",
+                                                  armExternalObjectDirectory.getId(), start);
+                featureFlagLogApi.logDetsToArmPush(logMessage);
 
                 log.info("About to push raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
                 armDataManagementApi.copyDetsBlobDataToArm(detsExternalObjectDirectory.getExternalLocation(), filename);
@@ -332,8 +336,10 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
 
                 Instant finish = Instant.now();
                 long timeElapsed = Duration.between(start, finish).toMillis();
-                log.info("ARM PERFORMANCE PUSH END for DETS EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
-                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for DETS EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
+                logMessage = String.format("ARM PERFORMANCE PUSH END for DETS EOD %s ended at %s", armExternalObjectDirectory.getId(), finish);
+                featureFlagLogApi.logDetsToArmPush(logMessage);
+                logMessage = String.format("ARM PERFORMANCE PUSH ELAPSED TIME for DETS EOD %s took %s ms", armExternalObjectDirectory.getId(), timeElapsed);
+                featureFlagLogApi.logDetsToArmPush(logMessage);
 
                 armExternalObjectDirectory.setChecksum(detsExternalObjectDirectory.getChecksum());
                 armExternalObjectDirectory.setExternalLocation(UUID.randomUUID().toString());

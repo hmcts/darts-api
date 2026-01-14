@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
+import uk.gov.hmcts.darts.featureflag.api.impl.FeatureFlagLogApiImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.OffsetDateTime;
@@ -87,6 +88,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
     private CreateRecordFilenameProcessor createRecordFilenameProcessor;
     private UploadFileFilenameProcessor uploadFileFilenameProcessor;
     private InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor;
+    private FeatureFlagLogApiImpl featureFlagLogApi;
 
     @AfterAll
     public static void close() {
@@ -109,7 +111,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
             logApi,
             deleteArmResponseFilesHelper,
             configuration,
-            osrRepository
+            osrRepository,
+            featureFlagLogApi
         );
 
         String batchMetadataFilename = "dropzone/DARTS/response/DETS_a17b9015-e6ad-77c5-8d1e-13259aae1895_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
