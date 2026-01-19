@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.featureflag.api.impl.FeatureFlagLogApiImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AsyncTaskConfig;
 import uk.gov.hmcts.darts.util.AsyncUtil;
@@ -70,7 +71,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     protected static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
     protected static final String CREATE_RECORD = "create_record";
-    public static final int MAX_INVALID_LINE_RECORDS = 2;
+    protected static final int MAX_INVALID_LINE_RECORDS = 2;
     protected final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     protected final ArmDataManagementApi armDataManagementApi;
     protected final FileOperationService fileOperationService;
@@ -81,14 +82,17 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     protected final ExternalObjectDirectoryService externalObjectDirectoryService;
     protected final LogApi logApi;
     protected final DeleteArmResponseFilesHelper deleteArmResponseFilesHelper;
+    protected final FeatureFlagLogApiImpl featureFlagLogApi;
 
     protected DateTimeFormatter dateTimeFormatter;
 
-    public AbstractArmBatchProcessResponseFiles(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
+    @SuppressWarnings({"PMD.ExcessiveParameterList"})
+    public AbstractArmBatchProcessResponseFiles(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
+                                                ArmDataManagementApi armDataManagementApi,
                                                 FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                                 ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper timeHelper,
                                                 ExternalObjectDirectoryService externalObjectDirectoryService, LogApi logApi,
-                                                DeleteArmResponseFilesHelper deleteArmResponseFilesHelper) {
+                                                DeleteArmResponseFilesHelper deleteArmResponseFilesHelper, FeatureFlagLogApiImpl featureFlagLogApi) {
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.armDataManagementApi = armDataManagementApi;
         this.fileOperationService = fileOperationService;
@@ -99,6 +103,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         this.externalObjectDirectoryService = externalObjectDirectoryService;
         this.logApi = logApi;
         this.deleteArmResponseFilesHelper = deleteArmResponseFilesHelper;
+        this.featureFlagLogApi = featureFlagLogApi;
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getInputUploadResponseTimestampFormat());
     }
 
@@ -139,12 +144,15 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             .stream()
             .map(inputUploadBlob -> (Callable<Void>) () -> {
                 Instant start = Instant.now();
-                log.info("ARM PERFORMANCE PULL START for manifest {} started at {}", inputUploadBlob, start);
+                String logMessage = String.format("ARM PERFORMANCE PULL START for manifest %s started at %s", inputUploadBlob, start);
+                featureFlagLogApi.logArmPull(logMessage);
                 processInputUploadBlob(inputUploadBlob, userAccount);
                 Instant finish = Instant.now();
                 long timeElapsed = Duration.between(start, finish).toMillis();
-                log.info("ARM PERFORMANCE PULL END for manifest {} ended at {}", inputUploadBlob, finish);
-                log.info("ARM PERFORMANCE PULL ELAPSED TIME for manifest {} took {} ms", inputUploadBlob, timeElapsed);
+                logMessage = String.format("ARM PERFORMANCE PULL END for manifest %s ended at %s", inputUploadBlob, finish);
+                featureFlagLogApi.logArmPull(logMessage);
+                logMessage = String.format("ARM PERFORMANCE PULL ELAPSED TIME for manifest %s took %s ms", inputUploadBlob, timeElapsed);
+                featureFlagLogApi.logArmPull(logMessage);
                 return null;
             }).toList();
         runTasksAsync(tasks, asyncTaskConfig);

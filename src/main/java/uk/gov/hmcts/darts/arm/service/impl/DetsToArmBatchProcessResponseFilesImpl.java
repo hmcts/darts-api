@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
+import uk.gov.hmcts.darts.featureflag.api.impl.FeatureFlagLogApiImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DurationUtil;
 
@@ -31,14 +32,14 @@ import static java.util.Objects.nonNull;
 
 @Slf4j
 @Component
-@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessResponseFiles {
 
     private final DetsDataManagementConfiguration configuration;
 
     protected final ObjectStateRecordRepository objectStateRecordRepository;
 
-    @SuppressWarnings("PMD.ExcessiveParameterList")//TODO - refactor to reduce excessive parameter list when this class is next edited
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public DetsToArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                   ArmDataManagementApi armDataManagementApi, FileOperationService fileOperationService,
                                                   ArmDataManagementConfiguration armDataManagementConfiguration,
@@ -47,7 +48,8 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                   LogApi logApi,
                                                   DeleteArmResponseFilesHelper deleteArmResponseFilesHelper,
                                                   DetsDataManagementConfiguration configuration,
-                                                  ObjectStateRecordRepository objectStateRecordRepository) {
+                                                  ObjectStateRecordRepository objectStateRecordRepository,
+                                                  FeatureFlagLogApiImpl featureFlagLogApi) {
         super(externalObjectDirectoryRepository,
               armDataManagementApi,
               fileOperationService,
@@ -57,7 +59,8 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
               currentTimeHelper,
               externalObjectDirectoryService,
               logApi,
-              deleteArmResponseFilesHelper);
+              deleteArmResponseFilesHelper,
+              featureFlagLogApi);
         this.configuration = configuration;
         this.objectStateRecordRepository = objectStateRecordRepository;
     }
