@@ -95,15 +95,13 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
 
     private void closeCase(DartsEvent dartsEvent, CourtCaseEntity courtCase) {
         courtCase.setClosed(TRUE);
-        
+
         //If the case is being closed again, we only want to update the closed timestamp to the latest event
         OffsetDateTime eventDateTime = dartsEvent.getDateTime();
         OffsetDateTime closedTimestamp = courtCase.getCaseClosedTimestamp();
 
-        if (nonNull(eventDateTime)) {
-            if (isNull(closedTimestamp) || closedTimestamp.isBefore(eventDateTime)) {
-                courtCase.setCaseClosedTimestamp(eventDateTime);
-            }
+        if (nonNull(eventDateTime) && (isNull(closedTimestamp) || closedTimestamp.isBefore(eventDateTime))) {
+            courtCase.setCaseClosedTimestamp(eventDateTime);
         }
 
         caseRepository.saveAndFlush(courtCase);
