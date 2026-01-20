@@ -980,6 +980,66 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     }
 
     @Test
+    void receive_shouldUpdateExistingCourtCaseClosedDate_whenExistingCourtCaseClosedDateIsNull() {
+        // given
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
+        courtCaseEntity.setClosed(true);
+        courtCaseEntity.setCaseClosedTimestamp(null);
+        dartsDatabase.save(courtCaseEntity);
+
+        HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER,
+                                                                             DateConverterUtil.toLocalDateTime(testTime));
+
+        //setup existing retention
+        CaseRetentionEntity caseRetentionObject = dartsDatabase.getCaseRetentionStub().createCaseRetentionObject(
+            courtCaseEntity, PENDING,
+            OffsetDateTime.of(2021, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC),
+            false
+        );
+        EventEntity existingPendingEvent = dartsDatabase.getEventStub().createEvent(hearing, 77, testTime,
+                                                                                    "EVENTNAME");
+        CaseManagementRetentionEntity existingCaseManagement = new CaseManagementRetentionEntity();
+        existingCaseManagement.setCourtCase(courtCaseEntity);
+        existingCaseManagement.setEventEntity(existingPendingEvent);
+        existingCaseManagement.setRetentionPolicyTypeEntity(caseRetentionObject.getRetentionPolicyType());
+        dartsDatabase.save(existingCaseManagement);
+
+        caseRetentionObject.setCaseManagementRetention(existingCaseManagement);
+        dartsDatabase.save(caseRetentionObject);
+
+        EventHandlerEntity hearingEndedEventHandler = getHearingEndedEventHandler();
+
+        DartsEventRetentionPolicy retentionPolicy2 = new DartsEventRetentionPolicy();
+        retentionPolicy2.caseRetentionFixedPolicy("2");
+        retentionPolicy2.setCaseTotalSentence("20Y3M4D");//this should get ignored.
+
+        var eventTime = testTime;
+
+        DartsEvent dartsEvent = someMinimalDartsEvent()
+            .type(hearingEndedEventHandler.getType())
+            .subType(hearingEndedEventHandler.getSubType())
+            .caseNumbers(List.of(SOME_CASE_NUMBER))
+            .dateTime(eventTime)
+            .retentionPolicy(retentionPolicy2);
+
+        // when
+        eventDispatcher.receive(dartsEvent);
+
+        // then
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE
+        ).get();
+
+        assertTrue(persistedCase.getClosed());
+        assertEquals(eventTime, persistedCase.getCaseClosedTimestamp());
+        assertNull(persistedCase.getRetConfReason());
+        assertNull(persistedCase.getRetConfScore());
+        assertNull(persistedCase.getRetConfUpdatedTs());
+
+    }
+
+    @Test
     void receive_shouldNotUpdateExistingCourtCaseClosedDate_whenEventDateOlder() {
         // given
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
