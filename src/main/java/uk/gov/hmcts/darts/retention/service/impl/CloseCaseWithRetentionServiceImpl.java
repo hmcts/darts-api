@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
@@ -93,7 +95,17 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
 
     private void closeCase(DartsEvent dartsEvent, CourtCaseEntity courtCase) {
         courtCase.setClosed(TRUE);
-        courtCase.setCaseClosedTimestamp(dartsEvent.getDateTime());
+        
+        //If the case is being closed again, we only want to update the closed timestamp to the latest event
+        OffsetDateTime eventDateTime = dartsEvent.getDateTime();
+        OffsetDateTime closedTimestamp = courtCase.getCaseClosedTimestamp();
+
+        if (nonNull(eventDateTime)) {
+            if (isNull(closedTimestamp) || closedTimestamp.isBefore(eventDateTime)) {
+                courtCase.setCaseClosedTimestamp(eventDateTime);
+            }
+        }
+
         caseRepository.saveAndFlush(courtCase);
     }
 
