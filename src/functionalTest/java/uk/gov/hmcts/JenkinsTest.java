@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 //This class can not be moved into the darts package else it will be excluded
 @Slf4j
 class JenkinsTest {
-
+  
     @Test
     void test() {
         log.info("Jenkins test executed successfully.");
