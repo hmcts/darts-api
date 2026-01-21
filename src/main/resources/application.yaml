@@ -214,7 +214,7 @@ darts:
         transcription_request_unfulfilled: c19da6f7-9304-445a-9f30-3827f7c74103
   retention:
     overridable-fixed-policy-keys: 3
-    close-open-cases-older-than-years: 6
+    close-open-cases-older-than-period: P6Y
     close-events: "Case closed,Archive case"
     max-retention-retries: 3
   storage:

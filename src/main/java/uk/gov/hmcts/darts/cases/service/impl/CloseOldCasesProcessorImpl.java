@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.Period;
 import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
@@ -36,24 +37,31 @@ import java.util.Optional;
 import static java.lang.Boolean.TRUE;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.CouplingBetweenObjects"})
 public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
-
 
     private final CloseOldCasesProcessorImpl.CloseCaseProcessor caseProcessor;
     private final CaseRepository caseRepository;
 
     private final AuthorisationApi authorisationApi;
 
-    @Value("${darts.retention.close-open-cases-older-than-years}")
-    private long years;
+    @Value("${darts.retention.close-open-cases-older-than-period}")
+    private Period closeOpenCasesPeriod;
+
+    public CloseOldCasesProcessorImpl(CloseCaseProcessor caseProcessor, CaseRepository caseRepository, AuthorisationApi authorisationApi,
+                                      @Value("${darts.retention.close-open-cases-older-than-period}") Period closeOpenCasesPeriod) {
+        this.caseProcessor = caseProcessor;
+        this.caseRepository = caseRepository;
+        this.authorisationApi = authorisationApi;
+        this.closeOpenCasesPeriod = closeOpenCasesPeriod;
+    }
 
     @Override
     public void closeCases(int batchSize) {
         log.info("Starting to close old cases...");
 
-        List<Integer> courtCaseEntityIdList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minusYears(years),
+        List<Integer> courtCaseEntityIdList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minus(closeOpenCasesPeriod),
                                                                                   Limit.of(batchSize));
         int totalCasesToClose = courtCaseEntityIdList.size();
         log.info("Found {} cases to close out of a batch size {}", totalCasesToClose, batchSize);
@@ -69,7 +77,6 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         log.info("Completed closing old cases.");
     }
 
-
     @Service
     @RequiredArgsConstructor(onConstructor = @__(@Autowired))
     static class CloseCaseProcessor {
@@ -83,11 +90,9 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         @Value("#{'${darts.retention.close-events}'.split(',')}")
         private List<String> closeEvents;
 
-
         @Transactional
         public void closeCase(Integer courtCaseId, UserAccountEntity userAccount) {
             CourtCaseEntity courtCase = caseService.getCourtCaseById(courtCaseId);
-
 
             log.info("About to close court case id {}", courtCase.getId());
             List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentEvents(courtCase);
@@ -131,7 +136,9 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                                                   RetentionConfidenceCategoryEnum retentionConfidenceCategory,
                                                   UserAccountEntity userAccount) {
             courtCase.setClosed(TRUE);
+
             courtCase.setCaseClosedTimestamp(caseClosedDate);
+
             caseService.saveCase(courtCase);
             log.info("Closed court case id {}", courtCase.getId());
 
