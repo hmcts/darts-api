@@ -90,7 +90,6 @@ class CloseOldCasesProcessorImplTest {
         // given
         LocalDateTime hearingDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now().minusYears(7));
         OffsetDateTime createdDate = OffsetDateTime.now().minusYears(7);
-        LocalDateTime retentionDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now());
 
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
         HearingEntity hearingEntity = hearings.getFirst();
@@ -105,7 +104,8 @@ class CloseOldCasesProcessorImplTest {
 
         CaseRetentionEntity caseRetention = createRetentionEntity(courtCase, userAccountEntity);
         when(retentionApi.createRetention(any(), any(), any(), any(), any(), any(), any())).thenReturn(caseRetention);
-
+        
+        LocalDateTime retentionDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now());
         when(retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.DEFAULT)).thenReturn(LocalDate.from(retentionDate));
         assertFalse(courtCase.getClosed());
 
