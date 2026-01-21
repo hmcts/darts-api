@@ -47,7 +47,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
     private final AuthorisationApi authorisationApi;
 
     @Value("${darts.retention.close-open-cases-older-than-period}")
-    private Period closeOpenCasesPeriod;
+    private final Period closeOpenCasesPeriod;
 
     public CloseOldCasesProcessorImpl(CloseCaseProcessor caseProcessor, CaseRepository caseRepository, AuthorisationApi authorisationApi,
                                       @Value("${darts.retention.close-open-cases-older-than-period}") Period closeOpenCasesPeriod) {
