@@ -66,8 +66,6 @@ class CloseOldCasesProcessorImplTest {
 
     private CloseOldCasesProcessor closeOldCasesProcessor;
 
-    private Period closeOpenCasesPeriod;
-
     @BeforeEach
     void setUp() {
         userAccountEntity = CommonTestDataUtil.createUserAccountWithId();
@@ -80,7 +78,7 @@ class CloseOldCasesProcessorImplTest {
             findCurrentEntitiesHelper
         );
 
-        closeOpenCasesPeriod = Period.ofYears(6);
+        Period closeOpenCasesPeriod = Period.ofYears(6);
 
         closeOldCasesProcessor = new CloseOldCasesProcessorImpl(caseProcessor, caseRepository, authorisationApi, closeOpenCasesPeriod);
 
