@@ -20,8 +20,10 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.Period;
@@ -90,6 +92,7 @@ class CloseOldCasesProcessorImplTest {
         // given
         LocalDateTime hearingDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now().minusYears(7));
         OffsetDateTime createdDate = OffsetDateTime.now().minusYears(7);
+        LocalDateTime retentionDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now());
 
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
         HearingEntity hearingEntity = hearings.getFirst();
@@ -104,6 +107,8 @@ class CloseOldCasesProcessorImplTest {
 
         CaseRetentionEntity caseRetention = createRetentionEntity(courtCase, userAccountEntity);
         when(retentionApi.createRetention(any(), any(), any(), any(), any(), any(), any())).thenReturn(caseRetention);
+
+        when(retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.DEFAULT)).thenReturn(LocalDate.from(retentionDate));
         assertFalse(courtCase.getClosed());
 
         // when
