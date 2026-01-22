@@ -1125,5 +1125,4 @@ class StopAndCloseHandlerTest extends HandlerTestData {
             .findFirst()
             .orElseThrow();
     }
-
 }
