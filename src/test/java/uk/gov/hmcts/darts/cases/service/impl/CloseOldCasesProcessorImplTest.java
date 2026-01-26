@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.helper.FindCurrentEntitiesHelper;
 import uk.gov.hmcts.darts.cases.service.CaseService;
@@ -19,22 +20,29 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.Period;
 import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"darts.retention.close-open-cases-older-than-period=P6Y"})
 @ExtendWith(MockitoExtension.class)
 class CloseOldCasesProcessorImplTest {
-    public static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+
+    private static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC);
 
     @Mock
     private CaseRepository caseRepository;
@@ -70,7 +78,9 @@ class CloseOldCasesProcessorImplTest {
             findCurrentEntitiesHelper
         );
 
-        closeOldCasesProcessor = new CloseOldCasesProcessorImpl(caseProcessor, caseRepository, authorisationApi);
+        Period closeOpenCasesPeriod = Period.ofYears(6);
+
+        closeOldCasesProcessor = new CloseOldCasesProcessorImpl(caseProcessor, caseRepository, authorisationApi, closeOpenCasesPeriod);
 
         lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
     }
@@ -94,6 +104,9 @@ class CloseOldCasesProcessorImplTest {
 
         CaseRetentionEntity caseRetention = createRetentionEntity(courtCase, userAccountEntity);
         when(retentionApi.createRetention(any(), any(), any(), any(), any(), any(), any())).thenReturn(caseRetention);
+        
+        LocalDateTime retentionDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now());
+        when(retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.DEFAULT)).thenReturn(LocalDate.from(retentionDate));
         assertFalse(courtCase.getClosed());
 
         // when
@@ -101,6 +114,10 @@ class CloseOldCasesProcessorImplTest {
 
         // then
         assertTrue(courtCase.getClosed());
+        assertNotNull(courtCase.getCaseClosedTimestamp());
+        assertNull(courtCase.getRetConfReason());
+        assertNull(courtCase.getRetConfScore());
+        assertNull(courtCase.getRetConfUpdatedTs());
     }
 
     public static CaseRetentionEntity createRetentionEntity(CourtCaseEntity courtCase, UserAccountEntity userAccount) {

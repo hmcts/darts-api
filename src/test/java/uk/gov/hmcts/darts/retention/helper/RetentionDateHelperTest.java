@@ -52,6 +52,26 @@ class RetentionDateHelperTest {
     }
 
     @Test
+    void getRetentionDateForPolicy_WithDefaultPolicy() {
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+
+        RetentionPolicyTypeEntity retentionPolicyType = new RetentionPolicyTypeEntity();
+        retentionPolicyType.setDuration("7Y0M0D");
+
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(List.of(retentionPolicyType));
+
+        when(currentTimeHelper.currentOffsetDateTime())
+            .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+
+        RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
+        LocalDate response = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.DEFAULT);
+
+        assertEquals(LocalDate.of(2027, 10, 10), response);
+
+    }
+
+    @Test
     void ok_99y9m9d() {
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
