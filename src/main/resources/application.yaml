@@ -629,4 +629,4 @@ dbMigration:
 logging:
   level:
     uk.gov.hmcts.darts: ${DARTS_LOG_LEVEL:INFO}
-    net.javacrumbs.shedlock: ${DARTS_LOG_LEVEL:INFO}
+    net.javacrumbs.shedlock: ${SHEDLOCK_LOG_LEVEL:INFO}

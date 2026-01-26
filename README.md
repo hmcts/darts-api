@@ -71,6 +71,7 @@ There are few attributes which doesn't use Azure Keyvault secrets. Those environ
 | ARM_URL                       |                                                                  |  
 | ARM_AUTH_URL                  |                                                                  |
 | ARM_API_URL                   |                                                                  |
+| SHEDLOCK_LOG_LEVEL            | INFO                                                             |
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:

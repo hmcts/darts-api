@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
@@ -19,6 +20,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @SuppressWarnings("PMD.ReplaceJavaUtilDate")
+@Slf4j
 public class LockServiceImpl implements LockService {
 
     private static final Duration DEFAULT_LOCK_AT_MOST = Duration.ofMinutes(300);
@@ -51,6 +53,7 @@ public class LockServiceImpl implements LockService {
     @Override
     public boolean isLocked(AutomatedTaskEntity automatedTask) {
         List<Timestamp> lockedUntil = automatedTaskRepository.findLockedUntilForTask(automatedTask.getTaskName());
+        log.info("Locked until timestamps for task {}: {}", automatedTask.getTaskName(), lockedUntil);
         return !lockedUntil.isEmpty() && isInFuture(lockedUntil);
     }
 
