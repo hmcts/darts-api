@@ -210,6 +210,10 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                 while (records.iterator().hasNext()) {
                     CSVRecord csvRecord = records.iterator().next();
                     counter++;
+                    log.info("Read {} rows so far from file {}. Latest row: {}",
+                             counter,
+                             csvFile.getName(),
+                             csvRecord.toMap());
                     String csvEod = csvRecord.get(CLIENT_IDENTIFIER_CSV_HEADER);
                     if (StringUtils.isNotBlank(csvEod)) {
                         csvEodList.add(Long.parseLong(csvEod));
