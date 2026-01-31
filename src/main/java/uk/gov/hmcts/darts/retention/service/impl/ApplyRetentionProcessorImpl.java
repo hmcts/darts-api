@@ -70,6 +70,8 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
             }
             CaseRetentionEntity caseRetentionEntity = caseRetentionEntityOpt.get();
             CourtCaseEntity courtCaseEntity = caseRetentionEntity.getCourtCase();
+
+            RetentionConfidenceCategoryEnum confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity);
             if (processedCases.contains(courtCaseEntity.getId())) {
                 caseRetentionEntity.setCurrentState(CaseRetentionStatus.IGNORED.name());
                 caseRetentionRepository.save(caseRetentionEntity);
@@ -95,5 +97,8 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
             processedCases.add(courtCaseEntity.getId());
         }
+
+
     }
+
 }
