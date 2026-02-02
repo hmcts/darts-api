@@ -170,7 +170,7 @@ darts:
       unstructured:
         arm-minimum:
           weeks: 30
-    pending-retention-duration: 7d
+    pending-retention-duration: 2d
   daily-list:
     housekeeping:
       enabled: true
