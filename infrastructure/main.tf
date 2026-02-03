@@ -171,7 +171,7 @@ data "azuread_group" "jit_admin_group" {
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "jit_admin" {
-  server_name         = module.postgresql_flexible.server_name
+  server_name         = "darts-api-${var.env}"
   resource_group_name = local.rg_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
   object_id           = data.azuread_group.jit_admin_group.object_id
