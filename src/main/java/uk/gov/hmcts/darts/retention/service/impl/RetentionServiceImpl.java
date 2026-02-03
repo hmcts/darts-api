@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.cases.helper.FindCurrentEntitiesHelper;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
@@ -22,10 +21,13 @@ import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
+import static java.time.Duration.between;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -39,7 +41,9 @@ public class RetentionServiceImpl implements RetentionService {
     private final Clock clock;
     private final FindCurrentEntitiesHelper findCurrentEntitiesHelper;
     @Value("#{'${darts.retention.close-events}'.split(',')}")
-    private List<String> closeEvents;
+    private final List<String> closeEvents;
+    @Value("${darts.retention.days-between-events:10}")
+    private final Period daysBetweenEvents;
 
     @Override
     public List<GetCaseRetentionsResponse> getCaseRetentions(Integer caseId) {
@@ -69,36 +73,64 @@ public class RetentionServiceImpl implements RetentionService {
         return caseRepository.save(courtCase);
     }
 
+    @Override
     public RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase) {
         RetentionConfidenceCategoryEnum confidenceCategory;
+
         List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentEvents(courtCase);
         if (CollectionUtils.isNotEmpty(eventList)) {
             eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
+            EventEntity latestEvent = eventList.get(0);
             //find latest closed event
-            Optional<EventEntity> closedEvent =
-                eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getEventName())).findFirst();
-
-            if (closedEvent.isPresent()) {
-                confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED;
+            Optional<EventEntity> latestClosedEvent =
+                eventList.stream().filter(eventEntity -> closeEvents.contains(latestEvent.getEventType().getEventName())).findFirst();
+            if (latestClosedEvent.isPresent() && latestEvent.getId().equals(latestClosedEvent.get().getId())) {
+                // If the latest event in the case is "Case Closed" or "Archive Case" event
+                confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;//CASE_CLOSED_EXACT_10111000;
+            } else if (latestClosedEvent.isPresent()) {
+                confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(latestClosedEvent, latestEvent);
             } else {
-                //look for the last event and use that date
-                confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED;
+                if (eventList.stream().filter(EventEntity::isLogEntry).count() == eventList.size()) {
+                    // If events exist in the case and NO non-log events are present, use the latest log event
+                    confidenceCategory = RetentionConfidenceCategoryEnum.MAX_LOG_LATEST_10251070;
+                } else {
+                    //If events exist in the case and NO "Case Closed" or "Archive Case" events are present, use the latest non-log event
+                    confidenceCategory = RetentionConfidenceCategoryEnum.MAX_EVENT_LATEST_10141060;
+                }
             }
-        } else if (courtCase.getHearings().isEmpty()) {
-            //set to created date
-            confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED;
         } else {
-            //look for the last audio and use its recorded date
-            List<MediaEntity> mediaList = findCurrentEntitiesHelper.getCurrentMedia(courtCase);
-            if (mediaList.isEmpty()) {
-                //look for the last hearing date and use that
-                courtCase.getHearings().sort(Comparator.comparing(HearingEntity::getHearingDate).reversed());
-                HearingEntity lastHearingEntity = courtCase.getHearings().getFirst();
-                confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED;
-            } else {
-                mediaList.sort(Comparator.comparing(MediaEntity::getCreatedDateTime).reversed());
-                confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED;
-            }
+            confidenceCategory = getRetentionConfidenceCategoryForMedia(courtCase);
+        }
+        return confidenceCategory;
+    }
+
+    private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumBasedOnDates(Optional<EventEntity> latestClosedEvent, EventEntity latestEvent) {
+        RetentionConfidenceCategoryEnum confidenceCategory;
+        OffsetDateTime closedEventDateTime = latestClosedEvent.get().getCreatedDateTime();
+        OffsetDateTime latestEventDateTime = latestEvent.getCreatedDateTime();
+        long daysBetween = between(closedEventDateTime, latestEventDateTime).toDays();
+        if (daysBetween <= daysBetweenEvents.getDays()) {
+            // if the latest "Case Closed" or "Archive Case" event is NOT the latest non-log event, but the latest non-log event occurs
+            // WITHIN 10 days of the "Case Closed" or "Archive Case" event
+            confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED_P3_WITHIN_30183000;
+        } else {
+            // if the latest "Case Closed" or "Archive Case" event is NOT the latest non-log event, but the latest non-log event occurs
+            // MORE THAN 10 days after the "Case Closed" or "Archive Case" event
+            confidenceCategory = RetentionConfidenceCategoryEnum.MAX_EVENT_OUTWITH_10131060;
+        }
+        return confidenceCategory;
+    }
+
+    private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryForMedia(CourtCaseEntity courtCase) {
+        RetentionConfidenceCategoryEnum confidenceCategory;
+        //look for the last audio and use its recorded date
+        List<MediaEntity> mediaList = findCurrentEntitiesHelper.getCurrentMedia(courtCase);
+        if (mediaList.isEmpty()) {
+            //look for the last hearing date and use that
+            confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CREATION_10271050;//AGED_CASE_MAX_HEARING_CLOSED;
+        } else {
+            mediaList.sort(Comparator.comparing(MediaEntity::getCreatedDateTime).reversed());
+            confidenceCategory = RetentionConfidenceCategoryEnum.MEDIA_LATEST_10261070;//AGED_CASE_MAX_MEDIA_CLOSED;
         }
         return confidenceCategory;
     }
