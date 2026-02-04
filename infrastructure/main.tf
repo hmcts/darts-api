@@ -149,16 +149,32 @@ data "azurerm_subnet" "private_endpoints" {
 }
 
 module "armsa" {
-  source                   = "git@github.com:hmcts/cnp-module-storage-account?ref=4.x"
-  env                      = var.env
-  storage_account_name     = "${var.product}arm${var.env}"
-  resource_group_name      = local.rg_name
-  location                 = var.location
-  account_kind             = var.account_kind
-  enable_hns               = true
-  account_replication_type = "ZRS"
-  common_tags              = var.common_tags
-  cross_tenant_replication_enabled   = true
-  private_endpoint_subnet_id = data.azurerm_subnet.private_endpoints.id
-  default_action           = "Allow"
+  source                           = "git@github.com:hmcts/cnp-module-storage-account?ref=4.x"
+  env                              = var.env
+  storage_account_name             = "${var.product}arm${var.env}"
+  resource_group_name              = local.rg_name
+  location                         = var.location
+  account_kind                     = var.account_kind
+  enable_hns                       = true
+  account_replication_type         = "ZRS"
+  common_tags                      = var.common_tags
+  cross_tenant_replication_enabled = true
+  private_endpoint_subnet_id       = data.azurerm_subnet.private_endpoints.id
+  default_action                   = "Allow"
+}
+
+data "azurerm_client_config" "current" {}
+
+data "azuread_group" "jit_admin_group" {
+  display_name     = "DTS JIT Access Darts DB Admin"
+  security_enabled = true
+}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "jit_admin" {
+  server_name         = "darts-api-${var.env}"
+  resource_group_name = local.rg_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = data.azuread_group.jit_admin_group.object_id
+  principal_name      = data.azuread_group.jit_admin_group.display_name
+  principal_type      = "Group"
 }
