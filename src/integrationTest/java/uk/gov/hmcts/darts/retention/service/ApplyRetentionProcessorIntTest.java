@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.retention.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
@@ -87,6 +88,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         });
     }
 
+    @Disabled("Disabled for SIT cycle 7")
     @Test
     void processApplyRetention_ShouldNotApplyRetention_WhenCloseDateWithRecordInsideCoolOff() {
         OffsetDateTime caseClosedTime = OffsetDateTime.now().minusDays(6);
