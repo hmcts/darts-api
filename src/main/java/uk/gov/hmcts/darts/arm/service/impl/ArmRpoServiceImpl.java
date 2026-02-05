@@ -163,6 +163,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         }
     }
 
+    @Override
     public ArmAutomatedTaskEntity getArmAutomatedTaskEntity(StringBuilder errorMessage) {
         return armAutomatedTaskRepository.findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
             .orElseThrow(() -> new ArmRpoException(errorMessage.append("Automated task ProcessE2EArmRpoPending not found.").toString()));
