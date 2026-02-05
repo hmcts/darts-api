@@ -60,7 +60,8 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
             return false;
         }
         // Only perform backlog catchup if the last execution is in REMOVE_PRODUCTION state or FAILED status
-        var earliestEodInRpo = externalObjectDirectoryRepository.findOldestByStatusAndLocation(EodHelper.armRpoPendingStatus(), EodHelper.armLocation());
+        var earliestEodInRpo = externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(EodHelper.armRpoPendingStatus(),
+                                                                                                                        EodHelper.armLocation());
         if (isNull(earliestEodInRpo)) {
             log.info("No EODs found in ARM RPO pending status for backlog catchup.");
             return false;

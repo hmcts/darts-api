@@ -732,9 +732,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         SELECT eod.id FROM ExternalObjectDirectoryEntity eod
         WHERE eod.status = :status
         AND eod.externalLocationType = :locationType
-        ORDER BY eod.createdDateTime ASC
+        ORDER BY eod.inputUploadProcessedTs ASC
         LIMIT 1
         """)
-    ExternalObjectDirectoryEntity findOldestByStatusAndLocation(ObjectRecordStatusEntity status,
-                                                                ExternalLocationTypeEntity locationType);
+    ExternalObjectDirectoryEntity findOldestByInputUploadProcessedTsAndStatusAndLocation(ObjectRecordStatusEntity status,
+                                                                                         ExternalLocationTypeEntity locationType);
 }
