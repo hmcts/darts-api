@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.TriggerArmRpoSearchService;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -34,7 +35,11 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
     @Override
     public void performCatchup(Integer batchSize, Integer maxHoursEndingPoint, Integer totalCatchupHours, Duration threadSleepDuration) {
         var armRpoExecutionDetailEntity = armRpoService.getLatestArmRpoExecutionDetailEntity();
-        if (!validateTaskCanBeRun(maxHoursEndingPoint, totalCatchupHours, armRpoExecutionDetailEntity)) {
+        // Only perform backlog catchup if the last execution is in REMOVE_PRODUCTION state or FAILED status
+        var earliestEodInRpo = externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(EodHelper.armRpoPendingStatus(),
+                                                                                                                        EodHelper.armLocation());
+
+        if (!validateTaskCanBeRun(maxHoursEndingPoint, totalCatchupHours, armRpoExecutionDetailEntity, earliestEodInRpo)) {
             return;
         }
         StringBuilder errorMessage = new StringBuilder();
@@ -43,26 +48,30 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
             log.error("Failed to retrieve ArmAutomatedTaskEntity: {}", errorMessage);
             return;
         }
-        armAutomatedTaskEntity.setRpoCsvStartHour(maxHoursEndingPoint);
-        armAutomatedTaskEntity.setRpoCsvEndHour(maxHoursEndingPoint + totalCatchupHours);
+
+        OffsetDateTime inputUploadProcessedTs = earliestEodInRpo.getInputUploadProcessedTs();
+        long hoursEnd = generateHoursBetweenDates(inputUploadProcessedTs.toString(), inputUploadProcessedTs.toString());
+
+        armAutomatedTaskEntity.setRpoCsvStartHour((int) hoursEnd);
+        armAutomatedTaskEntity.setRpoCsvEndHour((int) (hoursEnd - totalCatchupHours));
         armAutomatedTaskRepository.save(armAutomatedTaskEntity);
         triggerArmRpoSearchService.triggerArmRpoSearch(threadSleepDuration);
     }
 
     private boolean validateTaskCanBeRun(Integer maxHoursEndingPoint, Integer totalCatchupHours,
-                                         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+                                         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity,
+                                         ExternalObjectDirectoryEntity earliestEodInRpo) {
         if (isNull(armRpoExecutionDetailEntity) || isNull(armRpoExecutionDetailEntity.getArmRpoState())) {
             log.info("ARM RPO state is not valid, skipping backlog catchup.");
             return false;
         }
+
         if (!ArmRpoHelper.removeProductionRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
             && !ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId())) {
             log.info("Last ARM RPO execution is not in REMOVE_PRODUCTION state or FAILED status, skipping backlog catchup.");
             return false;
         }
-        // Only perform backlog catchup if the last execution is in REMOVE_PRODUCTION state or FAILED status
-        var earliestEodInRpo = externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(EodHelper.armRpoPendingStatus(),
-                                                                                                                        EodHelper.armLocation());
+
         if (isNull(earliestEodInRpo)) {
             log.info("No EODs found in ARM RPO pending status for backlog catchup.");
             return false;
@@ -70,11 +79,24 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
 
         // check the earliest EOD date is greater than the maxHoursEndingPoint plus totalCatchupHours
         OffsetDateTime currentTime = currentTimeHelper.currentOffsetDateTime();
-        OffsetDateTime earliestEodDateTime = currentTime.minus(maxHoursEndingPoint + totalCatchupHours, ChronoUnit.HOURS);
-        if (earliestEodInRpo.getCreatedDateTime().isAfter(earliestEodDateTime)) {
+        OffsetDateTime lastRunTaskDateTime = currentTime.minus(maxHoursEndingPoint + totalCatchupHours, ChronoUnit.HOURS);
+        if (earliestEodInRpo.getInputUploadProcessedTs().isAfter(lastRunTaskDateTime)) {
             log.info("Earliest EODs found in ARM RPO pending status is not suitable for backlog catchup.");
             return false;
         }
         return true;
+    }
+
+    private long generateHoursBetweenDates(String startDateTime, String endDateTime) {
+        OffsetDateTime start = OffsetDateTime.parse(endDateTime);
+        OffsetDateTime end = OffsetDateTime.parse(startDateTime);
+        OffsetDateTime now = OffsetDateTime.now();
+        // calculate hours between start and now
+        long minutesStart = java.time.Duration.between(start, now).toMinutes();
+        long hoursStart = (long) Math.floor(minutesStart / 60.0);
+        long minutesEnd = java.time.Duration.between(end, now).toMinutes();
+        long hoursEnd = (long) Math.ceil(minutesEnd / 60.0);
+        log.info("Hours between " + hoursStart + " and " + hoursEnd);
+        return hoursEnd;
     }
 }
