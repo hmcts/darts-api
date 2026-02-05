@@ -50,10 +50,10 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
         }
 
         OffsetDateTime inputUploadProcessedTs = earliestEodInRpo.getInputUploadProcessedTs();
-        long hoursEnd = calculateHoursFromStartToNow(inputUploadProcessedTs.toString());
+        int hoursEnd = Long.valueOf(calculateHoursFromStartToNow(inputUploadProcessedTs.toString())).intValue();
 
-        armAutomatedTaskEntity.setRpoCsvStartHour((int) (hoursEnd - totalCatchupHours));
-        armAutomatedTaskEntity.setRpoCsvEndHour((int) hoursEnd);
+        armAutomatedTaskEntity.setRpoCsvStartHour(hoursEnd - totalCatchupHours);
+        armAutomatedTaskEntity.setRpoCsvEndHour(hoursEnd);
         armAutomatedTaskRepository.save(armAutomatedTaskEntity);
         triggerArmRpoSearchService.triggerArmRpoSearch(threadSleepDuration);
     }
