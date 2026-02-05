@@ -728,5 +728,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                         @Param("locationType") ExternalLocationTypeEntity locationType,
                                                                         Limit limit);
 
-
+    @Query("""
+        SELECT eod.id FROM ExternalObjectDirectoryEntity eod
+        WHERE eod.status = :status
+        AND eod.externalLocationType = :locationType
+        ORDER BY eod.createdDateTime ASC
+        LIMIT 1
+        """)
+    ExternalObjectDirectoryEntity findOldestByStatusAndLocation(ObjectRecordStatusEntity status,
+                                                                ExternalLocationTypeEntity locationType);
 }
