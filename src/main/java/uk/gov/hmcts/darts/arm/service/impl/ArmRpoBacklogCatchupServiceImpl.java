@@ -50,10 +50,10 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
         }
 
         OffsetDateTime inputUploadProcessedTs = earliestEodInRpo.getInputUploadProcessedTs();
-        long hoursEnd = generateHoursBetweenDates(inputUploadProcessedTs.toString(), inputUploadProcessedTs.toString());
+        long hoursEnd = calculateHoursFromStartToNow(inputUploadProcessedTs.toString());
 
-        armAutomatedTaskEntity.setRpoCsvStartHour((int) hoursEnd);
-        armAutomatedTaskEntity.setRpoCsvEndHour((int) (hoursEnd - totalCatchupHours));
+        armAutomatedTaskEntity.setRpoCsvStartHour((int) (hoursEnd - totalCatchupHours));
+        armAutomatedTaskEntity.setRpoCsvEndHour((int) hoursEnd);
         armAutomatedTaskRepository.save(armAutomatedTaskEntity);
         triggerArmRpoSearchService.triggerArmRpoSearch(threadSleepDuration);
     }
@@ -87,16 +87,13 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
         return true;
     }
 
-    private long generateHoursBetweenDates(String startDateTime, String endDateTime) {
-        OffsetDateTime start = OffsetDateTime.parse(endDateTime);
+    private long calculateHoursFromStartToNow(String startDateTime) {
         OffsetDateTime end = OffsetDateTime.parse(startDateTime);
         OffsetDateTime now = OffsetDateTime.now();
         // calculate hours between start and now
-        long minutesStart = Duration.between(start, now).toMinutes();
-        long hoursStart = (long) Math.floor(minutesStart / 60.0);
         long minutesEnd = Duration.between(end, now).toMinutes();
         long hoursEnd = (long) Math.ceil(minutesEnd / 60.0);
-        log.info("Hours between " + hoursStart + " and " + hoursEnd);
+        log.info("Hours " + hoursEnd);
         return hoursEnd;
     }
 }
