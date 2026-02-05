@@ -76,10 +76,12 @@ class ArmRpoBacklogCatchupServiceImplTest {
     }
 
     @Test
-    void performCatchup_whenInvalidState_thenDoesNothing() {
+    void performCatchup_doesNothing_whenStateIsInProgress() {
         // given
         ArmRpoExecutionDetailEntity exec = new ArmRpoExecutionDetailEntity();
         ArmRpoStateEntity state = ArmRpoHelper.getProfileEntitlementsRpoState();
+        exec.setArmRpoState(state);
+        exec.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(exec);
 
         // when
@@ -90,7 +92,23 @@ class ArmRpoBacklogCatchupServiceImplTest {
     }
 
     @Test
-    void performCatchup_doesNothing_whenNoEarliestEod() {
+    void performCatchup_doesNothing_whenStatusIsFailed() {
+        // given
+        ArmRpoExecutionDetailEntity exec = new ArmRpoExecutionDetailEntity();
+        ArmRpoStateEntity state = ArmRpoHelper.removeProductionRpoState();
+        exec.setArmRpoState(state);
+        exec.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
+        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(exec);
+
+        // when
+        service.performCatchup(BATCH_SIZE, MAX_HOURS_ENDING_POINT, TOTAL_CATCHUP_HOURS, sleepDuration);
+
+        // then
+        verifyNoInteractions(armAutomatedTaskRepository, triggerArmRpoSearchService);
+    }
+
+    @Test
+    void performCatchup_doesNothing_whenNoEodsToProcess() {
         // given
         ArmRpoExecutionDetailEntity exec = new ArmRpoExecutionDetailEntity();
         ArmRpoStateEntity removeProductionState = ArmRpoHelper.removeProductionRpoState();
@@ -98,7 +116,7 @@ class ArmRpoBacklogCatchupServiceImplTest {
         exec.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(exec);
 
-        when(externalObjectDirectoryRepository.findOldestByStatusAndLocation(any(), any()))
+        when(externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(any(), any()))
             .thenReturn(null);
 
         // when
@@ -111,14 +129,15 @@ class ArmRpoBacklogCatchupServiceImplTest {
     @Test
     void performCatchup_doesNothing_whenEarliestEodTooRecent() {
         // given
-        ArmRpoExecutionDetailEntity exec = new ArmRpoExecutionDetailEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         ArmRpoStateEntity validState = ArmRpoHelper.removeProductionRpoState();
-        exec.setArmRpoState(validState);
-        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(exec);
+        armRpoExecutionDetailEntity.setArmRpoState(validState);
+        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
 
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
         eod.setCreatedDateTime(OffsetDateTime.now().minusHours(1)); // recent
-        when(externalObjectDirectoryRepository.findOldestByStatusAndLocation(any(), any()))
+        eod.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(1)); // recent
+        when(externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(any(), any()))
             .thenReturn(eod);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
@@ -133,27 +152,29 @@ class ArmRpoBacklogCatchupServiceImplTest {
     @Test
     void performCatchup_runsSuccessfully_whenValid() {
         // given
-        ArmRpoExecutionDetailEntity exec = new ArmRpoExecutionDetailEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         ArmRpoStateEntity removeProduction = ArmRpoHelper.removeProductionRpoState();
-        exec.setArmRpoState(removeProduction);
-        exec.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(removeProduction);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
 
-        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(exec);
+        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
 
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
         OffsetDateTime earliest = OffsetDateTime.now().minusHours(100);
         eod.setCreatedDateTime(earliest);
-        when(externalObjectDirectoryRepository.findOldestByStatusAndLocation(any(), any()))
+        eod.setInputUploadProcessedTs(earliest);
+        when(externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(any(), any()))
             .thenReturn(eod);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
-        StringBuilder err = new StringBuilder();
         ArmAutomatedTaskEntity automatedTask = new ArmAutomatedTaskEntity();
-        when(armRpoService.getArmAutomatedTaskEntity(any())).thenAnswer(invocation -> automatedTask);
+        automatedTask.setRpoCsvStartHour(MAX_HOURS_ENDING_POINT);
+        automatedTask.setRpoCsvEndHour(MAX_HOURS_ENDING_POINT + TOTAL_CATCHUP_HOURS);
+        when(armRpoService.getArmAutomatedTaskEntity(any())).thenReturn(automatedTask);
 
         // when
-        service.performCatchup(5, BATCH_SIZE, MAX_HOURS_ENDING_POINT, sleepDuration);
+        service.performCatchup(BATCH_SIZE, MAX_HOURS_ENDING_POINT, TOTAL_CATCHUP_HOURS, sleepDuration);
 
         // then
         verify(armAutomatedTaskRepository, times(1)).save(automatedTask);
