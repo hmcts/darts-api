@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -179,5 +180,12 @@ class ArmRpoBacklogCatchupServiceImplTest {
         // then
         verify(armAutomatedTaskRepository, times(1)).save(automatedTask);
         verify(triggerArmRpoSearchService, times(1)).triggerArmRpoSearch(eq(sleepDuration));
+    }
+
+    @AfterEach
+    void close() {
+        if (armRpoHelperMocks != null) {
+            armRpoHelperMocks.close();
+        }
     }
 }
