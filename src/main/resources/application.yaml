@@ -579,6 +579,15 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT45M
+      arm-rpo-backlog-catchup:
+        total-catchup-hours: 5
+        max-hours-ending-point: 50
+        thread-sleep-duration: ${ARM_RPO_THREAD_SLEEP_DURATION:60s}
+        system-user-email: system_ArmRpoBacklogCatchup@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT59M
+
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
         threads: 30
@@ -586,6 +595,7 @@ darts:
       dets-to-arm-batch-processor:
         max-arm-manifest-items: 100
         manifest-file-prefix: DETS
+
   annotations:
     allowed-extensions:
       - "docx"
