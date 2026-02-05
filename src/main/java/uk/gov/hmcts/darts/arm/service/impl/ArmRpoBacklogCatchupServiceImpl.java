@@ -92,9 +92,9 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
         OffsetDateTime end = OffsetDateTime.parse(startDateTime);
         OffsetDateTime now = OffsetDateTime.now();
         // calculate hours between start and now
-        long minutesStart = java.time.Duration.between(start, now).toMinutes();
+        long minutesStart = Duration.between(start, now).toMinutes();
         long hoursStart = (long) Math.floor(minutesStart / 60.0);
-        long minutesEnd = java.time.Duration.between(end, now).toMinutes();
+        long minutesEnd = Duration.between(end, now).toMinutes();
         long hoursEnd = (long) Math.ceil(minutesEnd / 60.0);
         log.info("Hours between " + hoursStart + " and " + hoursEnd);
         return hoursEnd;
