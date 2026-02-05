@@ -35,10 +35,9 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
     @Override
     public void performCatchup(Integer batchSize, Integer maxHoursEndingPoint, Integer totalCatchupHours, Duration threadSleepDuration) {
         var armRpoExecutionDetailEntity = armRpoService.getLatestArmRpoExecutionDetailEntity();
-        // Only perform backlog catchup if the last execution is in REMOVE_PRODUCTION state or FAILED status
         var earliestEodInRpo = externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(EodHelper.armRpoPendingStatus(),
                                                                                                                         EodHelper.armLocation());
-
+        // Only perform backlog catchup if the last execution is in REMOVE_PRODUCTION state or FAILED status
         if (!validateTaskCanBeRun(maxHoursEndingPoint, totalCatchupHours, armRpoExecutionDetailEntity, earliestEodInRpo)) {
             return;
         }
@@ -66,8 +65,7 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
             return false;
         }
 
-        if (!ArmRpoHelper.removeProductionRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
-            && !ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId())) {
+        if (!validateProgress(armRpoExecutionDetailEntity)) {
             log.info("Last ARM RPO execution is not in REMOVE_PRODUCTION state or FAILED status, skipping backlog catchup.");
             return false;
         }
@@ -85,6 +83,12 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
             return false;
         }
         return true;
+    }
+
+    private boolean validateProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        return (ArmRpoHelper.removeProductionRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
+            && ArmRpoHelper.completedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId()))
+            || !ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
     }
 
     private long calculateHoursFromStartToNow(String startDateTime) {

@@ -133,6 +133,7 @@ class ArmRpoBacklogCatchupServiceImplTest {
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         ArmRpoStateEntity validState = ArmRpoHelper.removeProductionRpoState();
         armRpoExecutionDetailEntity.setArmRpoState(validState);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
 
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
