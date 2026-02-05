@@ -416,7 +416,7 @@ darts:
         poll-duration: ${ARM_RPO_POLL_DURATION:4h}
         lock:
           at-least-for: PT1M
-          at-most-for: PT30M
+          at-most-for: P250M
       associated-object-data-expiry-deletion:
         system-user-email: system_AssociatedObjectDataExpiryDeletion@hmcts.net
         buffer-duration: 24h
