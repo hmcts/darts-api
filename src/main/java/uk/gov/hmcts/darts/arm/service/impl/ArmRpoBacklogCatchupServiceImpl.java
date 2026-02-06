@@ -49,7 +49,7 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
         }
 
         OffsetDateTime inputUploadProcessedTs = earliestEodInRpo.getInputUploadProcessedTs();
-        int hoursEnd = Long.valueOf(calculateHoursFromStartToNow(inputUploadProcessedTs.toString())).intValue();
+        int hoursEnd = (int) calculateHoursFromStartToNow(inputUploadProcessedTs.toString());
 
         armAutomatedTaskEntity.setRpoCsvStartHour(hoursEnd - totalCatchupHours);
         armAutomatedTaskEntity.setRpoCsvEndHour(hoursEnd);
@@ -77,7 +77,8 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
 
         // check the earliest EOD date is greater than the maxHoursEndingPoint plus totalCatchupHours
         OffsetDateTime currentTime = currentTimeHelper.currentOffsetDateTime();
-        OffsetDateTime lastRunTaskDateTime = currentTime.minus(maxHoursEndingPoint + totalCatchupHours, ChronoUnit.HOURS);
+        int amountToSubtract = maxHoursEndingPoint + totalCatchupHours;
+        OffsetDateTime lastRunTaskDateTime = currentTime.minus(amountToSubtract, ChronoUnit.HOURS);
         if (earliestEodInRpo.getInputUploadProcessedTs().isAfter(lastRunTaskDateTime)) {
             log.info("Earliest EODs found in ARM RPO pending status is not suitable for backlog catchup.");
             return false;
