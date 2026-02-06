@@ -1,9 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
-import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
@@ -55,23 +53,14 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
     }
     
     private void removeProductionsBatch(List<Integer> ardIds, UserAccountEntity userAccount) {
+        String bearerToken = armRpoUtil.getBearerToken("removeProduction");
         for (Integer ardId : ardIds) {
             try {
                 log.info("Removing ARM RPO production for ard_id: {}", ardId);
-                armRpoApi.removeProduction(armRpoUtil.getBearerToken("removeProduction"), ardId, userAccount);
+                armRpoApi.removeProduction(bearerToken, ardId, userAccount);
                 logApi.removeOldArmRpoProductionsSuccessful(ardId);
-            } catch (FeignException feignException) {
-                int status = feignException.status();
-                // If unauthorized or forbidden, retry once with a refreshed token
-                if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
-                    try {
-                        String refreshedBearer = armRpoUtil.retryGetBearerToken("removeProduction");
-                        armRpoApi.removeProduction(refreshedBearer, ardId, userAccount);
-                    } catch (FeignException retryEx) {
-                        logApi.removeOldArmRpoProductionsFailed(ardId);
-                    }
-                }
-            } catch (Exception ex) {
+                // retry logic is contained in armRpoApi.removeProduction so we just catch an exception here if it fails after retrying
+            }  catch (Exception ex) {
                 log.error("Error while removing old RPO production", ex);
                 logApi.removeOldArmRpoProductionsFailed(ardId);
             }
