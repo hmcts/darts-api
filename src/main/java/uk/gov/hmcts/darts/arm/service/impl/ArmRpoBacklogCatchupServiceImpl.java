@@ -89,7 +89,7 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
     private boolean validateProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         return (ArmRpoHelper.removeProductionRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
             && ArmRpoHelper.completedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId()))
-            || !ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
+            || ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
     }
 
     private long calculateHoursFromStartToNow(String startDateTime) {
