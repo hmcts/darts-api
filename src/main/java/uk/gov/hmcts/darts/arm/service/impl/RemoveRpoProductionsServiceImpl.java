@@ -5,21 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.arm.service.RemoveRpoProductionsService;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.List;
-
-import static uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum.FAILED; 
+import java.util.List; 
 
 @Service
 @AllArgsConstructor
@@ -42,7 +39,7 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
         try {
             log.info("Finding ARM RPO executions with status FAILED older than: {}", waitDuration);
             ardIdsToRemove = armRpoService.findIdsByStatusAndLastModifiedDateTimeAfter(
-                statusOf(FAILED), OffsetDateTime.now().minus(waitDuration)
+                ArmRpoHelper.failedRpoStatus(), OffsetDateTime.now().minus(waitDuration)
             );
             if (ardIdsToRemove.isEmpty()) {
                 log.info("No ARM RPO productions found to remove older than: {}", waitDuration);
@@ -75,17 +72,10 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
                     }
                 }
             } catch (Exception ex) {
-                log.error("Error while polling removing old RPO production", ex);
+                log.error("Error while removing old RPO production", ex);
                 logApi.removeOldArmRpoProductionsFailed(ardId);
             }
         }
-    }
-    
-    private ArmRpoStatusEntity statusOf(ArmRpoStatusEnum status) {
-        var armRpoStatusEntity = new ArmRpoStatusEntity();
-        armRpoStatusEntity.setId(status.getId());
-        armRpoStatusEntity.setDescription(status.name());
-        return armRpoStatusEntity;
     }
     
 }
