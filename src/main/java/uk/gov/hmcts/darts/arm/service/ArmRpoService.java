@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service;
 
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
@@ -28,4 +29,5 @@ public interface ArmRpoService {
 
     void reconcileArmRpoCsvData(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, List<File> csvFiles, int batchSize);
 
+    ArmAutomatedTaskEntity getArmAutomatedTaskEntity(StringBuilder errorMessage);
 }
