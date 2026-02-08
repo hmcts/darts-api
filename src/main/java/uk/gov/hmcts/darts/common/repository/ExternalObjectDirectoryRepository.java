@@ -729,7 +729,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                         Limit limit);
 
     @Query("""
-        SELECT eod.id FROM ExternalObjectDirectoryEntity eod
+        SELECT eod FROM ExternalObjectDirectoryEntity eod
         WHERE eod.status = :status
         AND eod.externalLocationType = :locationType
         ORDER BY eod.inputUploadProcessedTs ASC
