@@ -146,6 +146,44 @@ class ArmRpoBacklogCatchupServiceIntTest extends IntegrationBase {
 
     }
 
+    @Test
+    void performCatchup_doesNothing_WhenOldestPendingEodIsTooNew() {
+        OffsetDateTime lastModifiedDateTime = OffsetDateTime.now().minusHours(49);
+
+        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_RPO_PENDING))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID().toString()).build();
+        armEod1.setInputUploadProcessedTs(lastModifiedDateTime);
+        armEod1.setVerificationAttempts(1);
+        dartsPersistence.save(armEod1);
+
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+
+        var executionDetailEntity = createExecutionDetailEntity(userAccount);
+        dartsPersistence.save(executionDetailEntity);
+        var taskEntity = createArmAutomatedTaskEntity();
+        assertEquals(taskEntity.getRpoCsvStartHour(), 25);
+        assertEquals(taskEntity.getRpoCsvEndHour(), 49);
+
+        // when
+        armRpoBacklogCatchupService.performCatchup(10, 50, 12, Duration.of(100, ChronoUnit.MILLIS));
+
+        // then
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository()
+            .findLatestByCreatedDateTimeDesc().orElseThrow();
+
+        ArmAutomatedTaskEntity taskEntityResult = dartsPersistence.getArmAutomatedTaskRepository()
+            .findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME).orElseThrow();
+        assertEquals(taskEntityResult.getRpoCsvStartHour(), 25);
+        assertEquals(taskEntityResult.getRpoCsvEndHour(), 49);
+
+        assertNotNull(armRpoExecutionDetailEntity.getId());
+        assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), armRpoExecutionDetailEntity.getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), armRpoExecutionDetailEntity.getArmRpoStatus().getId());
+
+    }
+
     private ArmAutomatedTaskEntity createArmAutomatedTaskEntity() {
         ArmAutomatedTaskEntity taskEntity = dartsPersistence.getArmAutomatedTaskRepository()
             .findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME).orElseThrow();
