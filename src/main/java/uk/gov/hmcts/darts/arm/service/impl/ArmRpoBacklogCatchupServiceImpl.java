@@ -26,6 +26,7 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupService {
 
+    public static final long PRE_AMBLE_MINUTES = 10l;
     private final ArmRpoService armRpoService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
@@ -39,6 +40,10 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
                                                                                                                         EodHelper.armLocation());
         // Only perform backlog catchup if the last execution is in REMOVE_PRODUCTION state or FAILED status
         if (!validateTaskCanBeRun(maxHoursEndingPoint, totalCatchupHours, armRpoExecutionDetailEntity, earliestEodInRpo)) {
+            log.error(
+                "Unable to perform ARM RPO backlog catchup due to validation failure. " +
+                    "MaxHoursEndingPoint: {}, TotalCatchupHours: {}, ArmRpoExecutionDetailEntity ID: {}, EarliestEodInRpo ID: {}",
+                maxHoursEndingPoint, totalCatchupHours, armRpoExecutionDetailEntity.getId(), earliestEodInRpo.getId());
             return;
         }
         StringBuilder errorMessage = new StringBuilder();
@@ -49,7 +54,9 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
         }
 
         OffsetDateTime inputUploadProcessedTs = earliestEodInRpo.getInputUploadProcessedTs();
-        int hoursEnd = (int) calculateHoursFromStartToNow(inputUploadProcessedTs.toString());
+        // subtract 10 minutes to account for any potential delay in EOD being picked up for RPO search after the input upload processed timestamp
+        OffsetDateTime adjustedOldestEodDateTime = inputUploadProcessedTs.minus(PRE_AMBLE_MINUTES, ChronoUnit.MINUTES);
+        int hoursEnd = (int) calculateHoursFromStartToNow(adjustedOldestEodDateTime.toString());
 
         armAutomatedTaskEntity.setRpoCsvStartHour(hoursEnd - totalCatchupHours);
         armAutomatedTaskEntity.setRpoCsvEndHour(hoursEnd);
@@ -65,7 +72,7 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
             return false;
         }
 
-        if (!validateProgress(armRpoExecutionDetailEntity)) {
+        if (!validateCurrentStateAndStatus(armRpoExecutionDetailEntity)) {
             log.info("Last ARM RPO execution is not in REMOVE_PRODUCTION state or FAILED status, skipping backlog catchup.");
             return false;
         }
@@ -86,7 +93,7 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
         return true;
     }
 
-    private boolean validateProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+    private boolean validateCurrentStateAndStatus(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         return (ArmRpoHelper.removeProductionRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
             && ArmRpoHelper.completedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId()))
             || ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
