@@ -12,15 +12,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
-import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
-import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
-import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
-import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
@@ -34,7 +28,6 @@ import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,11 +53,6 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
 @SuppressWarnings({"PMD.CloseResource"})
 class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
 
-    private static final String PRODUCTION_ID = " b52268a3-75e5-4dd4-a8d3-0b43781cfcf9";
-    private static final String SEARCH_ID = "8271f101-8c14-4c41-8865-edc5d8baed99";
-    private static final String MATTER_ID = "cb70c7fa-8972-4400-af1d-ff5dd76d2104";
-    private static final String STORAGE_ACCOUNT_ID = "StorageAccountId";
-
     @Autowired
     private ArmApiConfigurationProperties armApiConfigurationProperties;
     @MockitoBean
@@ -72,14 +60,10 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
     @MockitoBean
     private UserIdentity userIdentity;
     @MockitoBean
-    private ArmAuthClient armAuthClient;
-    @MockitoBean
     private ArmApiBaseClient armApiBaseClient;
     @MockitoBean
     private ArmRpoUtil armRpoUtil;
-    @MockitoBean
-    private ArmRpoClient armRpoClient;
-
+    
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private final Duration  waitDuration = Duration.ofDays(30);
 
@@ -90,8 +74,6 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
     
     @BeforeEach
     void setUp() {
-
-
         UserAccountEntity userAccountEntity = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
@@ -104,25 +86,8 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         response.setStatus(200);
         response.setIsError(false);
         when(armApiBaseClient.removeProduction(any(), any())).thenReturn(response);
-
-        String bearerToken = "some-token";
-        ArmTokenRequest tokenRequest = ArmTokenRequest.builder()
-            .username(armApiConfigurationProperties.getArmUsername())
-            .password(armApiConfigurationProperties.getArmPassword())
-            .build();
-        ArmTokenResponse tokenResponse = ArmTokenResponse.builder().accessToken(bearerToken).build();
-        when(armAuthClient.getToken(tokenRequest)).thenReturn(tokenResponse);
-
-        String armProfileId = "profileId";
-        AvailableEntitlementProfile profile = AvailableEntitlementProfile.builder()
-            .profiles(List.of(AvailableEntitlementProfile.Profiles.builder()
-                                  .profileId(armProfileId)
-                                  .profileName(armApiConfigurationProperties.getArmServiceProfile())
-                                  .build()))
-            .build();
-        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armApiBaseClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
-        when(armApiBaseClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(tokenResponse);
+        doReturn("token").when(armRpoUtil).getBearerToken("removeProduction");
+        when(armApiBaseClient.removeProduction(eq("token"), any())).thenReturn(response);
 
         //given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
@@ -154,25 +119,8 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         response.setStatus(200);
         response.setIsError(false);
         when(armApiBaseClient.removeProduction(any(), any())).thenReturn(response);
-
-        String bearerToken = "some-token";
-        ArmTokenRequest tokenRequest = ArmTokenRequest.builder()
-            .username(armApiConfigurationProperties.getArmUsername())
-            .password(armApiConfigurationProperties.getArmPassword())
-            .build();
-        ArmTokenResponse tokenResponse = ArmTokenResponse.builder().accessToken(bearerToken).build();
-        when(armAuthClient.getToken(tokenRequest)).thenReturn(tokenResponse);
-
-        String armProfileId = "profileId";
-        AvailableEntitlementProfile profile = AvailableEntitlementProfile.builder()
-            .profiles(List.of(AvailableEntitlementProfile.Profiles.builder()
-                                  .profileId(armProfileId)
-                                  .profileName(armApiConfigurationProperties.getArmServiceProfile())
-                                  .build()))
-            .build();
-        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armApiBaseClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
-        when(armApiBaseClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(tokenResponse);
+        doReturn("token").when(armRpoUtil).getBearerToken("removeProduction");
+        when(armApiBaseClient.removeProduction(eq("token"), any())).thenReturn(response);
 
         //given
         // create execution detail with FAILED status and last modified date older than duration
@@ -206,26 +154,8 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         response.setStatus(200);
         response.setIsError(false);
         when(armApiBaseClient.removeProduction(any(), any())).thenReturn(response);
-
-        String bearerToken = "some-token";
-        ArmTokenRequest tokenRequest = ArmTokenRequest.builder()
-            .username(armApiConfigurationProperties.getArmUsername())
-            .password(armApiConfigurationProperties.getArmPassword())
-            .build();
-        ArmTokenResponse tokenResponse = ArmTokenResponse.builder().accessToken(bearerToken).build();
-        when(armAuthClient.getToken(tokenRequest)).thenReturn(tokenResponse);
-
-        String armProfileId = "profileId";
-        AvailableEntitlementProfile profile = AvailableEntitlementProfile.builder()
-            .profiles(List.of(AvailableEntitlementProfile.Profiles.builder()
-                                  .profileId(armProfileId)
-                                  .profileName(armApiConfigurationProperties.getArmServiceProfile())
-                                  .build()))
-            .build();
-        EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armApiBaseClient.availableEntitlementProfiles("Bearer " + bearerToken, emptyRpoRequest)).thenReturn(profile);
-        when(armApiBaseClient.selectEntitlementProfile("Bearer " + bearerToken, armProfileId, emptyRpoRequest)).thenReturn(tokenResponse);
-
+        doReturn("token").when(armRpoUtil).getBearerToken("removeProduction");
+        when(armApiBaseClient.removeProduction(eq("token"), any())).thenReturn(response);
         //given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
