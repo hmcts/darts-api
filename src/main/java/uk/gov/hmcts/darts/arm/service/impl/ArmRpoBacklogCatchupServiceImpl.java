@@ -26,7 +26,7 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupService {
 
-    public static final long PRE_AMBLE_MINUTES = 10l;
+    private static final long PRE_AMBLE_MINUTES = 10L;
     private final ArmRpoService armRpoService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
