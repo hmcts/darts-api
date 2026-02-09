@@ -40,10 +40,12 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
                                                                                                                         EodHelper.armLocation());
         // Only perform backlog catchup if the last execution is in REMOVE_PRODUCTION state or FAILED status
         if (!validateTaskCanBeRun(maxHoursEndingPoint, totalCatchupHours, armRpoExecutionDetailEntity, earliestEodInRpo)) {
+            Integer armRpoExecutionDetailEntityId = isNull(armRpoExecutionDetailEntity) ? null : armRpoExecutionDetailEntity.getId();
+            Long earliestEodInRpoId = isNull(earliestEodInRpo) ? null : earliestEodInRpo.getId();
             log.error(
                 "Unable to perform ARM RPO backlog catchup due to validation failure. " +
                     "MaxHoursEndingPoint: {}, TotalCatchupHours: {}, ArmRpoExecutionDetailEntity ID: {}, EarliestEodInRpo ID: {}",
-                maxHoursEndingPoint, totalCatchupHours, armRpoExecutionDetailEntity.getId(), earliestEodInRpo.getId());
+                maxHoursEndingPoint, totalCatchupHours, armRpoExecutionDetailEntityId, earliestEodInRpoId);
             return;
         }
         StringBuilder errorMessage = new StringBuilder();

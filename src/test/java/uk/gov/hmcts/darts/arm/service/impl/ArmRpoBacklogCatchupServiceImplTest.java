@@ -77,11 +77,12 @@ class ArmRpoBacklogCatchupServiceImplTest {
     @Test
     void performCatchup_doesNothing_whenStateIsInProgress() {
         // given
-        ArmRpoExecutionDetailEntity exec = new ArmRpoExecutionDetailEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         ArmRpoStateEntity state = ArmRpoHelper.getProfileEntitlementsRpoState();
-        exec.setArmRpoState(state);
-        exec.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
-        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(exec);
+        armRpoExecutionDetailEntity.setId(1);
+        armRpoExecutionDetailEntity.setArmRpoState(state);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
+        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
 
         // when
         service.performCatchup(BATCH_SIZE, MAX_HOURS_ENDING_POINT, TOTAL_CATCHUP_HOURS, sleepDuration);
@@ -93,11 +94,12 @@ class ArmRpoBacklogCatchupServiceImplTest {
     @Test
     void performCatchup_doesNothing_whenStatusIsFailed() {
         // given
-        ArmRpoExecutionDetailEntity exec = new ArmRpoExecutionDetailEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         ArmRpoStateEntity state = ArmRpoHelper.removeProductionRpoState();
-        exec.setArmRpoState(state);
-        exec.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
-        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(exec);
+        armRpoExecutionDetailEntity.setId(1);
+        armRpoExecutionDetailEntity.setArmRpoState(state);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
+        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
 
         // when
         service.performCatchup(BATCH_SIZE, MAX_HOURS_ENDING_POINT, TOTAL_CATCHUP_HOURS, sleepDuration);
@@ -109,11 +111,12 @@ class ArmRpoBacklogCatchupServiceImplTest {
     @Test
     void performCatchup_doesNothing_whenNoEodsToProcess() {
         // given
-        ArmRpoExecutionDetailEntity exec = new ArmRpoExecutionDetailEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setId(1);
         ArmRpoStateEntity removeProductionState = ArmRpoHelper.removeProductionRpoState();
-        exec.setArmRpoState(removeProductionState);
-        exec.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
-        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(exec);
+        armRpoExecutionDetailEntity.setArmRpoState(removeProductionState);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
+        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
 
         when(externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(any(), any()))
             .thenReturn(null);
@@ -132,6 +135,7 @@ class ArmRpoBacklogCatchupServiceImplTest {
         ArmRpoStateEntity validState = ArmRpoHelper.removeProductionRpoState();
         armRpoExecutionDetailEntity.setArmRpoState(validState);
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
+        armRpoExecutionDetailEntity.setId(1);
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
 
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
