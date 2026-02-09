@@ -580,8 +580,8 @@ darts:
           at-least-for: PT1M
           at-most-for: PT45M
       arm-rpo-backlog-catchup:
-        total-catchup-hours: 5
-        max-hours-ending-point: 50
+        total-catchup-hours: ${ARM_RPO_TOTAL_CATCHUP_HOURS:5}
+        max-hours-ending-point: ${ARM_RPO_TOTAL_CATCHUP_MAX_HOURS_ENDING_POINT:50}
         thread-sleep-duration: ${ARM_RPO_THREAD_SLEEP_DURATION:60s}
         system-user-email: system_ArmRpoBacklogCatchup@hmcts.net
         lock:
