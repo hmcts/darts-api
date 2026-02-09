@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.featureflag.api.impl.FeatureFlagLogApiImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.DetsToArmPushAutomatedTaskConfig;
 import uk.gov.hmcts.darts.test.common.FileStore;
@@ -65,7 +66,7 @@ class DetsToArmBatchPushProcessorImplTest {
 
     private static final Integer MAX_RETRY_ATTEMPTS = 3;
     private static final String DETS_UUID = UUID.randomUUID().toString();
-    public static final long OSR_UUID = 987L;
+    private static final long OSR_UUID = 987L;
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -93,6 +94,8 @@ class DetsToArmBatchPushProcessorImplTest {
     private ExternalObjectDirectoryService externalObjectDirectoryService;
     @Mock
     private DetsToArmPushAutomatedTaskConfig detsToArmPushAutomatedTaskConfig;
+    @Mock
+    private FeatureFlagLogApiImpl featureFlagLogApi;
 
     @InjectMocks
     private DataStoreToArmHelper dataStoreToArmHelper;
@@ -123,7 +126,8 @@ class DetsToArmBatchPushProcessorImplTest {
             objectStateRecordRepository,
             currentTimeHelper,
             externalObjectDirectoryService,
-            detsToArmPushAutomatedTaskConfig
+            detsToArmPushAutomatedTaskConfig,
+            featureFlagLogApi
         );
 
         lenient().when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);

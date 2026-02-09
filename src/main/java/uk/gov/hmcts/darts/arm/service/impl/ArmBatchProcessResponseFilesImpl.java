@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.featureflag.api.impl.FeatureFlagLogApiImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 
@@ -18,12 +19,14 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 @Component
 public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessResponseFiles {
 
+    @SuppressWarnings({"PMD.ExcessiveParameterList"})
     public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                             ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                             ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
                                             ExternalObjectDirectoryService externalObjectDirectoryService,
-                                            LogApi logApi, DeleteArmResponseFilesHelper deleteArmResponseFilesHelper) {
+                                            LogApi logApi, DeleteArmResponseFilesHelper deleteArmResponseFilesHelper,
+                                            FeatureFlagLogApiImpl featureFlagLogApi) {
         super(externalObjectDirectoryRepository,
               armDataManagementApi,
               fileOperationService,
@@ -33,7 +36,8 @@ public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessRes
               currentTimeHelper,
               externalObjectDirectoryService,
               logApi,
-              deleteArmResponseFilesHelper);
+              deleteArmResponseFilesHelper,
+              featureFlagLogApi);
     }
 
     @Override

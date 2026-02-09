@@ -1,0 +1,1 @@
+UPDATE darts.security_group set rol_id = 3 where grp_id = 292

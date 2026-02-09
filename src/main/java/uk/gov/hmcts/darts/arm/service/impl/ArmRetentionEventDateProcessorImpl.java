@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -23,6 +24,7 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
 
     private final ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
     private final ArmRetentionEventDateCalculatorAutomatedTaskConfig automatedTaskConfigurationProperties;
+    private final ArmApiService armApiService;
 
     @SuppressWarnings({"PMD.DoNotUseThreads"})
     @Override
@@ -35,6 +37,12 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
         log.info("Processing {} EODs for retention event date calculation for batch size {}", externalObjectDirectoryEntitiesIds.size(), batchSize);
 
         try {
+            if (externalObjectDirectoryEntitiesIds.isEmpty()) {
+                log.info("No EODs found for retention event date calculation");
+                return;
+            }
+            //preload token before spawning threads
+            armApiService.getArmBearerToken();
             List<Callable<Void>> tasks = externalObjectDirectoryEntitiesIds.stream()
                 .map(externalObjectDirectoryId -> (Callable<Void>) () -> {
                     try {

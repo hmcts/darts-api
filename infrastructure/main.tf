@@ -162,3 +162,19 @@ module "armsa" {
   private_endpoint_subnet_id       = data.azurerm_subnet.private_endpoints.id
   default_action                   = "Allow"
 }
+
+data "azurerm_client_config" "current" {}
+
+data "azuread_group" "jit_admin_group" {
+  display_name     = "DTS JIT Access Darts DB Admin"
+  security_enabled = true
+}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "jit_admin" {
+  server_name         = "darts-api-${var.env}"
+  resource_group_name = local.rg_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = data.azuread_group.jit_admin_group.object_id
+  principal_name      = data.azuread_group.jit_admin_group.display_name
+  principal_type      = "Group"
+}

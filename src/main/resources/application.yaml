@@ -214,7 +214,7 @@ darts:
         transcription_request_unfulfilled: c19da6f7-9304-445a-9f30-3827f7c74103
   retention:
     overridable-fixed-policy-keys: 3
-    close-open-cases-older-than-years: 6
+    close-open-cases-older-than-period: ${CLOSE_OPEN_CASES_OLDER_THAN_PERIOD:P6Y}
     close-events: "Case closed,Archive case"
     max-retention-retries: 3
   storage:
@@ -621,6 +621,12 @@ darts:
     cases:
       defendant-name-char-limit: 600
     unallocated-case-regex: ${UNALLOCATED_CASE_REGEX:.*\d{8}-\d{6}.*}
+  feature-flag:
+    logging:
+      arm-rpo-feature-flag-logs-enabled: ${ARM_RPO_FEATURE_FLAG_LOGS_ENABLED:false}
+      dets-to-arm-push-feature-flag-logs-enabled: ${DETS_TO_ARM_PUSH_FEATURE_FLAG_LOGS_ENABLED:false}
+      arm-pull-feature-flag-logs-enabled: ${ARM_PULL_FEATURE_FLAG_LOGS_ENABLED:false}
+
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
@@ -629,4 +635,4 @@ dbMigration:
 logging:
   level:
     uk.gov.hmcts.darts: ${DARTS_LOG_LEVEL:INFO}
-    net.javacrumbs.shedlock: ${DARTS_LOG_LEVEL:INFO}
+    net.javacrumbs.shedlock: ${SHEDLOCK_LOG_LEVEL:INFO}
