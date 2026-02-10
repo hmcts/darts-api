@@ -5,6 +5,6 @@ import java.time.Duration;
 @FunctionalInterface
 public interface CleanupDetsDataService {
 
-    void cleanupDetsData(int batchsize, Duration durationInArmStorage);
+    void cleanupDetsData(int batchsize, Duration durationInArmStorage, Integer partitionSize);
 
 }
