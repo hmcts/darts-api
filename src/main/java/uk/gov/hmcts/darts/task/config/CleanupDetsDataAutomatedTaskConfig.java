@@ -14,5 +14,6 @@ import java.time.Duration;
 public class CleanupDetsDataAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
 
     private Duration durationInArmStorage;
+    private Integer partitionSize;
 
 }

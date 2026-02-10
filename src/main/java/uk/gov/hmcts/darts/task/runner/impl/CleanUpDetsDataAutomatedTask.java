@@ -35,7 +35,9 @@ public class CleanUpDetsDataAutomatedTask extends AbstractLockableAutomatedTask<
 
     @Override
     protected void runTask() {
-        cleanupDetsDataService.cleanupDetsData(getAutomatedTaskBatchSize(), cleanupDetsDataAutomatedTaskConfig.getDurationInArmStorage());
+        cleanupDetsDataService.cleanupDetsData(getAutomatedTaskBatchSize(),
+                                               cleanupDetsDataAutomatedTaskConfig.getDurationInArmStorage(),
+                                               cleanupDetsDataAutomatedTaskConfig.getPartitionSize());
     }
 
 }

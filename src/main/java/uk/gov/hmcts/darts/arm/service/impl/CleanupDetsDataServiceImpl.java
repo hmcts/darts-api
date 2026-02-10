@@ -68,9 +68,7 @@ public class CleanupDetsDataServiceImpl implements CleanupDetsDataService {
         } catch (Exception e) {
             log.error("Error occurred during DETS cleanup", e);
         }
-        for (Long detsEodId : detsEods) {
-            cleanupDetsEodTransactionalService.cleanupDetsEod(detsEodId);
-        }
+
 
     }
 
@@ -81,7 +79,9 @@ public class CleanupDetsDataServiceImpl implements CleanupDetsDataService {
                 int batchNumber = batchCounter.getAndIncrement();
                 try {
                     log.info("Starting processing batch {} out of {}", batchNumber, detsBatches.size());
-                    cleanupDetsEodTransactionalService.cleanupDetsEod(detsEodId);
+                    for (Long detsEodId : eodsForBatch) {
+                        cleanupDetsEodTransactionalService.cleanupDetsEod(detsEodId);
+                    }
                     log.info("Finished processing batch {} out of {}", batchNumber, detsBatches.size());
                 } catch (Exception e) {
                     log.error("Unexpected exception when processing batch {}", batchNumber, e);
