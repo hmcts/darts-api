@@ -38,6 +38,7 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
         var armRpoExecutionDetailEntity = armRpoService.getLatestArmRpoExecutionDetailEntity();
         var earliestEodInRpo = externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(EodHelper.armRpoPendingStatus(),
                                                                                                                         EodHelper.armLocation());
+
         // Only perform backlog catchup if the last execution is in REMOVE_PRODUCTION state or FAILED status
         if (!validateTaskCanBeRun(maxHoursEndingPoint, totalCatchupHours, armRpoExecutionDetailEntity, earliestEodInRpo)) {
             Integer armRpoExecutionDetailEntityId = isNull(armRpoExecutionDetailEntity) ? null : armRpoExecutionDetailEntity.getId();
