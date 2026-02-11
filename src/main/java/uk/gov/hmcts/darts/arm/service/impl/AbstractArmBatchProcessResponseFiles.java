@@ -525,6 +525,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         String createRecordFilenameAndPath = createRecordFilenameProcessor.getCreateRecordFilenameAndPath();
         if (nonNull(createRecordBinary)) {
             try {
+                log.info("Length of ARM CR response file {} is {}", createRecordFilenameAndPath, createRecordBinary.getLength());
                 log.info("Contents of ARM CR response file: {} - {}", createRecordFilenameAndPath, createRecordBinary);
                 ArmResponseCreateRecord armResponseCreateRecord = getResponseCreateRecordOrDelete(createRecordFilenameAndPath, createRecordBinary);
                 UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
@@ -596,6 +597,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         String uploadFileFilenameAndPath = uploadFileFilenameProcessor.getUploadFileFilenameAndPath();
         if (nonNull(uploadFileBinary)) {
             try {
+                log.info("Length of ARM UF response file {} is {}", uploadFileFilenameAndPath, uploadFileBinary.getLength());
                 log.info("Contents of ARM UF response file: {} - {}", uploadFileFilenameAndPath, uploadFileBinary);
                 ArmResponseUploadFileRecord armResponseUploadFileRecord = getResponseUploadFileRecordOrDelete(uploadFileFilenameAndPath, uploadFileBinary);
                 UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseUploadFileRecord.getInput());
