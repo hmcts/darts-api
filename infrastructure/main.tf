@@ -149,16 +149,16 @@ data "azurerm_subnet" "private_endpoints" {
 }
 
 module "armsa" {
-  source                   = "git@github.com:hmcts/cnp-module-storage-account?ref=4.x"
-  env                      = var.env
-  storage_account_name     = "${var.product}arm${var.env}"
-  resource_group_name      = local.rg_name
-  location                 = var.location
-  account_kind             = var.account_kind
-  enable_hns               = true
-  account_replication_type = "ZRS"
-  common_tags              = var.common_tags
-  cross_tenant_replication_enabled   = true
-  private_endpoint_subnet_id = data.azurerm_subnet.private_endpoints.id
-  default_action           = "Allow"
+  source                           = "git@github.com:hmcts/cnp-module-storage-account?ref=4.x"
+  env                              = var.env
+  storage_account_name             = "${var.product}arm${var.env}"
+  resource_group_name              = local.rg_name
+  location                         = var.location
+  account_kind                     = var.account_kind
+  enable_hns                       = true
+  account_replication_type         = "ZRS"
+  common_tags                      = var.common_tags
+  cross_tenant_replication_enabled = true
+  private_endpoint_subnet_id       = data.azurerm_subnet.private_endpoints.id
+  default_action                   = "Allow"
 }
