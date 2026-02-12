@@ -61,10 +61,19 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
         OffsetDateTime adjustedOldestEodDateTime = inputUploadProcessedTs.minus(PRE_AMBLE_MINUTES, ChronoUnit.MINUTES);
         int hoursEnd = (int) calculateHoursFromStartToNow(adjustedOldestEodDateTime.toString());
 
-        armAutomatedTaskEntity.setRpoCsvStartHour(hoursEnd - totalCatchupHours);
-        armAutomatedTaskEntity.setRpoCsvEndHour(hoursEnd);
-        armAutomatedTaskRepository.save(armAutomatedTaskEntity);
-        triggerArmRpoSearchService.triggerArmRpoSearch(threadSleepDuration);
+        Integer originalStaartHour = armAutomatedTaskEntity.getRpoCsvStartHour();
+        Integer originalEndHour = armAutomatedTaskEntity.getRpoCsvEndHour();
+        try {
+            armAutomatedTaskEntity.setRpoCsvStartHour(hoursEnd - totalCatchupHours);
+            armAutomatedTaskEntity.setRpoCsvEndHour(hoursEnd);
+            armAutomatedTaskRepository.save(armAutomatedTaskEntity);
+            triggerArmRpoSearchService.triggerArmRpoSearch(threadSleepDuration);
+        } finally {
+            // reset the start and end hour to the original value after the task is triggered
+            armAutomatedTaskEntity.setRpoCsvStartHour(originalStaartHour);
+            armAutomatedTaskEntity.setRpoCsvEndHour(originalEndHour);
+            armAutomatedTaskRepository.save(armAutomatedTaskEntity);
+        }
     }
 
     private boolean validateTaskCanBeRun(Integer maxHoursEndingPoint, Integer totalCatchupHours,
