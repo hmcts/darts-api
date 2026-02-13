@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.arm.service.impl.DartsBatchCleanupArmResponseFilesServ
 @SuppressWarnings("PMD.TestClassWithoutTestCases")//False positive tests done via inheritanc
 class DartsBatchCleanupArmResponseFilesServiceIntTest extends AbstractBatchCleanupArmResponseFilesServiceIntTest {
 
-
     @Autowired
     @Getter
     private DartsBatchCleanupArmResponseFilesServiceImpl cleanupArmResponseFilesService;
