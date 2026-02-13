@@ -37,9 +37,9 @@ class RemoveRpoProductionsServiceImplTest {
     @Mock
     private ArmApiService armApiService;
     @Mock
-    LogApi logApi;
+    private LogApi logApi;
     @Mock
-    ArmRpoApi armRpoApi;
+    private ArmRpoApi armRpoApi;
     @Mock
     private UserIdentity userIdentity;
     @Mock
