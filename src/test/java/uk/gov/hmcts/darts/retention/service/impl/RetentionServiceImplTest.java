@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.cases.helper.FindCurrentEntitiesHelper;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionConfidenceCategoryMapperEntity;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.darts.test.common.data.RetentionConfidenceCategoryMapperTest
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.Period;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
@@ -47,21 +49,27 @@ class RetentionServiceImplTest {
     private CaseRepository caseRepository;
     @Mock
     private RetentionMapper retentionMapper;
+    @Mock
+    private FindCurrentEntitiesHelper findCurrentEntitiesHelper;
 
     private RetentionService retentionService;
 
-    public static final String FIXED_DATE_TIME = "2024-01-01T00:00:00Z";
+    private static final String FIXED_DATE_TIME = "2024-01-01T00:00:00Z";
 
     @BeforeEach
     void setUp() {
         Clock clock = Clock.fixed(Instant.parse(FIXED_DATE_TIME),
                                   ZoneId.of("UTC"));
-
+        List<String> closeEvents = List.of("Case closed", "Archive case");
+        Period daysBetweenEvents = Period.ofDays(10);
         retentionService = new RetentionServiceImpl(caseRetentionRepository,
                                                     retentionConfidenceCategoryMapperRepository,
                                                     caseRepository,
                                                     retentionMapper,
-                                                    clock);
+                                                    clock,
+                                                    findCurrentEntitiesHelper,
+                                                    closeEvents,
+                                                    daysBetweenEvents);
     }
 
     @Nested
