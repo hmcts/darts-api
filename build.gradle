@@ -15,7 +15,7 @@ plugins {
   id 'org.owasp.dependencycheck' version '12.2.0'
   id 'com.github.ben-manes.versions' version '0.52.0'
   id 'org.sonarqube' version '6.2.0.5505'
-  id "io.freefair.lombok" version "8.14"
+  id "io.freefair.lombok" version "8.14.4"
   id "org.openapi.generator" version "7.13.0"
   id "org.flywaydb.flyway" version "11.11.0"
   id 'maven-publish'
