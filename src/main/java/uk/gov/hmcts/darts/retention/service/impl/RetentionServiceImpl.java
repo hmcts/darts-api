@@ -86,9 +86,9 @@ public class RetentionServiceImpl implements RetentionService {
                 eventList.stream().filter(eventEntity -> closeEvents.contains(latestEvent.getEventType().getEventName())).findFirst();
             if (latestClosedEvent.isPresent() && latestEvent.getId().equals(latestClosedEvent.get().getId())) {
                 // If the latest event in the case is "Case Closed" or "Archive Case" event
-                confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;//CASE_CLOSED_EXACT_10111000;
+                confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;
             } else if (latestClosedEvent.isPresent()) {
-                confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(latestClosedEvent, latestEvent);
+                confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(latestClosedEvent.get(), latestEvent);
             } else {
                 if (eventList.stream().filter(EventEntity::isLogEntry).count() == eventList.size()) {
                     // If events exist in the case and NO non-log events are present, use the latest log event
@@ -104,19 +104,19 @@ public class RetentionServiceImpl implements RetentionService {
         return confidenceCategory;
     }
 
-    private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumBasedOnDates(Optional<EventEntity> latestClosedEvent, EventEntity latestEvent) {
+    private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumBasedOnDates(EventEntity latestClosedEvent, EventEntity latestEvent) {
         RetentionConfidenceCategoryEnum confidenceCategory;
-        OffsetDateTime closedEventDateTime = latestClosedEvent.get().getCreatedDateTime();
+        OffsetDateTime closedEventDateTime = latestClosedEvent.getCreatedDateTime();
         OffsetDateTime latestEventDateTime = latestEvent.getCreatedDateTime();
         long daysBetween = between(closedEventDateTime, latestEventDateTime).toDays();
         if (daysBetween <= daysBetweenEvents.getDays()) {
             // if the latest "Case Closed" or "Archive Case" event is NOT the latest non-log event, but the latest non-log event occurs
             // WITHIN 10 days of the "Case Closed" or "Archive Case" event
-            confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED_P3_WITHIN_30183000;
+            confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN;
         } else {
             // if the latest "Case Closed" or "Archive Case" event is NOT the latest non-log event, but the latest non-log event occurs
             // MORE THAN 10 days after the "Case Closed" or "Archive Case" event
-            confidenceCategory = RetentionConfidenceCategoryEnum.MAX_EVENT_OUTWITH_10131060;
+            confidenceCategory = RetentionConfidenceCategoryEnum.MAX_EVENT_OUTWITH;
         }
         return confidenceCategory;
     }

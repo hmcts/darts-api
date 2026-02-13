@@ -18,6 +18,8 @@ public enum RetentionConfidenceCategoryEnum {
     AGED_CASE_MAX_MEDIA_CLOSED(6),
     AGED_CASE_MAX_HEARING_CLOSED(7),
     AGED_CASE_CASE_CREATION_CLOSED(8),
+    CASE_CLOSED_WITHIN(9),
+    MAX_EVENT_OUTWITH(10),
 
     // Legacy values
     LEGACY_CASE_CLOSED_11(11),
