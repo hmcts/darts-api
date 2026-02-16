@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -151,13 +152,20 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void modifyUser_ReturnsUpdatedUser_WithActivateFalse() {
+    void modifyUser_ShouldReturnUpdatedUserAndRollsBackTranscriptions_WhenTranscriberAndWithActivateFalse() {
+        UserAccountEntity user = createUserAccount(1, EXISTING_EMAIL_ADDRESS);
+        user.setActive(true);
+        user.setIsSystemUser(false);
+
+        SecurityRoleEntity roleEntity = new SecurityRoleEntity();
+        roleEntity.setId(SecurityRoleEnum.TRANSCRIBER.getId());
+
+        SecurityGroupEntity groupEntity = new SecurityGroupEntity();
+        groupEntity.setSecurityRoleEntity(roleEntity);
+        groupEntity.setUsers(new HashSet<>(Set.of(user)));
+        user.setSecurityGroupEntities(new HashSet<>(Set.of(groupEntity)));
         List<UserAccountEntity> userAccountEntities = new ArrayList<>();
-        userAccountEntities.add(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
-
-        userAccountEntities.getFirst().setActive(false);
-        userAccountEntities.getFirst().setIsSystemUser(false);
-
+        userAccountEntities.add(user);
         userAccountEntities.add(createUserAccount(2, "another-user-email@hmcts.net"));
 
         Integer userId = 1001;
@@ -174,6 +182,9 @@ class UserManagementServiceImplTest {
         when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
         when(userAccountRepository.existsById(userId)).thenReturn(true);
         when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.getFirst()));
+        when(userAccountRepository.findByRoleAndUserId(
+            SecurityRoleEnum.TRANSCRIBER.getId(), user.getId()))
+            .thenReturn(Optional.of(user));
         when(transcriptionService.rollbackUserTranscriptions(userAccountEntities.getFirst())).thenReturn(Arrays.asList(transcriptionId));
         when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
 
@@ -184,7 +195,34 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void modifyUser_ReturnsUpdatedUser_WithoutActiveSet() {
+    void modifyUser_ShouldNotRollbackTranscriptions_WhenUserNotTranscriber() {
+        List<UserAccountEntity> userAccountEntities = new ArrayList<>();
+        userAccountEntities.add(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
+
+        userAccountEntities.getFirst().setActive(false);
+        userAccountEntities.getFirst().setIsSystemUser(false);
+
+        userAccountEntities.add(createUserAccount(2, "another-user-email@hmcts.net"));
+
+        Integer userId = 1001;
+        UserPatch patch = new UserPatch();
+        patch.setActive(false);
+
+        Set<UserAccountEntity> userAccountEntitySet = new HashSet<>(userAccountEntities);
+        SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
+        when(securityGroupEntity.getUsers()).thenReturn(userAccountEntitySet);
+        
+        when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
+        when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
+        when(userAccountRepository.existsById(userId)).thenReturn(true);
+        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.getFirst()));
+        when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
+        service.modifyUser(userId, patch);
+        verify(transcriptionService, times(0)).rollbackUserTranscriptions(Mockito.any());
+    }
+
+    @Test
+    void modifyUser_ShouldReturnUpdatedUser_WhenActiveNotSet() {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
         userAccountEntities.getFirst().setIsSystemUser(false);
 
@@ -226,7 +264,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void modifyUser_ReturnsUpdatedUser_WithActiveTrue() {
+    void modifyUser_ShouldReturnUpdatedUser_WhenActiveTrue() {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
         userAccountEntities.getFirst().setIsSystemUser(false);
 
