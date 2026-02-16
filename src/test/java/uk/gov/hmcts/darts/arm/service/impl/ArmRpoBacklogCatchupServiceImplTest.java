@@ -22,7 +22,6 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -182,7 +181,7 @@ class ArmRpoBacklogCatchupServiceImplTest {
         service.performCatchup(BATCH_SIZE, MAX_HOURS_ENDING_POINT, TOTAL_CATCHUP_HOURS, sleepDuration);
 
         // then
-        verify(armAutomatedTaskRepository, times(2)).save(automatedTask);
+        verify(armAutomatedTaskRepository).save(automatedTask);
         verify(triggerArmRpoSearchService).triggerArmRpoSearch(sleepDuration);
 
     }
