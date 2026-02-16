@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -136,8 +137,8 @@ class ArmRpoBacklogCatchupServiceIntTest extends IntegrationBase {
 
         ArmAutomatedTaskEntity taskEntityResult = dartsPersistence.getArmAutomatedTaskRepository()
             .findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME).orElseThrow();
-        assertEquals(taskEntityResult.getRpoCsvStartHour(), 25);
-        assertEquals(taskEntityResult.getRpoCsvEndHour(), 49);
+        assertNotEquals(taskEntityResult.getRpoCsvStartHour(), 25);
+        assertNotEquals(taskEntityResult.getRpoCsvEndHour(), 49);
 
         assertNotNull(armRpoExecutionDetailEntity.getId());
         assertEquals(ArmRpoHelper.saveBackgroundSearchRpoState().getId(), armRpoExecutionDetailEntity.getArmRpoState().getId());

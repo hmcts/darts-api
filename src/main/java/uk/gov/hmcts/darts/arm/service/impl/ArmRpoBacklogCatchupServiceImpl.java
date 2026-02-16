@@ -68,8 +68,8 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
             armAutomatedTaskEntity.setRpoCsvEndHour(hoursEnd);
             armAutomatedTaskRepository.save(armAutomatedTaskEntity);
             triggerArmRpoSearchService.triggerArmRpoSearch(threadSleepDuration);
-        } finally {
-            // reset the start and end hour to the original value after the task is triggered
+        } catch (Exception e) {
+            // reset the start and end hour to the original value if there are any failures
             armAutomatedTaskEntity.setRpoCsvStartHour(originalStaartHour);
             armAutomatedTaskEntity.setRpoCsvEndHour(originalEndHour);
             armAutomatedTaskRepository.save(armAutomatedTaskEntity);
