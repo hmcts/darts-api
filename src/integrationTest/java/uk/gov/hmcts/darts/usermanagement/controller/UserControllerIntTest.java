@@ -14,11 +14,14 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
@@ -67,6 +70,9 @@ class UserControllerIntTest extends IntegrationBase {
 
     @Autowired
     private SecurityGroupRepository securityGroupRepository;
+    
+    @Autowired
+    private SecurityRoleRepository securityRoleRepository;
 
     @Autowired
     private UserAccountRepository userAccountRepository;
@@ -82,16 +88,24 @@ class UserControllerIntTest extends IntegrationBase {
         .withSecond(0).withNano(0);
 
     @Test
-    void testDeactivateModifyWithSuperAdmin() throws Exception {
+    void deactivateUser_ShouldDeactivateUserAndRollBackTranscriptions_WhenTranscriber() throws Exception {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
         userAccountEntity = userAccountRepository.save(userAccountEntity);
 
-        Optional<SecurityGroupEntity> groupEntity
-            = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
+        Optional<SecurityGroupEntity> groupEntity = securityGroupRepository.findByGroupNameIgnoreCase(
+            SecurityGroupEnum.SUPER_ADMIN.getName());
+        SecurityGroupEntity superAdminGroup = groupEntity.get();
 
-        userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
+        Optional<SecurityRoleEntity> roleEntity = securityRoleRepository.findById(SecurityRoleEnum.TRANSCRIBER.getId());
+        SecurityRoleEntity transcriberRole = roleEntity.get();
+
+        superAdminGroup.setSecurityRoleEntity(transcriberRole);
+        superAdminGroup = securityGroupRepository.save(superAdminGroup);
+
+        userAccountEntity.getSecurityGroupEntities().add(superAdminGroup);
+
         userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -141,7 +155,74 @@ class UserControllerIntTest extends IntegrationBase {
     }
 
     @Test
-    void testDeactivateUserWithSuperUser() throws Exception {
+    void deactivateUser_ShouldDeactivateUser_WhenSuperAdmin() throws Exception {
+        securityGroupStub.clearUsers(SecurityGroupEnum.SUPER_ADMIN);
+        superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
+
+        UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
+        userAccountEntity = userAccountRepository.save(userAccountEntity);
+
+        Optional<SecurityGroupEntity> groupEntity
+            = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
+        SecurityGroupEntity superAdminGroup = groupEntity.get();
+
+        Optional<SecurityRoleEntity> roleEntity = securityRoleRepository.findById(SecurityRoleEnum.SUPER_ADMIN.getId());
+        SecurityRoleEntity transcriberRole = roleEntity.get();
+
+        superAdminGroup.setSecurityRoleEntity(transcriberRole);
+        superAdminGroup = securityGroupRepository.save(superAdminGroup);
+
+        userAccountEntity.getSecurityGroupEntities().add(superAdminGroup);
+
+        userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
+
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            SOME_CASE_ID,
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME));
+
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        TranscriptionEntity transcription
+            = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(userAccountEntity, courtCase, hearingEntity, YESTERDAY, false);
+
+        // now run the test to disable the user
+        UserPatch userPatch = new UserPatch();
+        userPatch.setActive(false);
+        userPatch.setDescription("");
+        List<TranscriptionWorkflowEntity> workflowEntityBefore
+            = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
+        Assertions.assertFalse(containsApprovedWorkflow(workflowEntityBefore));
+
+        MvcResult mvcResult = mockMvc.perform(patch(ENDPOINT_URL + userAccountEntity.getId())
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(userPatch)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        Optional<UserAccountEntity> fndUserIdentity = dartsDatabase.getUserAccountRepository().findById(userAccountEntity.getId());
+        Assertions.assertTrue(fndUserIdentity.isPresent());
+
+        Assertions.assertFalse(securityGroupStub.isPartOfAnySecurityGroup(fndUserIdentity.get().getId()));
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        UserWithIdAndTimestamps userWithIdAndTimestamps = mapper.readValue(mvcResult.getResponse().getContentAsString(),
+                                                                           UserWithIdAndTimestamps.class);
+
+        List<Long> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
+        
+        List<TranscriptionWorkflowEntity> workflowEntityAfter
+            = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
+
+        // transcription workflows should not be changed if user is not transcriber
+        Assertions.assertNull(rolledBackTranscription);
+        Assertions.assertEquals(workflowEntityBefore.size(), workflowEntityAfter.size());
+    }
+
+    @Test
+    void deactivateUser_ShouldDeactivateUser_WhenSuperUser() throws Exception {
         superAdminUserStub.givenSystemUserIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
@@ -150,8 +231,6 @@ class UserControllerIntTest extends IntegrationBase {
         // add user to the super user group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_USER.getName());
-
-
         userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
         userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 
@@ -186,23 +265,18 @@ class UserControllerIntTest extends IntegrationBase {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-
         UserWithIdAndTimestamps userWithIdAndTimestamps = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                                            UserWithIdAndTimestamps.class);
 
         List<Long> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
-
+        Assertions.assertNull(rolledBackTranscription);
         List<TranscriptionWorkflowEntity> workflowEntityAfter
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
-
-        Assertions.assertEquals(1, rolledBackTranscription.size());
-        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.getFirst());
-        Assertions.assertEquals(workflowEntityBefore.size() + 1, workflowEntityAfter.size());
-        Assertions.assertTrue(containsApprovedWorkflow(workflowEntityAfter));
+        Assertions.assertEquals(workflowEntityBefore.size(), workflowEntityAfter.size());
     }
 
     @Test
-    void testActivateModifyUserWithSuperAdmin() throws Exception {
+    void activateUser_ShouldActivateUser_WhenSuperAdmin() throws Exception {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
@@ -263,7 +337,7 @@ class UserControllerIntTest extends IntegrationBase {
     }
 
     @Test
-    void testActivateModifyUserWithSuperAdminAndFailWithNoEmailAddress() throws Exception {
+    void activateUser_ShouldFail_WhenSuperAdminAndNoEmailAddress() throws Exception {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
@@ -312,7 +386,7 @@ class UserControllerIntTest extends IntegrationBase {
     }
 
     @Test
-    void testActivateModifyUserWithSuperAdminAndFailWithNoFullNameAndNoEmailAddress() throws Exception {
+    void activateUser_ShouldFail_WhenSuperAdminAndNoFullNameOrEmailAddress() throws Exception {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
@@ -358,7 +432,7 @@ class UserControllerIntTest extends IntegrationBase {
     }
 
     @Test
-    void testDeactivateFailureWhereUserIsLastInSuperAdminGroup() throws Exception {
+    void deactivateUser_ShouldFail_WhenUserIsLastInSuperAdminGroup() throws Exception {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
@@ -391,7 +465,7 @@ class UserControllerIntTest extends IntegrationBase {
     }
 
     @Test
-    void testDeactivateFailureFromSuperUserModifyChange() throws Exception {
+    void setDescription_ShouldFail_WhenSuperUser() throws Exception {
         superAdminUserStub.givenSystemUserIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
@@ -419,7 +493,7 @@ class UserControllerIntTest extends IntegrationBase {
     }
 
     @Test
-    void testActivateFailureFromSuperUser() throws Exception {
+    void activateUser_ShouldFail_WhenSuperUser() throws Exception {
         superAdminUserStub.givenSystemUserIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
