@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
-import uk.gov.hmcts.darts.audio.deleter.ExternalDataStoreEntityDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalDataStoreEntityDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;

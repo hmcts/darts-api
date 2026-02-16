@@ -1,12 +1,13 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
-import uk.gov.hmcts.darts.audio.deleter.ExternalDataStoreEntityDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalDataStoreEntityDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -17,7 +18,6 @@ import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
-import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -48,16 +48,14 @@ class ExternalOutboundDataStoreDeleterImplTest {
     private OffsetDateTime currentTime;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() throws IllegalAccessException {
         this.deleter = new ExternalOutboundDataStoreDeleter(
             transientObjectDirectoryRepository,
             transformedMediaRepository,
             dataManagementApi
         );
-        // Inject the mock entityDeleter via reflection
-        Field field = deleter.getClass().getSuperclass().getDeclaredField("entityDeleter");
-        field.setAccessible(true);
-        field.set(deleter, entityDeleter);
+        // Inject the mock entityDeleter via reflection (safe, no setAccessible)
+        FieldUtils.writeField(deleter, "entityDeleter", entityDeleter, true);
         currentTime = OffsetDateTime.now();
     }
 
