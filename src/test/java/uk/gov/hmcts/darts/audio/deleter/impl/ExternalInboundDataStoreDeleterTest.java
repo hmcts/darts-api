@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.audio.deleter.impl;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.deleter.ExternalDataStoreEntityDeleter;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
@@ -16,9 +18,11 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEn
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -34,13 +38,18 @@ class ExternalInboundDataStoreDeleterTest {
     private ExternalInboundDataStoreDeleter deleter;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IllegalAccessException {
         eodHelperMocks = new EodHelperMocks();
         this.deleter = spy(new ExternalInboundDataStoreDeleter(
             externalObjectDirectoryRepository,
             dataManagementApi
         ));
-
+        ExternalDataStoreEntityDeleter entityDeleter = mock(ExternalDataStoreEntityDeleter.class);
+        FieldUtils.writeField(deleter, "entityDeleter", entityDeleter, true);
+        when(entityDeleter.deleteEntity(any(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            return ((ExternalInboundDataStoreDeleter) args[0]).deleteInternal((uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity) args[1]);
+        });
     }
 
     @AfterEach
@@ -98,5 +107,5 @@ class ExternalInboundDataStoreDeleterTest {
 
         assertNotNull(result);
     }
-    
+
 }

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.audio.deleter.ExternalDataStoreEntityDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -13,10 +14,10 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -35,8 +36,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ExternalOutboundDataStoreDeleterImplTest {
     @Mock
-    private UserAccountRepository userAccountRepository;
-    @Mock
     private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private ExternalOutboundDataStoreDeleter deleter;
     private ObjectRecordStatusEntity markedForDeletionStatus;
@@ -44,15 +43,21 @@ class ExternalOutboundDataStoreDeleterImplTest {
     private DataManagementApi dataManagementApi;
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
+    @Mock
+    private ExternalDataStoreEntityDeleter entityDeleter;
     private OffsetDateTime currentTime;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         this.deleter = new ExternalOutboundDataStoreDeleter(
             transientObjectDirectoryRepository,
             transformedMediaRepository,
             dataManagementApi
         );
+        // Inject the mock entityDeleter via reflection
+        Field field = deleter.getClass().getSuperclass().getDeclaredField("entityDeleter");
+        field.setAccessible(true);
+        field.set(deleter, entityDeleter);
         currentTime = OffsetDateTime.now();
     }
 
@@ -95,6 +100,11 @@ class ExternalOutboundDataStoreDeleterImplTest {
         try (EodHelperMocks eodHelperMocks = new EodHelperMocks()) {
 
             when(transientObjectDirectoryRepository.findByStatus(any(), any())).thenReturn(outboundData);
+            // Mock the entityDeleter to call the real deleteInternal logic
+            when(entityDeleter.deleteEntity(any(), any())).thenAnswer(invocation -> {
+                Object[] args = invocation.getArguments();
+                return ((ExternalOutboundDataStoreDeleter) args[0]).deleteInternal((TransientObjectDirectoryEntity) args[1]);
+            });
 
             Collection<TransientObjectDirectoryEntity> deletedItems = deleter.delete(100);
 
@@ -123,3 +133,4 @@ class ExternalOutboundDataStoreDeleterImplTest {
         assertEodAndTodAndTransformedMediaAreDeletedWithExprityOffset(Duration.ofDays(89));
     }
 }
+

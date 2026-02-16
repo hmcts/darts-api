@@ -1,13 +1,16 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.audio.deleter.ExternalDataStoreEntityDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -49,7 +52,7 @@ class ExternalInboundDataStoreDeleterImplTest {
     private EodHelperMocks eodHelperMocks;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IllegalAccessException {
         eodHelperMocks = new EodHelperMocks();
         mockStatus();
         List<ExternalObjectDirectoryEntity> inboundData = createInboundData();
@@ -63,6 +66,12 @@ class ExternalInboundDataStoreDeleterImplTest {
             externalObjectDirectoryRepository,
             dataManagementApi
         );
+        ExternalDataStoreEntityDeleter entityDeleter = Mockito.mock(ExternalDataStoreEntityDeleter.class);
+        FieldUtils.writeField(deleter, "entityDeleter", entityDeleter, true);
+        when(entityDeleter.deleteEntity(any(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            return ((ExternalInboundDataStoreDeleter) args[0]).deleteInternal((ExternalObjectDirectoryEntity) args[1]);
+        });
     }
 
     @AfterEach
