@@ -74,6 +74,21 @@ public class RetentionServiceImpl implements RetentionService {
     }
 
     @Override
+    public RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryForMedia(CourtCaseEntity courtCase) {
+        RetentionConfidenceCategoryEnum confidenceCategory;
+        //look for the last audio and use its recorded date
+        List<MediaEntity> mediaList = findCurrentEntitiesHelper.getCurrentMedia(courtCase);
+        if (mediaList.isEmpty()) {
+            //look for the last hearing date and use that
+            confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED;
+        } else {
+            mediaList.sort(Comparator.comparing(MediaEntity::getCreatedDateTime).reversed());
+            confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED;
+        }
+        return confidenceCategory;
+    }
+
+    @Override
     public RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase) {
         RetentionConfidenceCategoryEnum confidenceCategory = null;
 
@@ -83,7 +98,7 @@ public class RetentionServiceImpl implements RetentionService {
             EventEntity latestEvent = eventList.get(0);
             //find latest closed event
             Optional<EventEntity> latestClosedEvent =
-                eventList.stream().filter(eventEntity -> closeEvents.contains(latestEvent.getEventType().getEventName())).findFirst();
+                eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getEventName())).findFirst();
             if (latestClosedEvent.isPresent() && latestEvent.getId().equals(latestClosedEvent.get().getId())) {
                 // If the latest event in the case is "Case Closed" or "Archive Case" event
                 confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;
@@ -111,17 +126,5 @@ public class RetentionServiceImpl implements RetentionService {
         return confidenceCategory;
     }
 
-    private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryForMedia(CourtCaseEntity courtCase) {
-        RetentionConfidenceCategoryEnum confidenceCategory;
-        //look for the last audio and use its recorded date
-        List<MediaEntity> mediaList = findCurrentEntitiesHelper.getCurrentMedia(courtCase);
-        if (mediaList.isEmpty()) {
-            //look for the last hearing date and use that
-            confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CREATION_10271050;//AGED_CASE_MAX_HEARING_CLOSED;
-        } else {
-            mediaList.sort(Comparator.comparing(MediaEntity::getCreatedDateTime).reversed());
-            confidenceCategory = RetentionConfidenceCategoryEnum.MEDIA_LATEST_10261070;//AGED_CASE_MAX_MEDIA_CLOSED;
-        }
-        return confidenceCategory;
-    }
+
 }
