@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.isNull;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -76,7 +78,9 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
                 return;
             }
             RetentionConfidenceCategoryEnum confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity);
-
+            if (isNull(confidenceCategory)) {
+                confidenceCategory = caseRetentionEntity.getConfidenceCategory();
+            }
             caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
             caseRetentionEntity.setCurrentState(CaseRetentionStatus.COMPLETE.name());
             retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCaseEntity, confidenceCategory);

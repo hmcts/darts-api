@@ -75,7 +75,7 @@ public class RetentionServiceImpl implements RetentionService {
 
     @Override
     public RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase) {
-        RetentionConfidenceCategoryEnum confidenceCategory;
+        RetentionConfidenceCategoryEnum confidenceCategory = null;
 
         List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentEvents(courtCase);
         if (CollectionUtils.isNotEmpty(eventList)) {
@@ -89,17 +89,7 @@ public class RetentionServiceImpl implements RetentionService {
                 confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;
             } else if (latestClosedEvent.isPresent()) {
                 confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(latestClosedEvent.get(), latestEvent);
-            } else {
-                if (eventList.stream().filter(EventEntity::isLogEntry).count() == eventList.size()) {
-                    // If events exist in the case and NO non-log events are present, use the latest log event
-                    confidenceCategory = RetentionConfidenceCategoryEnum.MAX_LOG_LATEST_10251070;
-                } else {
-                    //If events exist in the case and NO "Case Closed" or "Archive Case" events are present, use the latest non-log event
-                    confidenceCategory = RetentionConfidenceCategoryEnum.MAX_EVENT_LATEST_10141060;
-                }
             }
-        } else {
-            confidenceCategory = getRetentionConfidenceCategoryForMedia(courtCase);
         }
         return confidenceCategory;
     }
