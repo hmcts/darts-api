@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.retention.service.impl;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -174,7 +175,6 @@ class RetentionServiceImplTest {
 
     }
 
-    @SuppressWarnings({"PMD.VariableDeclarationUsageDistance"})
     @Nested
     class GetRetentionConfidenceCategoryForMediaTest {
         @Test
@@ -208,12 +208,7 @@ class RetentionServiceImplTest {
         @Test
         void getConfidenceCategory_shouldReturnCaseClosed_whenLatestEventIsClosed() {
             CourtCaseEntity courtCase = new CourtCaseEntity();
-            EventEntity closedEvent = new EventEntity();
-            closedEvent.setId(1L);
-            closedEvent.setCreatedDateTime(java.time.OffsetDateTime.parse("2024-01-01T10:00:00Z"));
-            EventHandlerEntity closedType = new EventHandlerEntity();
-            closedType.setEventName("Case closed");
-            closedEvent.setEventType(closedType);
+            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed");
             List<EventEntity> events = new ArrayList<>(List.of(closedEvent));
             when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
 
@@ -224,19 +219,9 @@ class RetentionServiceImplTest {
         @Test
         void getConfidenceCategory_shouldReturnCaseClosedWithin_whenLatestClosedEventIsNotLatestButWithinDays() {
             CourtCaseEntity courtCase = new CourtCaseEntity();
-            EventEntity closedEvent = new EventEntity();
-            closedEvent.setId(1L);
-            closedEvent.setCreatedDateTime(java.time.OffsetDateTime.parse("2024-01-01T10:00:00Z"));
-            EventHandlerEntity closedType = new EventHandlerEntity();
-            closedType.setEventName("Case closed");
-            closedEvent.setEventType(closedType);
+            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed");
 
-            EventEntity otherEvent = new EventEntity();
-            otherEvent.setId(2L);
-            otherEvent.setCreatedDateTime(java.time.OffsetDateTime.parse("2024-01-05T10:00:00Z"));
-            EventHandlerEntity otherType = new EventHandlerEntity();
-            otherType.setEventName("Other event");
-            otherEvent.setEventType(otherType);
+            EventEntity otherEvent = getEvent(2L, "2024-01-05T10:00:00Z", "Other event");
 
             // The list order does not matter, but the timestamps do
             List<EventEntity> events = new ArrayList<>(List.of(closedEvent, otherEvent));
@@ -246,22 +231,22 @@ class RetentionServiceImplTest {
             assertEquals(RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN, result);
         }
 
+        private static @NotNull EventEntity getEvent(long id, String text, String eventName) {
+            EventEntity eventEntity = new EventEntity();
+            eventEntity.setId(id);
+            eventEntity.setCreatedDateTime(java.time.OffsetDateTime.parse(text));
+            EventHandlerEntity eventHandler = new EventHandlerEntity();
+            eventHandler.setEventName(eventName);
+            eventEntity.setEventType(eventHandler);
+            return eventEntity;
+        }
+
         @Test
         void getConfidenceCategory_shouldReturnMaxEventOutwith_whenLatestClosedEventIsNotLatestAndOutwithDays() {
             CourtCaseEntity courtCase = new CourtCaseEntity();
-            EventEntity closedEvent = new EventEntity();
-            closedEvent.setId(1L);
-            closedEvent.setCreatedDateTime(java.time.OffsetDateTime.parse("2024-01-01T10:00:00Z"));
-            EventHandlerEntity closedType = new EventHandlerEntity();
-            closedType.setEventName("Case closed");
-            closedEvent.setEventType(closedType);
+            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed");
 
-            EventEntity otherEvent = new EventEntity();
-            otherEvent.setId(2L);
-            otherEvent.setCreatedDateTime(java.time.OffsetDateTime.parse("2024-01-20T10:00:00Z"));
-            EventHandlerEntity otherType = new EventHandlerEntity();
-            otherType.setEventName("Other event");
-            otherEvent.setEventType(otherType);
+            EventEntity otherEvent = getEvent(2L, "2024-01-20T10:00:00Z", "Other event");
 
             // The list order does not matter, but the timestamps do
             List<EventEntity> events = new ArrayList<>(List.of(closedEvent, otherEvent));
@@ -279,6 +264,5 @@ class RetentionServiceImplTest {
             assertNull(result);
         }
     }
-
-
+    
 }
