@@ -49,7 +49,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
         //List is ordered in createdDateTime desc order
         for (Integer caseRetentionEntitiesId : caseRetentionEntitiesIds) {
-            applyRetentionCaseProcessor.process(processedCases, caseRetentionEntitiesId);
+            applyRetentionCaseProcessor.process(processedCases, caseRetentionEntitiesId, pendingRetentionDuration);
         }
 
     }
@@ -63,8 +63,9 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
         private final CaseRepository caseRepository;
         private final RetentionService retentionService;
 
+
         @Transactional
-        public void process(Set<Integer> processedCases, int caseRetentionEntitiesId) {
+        public void process(Set<Integer> processedCases, int caseRetentionEntitiesId, Duration pendingRetentionDuration) {
             Optional<CaseRetentionEntity> caseRetentionEntityOpt = caseRetentionRepository.findById(caseRetentionEntitiesId);
             if (caseRetentionEntityOpt.isEmpty()) {
                 log.error("CaseRetentionEntity with id {} not found", caseRetentionEntitiesId);
@@ -78,7 +79,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
                 caseRetentionRepository.save(caseRetentionEntity);
                 return;
             }
-            RetentionConfidenceCategoryEnum confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity);
+            RetentionConfidenceCategoryEnum confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity, pendingRetentionDuration);
             if (isNull(confidenceCategory)) {
                 confidenceCategory = nonNull(caseRetentionEntity.getConfidenceCategory())
                     ? caseRetentionEntity.getConfidenceCategory()

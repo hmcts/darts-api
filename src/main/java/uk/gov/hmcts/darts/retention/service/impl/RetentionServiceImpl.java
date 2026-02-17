@@ -20,8 +20,8 @@ import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -42,8 +42,6 @@ public class RetentionServiceImpl implements RetentionService {
     private final FindCurrentEntitiesHelper findCurrentEntitiesHelper;
     @Value("#{'${darts.retention.close-events}'.split(',')}")
     private final List<String> closeEvents;
-    @Value("${darts.retention.days-between-events:10}")
-    private final Period daysBetweenEvents;
 
     @Override
     public List<GetCaseRetentionsResponse> getCaseRetentions(Integer caseId) {
@@ -89,7 +87,7 @@ public class RetentionServiceImpl implements RetentionService {
     }
 
     @Override
-    public RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase) {
+    public RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase, Duration pendingRetentionDuration) {
         RetentionConfidenceCategoryEnum confidenceCategory = null;
 
         List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentEvents(courtCase);
@@ -109,12 +107,14 @@ public class RetentionServiceImpl implements RetentionService {
         return confidenceCategory;
     }
 
-    private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumBasedOnDates(EventEntity latestClosedEvent, EventEntity latestEvent) {
+    private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumBasedOnDates(EventEntity latestClosedEvent,
+                                                                                           EventEntity latestEvent,
+                                                                                           Duration pendingRetentionDuration) {
         RetentionConfidenceCategoryEnum confidenceCategory;
         OffsetDateTime closedEventDateTime = latestClosedEvent.getCreatedDateTime();
         OffsetDateTime latestEventDateTime = latestEvent.getCreatedDateTime();
         long daysBetween = between(closedEventDateTime, latestEventDateTime).toDays();
-        if (daysBetween <= daysBetweenEvents.getDays()) {
+        if (daysBetween <= pendingRetentionDuration.toDays()) {
             // if the latest "Case Closed" or "Archive Case" event is NOT the latest non-log event, but the latest non-log event occurs
             // WITHIN 10 days of the "Case Closed" or "Archive Case" event
             confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN;
