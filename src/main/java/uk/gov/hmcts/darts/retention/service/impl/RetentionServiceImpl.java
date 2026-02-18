@@ -101,7 +101,7 @@ public class RetentionServiceImpl implements RetentionService {
                 // If the latest event in the case is "Case Closed" or "Archive Case" event
                 confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;
             } else if (latestClosedEvent.isPresent()) {
-                confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(latestClosedEvent.get(), latestEvent);
+                confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(latestClosedEvent.get(), latestEvent, pendingRetentionDuration);
             }
         }
         return confidenceCategory;
