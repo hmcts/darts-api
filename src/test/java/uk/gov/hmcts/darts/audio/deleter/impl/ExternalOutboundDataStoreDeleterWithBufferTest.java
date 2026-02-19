@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.deleter.impl;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -39,8 +40,6 @@ class ExternalOutboundDataStoreDeleterWithBufferTest {
 
     private static final Duration BUFFER_DURATION = Duration.ofDays(90);
 
-    @Mock
-    private UserAccountRepository userAccountRepository;
     @Mock
     private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private ExternalOutboundDataStoreDeleterWithBuffer deleter;
@@ -54,7 +53,7 @@ class ExternalOutboundDataStoreDeleterWithBufferTest {
     private EodHelperMocks eodHelperMocks;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IllegalAccessException {
         eodHelperMocks = new EodHelperMocks();
         this.deleter = spy(new ExternalOutboundDataStoreDeleterWithBuffer(
             transientObjectDirectoryRepository,
@@ -63,6 +62,12 @@ class ExternalOutboundDataStoreDeleterWithBufferTest {
             currentTimeHelper,
             BUFFER_DURATION
         ));
+        ExternalDataStoreEntityDeleter entityDeleter = mock(ExternalDataStoreEntityDeleter.class);
+        FieldUtils.writeField(deleter, "entityDeleter", entityDeleter, true);
+        lenient().when(entityDeleter.deleteEntity(any(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            return ((ExternalOutboundDataStoreDeleterWithBuffer) args[0]).deleteInternal((TransientObjectDirectoryEntity) args[1]);
+        });
         currentTime = OffsetDateTime.now();
         lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentTime);
     }

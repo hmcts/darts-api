@@ -4,7 +4,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalDataStoreEntityDeleter;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectory;
 
 import java.util.Collection;
@@ -18,17 +20,25 @@ public abstract class AbstractExternalDataStoreDeleter<T extends ObjectDirectory
     @Getter
     private final R repository;
 
+    @Autowired
+    private ExternalDataStoreEntityDeleter entityDeleter;
+
     @Override
     public Collection<T> delete(Integer batchSize) {
         Collection<T> toBeDeleted = findItemsToDelete(batchSize);
         for (T entityToBeDeleted : toBeDeleted) {
-            delete(entityToBeDeleted);
+            entityDeleter.deleteEntity(this, entityToBeDeleted);
         }
         return toBeDeleted;
     }
 
     @Override
     public boolean delete(T entityToBeDeleted) {
+        return entityDeleter.deleteEntity(this, entityToBeDeleted);
+    }
+
+    // Internal delete logic, not transactional
+    public boolean deleteInternal(T entityToBeDeleted) {
         boolean deletedFromDataStore = deleteFromDataStore(entityToBeDeleted);
         if (deletedFromDataStore) {
             datastoreDeletionCallback(entityToBeDeleted);
@@ -69,4 +79,5 @@ public abstract class AbstractExternalDataStoreDeleter<T extends ObjectDirectory
     protected void datastoreDeletionCallback(T entityToBeDeleted) {
         repository.delete(entityToBeDeleted);
     }
+
 }
