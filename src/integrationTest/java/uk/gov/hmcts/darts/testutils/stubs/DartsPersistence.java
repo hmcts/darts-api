@@ -494,7 +494,7 @@ public class DartsPersistence {
             workflowEntity.setTranscription(save(workflowEntity.getTranscription()));
 
             if (workflowEntity.getTranscriptionComments() != null) {
-                workflowEntity.setTranscriptionComments(saceCommentList(workflowEntity.getTranscriptionComments()));
+                workflowEntity.setTranscriptionComments(saveCommentList(workflowEntity.getTranscriptionComments()));
             }
 
             workflowEntity.setWorkflowActor(save(save(workflowEntity.getWorkflowActor())));
@@ -679,6 +679,20 @@ public class DartsPersistence {
     }
 
     @Transactional
+    public CaseRetentionEntity save(CaseRetentionEntity entity) {
+        entity = (CaseRetentionEntity) preCheckPersist(entity);
+
+        if (entity.getId() == null) {
+            entity.setCreatedById(Optional.ofNullable(entity.getCreatedById()).orElse(0));
+            entity.setLastModifiedById(Optional.ofNullable(entity.getLastModifiedById()).orElse(0));
+            entity.setCourtCase(save(entity.getCourtCase()));
+            return caseRetentionRepository.save(entity);
+        } else {
+            return entityManager.merge(entity);
+        }
+    }
+
+    @Transactional
     public ArmRpoStateEntity save(ArmRpoStateEntity armRpoStateEntity) {
         armRpoStateEntity = (ArmRpoStateEntity) preCheckPersist(armRpoStateEntity);
 
@@ -813,7 +827,7 @@ public class DartsPersistence {
         });
     }
 
-    private List<TranscriptionCommentEntity> saceCommentList(List<TranscriptionCommentEntity> transcriptionCommentEntities) {
+    private List<TranscriptionCommentEntity> saveCommentList(List<TranscriptionCommentEntity> transcriptionCommentEntities) {
         List<TranscriptionCommentEntity> transcriptionWorkflowEntityList = new ArrayList<>();
 
         transcriptionCommentEntities.forEach(workflowEntity -> transcriptionWorkflowEntityList.add(save(workflowEntity)));
@@ -929,4 +943,6 @@ public class DartsPersistence {
             .orElseThrow()
             .name();
     }
+
+
 }

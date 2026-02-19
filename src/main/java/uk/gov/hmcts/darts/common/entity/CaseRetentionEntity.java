@@ -24,7 +24,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 public class CaseRetentionEntity extends CreatedModifiedBaseEntity implements HasIntegerId {
-    
+
     public static final String ID = "car_id";
     public static final String TABLE_NAME = "case_retention";
 

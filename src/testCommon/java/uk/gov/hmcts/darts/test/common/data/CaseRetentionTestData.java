@@ -2,15 +2,17 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestCaseRetentionEntity;
 
 import java.time.OffsetDateTime;
 
 import static uk.gov.hmcts.darts.test.common.data.RetentionPolicyTypeTestData.someMinimalRetentionPolicyType;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-public final class CaseRetentionTestData {
+public final class CaseRetentionTestData implements Persistable<TestCaseRetentionEntity.TestCaseRetentionBuilderRetrieve,
+    CaseRetentionEntity, TestCaseRetentionEntity.TestCaseRetentionEntityBuilder> {
 
-    private CaseRetentionTestData() {
+    public CaseRetentionTestData() {
         // This constructor is intentionally empty. Nothing special is needed here.
     }
 
@@ -36,4 +38,29 @@ public final class CaseRetentionTestData {
         return caseRetentionEntity;
     }
 
+    @Override
+    public CaseRetentionEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public TestCaseRetentionEntity.TestCaseRetentionEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
+    }
+
+    @Override
+    public TestCaseRetentionEntity.TestCaseRetentionBuilderRetrieve someMinimalBuilderHolder() {
+        TestCaseRetentionEntity.TestCaseRetentionBuilderRetrieve retrieve
+            = new TestCaseRetentionEntity.TestCaseRetentionBuilderRetrieve();
+        retrieve.getBuilder().courtCase(PersistableFactory.getCourtCaseTestData().someMinimalCase())
+            .retentionPolicyType(someMinimalRetentionPolicyType())
+            .retainUntil(OffsetDateTime.now().plusYears(7))
+            .currentState("some-state")
+            .createdDateTime(OffsetDateTime.now())
+            .createdById(0)
+            .submittedBy(minimalUserAccount())
+            .lastModifiedDateTime(OffsetDateTime.now())
+            .lastModifiedById(0);
+        return retrieve;
+    }
 }

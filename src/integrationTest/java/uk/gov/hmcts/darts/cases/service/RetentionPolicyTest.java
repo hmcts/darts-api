@@ -31,7 +31,7 @@ class RetentionPolicyTest extends IntegrationBase {
     }
 
     @Test
-    void singlePolicyWithCurrentStateComplete() {
+    void mapToSingleCase_singlePolicyWithCurrentStateComplete() {
         CourtCaseEntity courtCase = dartsDatabase.createCase("Swansea", "aCaseNumber");
         createCompleteCaseRetention(courtCase);
 
@@ -43,7 +43,7 @@ class RetentionPolicyTest extends IntegrationBase {
     }
 
     @Test
-    void twoPoliciesWithCurrentStateCompleteReturnLatest() {
+    void mapToSingleCase_twoPoliciesWithCurrentStateCompleteReturnLatest() {
         CourtCaseEntity courtCase = dartsDatabase.createCase("Swansea", "aCaseNumber");
         createCompleteCaseRetention(courtCase);
         CaseRetentionEntity latestCaseRetentionCompleted = createCompleteCaseRetention(courtCase);
@@ -59,7 +59,7 @@ class RetentionPolicyTest extends IntegrationBase {
     }
 
     @Test
-    void twoPoliciesWithCurrentStateCompleteAndPending() {
+    void mapToSingleCase_twoPoliciesWithCurrentStateCompleteAndPending() {
         CourtCaseEntity courtCase = dartsDatabase.createCase("Swansea", "aCaseNumber");
 
         createCompleteCaseRetention(courtCase);
@@ -75,7 +75,7 @@ class RetentionPolicyTest extends IntegrationBase {
     }
 
     @Test
-    void threePoliciesTwoWithCurrentStateCompleteAndOnePending() {
+    void mapToSingleCase_threePoliciesTwoWithCurrentStateCompleteAndOnePending() {
         CourtCaseEntity courtCase = dartsDatabase.createCase("Swansea", "aCaseNumber");
 
         createCompleteCaseRetention(courtCase);
@@ -97,7 +97,7 @@ class RetentionPolicyTest extends IntegrationBase {
     }
 
     @Test
-    void noRentionPolicyAdded() {
+    void mapToSingleCase_noRetentionPolicyAdded() {
         CourtCaseEntity courtCase = dartsDatabase.createCase("Swansea", "aCaseNumber");
         var singleCase = casesMapper.mapToSingleCase(courtCase);
 
@@ -107,7 +107,7 @@ class RetentionPolicyTest extends IntegrationBase {
     }
 
     @Test
-    void onePolicyWithCurrentStatePending() {
+    void mapToSingleCase_onePolicyWithCurrentStatePending() {
         CourtCaseEntity courtCase = dartsDatabase.createCase("Swansea", "aCaseNumber");
         courtCase.setCaseClosedTimestamp(OffsetDateTime.now());
         dartsDatabase.save(courtCase);
@@ -128,6 +128,5 @@ class RetentionPolicyTest extends IntegrationBase {
     private CaseRetentionEntity createCompleteCaseRetention(CourtCaseEntity courtCase) {
         return dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.parse("2029-01-31T15:42:10.361Z"), false);
     }
-
 
 }

@@ -27,13 +27,13 @@ class CaseRetentionRepositoryIntTest extends IntegrationBase {
     private static final OffsetDateTime DT_2026 = OffsetDateTime.of(2026, 1, 1, 1, 0, 0, 0, UTC);
 
     @Autowired
-    CourtCaseStub caseStub;
+    private CourtCaseStub caseStub;
     @Autowired
-    CaseRetentionStub caseRetentionStub;
+    private CaseRetentionStub caseRetentionStub;
     @Autowired
-    CaseRetentionRepository caseRetentionRepository;
+    private CaseRetentionRepository caseRetentionRepository;
     @Autowired
-    EntityGraphPersistence entityGraphPersistence;
+    private EntityGraphPersistence entityGraphPersistence;
 
     @Test
     void testFindTopByCourtCaseOrderByRetainUntilAppliedOnDesc() {
