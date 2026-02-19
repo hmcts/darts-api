@@ -20,7 +20,7 @@ import static uk.gov.hmcts.darts.test.common.data.ArmRpoStateEntityTestData.stat
 import static uk.gov.hmcts.darts.test.common.data.ArmRpoStatusEntityTestData.statusOf;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
-class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
+class ArmRpoExecutionDetailRepositoryIntTest extends PostgresIntegrationBase {
 
     @Autowired
     private ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
@@ -31,7 +31,6 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity4;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity5;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity6;
-
 
     @BeforeEach
     public void beforeAll() {

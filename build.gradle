@@ -179,6 +179,8 @@ configurations {
   smokeTestRuntimeOnly.extendsFrom runtimeOnly
 
   openapispecifications
+
+  mockitoAgent
 }
 
 tasks.named('processTestResources', Copy) {
@@ -499,6 +501,9 @@ dependencies {
   testImplementation 'com.h2database:h2:2.3.232'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.10'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
+
+  mockitoAgent 'org.mockito:mockito-core:5.2.0'
+
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
