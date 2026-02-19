@@ -235,7 +235,7 @@ checkstyle {
 }
 
 pmd {
-  toolVersion = "7.16.0"
+  toolVersion = "7.21.0"
   reportsDir = file("$project.buildDir/reports/pmd")
   // https://github.com/pmd/pmd/issues/876
   ruleSets = []
