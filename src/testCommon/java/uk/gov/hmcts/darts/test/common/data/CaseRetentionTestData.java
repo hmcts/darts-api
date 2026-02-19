@@ -12,7 +12,7 @@ import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUse
 public final class CaseRetentionTestData implements Persistable<TestCaseRetentionEntity.TestCaseRetentionBuilderRetrieve,
     CaseRetentionEntity, TestCaseRetentionEntity.TestCaseRetentionEntityBuilder> {
 
-    CaseRetentionTestData() {
+    public CaseRetentionTestData() {
         // This constructor is intentionally empty. Nothing special is needed here.
     }
 

@@ -23,7 +23,7 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
     List<CaseRetentionEntity> findByCourtCaseId(Integer courtCaseId);
 
     Optional<CaseRetentionEntity> findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(CourtCaseEntity courtCase, String currentState);
-    
+
     @Query("""
         SELECT c
         FROM CaseRetentionEntity c
