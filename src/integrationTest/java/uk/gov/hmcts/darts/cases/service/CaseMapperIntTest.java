@@ -25,13 +25,13 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_4_1981_D
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
-class CaseMapperTest extends IntegrationBase {
+class CaseMapperIntTest extends IntegrationBase {
 
     @Autowired
     private CasesMapper casesMapper;
 
     @Test
-    void mapsSingleCaseCorrectlyWhenZeroReportingRestrictionsAssociatedWithCase() {
+    void mapToSingleCase_mapsSingleCaseCorrectlyWhenZeroReportingRestrictionsAssociatedWithCase() {
         var minimalHearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         var hearingEntity = dartsDatabase.save(minimalHearing);
 
@@ -41,7 +41,7 @@ class CaseMapperTest extends IntegrationBase {
     }
 
     @Test
-    void mapsOneReportingRestrictionsCorrectly() {
+    void mapToSingleCase_mapsOneReportingRestrictionsCorrectly() {
         List<OffsetDateTime> eventDateTimes = new ArrayList<>();
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
         var reportingRestrictions = dartsDatabase.getTransactionalUtil()
@@ -63,7 +63,7 @@ class CaseMapperTest extends IntegrationBase {
     }
 
     @Test
-    void mapsCaseCourtroomIdCorrectly() {
+    void mapToSingleCase_mapsCaseCourtroomIdCorrectly() {
         List<OffsetDateTime> eventDateTimes = new ArrayList<>();
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
         var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
@@ -79,7 +79,7 @@ class CaseMapperTest extends IntegrationBase {
 
 
     @Test
-    void mapsMultipleReportingRestrictionsValuesCorrectly() {
+    void mapToSingleCase_mapsMultipleReportingRestrictionsValuesCorrectly() {
 
         List<OffsetDateTime> eventDateTimes = new ArrayList<>();
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
@@ -106,7 +106,7 @@ class CaseMapperTest extends IntegrationBase {
     }
 
     @Test
-    void ordersMultipleReportingRestrictionsElementCorrectly() {
+    void mapToSingleCase_ordersMultipleReportingRestrictionsElementCorrectly() {
         List<OffsetDateTime> eventDateTimes = new ArrayList<>();
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
@@ -134,7 +134,7 @@ class CaseMapperTest extends IntegrationBase {
     }
 
     @Test
-    void includesReportingRestrictionsLifted() {
+    void mapToSingleCase_includesReportingRestrictionsLifted() {
 
         var event1 = dartsDatabase.getEventStub().createDefaultEvent();
         event1.setTimestamp(OffsetDateTime.of(2020, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
@@ -156,7 +156,7 @@ class CaseMapperTest extends IntegrationBase {
     }
 
     @Test
-    void includesReportingRestrictionsLiftedWhenReapplied() {
+    void mapToSingleCase_includesReportingRestrictionsLiftedWhenReapplied() {
         var event1 = dartsDatabase.getEventStub().createDefaultEvent();
         event1.setTimestamp(now().minusDays(2));
         var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, SECTION_4_1981_DB_ID);
@@ -180,7 +180,7 @@ class CaseMapperTest extends IntegrationBase {
     }
 
     @Test
-    void includesMigratedCaseWithRestrictionPersistedOnCaseTable() {
+    void mapToSingleCase_includesMigratedCaseWithRestrictionPersistedOnCaseTable() {
         var caseWithReportingRestrictions =
             dartsDatabase.addHandlerToCase(PersistableFactory.getCourtCaseTestData().createSomeMinimalCase(), someReportingRestrictionId());
 

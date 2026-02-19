@@ -42,6 +42,10 @@ public final class PersistableFactory {
         return new CaseTestData();
     }
 
+    public static CaseRetentionTestData getCaseRetentionTestData() {
+        return new CaseRetentionTestData();
+    }
+
     public static CaseDocumentTestData getCaseDocumentTestData() {
         return new CaseDocumentTestData();
     }

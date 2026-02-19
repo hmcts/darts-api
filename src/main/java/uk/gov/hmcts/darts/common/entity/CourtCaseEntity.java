@@ -134,7 +134,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasInt
     @OneToMany(mappedBy = MediaLinkedCaseEntity_.COURT_CASE)
     private List<MediaLinkedCaseEntity> mediaLinkedCaseList = new ArrayList<>();
 
-
     @OneToMany(mappedBy = CaseDocumentEntity_.COURT_CASE)
     private List<CaseDocumentEntity> caseDocumentEntities = new ArrayList<>();
 
@@ -181,7 +180,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasInt
 
     public void addDefendant(DefendantEntity defendant) {
         if (defendantList.stream().noneMatch(defendantEntity -> defendantEntity.getName().equalsIgnoreCase(defendant.getName()))) {
-            defendantList.add(defendant); 
+            defendantList.add(defendant);
         }
     }
 
