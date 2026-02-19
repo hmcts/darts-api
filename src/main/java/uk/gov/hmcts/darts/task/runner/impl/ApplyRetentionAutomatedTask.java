@@ -15,7 +15,7 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.APPLY_RETENTION_TASK
 
 @Slf4j
 @Component
-public class ApplyRetentionAutomatedTask 
+public class ApplyRetentionAutomatedTask
     extends AbstractLockableAutomatedTask<ApplyRetentionAutomatedTaskConfig>
     implements AutoloadingManualTask {
     ApplyRetentionProcessor applyRetentionProcessor;
@@ -35,6 +35,6 @@ public class ApplyRetentionAutomatedTask
 
     @Override
     protected void runTask() {
-        applyRetentionProcessor.processApplyRetention(getAutomatedTaskBatchSize());
+        applyRetentionProcessor.processApplyRetention(getAutomatedTaskBatchSize(), getConfig().getDaysBetweenEvents());
     }
 }
