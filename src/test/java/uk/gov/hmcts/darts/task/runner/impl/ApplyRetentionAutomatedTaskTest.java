@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import java.time.Duration;
+
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -20,6 +22,8 @@ class ApplyRetentionAutomatedTaskTest {
     private LogApi logApi;
     @Mock
     private LockService lockService;
+
+    private final Duration daysBetweenEvents = Duration.ofDays(10);
 
     @Test
     void runTask() {
@@ -35,7 +39,7 @@ class ApplyRetentionAutomatedTaskTest {
         doReturn(1000).when(applyRetentionAutomatedTaskTest).getAutomatedTaskBatchSize();
 
         applyRetentionAutomatedTaskTest.runTask();
-        Mockito.verify(applyRetentionProcessor, Mockito.times(1)).processApplyRetention(1000);
+        Mockito.verify(applyRetentionProcessor, Mockito.times(1)).processApplyRetention(1000, daysBetweenEvents);
         Mockito.verify(applyRetentionAutomatedTaskTest, Mockito.times(1)).getAutomatedTaskBatchSize();
     }
 }

@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionConfidenceCategoryMapperRepository;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.mapper.RetentionMapper;
 import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
@@ -42,6 +43,14 @@ public class RetentionServiceImpl implements RetentionService {
     private final FindCurrentEntitiesHelper findCurrentEntitiesHelper;
     @Value("#{'${darts.retention.close-events}'.split(',')}")
     private final List<String> closeEvents;
+
+    private List<RetentionConfidenceCategoryEnum> confidenceCategoriesToCheck = List.of(
+        RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED,
+        RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED,
+        RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED,
+        RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED,
+        RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED
+    );
 
     @Override
     public List<GetCaseRetentionsResponse> getCaseRetentions(Integer caseId) {
@@ -101,7 +110,8 @@ public class RetentionServiceImpl implements RetentionService {
                 // If the latest event in the case is "Case Closed" or "Archive Case" event
                 confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;
             } else if (latestClosedEvent.isPresent()) {
-                confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(latestClosedEvent.get(), latestEvent, pendingRetentionDuration);
+                confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(latestClosedEvent.get(), latestEvent, pendingRetentionDuration,
+                                                                                    courtCase.getRetConfReason());
             }
         }
         return confidenceCategory;
@@ -109,12 +119,20 @@ public class RetentionServiceImpl implements RetentionService {
 
     private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumBasedOnDates(EventEntity latestClosedEvent,
                                                                                            EventEntity latestEvent,
-                                                                                           Duration pendingRetentionDuration) {
+                                                                                           Duration pendingRetentionDuration,
+                                                                                           RetentionConfidenceReasonEnum courtCaseRetentionConfidenceReason) {
         RetentionConfidenceCategoryEnum confidenceCategory;
         OffsetDateTime closedEventDateTime = latestClosedEvent.getCreatedDateTime();
         OffsetDateTime latestEventDateTime = latestEvent.getCreatedDateTime();
         long daysBetween = between(closedEventDateTime, latestEventDateTime).toDays();
-        if (daysBetween <= pendingRetentionDuration.toDays()) {
+        if (courtCaseRetentionConfidenceReason != null && confidenceCategoriesToCheck.contains(courtCaseRetentionConfidenceReason)) {
+            // Convert courtCaseRetentionConfidenceReason (RetentionConfidenceReasonEnum) to RetentionConfidenceCategoryEnum
+            try {
+                confidenceCategory = RetentionConfidenceCategoryEnum.valueOf(courtCaseRetentionConfidenceReason.name());
+            } catch (IllegalArgumentException e) {
+                confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
+            }
+        } else if (daysBetween <= pendingRetentionDuration.toDays()) {
             // if the latest "Case Closed" or "Archive Case" event is NOT the latest non-log event, but the latest non-log event occurs
             // WITHIN 10 days of the "Case Closed" or "Archive Case" event
             confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN;

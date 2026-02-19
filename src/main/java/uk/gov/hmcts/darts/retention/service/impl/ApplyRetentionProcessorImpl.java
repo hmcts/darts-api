@@ -40,7 +40,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
     private final Duration pendingRetentionDuration;
 
     @Override
-    public void processApplyRetention(Integer batchSize) {
+    public void processApplyRetention(Integer batchSize, Duration daysBetweenEvents) {
         List<Integer> caseRetentionEntitiesIds =
             caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minus(pendingRetentionDuration),
                                                          Limit.of(batchSize));
@@ -49,7 +49,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
         //List is ordered in createdDateTime desc order
         for (Integer caseRetentionEntitiesId : caseRetentionEntitiesIds) {
-            applyRetentionCaseProcessor.process(processedCases, caseRetentionEntitiesId, pendingRetentionDuration);
+            applyRetentionCaseProcessor.process(processedCases, caseRetentionEntitiesId, daysBetweenEvents);
         }
 
     }
@@ -63,9 +63,8 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
         private final CaseRepository caseRepository;
         private final RetentionService retentionService;
 
-
         @Transactional
-        public void process(Set<Integer> processedCases, int caseRetentionEntitiesId, Duration pendingRetentionDuration) {
+        public void process(Set<Integer> processedCases, int caseRetentionEntitiesId, Duration daysBetweenEvents) {
             Optional<CaseRetentionEntity> caseRetentionEntityOpt = caseRetentionRepository.findById(caseRetentionEntitiesId);
             if (caseRetentionEntityOpt.isEmpty()) {
                 log.error("CaseRetentionEntity with id {} not found", caseRetentionEntitiesId);
@@ -79,7 +78,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
                 caseRetentionRepository.save(caseRetentionEntity);
                 return;
             }
-            RetentionConfidenceCategoryEnum confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity, pendingRetentionDuration);
+            RetentionConfidenceCategoryEnum confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity, daysBetweenEvents);
             if (isNull(confidenceCategory)) {
                 confidenceCategory = nonNull(caseRetentionEntity.getConfidenceCategory())
                     ? caseRetentionEntity.getConfidenceCategory()
