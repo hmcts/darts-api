@@ -25,8 +25,7 @@ public class DartsDatabaseSaveStub {
     private final UserAccountRepository userAccountRepository;
     private final EntityManager entityManager;
     private final TransactionalUtil transactionalUtil;
-
-
+    
     @Transactional
     public <T> T save(T entity) {
         if (entity == null) {
