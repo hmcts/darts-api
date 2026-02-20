@@ -123,8 +123,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         ObjectRecordStatusEntity armRpoPending = EodHelper.armRpoPendingStatus();
         StringBuilder errorMessage = new StringBuilder(92).append("Failure during ARM RPO CSV Reconciliation: ");
 
-        ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
-            .orElseThrow(() -> new ArmRpoException(errorMessage.append("Automated task ProcessE2EArmRpoPending not found.").toString()));
+        ArmAutomatedTaskEntity armAutomatedTaskEntity = getArmAutomatedTaskEntity(errorMessage);
 
         List<Long> csvEodList = getEodsListFromCsvFiles(csvFiles, errorMessage);
 
@@ -162,6 +161,12 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         if (CollectionUtils.isNotEmpty(missingEods)) {
             log.warn("Unable to process the following EODs {} found in the CSV but not in filtered DB list", missingEods);
         }
+    }
+
+    @Override
+    public ArmAutomatedTaskEntity getArmAutomatedTaskEntity(StringBuilder errorMessage) {
+        return armAutomatedTaskRepository.findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
+            .orElseThrow(() -> new ArmRpoException(errorMessage.append("Automated task ProcessE2EArmRpoPending not found.").toString()));
     }
 
     private void updateEodStatus(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities, List<Long> csvEodList) {
