@@ -44,6 +44,7 @@ import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toSet;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.usermanagement.auditing.UserAccountUpdateAuditActivityProvider.auditActivitiesFor;
 
 @Service
@@ -195,15 +196,22 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
 
         Boolean active = userPatch.getActive();
+        // if we are disabling the user
+        if (Boolean.FALSE.equals(active)) {
+            // unassign from any groups they are part of and if they are a transcriber, roll back any transcriptions they are assigned to
+            boolean isTranscriber = userAccountRepository
+                .findByRoleAndUserId(TRANSCRIBER.getId(), userAccountEntity.getId())
+                .isPresent();
+
+            if (isTranscriber) {
+                rolledBackTranscriptionsList =
+                    transcriptionService.rollbackUserTranscriptions(userAccountEntity);
+            }
+            unassignUserFromGroupsTheyArePartOf(userAccountEntity);
+        }
+        // set active status to new value if it is not null
         if (active != null) {
             userAccountEntity.setActive(active);
-
-            // if we are disabling the user then disable the transcriptions
-            // and remove user from security groups
-            if (active.equals(Boolean.FALSE)) {
-                unassignUserFromGroupsTheyArePartOf(userAccountEntity);
-                rolledBackTranscriptionsList = transcriptionService.rollbackUserTranscriptions(userAccountEntity);
-            }
         }
 
         if (BooleanUtils.isTrue(userAccountEntity.isActive())) {
