@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
-class CaseServiceGetTranscriptsTest extends IntegrationBase {
+class CaseServiceGetTranscriptsintTest extends IntegrationBase {
 
     @Autowired
     private CaseService service;

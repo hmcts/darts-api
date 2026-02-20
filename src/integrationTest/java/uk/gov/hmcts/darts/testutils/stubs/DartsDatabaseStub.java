@@ -268,23 +268,23 @@ public class DartsDatabaseStub {
                 String table = entityType.getJavaType().getAnnotation(Table.class).name();
                 entityManager.createNativeQuery("update darts." + table + " set last_modified_by = 0").executeUpdate();
             });
-        retentionPolicyTypeRepository.deleteAll(
+        retentionPolicyTypeRepository.deleteAllInBatch(
             retentionPolicyTypeRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
-        eventHandlerRepository.deleteAll(
+        eventHandlerRepository.deleteAllInBatch(
             eventHandlerRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
-        automatedTaskRepository.deleteAll(
+        automatedTaskRepository.deleteAllInBatch(
             automatedTaskRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
-        securityGroupRepository.deleteAll(
+        securityGroupRepository.deleteAllInBatch(
             securityGroupRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
-        userAccountRepository.deleteAll(
+        userAccountRepository.deleteAllInBatch(
             userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
     }
@@ -296,45 +296,46 @@ public class DartsDatabaseStub {
                              CaseDocumentEntity.class,
                              MediaEntity.class,
                              TranscriptionDocumentEntity.class);
-            transcriptionLinkedCaseRepository.deleteAll();
-            dataAnonymisationRepository.deleteAll();
-            armRpoExecutionDetailRepository.deleteAll();
-            objectAdminActionRepository.deleteAll();
-            auditRepository.deleteAll();
-            externalObjectDirectoryRepository.deleteAll();
-            annotationDocumentRepository.deleteAll();
-            caseDocumentRepository.deleteAll();
-            caseRetentionRepository.deleteAll();
-            caseManagementRetentionRepository.deleteAll();
-            transcriptionDocumentRepository.deleteAll();
-            transcriptionCommentRepository.deleteAll();
-            transcriptionWorkflowRepository.deleteAll();
-            transcriptionDocumentRepository.deleteAll();
-            transcriptionRepository.deleteAll();
-            transientObjectDirectoryRepository.deleteAll();
-            transformedMediaRepository.deleteAll();
-            mediaRequestRepository.deleteAll();
-            eventLinkedCaseRepository.deleteAll();
-            eventRepository.deleteAll();
-            hearingRepository.deleteAll();
-            annotationRepository.deleteAll();
-            mediaLinkedCaseRepository.deleteAll();
-            mediaRepository.deleteAll();
-            notificationRepository.deleteAll();
-            nodeRegisterRepository.deleteAll();
-            courtroomRepository.deleteAll();
-            defenceRepository.deleteAll();
-            defendantRepository.deleteAll();
-            prosecutorRepository.deleteAll();
-            caseRepository.deleteAll();
-            judgeRepository.deleteAll();
-            dailyListRepository.deleteAll();
-            courthouseRepository.deleteAll();
-            regionRepository.deleteAll();
-            annotationRepository.deleteAll();
-            transcriptionRepository.deleteAll();
-            transcriptionWorkflowRepository.deleteAll();
-            retentionConfidenceCategoryMapperRepository.deleteAll();
+            transcriptionLinkedCaseRepository.deleteAllInBatch();
+            dataAnonymisationRepository.deleteAllInBatch();
+            armRpoExecutionDetailRepository.deleteAllInBatch();
+            objectAdminActionRepository.deleteAllInBatch();
+            auditRepository.deleteAllInBatch();
+            externalObjectDirectoryRepository.deleteAllInBatch();
+            annotationDocumentRepository.deleteAllInBatch();
+            caseDocumentRepository.deleteAllInBatch();
+            caseRetentionRepository.deleteAllInBatch();
+            caseManagementRetentionRepository.deleteAllInBatch();
+            transcriptionDocumentRepository.deleteAllInBatch();
+            transcriptionCommentRepository.deleteAllInBatch();
+            transcriptionWorkflowRepository.deleteAllInBatch();
+            transcriptionDocumentRepository.deleteAllInBatch();
+            transcriptionRepository.deleteAllInBatch();
+            transientObjectDirectoryRepository.deleteAllInBatch();
+            transformedMediaRepository.deleteAllInBatch();
+            mediaRequestRepository.deleteAllInBatch();
+            eventLinkedCaseRepository.deleteAllInBatch();
+            eventRepository.deleteAllInBatch();
+            hearingRepository.deleteAllInBatch();
+            annotationRepository.deleteAllInBatch();
+            mediaLinkedCaseRepository.deleteAllInBatch();
+            mediaRepository.deleteAllInBatch();
+            notificationRepository.deleteAllInBatch();
+            nodeRegisterRepository.deleteAllInBatch();
+            courtroomRepository.deleteAllInBatch();
+            defenceRepository.deleteAllInBatch();
+            defendantRepository.deleteAllInBatch();
+            prosecutorRepository.deleteAllInBatch();
+            caseRepository.deleteAllInBatch();
+            judgeRepository.deleteAllInBatch();
+            dailyListRepository.deleteAllInBatch();
+            courthouseRepository.deleteAllInBatch();
+            regionRepository.deleteAllInBatch();
+            annotationRepository.deleteAllInBatch();
+            transcriptionRepository.deleteAllInBatch();
+            transcriptionWorkflowRepository.deleteAllInBatch();
+            retentionConfidenceCategoryMapperRepository.deleteAllInBatch();
+            entityManager.clear();
         });
     }
 
@@ -1186,3 +1187,4 @@ public class DartsDatabaseStub {
             .name();
     }
 }
+

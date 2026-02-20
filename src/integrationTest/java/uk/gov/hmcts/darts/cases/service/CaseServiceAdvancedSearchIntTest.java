@@ -42,7 +42,7 @@ import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TES
 
 @Slf4j
 @SuppressWarnings({"PMD.NcssCount"})
-class CaseServiceAdvancedSearchTest extends IntegrationBase {
+class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
     @Autowired
     private SecurityGroupRepository securityGroupRepository;
     @Autowired

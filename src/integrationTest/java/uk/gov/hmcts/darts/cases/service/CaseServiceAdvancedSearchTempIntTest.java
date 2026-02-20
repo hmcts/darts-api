@@ -27,7 +27,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
-class CaseServiceAdvancedSearchTempTest extends IntegrationBase {
+class CaseServiceAdvancedSearchTempIntTest extends IntegrationBase {
     @Autowired
     SecurityGroupRepository securityGroupRepository;
     @Autowired

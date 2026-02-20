@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true") // To override Clock bean
-class CloseOldCasesProcessorTest extends IntegrationBase {
+class CloseOldCasesProcessorintTest extends IntegrationBase {
     @Autowired
     private CloseOldCasesProcessor closeOldCasesProcessor;
 
@@ -290,7 +290,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getRetConfScore());
         assertNull(updatedCourtCaseEntity.getRetConfReason());
         assertNull(updatedCourtCaseEntity.getRetConfUpdatedTs());
-        
+
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
         assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED, caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());

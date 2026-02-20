@@ -27,19 +27,17 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtR
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
-class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
+class CaseServiceAdvancedSearchUseInterpreterIntTest extends IntegrationBase {
 
     @Autowired
-    SecurityGroupRepository securityGroupRepository;
+    private SecurityGroupRepository securityGroupRepository;
     @Autowired
-    UserAccountRepository userAccountRepository;
+    private UserAccountRepository userAccountRepository;
     @Autowired
-    CaseService service;
-    CourthouseEntity swanseaCourthouse;
-    CourthouseEntity cardiffCourthouse;
-    CourthouseEntity liverpoolCourthouse;
-    UserAccountEntity user;
-
+    private CaseService service;
+    private CourthouseEntity swanseaCourthouse;
+    private CourthouseEntity cardiffCourthouse;
+    private UserAccountEntity user;
 
     @BeforeEach
     void setupData() {
@@ -74,7 +72,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         dartsPersistence.saveAll(hearing3, hearing4);
 
         // liverpool cases
-        liverpoolCourthouse = CourthouseTestData.createCourthouseWithName("LIVERPOOL");
+        CourthouseEntity liverpoolCourthouse = CourthouseTestData.createCourthouseWithName("LIVERPOOL");
 
         CourtCaseEntity case5 = PersistableFactory.getCourtCaseTestData().createCaseAt(liverpoolCourthouse, "Case5");
 

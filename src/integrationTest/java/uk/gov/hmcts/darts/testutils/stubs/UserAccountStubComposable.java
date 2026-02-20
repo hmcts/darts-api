@@ -17,6 +17,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 @Deprecated
+@SuppressWarnings({"PMD.NullAssignment"})
 public class UserAccountStubComposable {
     private static final int SYSTEM_USER_ID = 0;
     public static final String INTEGRATION_TEST_USER_EMAIL = "integrationtest.user@example.com";
@@ -31,6 +32,12 @@ public class UserAccountStubComposable {
 
     private final DartsPersistence dartsPersistence;
     private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
+
+    private UserAccountEntity cachedIntegrationTestUser;
+
+    public void resetCache() {
+        cachedIntegrationTestUser = null;
+    }
 
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseStubComposable courthouseStubComposable, String courthouse) {
@@ -80,11 +87,16 @@ public class UserAccountStubComposable {
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
-        Optional<UserAccountEntity> userAccounts = userAccountRepository.findFirstByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL);
-        if (userAccounts.isEmpty()) {
-            return createIntegrationUser(UUID.randomUUID().toString());
+        if (cachedIntegrationTestUser != null) {
+            return cachedIntegrationTestUser;
         }
-        return userAccounts.get();
+        cachedIntegrationTestUser = userAccountRepository.findFirstByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL)
+            .map(user -> userAccountRepository.findById(user.getId()).orElse(user))
+            .orElseGet(() -> {
+                UserAccountEntity created = createIntegrationUser(UUID.randomUUID().toString());
+                return userAccountRepository.findById(created.getId()).orElse(created);
+            });
+        return cachedIntegrationTestUser;
     }
 
     /**
@@ -128,6 +140,11 @@ public class UserAccountStubComposable {
     }
 
     private UserAccountEntity createIntegrationUser(String guid, String fullName, String emailAddress, boolean active) {
+        Optional<UserAccountEntity> existing = userAccountRepository.findFirstByEmailAddressIgnoreCase(emailAddress);
+        if (existing.isPresent()) {
+            // Always return the managed instance to avoid session conflicts
+            return userAccountRepository.findById(existing.get().getId()).orElse(existing.get());
+        }
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
         newUser.setUserFullName(fullName + "FullName");
@@ -184,3 +201,4 @@ public class UserAccountStubComposable {
         }
     }
 }
+

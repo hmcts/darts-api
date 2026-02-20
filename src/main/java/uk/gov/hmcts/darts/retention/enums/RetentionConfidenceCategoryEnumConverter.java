@@ -25,8 +25,6 @@ public class RetentionConfidenceCategoryEnumConverter implements AttributeConver
         return Stream.of(RetentionConfidenceCategoryEnum.values())
             .filter(c -> c.getId().equals(id))
             .findFirst()
-            .orElseThrow(() ->
-                             new IllegalArgumentException("Unknown RetentionConfidenceCategoryEnum id: " + id)
-            );
+            .orElse(RetentionConfidenceCategoryEnum.UNKNOWN);
     }
 }

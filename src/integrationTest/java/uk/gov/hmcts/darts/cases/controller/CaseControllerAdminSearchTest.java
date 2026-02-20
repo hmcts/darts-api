@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -57,6 +58,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     private CourthouseEntity swanseaCourthouse;
     private UserAccountEntity user;
 
+    @Transactional
     @BeforeEach
     void setupData() {
         swanseaCourthouse = someMinimalCourthouse();
@@ -143,6 +145,13 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         setupUserAccountAndSecurityGroup();
+    }
+
+    @BeforeEach
+    void resetUserAccountStubCache() {
+        if (dartsDatabase != null && dartsDatabase.getUserAccountStub() != null) {
+            dartsDatabase.getUserAccountStub().resetCache();
+        }
     }
 
     @Test
@@ -339,6 +348,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Transactional
     private void setupUserAccountAndSecurityGroup() {
         var securityGroup = SecurityGroupTestData.createGroupForRole(SUPER_ADMIN);
         securityGroup.setGlobalAccess(true);
@@ -346,6 +356,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         assignSecurityGroupToUser(user, securityGroup);
     }
 
+    @Transactional
     private void assignSecurityGroupToUser(UserAccountEntity user, SecurityGroupEntity securityGroup) {
         securityGroup.getUsers().add(user);
         user.getSecurityGroupEntities().add(securityGroup);
@@ -354,3 +365,4 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
 }
+

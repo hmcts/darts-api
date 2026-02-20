@@ -17,13 +17,13 @@ import java.time.OffsetDateTime;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
-class RetentionPolicyTest extends IntegrationBase {
+class RetentionPolicyintTest extends IntegrationBase {
 
     @Autowired
     private CasesMapper casesMapper;
 
     @MockitoBean
-    CurrentTimeHelper currentTimeHelper;
+    private CurrentTimeHelper currentTimeHelper;
 
     @BeforeEach
     void setup() {

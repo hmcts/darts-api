@@ -391,4 +391,8 @@ public class UserAccountStub {
         currentOwner.getSecurityGroupEntities().add(securityGroupEntity);
         userAccountRepository.save(currentOwner);
     }
+
+    public void resetCache() {
+        userAccountStubComposable.resetCache();
+    }
 }
