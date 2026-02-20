@@ -10,4 +10,5 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 @Configuration
 public class DetsBatchCleanupArmResponseFilesAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
+    
 }

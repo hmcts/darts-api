@@ -1,0 +1,130 @@
+package uk.gov.hmcts.darts.arm.service.impl;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
+import org.springframework.data.domain.Limit;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.arm.service.CleanupDetsDataService;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalDetsDataStoreDeleter;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
+import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.util.AsyncUtil;
+
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class CleanupDetsDataServiceImpl implements CleanupDetsDataService {
+
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final CurrentTimeHelper currentTimeHelper;
+    private final CleanupDetsEodTransactionalService cleanupDetsEodTransactionalService;
+    private final UserIdentity userIdentity;
+
+    @Override
+    public void cleanupDetsData(int batchsize, Duration durationInArmStorage, Integer partitionSize) {
+        log.info("Started running DETS cleanup at: {}", OffsetDateTime.now());
+
+        OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(durationInArmStorage);
+
+        List<Long> detsEods = externalObjectDirectoryRepository.findEodIdsInOtherStorageLastModifiedBefore(EodHelper.storedStatus().getId(),
+                                                                                                           EodHelper.detsLocation().getId(),
+                                                                                                           EodHelper.armLocation().getId(),
+                                                                                                           lastModifiedBefore,
+                                                                                                           Limit.of(batchsize)
+        );
+
+        if (detsEods.isEmpty()) {
+            log.info("No DETS EOD records found for cleanup at: {}", OffsetDateTime.now());
+            return;
+        }
+        try {
+            List<List<Long>> detsBatches = ListUtils.partition(detsEods, partitionSize);
+            AtomicInteger batchCounter = new AtomicInteger(1);
+            List<Callable<Void>> tasks = getTasks(detsBatches, batchCounter);
+
+            try {
+                AsyncUtil.invokeAllAwaitTermination(tasks);
+            } catch (InterruptedException e) {
+                log.error("Unstructured to arm batch interrupted exception", e);
+                throw e;
+            } catch (Exception e) {
+                log.error("Unstructured to arm batch unexpected exception", e);
+                return;
+            }
+        } catch (Exception e) {
+            log.error("Error occurred during DETS cleanup", e);
+        }
+
+
+    }
+
+    private List<Callable<Void>> getTasks(List<List<Long>> detsBatches, AtomicInteger batchCounter) {
+        return detsBatches
+            .stream()
+            .map(eodsForBatch -> (Callable<Void>) () -> {
+                int batchNumber = batchCounter.getAndIncrement();
+                try {
+                    log.info("Starting processing batch {} out of {}", batchNumber, detsBatches.size());
+                    for (Long detsEodId : eodsForBatch) {
+                        cleanupDetsEodTransactionalService.cleanupDetsEod(detsEodId);
+                    }
+                    log.info("Finished processing batch {} out of {}", batchNumber, detsBatches.size());
+                } catch (Exception e) {
+                    log.error("Unexpected exception when processing batch {}", batchNumber, e);
+                    if (e instanceof InterruptedException) {
+                        throw e;
+                    }
+                }
+                return null;
+            })
+            .toList();
+    }
+
+    @Service
+    @RequiredArgsConstructor
+    public static class CleanupDetsEodTransactionalService {
+
+        private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+        private final CurrentTimeHelper currentTimeHelper;
+        private final ExternalDetsDataStoreDeleter detsDataStoreDeleter;
+        private final ObjectStateRecordRepository objectStateRecordRepository;
+
+        @Transactional
+        public void cleanupDetsEod(Long detsEodId) {
+            Optional<ExternalObjectDirectoryEntity> detsEodRecord = externalObjectDirectoryRepository.findById(detsEodId);
+            if (detsEodRecord.isEmpty()) {
+                log.warn("Unable to find ExternalObjectDirectory: {}", detsEodId);
+                return;
+            }
+            var detsEod = detsEodRecord.get();
+            try {
+                detsDataStoreDeleter.deleteFromDataStore(detsEod.getExternalLocation());
+                Long detsObectStateRecordId = detsEod.getOsrUuid();
+                externalObjectDirectoryRepository.deleteById(detsEodId);
+                var objectStateRecord = objectStateRecordRepository.findById(detsObectStateRecordId).get();
+                objectStateRecord.setFlagFileDetsCleanupStatus(true);
+                objectStateRecord.setDateFileDetsCleanup(currentTimeHelper.currentOffsetDateTime());
+                objectStateRecordRepository.save(objectStateRecord);
+            } catch (AzureDeleteBlobException e) {
+                log.error("Unable to delete from DETS storage location {}", detsEod.getExternalLocation(), e);
+            } catch (Exception e) {
+                log.error("Unable to clean up DETS eod {}", detsEod.getId(), e);
+            }
+        }
+    }
+
+}

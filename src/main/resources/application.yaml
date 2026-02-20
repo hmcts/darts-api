@@ -586,6 +586,12 @@ darts:
       dets-to-arm-batch-processor:
         max-arm-manifest-items: 100
         manifest-file-prefix: DETS
+      cleanup-dets-data:
+        system-user-email: system_CleanupDetsData@hmcts.net
+        duration-in-arm-storage: 7d
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT90M
   annotations:
     allowed-extensions:
       - "docx"

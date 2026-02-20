@@ -26,8 +26,9 @@ import java.util.Set;
 
 @Repository
 @SuppressWarnings({
-    "PMD.TooManyMethods",//TODO - refactor to reduce methods when this class is next edited,
-    "PMD.ExcessivePublicCount"//TODO - refactor to reduce public methods when this class is next edited
+    "PMD.TooManyMethods",
+    "PMD.ExcessivePublicCount",
+    "PMD.AvoidDuplicateLiterals"
 })
 public interface ExternalObjectDirectoryRepository extends JpaRepository<ExternalObjectDirectoryEntity, Long> {
 
@@ -207,7 +208,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByCaseDocumentIdAndExternalLocationTypes(Long caseDocumentId,
                                                                                      List<ExternalLocationTypeEntity> externalLocationTypes);
 
-
     List<ExternalObjectDirectoryEntity> findByMedia(MediaEntity media);
 
     List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntity(TranscriptionDocumentEntity transcriptionDocument);
@@ -277,7 +277,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                           ExternalLocationTypeEntity armLocation,
                                                           OffsetDateTime unstructuredLastModifiedBefore,
                                                           Limit limit);
-
 
     @Query(
         """                       
@@ -356,7 +355,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     void updateStatus(ObjectRecordStatusEntity newStatus, Integer userAccount, List<Long> idsToUpdate, OffsetDateTime timestamp);
 
-
     default List<Long> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                            ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                            Integer maxTransferAttempts, Limit limit) {
@@ -414,7 +412,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                  ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
                                                  Integer maxTransferAttempts, Limit limit);
 
-
     default List<Long> findEodsNotInOtherStorage(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                  ExternalLocationTypeEntity notExistsLocation, Integer limitRecords) {
         Set<Long> results = new HashSet<>(); // Ensures no duplicates
@@ -453,6 +450,51 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                   Integer notExistsLocation, Integer limitRecords);
 
     @Query(
+        """
+            SELECT eod.id
+            FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE eod.media.id = eod2.media.id
+            AND eod.status.id = :status
+            AND eod2.status.id = :status
+            AND eod.externalLocationType.id = :type
+            AND eod2.externalLocationType.id = :existsLocation
+            AND eod2.lastModifiedDateTime <= :lastModifiedBefore
+            UNION ALL
+            SELECT eod.id
+            FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE eod.transcriptionDocumentEntity.id = eod2.transcriptionDocumentEntity.id
+            AND eod.status.id = :status
+            AND eod2.status.id = :status
+            AND eod.externalLocationType.id = :type
+            AND eod2.externalLocationType.id = :existsLocation
+            AND eod2.lastModifiedDateTime <= :lastModifiedBefore
+            UNION ALL
+            SELECT eod.id
+            FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE eod.annotationDocumentEntity.id = eod2.annotationDocumentEntity.id
+            AND eod.status.id = :status
+            AND eod2.status.id = :status
+            AND eod.externalLocationType.id = :type
+            AND eod2.externalLocationType.id = :existsLocation
+            AND eod2.lastModifiedDateTime <= :lastModifiedBefore
+            UNION ALL
+            SELECT eod.id
+            FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE eod.caseDocument.id = eod2.caseDocument.id
+            AND eod.status.id = :status
+            AND eod2.status.id = :status
+            AND eod.externalLocationType.id = :type
+            AND eod2.externalLocationType.id = :existsLocation
+            AND eod2.lastModifiedDateTime <= :lastModifiedBefore
+            """
+    )
+    List<Long> findEodIdsInOtherStorageLastModifiedBefore(@Param("status") Integer status,
+                                                          @Param("type") Integer type,
+                                                          @Param("existsLocation") Integer existsLocation,
+                                                          @Param("lastModifiedBefore") OffsetDateTime lastModifiedBefore,
+                                                          Limit limit);
+
+    @Query(
         value = """
             SELECT eod1.eod_id
             FROM darts.external_object_directory eod1
@@ -489,7 +531,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     ExternalObjectDirectoryEntity findByIdsAndFailure(Long mediaId, Long caseDocumentId, Long annotationDocumentId, Long transcriptionDocumentId,
                                                       List<Integer> failureStatesList);
-
 
     @Query(
         """
@@ -727,6 +768,5 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                         @Param("endDateTime") OffsetDateTime endDateTime,
                                                                         @Param("locationType") ExternalLocationTypeEntity locationType,
                                                                         Limit limit);
-
 
 }

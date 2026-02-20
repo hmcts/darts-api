@@ -36,7 +36,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupArmResponseFilesService {
 
     protected final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -65,7 +65,6 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
              batchCleanupConfiguration, armDataManagementConfiguration, currentTimeHelper, armResponseFileHelper,
              manifestFilePrefix, manifestFilePrefix);
     }
-
 
     @Override
     public void cleanupResponseFiles(int batchsize) {
