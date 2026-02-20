@@ -19,6 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
+import uk.gov.hmcts.darts.arm.service.RemoveRpoProductionsService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalInboundDataStoreDeleter;
@@ -57,6 +58,7 @@ import uk.gov.hmcts.darts.task.config.InboundToUnstructuredAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.OutboundAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ProcessArmResponseFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.RemoveRpoProductionsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredToArmAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
@@ -76,6 +78,7 @@ import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.RemoveOldArmRpoProductionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
@@ -150,6 +153,8 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     private ArmRpoPollService armRpoPollService;
     @Autowired
     private UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
+    @Autowired
+    private RemoveRpoProductionsService removeRpoProductionsService;
 
     @MockitoBean
     private UserIdentity userIdentity;
@@ -211,7 +216,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelProcessDailyList() {
+     void cancelAutomatedTask_shouldCancelProcessDailyListTask_whenTaskExistsAndIsRunning() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
             automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
@@ -228,7 +233,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTasksUpdateCronExpressionAndResetCronExpression() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetProcessDailyListAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
             automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
@@ -253,7 +258,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void cancelAutomatedTaskAndUpdateCronExpression() {
+    void cancelAutomatedTaskAndUpdateCronExpression_shouldCancelAutomatedTaskAndUpdateCronExpression_whenTaskExists() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
             automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
@@ -277,7 +282,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenNonExistingAutomatedTaskNameUpdateAutomatedTaskCronExpressionThrowsDartsApiException() {
+     void updateAutomatedTaskCronExpression_shouldThrowDartsApiException_whenTaskDoesNotExist() {
         var exception = assertThrows(
             DartsApiException.class,
             () -> automatedTaskService.updateAutomatedTaskCronExpression(
@@ -288,7 +293,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenExistingAutomatedTaskNameAndInvalidCronExpressionThrowsDartsApiException() {
+    void updateAutomatedTaskCronExpression_shouldThrowDartsApiException_whenCronExpressionIsInvalid() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
             automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
@@ -305,7 +310,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void updateCronExpressionWithoutRescheduleForcingTaskToSkipRunning() {
+    void cancelAutomatedTaskAndUpdateCronExpression_shouldUpdateCronExpressionWithoutRescheduleForcingTaskToSkipRunning_whenTaskExists() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
             automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
@@ -347,7 +352,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTasksUpdateCronAndResetCronForCloseUnfinishedTranscriptionsAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetCloseUnfinishedTranscriptionsAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new CloseUnfinishedTranscriptionsAutomatedTask(
                 automatedTaskRepository,
@@ -380,7 +385,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelCloseUnfinishedTranscriptionsAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelCloseUnfinishedTranscriptionsAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new CloseUnfinishedTranscriptionsAutomatedTask(
                 automatedTaskRepository,
@@ -403,7 +408,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTasksUpdateCronAndResetCronForOutboundAudioDeleterAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetCronForOutboundAudioDeleterAutomatedTask_WhenTaskExists() {
         AutomatedTask automatedTask =
             new OutboundAudioDeleterAutomatedTask(
                 automatedTaskRepository,
@@ -436,7 +441,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelOutboundAudioDeleterAutomatedTask() {
+    void cancelAutomatedTask_ShouldCancelOutboundAudioDeleterAutomatedTask_WhenTaskExists() {
         AutomatedTask automatedTask =
             new OutboundAudioDeleterAutomatedTask(automatedTaskRepository,
                                                   mock(OutboundAudioDeleterAutomatedTaskConfig.class),
@@ -456,7 +461,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelInboundAudioDeleterAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelInboundAudioDeleterAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new InboundAudioDeleterAutomatedTask(automatedTaskRepository,
                                                  mock(InboundAudioDeleterAutomatedTaskConfig.class),
@@ -479,7 +484,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTasksUpdateCronAndResetCronForExternalDataDeleterAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetCronForExternalDataDeleterAutomatedTask_whenTaskExists() {    
         AutomatedTask automatedTask =
             new ExternalDataStoreDeleterAutomatedTask(
                 automatedTaskRepository,
@@ -512,7 +517,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelExternalDataDeleterAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelExternalDataDeleterAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new ExternalDataStoreDeleterAutomatedTask(
                 automatedTaskRepository,
@@ -537,7 +542,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelInboundToUnstructuredAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelInboundToUnstructuredAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new InboundToUnstructuredAutomatedTask(automatedTaskRepository,
                                                    mock(InboundToUnstructuredAutomatedTaskConfig.class),
@@ -560,7 +565,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelUnstructuredAudioDeleterAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelUnstructuredAudioDeleterAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new UnstructuredAudioDeleterAutomatedTask(automatedTaskRepository,
                                                       mock(UnstructuredAudioDeleterAutomatedTaskConfig.class),
@@ -584,7 +589,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTasksUpdateCronAndResetCronForUnstructuredToArmAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetCronForUnstructuredToArmAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
@@ -618,7 +623,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelUnstructuredToArmAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelUnstructuredToArmAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
@@ -645,7 +650,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
 
 
     @Test
-    void givenConfiguredTasksUpdateCronAndResetCronForProcessArmResponseFilesAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetCronForProcessArmResponseFilesAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new ProcessArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
@@ -677,7 +682,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelProcessArmResponseFilesAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelProcessArmResponseFilesAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new ProcessArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
@@ -703,7 +708,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCloseOldCasesAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetCloseOldCasesAutomatedTaskCronExpression_whenTaskExists() {
         AutomatedTask automatedTask =
             new CloseOldCasesAutomatedTask(
                 automatedTaskRepository,
@@ -737,7 +742,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelCloseOldCasesAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelCloseOldCasesAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new CloseOldCasesAutomatedTask(
                 automatedTaskRepository,
@@ -762,7 +767,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskGenerateCaseDocumentAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetGenerateCaseDocumentAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentAutomatedTask(
                 automatedTaskRepository,
@@ -796,7 +801,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelGenerateCaseDocumentAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelGenerateCaseDocumentAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentAutomatedTask(
                 automatedTaskRepository,
@@ -821,7 +826,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void canUpdatedCronForDailyListHouseKeepingTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateDailyListHousekeepingAutomatedTask_whenTaskExists() {
         var automatedTask = new DailyListHousekeepingAutomatedTask(
             automatedTaskRepository,
             mock(DailyListHousekeepingAutomatedTaskConfig.class),
@@ -842,7 +847,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void canCancelDailyListAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelDailyListHousekeepingAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new DailyListHousekeepingAutomatedTask(
                 automatedTaskRepository,
@@ -867,7 +872,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskApplyRetentionCaseAssociatedObjectsAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateApplyRetentionCaseAssociatedObjectsAutomatedTaskCron_whenTaskExists() {
         AutomatedTask automatedTask =
             new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
                 automatedTaskRepository,
@@ -901,7 +906,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelApplyRetentionCaseAssociatedObjectsAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelApplyRetentionCaseAssociatedObjectsAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
                 automatedTaskRepository,
@@ -926,7 +931,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTasksUpdateCronAndResetCronForArmRetentionEventDateCalculatorAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetCronForArmRetentionEventDateCalculatorAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new ArmRetentionEventDateCalculatorAutomatedTask(
                 automatedTaskRepository,
@@ -957,7 +962,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelArmRetentionEventDateCalculatorAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelArmRetentionEventDateCalculatorAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new ArmRetentionEventDateCalculatorAutomatedTask(
                 automatedTaskRepository,
@@ -983,7 +988,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskInboundTranscriptionAndAnnotationDeleterAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelInboundTranscriptionAndAnnotationDeleterAutomatedTask_whenTaskExists() {
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
 
@@ -998,7 +1003,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask_whenTaskExists() {
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
 
@@ -1013,7 +1018,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTasksUpdateCronAndResetCronForArmRpoPollAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetCronForArmRpoPollAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new ArmRpoPollingAutomatedTask(
                 automatedTaskRepository,
@@ -1043,8 +1048,40 @@ class AutomatedTaskServiceTest extends IntegrationBase {
             automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
     }
 
+    
     @Test
-    void givenConfiguredTaskGenerateCaseDocumentForRetentionDateAutomatedTask() {
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetCronForRemoveOldArmRpoProductionsAutomatedTask_whenTaskExists() { 
+        AutomatedTask automatedTask =
+            new RemoveOldArmRpoProductionsAutomatedTask(
+                automatedTaskRepository,
+                removeRpoProductionsService,
+                mock(RemoveRpoProductionsAutomatedTaskConfig.class),
+                logApi,
+                lockService
+            );
+        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
+                 updatedAutomatedTaskEntity.get().getCronExpression()
+        );
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+    }
+
+    @Test
+    void updateAutomatedTaskCronExpression_shouldUpdateAndResetCronForGenerateCaseDocumentForRetentionDateAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
@@ -1078,7 +1115,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelGenerateCaseDocumentForRetentionDateAutomatedTask() {
+    void cancelAutomatedTask_shouldCancelGenerateCaseDocumentForRetentionDateAutomatedTask_whenTaskExists() {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
@@ -1103,7 +1140,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void verifyCronExpressionRunsBetween8pmAnd8amAt50MinutesPastTheHour() {
+    void cronExpression_shouldRunBetween8pmAnd8amAt50MinutesPastTheHour_whenCronMatches() {
         CronExpression cronTrigger = CronExpression.parse("0 50 20-23,0-7 * * *");
 
         LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 19, 49));
@@ -1165,7 +1202,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void verifyCronExpressionRunsEveryHourAt15MinutesPastTheHour() {
+    void cronExpression_shouldRunEveryHourAt15MinutesPastTheHour_whenCronMatches() {
         CronExpression cronTrigger = CronExpression.parse("0 15 * * * *");
 
         LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 14));
@@ -1183,7 +1220,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void verifyCronExpressionRunsEvery5MinutesAt1MinutePast() {
+    void cronExpression_shouldRunEvery5MinutesAt1MinutePast_whenCronMatches() {
         CronExpression cronTrigger = CronExpression.parse("0 1/5 * * * *");
 
         LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 15));

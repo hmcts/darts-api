@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.log.service;
 
 import java.time.Duration;
 
+@SuppressWarnings("PMD.TooManyMethods") //Logging class with many ARM related logs
 public interface ArmLoggerService {
 
     void armPushSuccessful(Long eodId);
@@ -21,4 +22,10 @@ public interface ArmLoggerService {
     void armRpoPollingSuccessful(Integer executionId);
 
     void armRpoPollingFailed(Integer executionId);
+    
+    void removeOldArmRpoProductionsSuccessful(Integer executionId);
+    
+    void removeOldArmRpoProductionsFailed();
+
+    void removeOldArmRpoProductionsFailed(Integer executionId);
 }

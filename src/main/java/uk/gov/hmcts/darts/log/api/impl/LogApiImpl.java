@@ -199,5 +199,21 @@ public class LogApiImpl implements LogApi {
                                                   Long medId, Long fileSize) {
         audioLoggerService.addAudioSmallFileWithLongDuration(courthouse, courtroom, startDate, finishDate, medId, fileSize);
     }
+    
+    @Override
+    public void removeOldArmRpoProductionsSuccessful(Integer executionId) {
+        armLoggerService.removeOldArmRpoProductionsSuccessful(executionId);
+    }
+    
+    @Override
+    public void removeOldArmRpoProductionsFailed() {
+        armLoggerService.removeOldArmRpoProductionsFailed();
+    }
+
+    @Override
+    public void removeOldArmRpoProductionsFailed(Integer executionId) {
+        armLoggerService.removeOldArmRpoProductionsFailed(executionId);
+    }
+
 
 }

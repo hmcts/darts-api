@@ -28,4 +28,5 @@ public interface ArmRpoService {
 
     void reconcileArmRpoCsvData(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, List<File> csvFiles, int batchSize);
 
+    List<Integer> findIdsByStatusAndLastModifiedDateTimeAfter(ArmRpoStatusEntity armRpoStatusEntity, java.time.OffsetDateTime offsetDateTime);
 }

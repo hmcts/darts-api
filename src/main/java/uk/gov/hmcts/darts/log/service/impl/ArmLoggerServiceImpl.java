@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.util.DurationUtil;
 
 import java.time.Duration;
 
+@SuppressWarnings("PMD.TooManyMethods") //Logging class with many ARM related logs
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -25,6 +26,10 @@ public class ArmLoggerServiceImpl implements ArmLoggerService {
     private static final String ARM_RPO_SEARCH_FAILED_FOR_EXECUTION_ID = "ARM RPO Search - Failed for execution Id = {}";
     private static final String ARM_RPO_POLLING_SUCCESSFULLY_COMPLETED_FOR_EXECUTION_ID = "ARM RPO Polling - Successfully completed for execution Id = {}";
     private static final String ARM_RPO_POLLING_FAILED_FOR_EXECUTION_ID = "ARM RPO Polling - Failed for execution Id = {}";
+    private static final String ARM_RPO_REMOVAL_SUCCESSFULLY_COMPLETED_FOR_EXECUTION_ID = "ARM RPO Removal - Successfully completed for execution Id = {}";
+    private static final String ARM_RPO_REMOVAL_FAILED_FOR_BATCH = "ARM RPO Removal - Failed before processing individual execution IDs";
+    private static final String ARM_RPO_REMOVAL_FAILED_FOR_ARD_ID = "ARM RPO Removal - Failed for ARD_ID= {}";
+
 
     @Override
     public void armPushSuccessful(Long eodId) {
@@ -71,4 +76,19 @@ public class ArmLoggerServiceImpl implements ArmLoggerService {
         log.error(ARM_RPO_POLLING_FAILED_FOR_EXECUTION_ID, executionId);
     }
 
+    @Override
+    public void removeOldArmRpoProductionsSuccessful(Integer executionId) {
+        log.info(ARM_RPO_REMOVAL_SUCCESSFULLY_COMPLETED_FOR_EXECUTION_ID, executionId);
+    }
+    
+    @Override
+    public void removeOldArmRpoProductionsFailed() {
+        log.error(ARM_RPO_REMOVAL_FAILED_FOR_BATCH);
+    }
+
+    @Override
+    public void removeOldArmRpoProductionsFailed(Integer  executionId) {
+        log.error(ARM_RPO_REMOVAL_FAILED_FOR_ARD_ID, executionId);
+    }
+    
 }
