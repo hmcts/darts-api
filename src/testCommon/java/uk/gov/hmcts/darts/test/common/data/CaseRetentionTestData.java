@@ -12,10 +12,6 @@ import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUse
 public final class CaseRetentionTestData implements Persistable<TestCaseRetentionEntity.TestCaseRetentionBuilderRetrieve,
     CaseRetentionEntity, TestCaseRetentionEntity.TestCaseRetentionEntityBuilder> {
 
-    public CaseRetentionTestData() {
-        // This constructor is intentionally empty. Nothing special is needed here.
-    }
-
     public static CaseRetentionEntity someMinimalCaseRetention() {
 
         var caseRetention = new CaseRetentionEntity();
