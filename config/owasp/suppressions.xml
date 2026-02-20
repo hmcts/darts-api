@@ -6,7 +6,7 @@
       We aren't using the azure_cli package.
     </notes>
     <cve>CVE-2023-36052</cve>
-  </suppress>
+  </suppress> 
 
   <!--Please add all the false positives under the below section-->
   <suppress>
