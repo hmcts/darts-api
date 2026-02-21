@@ -117,7 +117,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
 
         TestRetentionConfidenceCategoryMapperEntity closedMappingEntity = testData.someMinimalBuilder()
-            .confidenceCategory(CASE_CLOSED)
+            .confidenceCategory(CASE_CLOSED.getId())
             .confidenceReason(RetentionConfidenceReasonEnum.CASE_CLOSED)
             .confidenceScore(CASE_PERFECTLY_CLOSED)
             .build();
@@ -345,7 +345,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(OffsetDateTime.of(2041, 1, 14, 0, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("PENDING", caseRetentionEntity.getCurrentState());
         assertEquals(5, caseRetentionEntity.getRetentionPolicyType().getId());
-        assertEquals(CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
     }
 
@@ -399,7 +399,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(OffsetDateTime.of(2040, 10, 10, 0, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("PENDING", caseRetentionEntity.getCurrentState());
         assertEquals(5, caseRetentionEntity.getRetentionPolicyType().getId());
-        assertEquals(CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
     }
 
@@ -454,7 +454,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(OffsetDateTime.of(2040, 12, 20, 0, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("PENDING", caseRetentionEntity.getCurrentState());
         assertEquals(5, caseRetentionEntity.getRetentionPolicyType().getId());
-        assertEquals(CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
     }
 
@@ -513,7 +513,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(date7YearsLater, caseRetentionEntity.getRetainUntil());
         assertEquals(String.valueOf(PENDING), caseRetentionEntity.getCurrentState());
         assertEquals(4, caseRetentionEntity.getRetentionPolicyType().getId());
-        assertEquals(CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
 
         List<EventEntity> eventsForHearing = dartsDatabase.getEventRepository().findAllByHearingId(hearing.getId());
@@ -697,7 +697,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(date7YearsLater, latestCaseRetentionEntity.getRetainUntil());
         assertEquals(String.valueOf(PENDING), latestCaseRetentionEntity.getCurrentState());
         assertEquals(4, latestCaseRetentionEntity.getRetentionPolicyType().getId());
-        assertEquals(CASE_CLOSED, latestCaseRetentionEntity.getConfidenceCategory());
+        assertEquals(CASE_CLOSED.getId(), latestCaseRetentionEntity.getConfidenceCategory());
         assertNotNull(latestCaseRetentionEntity.getCaseManagementRetention().getId());
 
         // the initial one is untouched by the new event, with no CMR link
@@ -1126,3 +1126,4 @@ class StopAndCloseHandlerTest extends HandlerTestData {
             .orElseThrow();
     }
 }
+

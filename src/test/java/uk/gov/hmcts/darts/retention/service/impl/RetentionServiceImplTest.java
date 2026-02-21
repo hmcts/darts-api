@@ -110,7 +110,7 @@ class RetentionServiceImplTest {
         void shouldUpdateConfidenceAttributes_whenConfidenceMappingExistsInDB() {
             // Given
             RetentionConfidenceCategoryMapperEntity confidenceMapping = createConfidenceMapping();
-            when(retentionConfidenceCategoryMapperRepository.findByConfidenceCategory(eq(RetentionConfidenceCategoryEnum.CASE_CLOSED)))
+            when(retentionConfidenceCategoryMapperRepository.findByConfidenceCategory(eq(RetentionConfidenceCategoryEnum.CASE_CLOSED.getId())))
                 .thenReturn(Optional.of(confidenceMapping));
 
             var courtCaseEntity = new CourtCaseEntity();
@@ -153,7 +153,7 @@ class RetentionServiceImplTest {
             RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
 
             return testData.someMinimalBuilder()
-                .confidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED)
+                .confidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED.getId())
                 .confidenceScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
                 .confidenceReason(RetentionConfidenceReasonEnum.CASE_CLOSED)
                 .build();

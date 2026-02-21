@@ -61,7 +61,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.getFirst();
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntity.getCurrentState());
-        caseRetentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
+        caseRetentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED.getId());
 
         caseRetentionRepository.saveAndFlush(caseRetentionEntity);
 

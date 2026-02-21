@@ -296,6 +296,7 @@ public class DartsDatabaseStub {
                              CaseDocumentEntity.class,
                              MediaEntity.class,
                              TranscriptionDocumentEntity.class);
+            objectStateRecordRepository.deleteAll();
             transcriptionLinkedCaseRepository.deleteAll();
             dataAnonymisationRepository.deleteAll();
             armRpoExecutionDetailRepository.deleteAll();
@@ -1186,3 +1187,4 @@ public class DartsDatabaseStub {
             .name();
     }
 }
+

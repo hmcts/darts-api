@@ -66,7 +66,7 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         }
 
         // ignore the caseTotalSentence if it's not an overridable policy
-        if (dartsEvent.getRetentionPolicy().getCaseTotalSentence() != null && !overridableFixedPolicyKeys.contains(
+        if (dartsEvent.getRetentionPolicy() != null && dartsEvent.getRetentionPolicy().getCaseTotalSentence() != null && !overridableFixedPolicyKeys.contains(
             dartsEvent.getRetentionPolicy().getCaseRetentionFixedPolicy())) {
             dartsEvent.getRetentionPolicy().setCaseTotalSentence(null);
         }
@@ -76,7 +76,8 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
             createRetention(caseManagementRetentionEntity, hearingAndEvent, dartsEvent);
         } else {
             PendingRetention latestPendingRetention = latestPendingRetentionOpt.get();
-            if (dartsEvent.getDateTime().isAfter(latestPendingRetention.getEventTimestamp())) {
+            if (dartsEvent.getDateTime() != null && latestPendingRetention.getEventTimestamp() != null && dartsEvent.getDateTime().isAfter(
+                latestPendingRetention.getEventTimestamp())) {
                 updateExistingRetention(caseManagementRetentionEntity, latestPendingRetention.getCaseRetention(), dartsEvent);
             } else {
                 log.info("Ignoring event with id {} because its event time {} is not after the latest pending entry {} for caseId {}.", dartsEvent.getEventId(),
@@ -111,21 +112,23 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
                                          DartsEvent dartsEvent) {
         DartsEventRetentionPolicy dartsEventRetentionPolicy = dartsEvent.getRetentionPolicy();
         existingCaseRetention.setRetentionPolicyType(caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
-        existingCaseRetention.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
+        if (dartsEventRetentionPolicy != null) {
+            existingCaseRetention.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
 
-        OffsetDateTime eventTimestamp = dartsEvent.getDateTime();
-        LocalDate eventDate = DateConverterUtil.toLocalDate(eventTimestamp);
-        LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,
-                                                                       dartsEventRetentionPolicy.getCaseTotalSentence(),
-                                                                       caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
+            OffsetDateTime eventTimestamp = dartsEvent.getDateTime();
+            LocalDate eventDate = DateConverterUtil.toLocalDate(eventTimestamp);
+            LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,
+                                                                           dartsEventRetentionPolicy.getCaseTotalSentence(),
+                                                                           caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
 
-        existingCaseRetention.setRetainUntil(retentionDate.atStartOfDay().atOffset(ZoneOffset.UTC));
+            existingCaseRetention.setRetainUntil(retentionDate.atStartOfDay().atOffset(ZoneOffset.UTC));
+        }
         existingCaseRetention.setCaseManagementRetention(caseManagementRetentionEntity);
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();
         existingCaseRetention.setSubmittedBy(currentUser);
         existingCaseRetention.setCreatedBy(currentUser);
         existingCaseRetention.setLastModifiedBy(currentUser);
-        existingCaseRetention.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
+        existingCaseRetention.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED.getId());
         caseRetentionRepository.save(existingCaseRetention);
 
     }
@@ -140,8 +143,10 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         caseRetentionEntity.setCourtCase(courtCase);
         caseRetentionEntity.setRetentionPolicyType(caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
         caseRetentionEntity.setCaseManagementRetention(caseManagementRetentionEntity);
-        caseRetentionEntity.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
-        caseRetentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
+        if (dartsEventRetentionPolicy != null) {
+            caseRetentionEntity.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
+        }
+        caseRetentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED.getId());
         OffsetDateTime eventTimestamp = dartsEvent.getDateTime();
         LocalDate eventDate = DateConverterUtil.toLocalDate(eventTimestamp);
         LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,

@@ -48,7 +48,7 @@ import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class RetentionPostServiceImplTest {
-    
+
     public static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC);
     @InjectMocks
     private RetentionPostServiceImpl retentionPostService;
@@ -302,7 +302,7 @@ class RetentionPostServiceImplTest {
         assertEquals("2026-01-01T00:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedById());
         assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
-        assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
+        assertEquals(MANUAL_OVERRIDE.getId(), savedRetention.getConfidenceCategory());
     }
 
     @Test
@@ -324,7 +324,7 @@ class RetentionPostServiceImplTest {
         assertEquals("2027-01-01T00:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedById());
         assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
-        assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
+        assertEquals(MANUAL_OVERRIDE.getId(), savedRetention.getConfidenceCategory());
     }
 
     @Test
@@ -347,7 +347,7 @@ class RetentionPostServiceImplTest {
         assertEquals("2025-10-01T00:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedById());
         assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
-        assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
+        assertEquals(MANUAL_OVERRIDE.getId(), savedRetention.getConfidenceCategory());
     }
 
     @Test
@@ -385,7 +385,8 @@ class RetentionPostServiceImplTest {
         assertEquals("2123-10-01T00:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedById());
         assertEquals(RetentionPolicyEnum.PERMANENT.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
-        assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
+        assertEquals(MANUAL_OVERRIDE.getId(), savedRetention.getConfidenceCategory());
     }
 
 }
+

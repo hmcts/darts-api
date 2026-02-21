@@ -44,7 +44,7 @@ public class RetentionServiceImpl implements RetentionService {
     @Override
     public CourtCaseEntity updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase,
                                                                            RetentionConfidenceCategoryEnum confidenceCategory) {
-        retentionConfidenceCategoryMapperRepository.findByConfidenceCategory(confidenceCategory)
+        retentionConfidenceCategoryMapperRepository.findByConfidenceCategory(confidenceCategory.getId())
             .ifPresentOrElse(categoryMapperEntity -> {
                 courtCase.setRetConfScore(categoryMapperEntity.getConfidenceScore());
                 courtCase.setRetConfReason(categoryMapperEntity.getConfidenceReason());
