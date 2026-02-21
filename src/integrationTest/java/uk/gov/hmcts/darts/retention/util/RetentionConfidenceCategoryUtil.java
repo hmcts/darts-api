@@ -55,7 +55,7 @@ public class RetentionConfidenceCategoryUtil {
 
         RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
         TestRetentionConfidenceCategoryMapperEntity agedCaseMappingEntity = testData.someMinimalBuilder()
-            .confidenceCategory(retentionConfidenceCategoryEnum)
+            .confidenceCategory(retentionConfidenceCategoryEnum != null ? retentionConfidenceCategoryEnum.getId() : null)
             .confidenceReason(retentionConfidenceReasonEnum)
             .confidenceScore(retentionConfidenceScoreEnum)
             .build();

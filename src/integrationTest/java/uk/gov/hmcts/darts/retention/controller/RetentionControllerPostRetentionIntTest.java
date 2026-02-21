@@ -76,7 +76,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
         RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
 
         TestRetentionConfidenceCategoryMapperEntity manualOverrideMappingEntity = testData.someMinimalBuilder()
-            .confidenceCategory(MANUAL_OVERRIDE)
+            .confidenceCategory(MANUAL_OVERRIDE.getId())
             .confidenceReason(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE)
             .confidenceScore(CASE_PERFECTLY_CLOSED)
             .build();
@@ -119,7 +119,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
             .andReturn().getResponse().getContentAsString();
         Optional<CaseRetentionEntity> latestCompletedRetention = dartsDatabase.getCaseRetentionRepository().findLatestCompletedRetention(courtCase);
         assertEquals(OffsetDateTime.parse("2024-05-20T00:00Z"), latestCompletedRetention.get().getRetainUntil());
-        assertThat(latestCompletedRetention.get().getConfidenceCategory()).isEqualTo(MANUAL_OVERRIDE);
+        assertThat(latestCompletedRetention.get().getConfidenceCategory()).isEqualTo(MANUAL_OVERRIDE.getId());
 
         String expectedResponse = """
             {

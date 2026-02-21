@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
 import uk.gov.hmcts.darts.retention.service.RetentionService;
 
@@ -76,7 +77,15 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
             caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
             caseRetentionEntity.setCurrentState(CaseRetentionStatus.COMPLETE.name());
-            retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCaseEntity, caseRetentionEntity.getConfidenceCategory());
+            Integer confidenceCategoryId = caseRetentionEntity.getConfidenceCategory();
+            RetentionConfidenceCategoryEnum confidenceCategoryEnum = null;
+            if (confidenceCategoryId != null) {
+                confidenceCategoryEnum = java.util.Arrays.stream(RetentionConfidenceCategoryEnum.values())
+                    .filter(e -> e.getId().equals(confidenceCategoryId))
+                    .findFirst()
+                    .orElse(null);
+            }
+            retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCaseEntity, confidenceCategoryEnum);
             courtCaseEntity.setRetentionUpdated(true);
             courtCaseEntity.setRetentionRetries(0);
 
