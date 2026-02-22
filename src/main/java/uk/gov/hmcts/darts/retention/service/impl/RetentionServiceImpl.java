@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.time.Duration.between;
+import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -43,14 +44,6 @@ public class RetentionServiceImpl implements RetentionService {
     private final FindCurrentEntitiesHelper findCurrentEntitiesHelper;
     @Value("#{'${darts.retention.close-events}'.split(',')}")
     private final List<String> closeEvents;
-
-    private List<RetentionConfidenceCategoryEnum> confidenceCategoriesToCheck = List.of(
-        RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED,
-        RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED,
-        RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED,
-        RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED,
-        RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED
-    );
 
     @Override
     public List<GetCaseRetentionsResponse> getCaseRetentions(Integer caseId) {
@@ -106,35 +99,43 @@ public class RetentionServiceImpl implements RetentionService {
             //find latest closed event
             Optional<EventEntity> latestClosedEvent =
                 eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getEventName())).findFirst();
-            if (latestClosedEvent.isPresent() && latestEvent.getId().equals(latestClosedEvent.get().getId())) {
+
+            if (RetentionConfidenceReasonEnum.MANUAL_OVERRIDE.name().equals(
+                courtCase.getRetConfReason() != null ? courtCase.getRetConfReason().name() : null)) {
+                confidenceCategory = RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE;
+
+            } else if (latestClosedEvent.isEmpty()) {
+                var courtCaseRetentionConfidenceReason = courtCase.getRetConfReason();
+                if (nonNull(courtCaseRetentionConfidenceReason)) {
+                    try {
+                        confidenceCategory = RetentionConfidenceCategoryEnum.valueOf(courtCaseRetentionConfidenceReason.name());
+                    } catch (IllegalArgumentException e) {
+                        confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
+                    }
+                } else {
+                    confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
+                }
+            } else if (latestEvent.getId().equals(latestClosedEvent.get().getId())) {
                 // If the latest event in the case is "Case Closed" or "Archive Case" event
                 confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;
-            } else if (latestClosedEvent.isPresent()) {
-                confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(latestClosedEvent.get(), latestEvent, pendingRetentionDuration,
-                                                                                    courtCase.getRetConfReason());
+            } else {
+                confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(eventList, latestClosedEvent.get(), pendingRetentionDuration);
             }
         }
         return confidenceCategory;
     }
 
-    private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumBasedOnDates(EventEntity latestClosedEvent,
-                                                                                           EventEntity latestEvent,
-                                                                                           Duration pendingRetentionDuration,
-                                                                                           RetentionConfidenceReasonEnum courtCaseRetentionConfidenceReason) {
+    private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumBasedOnDates(List<EventEntity> eventList,
+                                                                                           EventEntity latestClosedEvent, Duration pendingRetentionDuration) {
         RetentionConfidenceCategoryEnum confidenceCategory;
-        OffsetDateTime closedEventDateTime = latestClosedEvent.getCreatedDateTime();
-        OffsetDateTime latestEventDateTime = latestEvent.getCreatedDateTime();
-        long daysBetween = between(closedEventDateTime, latestEventDateTime).toDays();
-        if (courtCaseRetentionConfidenceReason != null && confidenceCategoriesToCheck.contains(courtCaseRetentionConfidenceReason)) {
-            // Convert courtCaseRetentionConfidenceReason (RetentionConfidenceReasonEnum) to RetentionConfidenceCategoryEnum
-            try {
-                confidenceCategory = RetentionConfidenceCategoryEnum.valueOf(courtCaseRetentionConfidenceReason.name());
-            } catch (IllegalArgumentException e) {
-                confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
-            }
-        } else if (daysBetween <= pendingRetentionDuration.toDays()) {
-            // if the latest "Case Closed" or "Archive Case" event is NOT the latest non-log event, but the latest non-log event occurs
-            // WITHIN 10 days of the "Case Closed" or "Archive Case" event
+        Optional<EventEntity> latestNonLogEvent =
+            eventList.stream().filter(eventEntity -> !eventEntity.isLogEntry()).findFirst();
+
+        OffsetDateTime nonLogEventDateTime = latestNonLogEvent.get().getCreatedDateTime();
+        OffsetDateTime latestClosedEventDateTime = latestClosedEvent.getCreatedDateTime();
+        long daysBetween = between(latestClosedEventDateTime, nonLogEventDateTime).toDays();
+        if (daysBetween <= pendingRetentionDuration.toDays()) {
+            // if the latest non-log event occurs WITHIN 10 days of the "Case Closed" or "Archive Case" event
             confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN;
         } else {
             // if the latest "Case Closed" or "Archive Case" event is NOT the latest non-log event, but the latest non-log event occurs
