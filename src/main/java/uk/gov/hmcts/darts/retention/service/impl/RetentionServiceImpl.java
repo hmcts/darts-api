@@ -105,22 +105,28 @@ public class RetentionServiceImpl implements RetentionService {
                 confidenceCategory = RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE;
 
             } else if (latestClosedEvent.isEmpty()) {
-                var courtCaseRetentionConfidenceReason = courtCase.getRetConfReason();
-                if (nonNull(courtCaseRetentionConfidenceReason)) {
-                    try {
-                        confidenceCategory = RetentionConfidenceCategoryEnum.valueOf(courtCaseRetentionConfidenceReason.name());
-                    } catch (IllegalArgumentException e) {
-                        confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
-                    }
-                } else {
-                    confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
-                }
+                confidenceCategory = getRetentionConfidenceCategoryEnumFromReason(courtCase);
             } else if (latestEvent.getId().equals(latestClosedEvent.get().getId())) {
                 // If the latest event in the case is "Case Closed" or "Archive Case" event
                 confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;
             } else {
                 confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(eventList, latestClosedEvent.get(), pendingRetentionDuration);
             }
+        }
+        return confidenceCategory;
+    }
+
+    private static RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumFromReason(CourtCaseEntity courtCase) {
+        RetentionConfidenceCategoryEnum confidenceCategory;
+        var courtCaseRetentionConfidenceReason = courtCase.getRetConfReason();
+        if (nonNull(courtCaseRetentionConfidenceReason)) {
+            try {
+                confidenceCategory = RetentionConfidenceCategoryEnum.valueOf(courtCaseRetentionConfidenceReason.name());
+            } catch (IllegalArgumentException e) {
+                confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
+            }
+        } else {
+            confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
         }
         return confidenceCategory;
     }
