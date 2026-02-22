@@ -228,16 +228,6 @@ class RetentionServiceImplTest {
             assertEquals(RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN, result);
         }
 
-        private static @NotNull EventEntity getEvent(long id, String text, String eventName) {
-            EventEntity eventEntity = new EventEntity();
-            eventEntity.setId(id);
-            eventEntity.setCreatedDateTime(java.time.OffsetDateTime.parse(text));
-            EventHandlerEntity eventHandler = new EventHandlerEntity();
-            eventHandler.setEventName(eventName);
-            eventEntity.setEventType(eventHandler);
-            return eventEntity;
-        }
-
         @Test
         void getConfidenceCategory_shouldReturnMaxEventOutwith_whenLatestClosedEventIsNotLatestAndOutwithDays() {
             CourtCaseEntity courtCase = new CourtCaseEntity();
@@ -254,12 +244,89 @@ class RetentionServiceImplTest {
         }
 
         @Test
+        void getConfidenceCategory_shouldReturnCaseClosedWithin_whenLatestEventIsLogEntryAndNonLogEventWithinDays() {
+            CourtCaseEntity courtCase = new CourtCaseEntity();
+            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed");
+            EventEntity logEvent = getEvent(2L, "2024-01-05T10:00:00Z", "Log event");
+            logEvent.setLogEntry(true);
+            EventEntity nonLogEvent = getEvent(3L, "2024-01-04T10:00:00Z", "Other event");
+            nonLogEvent.setLogEntry(false);
+            List<EventEntity> events = new ArrayList<>(List.of(closedEvent, logEvent, nonLogEvent));
+            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+
+            var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10));
+            assertEquals(RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN, result);
+        }
+
+        @Test
+        void getConfidenceCategory_shouldReturnMaxEventOutwith_whenLatestEventIsLogEntryAndNonLogEventOutwithDays() {
+            CourtCaseEntity courtCase = new CourtCaseEntity();
+            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed");
+            EventEntity logEvent = getEvent(2L, "2024-01-20T10:00:00Z", "Log event");
+            logEvent.setLogEntry(true);
+            EventEntity nonLogEvent = getEvent(3L, "2024-01-15T10:00:00Z", "Other event");
+            nonLogEvent.setLogEntry(false);
+            List<EventEntity> events = new ArrayList<>(List.of(closedEvent, logEvent, nonLogEvent));
+            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+
+            var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10));
+            assertEquals(RetentionConfidenceCategoryEnum.MAX_EVENT_OUTWITH, result);
+        }
+
+        @Test
         void shouldReturnNull_whenNoEvents() {
             CourtCaseEntity courtCase = new CourtCaseEntity();
             when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(new ArrayList<>());
             var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10));
             assertNull(result);
         }
+
+        @Test
+        void getConfidenceCategory_shouldReturnManualOverride_whenRetConfReasonIsManualOverride() {
+            CourtCaseEntity courtCase = new CourtCaseEntity();
+            courtCase.setRetConfReason(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE);
+            EventEntity event = getEvent(1L, "2024-01-01T10:00:00Z", "Other event");
+            List<EventEntity> events = new ArrayList<>(List.of(event));
+            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+
+            var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10));
+            assertEquals(RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE, result);
+        }
+
+        @Test
+        void getConfidenceCategory_shouldReturnEnum_whenNoClosedEventAndRetConfReasonIsValidEnum() {
+            CourtCaseEntity courtCase = new CourtCaseEntity();
+            courtCase.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
+            EventEntity event = getEvent(1L, "2024-01-01T10:00:00Z", "Other event");
+            List<EventEntity> events = new ArrayList<>(List.of(event));
+            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+
+            var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10));
+            assertEquals(RetentionConfidenceCategoryEnum.CASE_CLOSED, result);
+        }
+
+        @Test
+        void getConfidenceCategory_shouldReturnAgedCase_whenNoClosedEventAndRetConfReasonIsNull() {
+            CourtCaseEntity courtCase = new CourtCaseEntity();
+            courtCase.setRetConfReason(null);
+            EventEntity event = getEvent(1L, "2024-01-01T10:00:00Z", "Other event");
+            List<EventEntity> events = new ArrayList<>(List.of(event));
+            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+
+            var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10));
+            assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE, result);
+        }
+
+        private static @NotNull EventEntity getEvent(long id, String text, String eventName) {
+            EventEntity eventEntity = new EventEntity();
+            eventEntity.setId(id);
+            eventEntity.setCreatedDateTime(java.time.OffsetDateTime.parse(text));
+            EventHandlerEntity eventHandler = new EventHandlerEntity();
+            eventHandler.setEventName(eventName);
+            eventEntity.setEventType(eventHandler);
+            return eventEntity;
+        }
+
     }
 
 }
