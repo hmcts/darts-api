@@ -170,7 +170,7 @@ class RetentionServiceImplTest {
         }
 
     }
-    
+
     @Nested
     class GetConfidenceCategoryTest {
         @Test
