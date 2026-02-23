@@ -15,5 +15,4 @@ public interface RetentionService {
 
     RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase, Duration pendingRetentionDuration);
 
-    RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryForMedia(CourtCaseEntity courtCase);
 }

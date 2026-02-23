@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.cases.helper.FindCurrentEntitiesHelper;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionConfidenceCategoryMapperRepository;
@@ -75,21 +74,6 @@ public class RetentionServiceImpl implements RetentionService {
 
         courtCase.setRetConfUpdatedTs(OffsetDateTime.now(clock));
         return caseRepository.save(courtCase);
-    }
-
-    @Override
-    public RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryForMedia(CourtCaseEntity courtCase) {
-        RetentionConfidenceCategoryEnum confidenceCategory;
-        //look for the last audio and use its recorded date
-        List<MediaEntity> mediaList = findCurrentEntitiesHelper.getCurrentMedia(courtCase);
-        if (mediaList.isEmpty()) {
-            //look for the last hearing date and use that
-            confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED;
-        } else {
-            mediaList.sort(Comparator.comparing(MediaEntity::getCreatedDateTime).reversed());
-            confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED;
-        }
-        return confidenceCategory;
     }
 
     @Override

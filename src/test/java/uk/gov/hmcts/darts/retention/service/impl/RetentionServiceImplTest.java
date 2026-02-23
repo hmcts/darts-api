@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionConfidenceCategoryMapperEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
@@ -171,35 +170,7 @@ class RetentionServiceImplTest {
         }
 
     }
-
-    @Nested
-    class GetRetentionConfidenceCategoryForMediaTest {
-        @Test
-        void shouldReturnMaxMediaClosed_whenMediaExists() {
-            CourtCaseEntity courtCase = new CourtCaseEntity();
-            MediaEntity media1 = new MediaEntity();
-            media1.setCreatedDateTime(java.time.OffsetDateTime.parse("2024-01-01T10:00:00Z"));
-            MediaEntity media2 = new MediaEntity();
-            media2.setCreatedDateTime(java.time.OffsetDateTime.parse("2024-01-02T10:00:00Z"));
-            List<MediaEntity> mediaList = new ArrayList<>(List.of(media1, media2));
-            when(findCurrentEntitiesHelper.getCurrentMedia(courtCase)).thenReturn(mediaList);
-
-            var result = retentionService.getRetentionConfidenceCategoryForMedia(courtCase);
-
-            assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED, result);
-        }
-
-        @Test
-        void shouldReturnMaxHearingClosed_whenNoMediaExists() {
-            CourtCaseEntity courtCase = new CourtCaseEntity();
-            when(findCurrentEntitiesHelper.getCurrentMedia(courtCase)).thenReturn(new ArrayList<>());
-
-            var result = retentionService.getRetentionConfidenceCategoryForMedia(courtCase);
-
-            assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED, result);
-        }
-    }
-
+    
     @Nested
     class GetConfidenceCategoryTest {
         @Test
