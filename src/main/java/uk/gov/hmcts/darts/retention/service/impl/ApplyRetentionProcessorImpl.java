@@ -78,12 +78,14 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
             caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
             caseRetentionEntity.setCurrentState(CaseRetentionStatus.COMPLETE.name());
             Integer confidenceCategoryId = caseRetentionEntity.getConfidenceCategory();
-            RetentionConfidenceCategoryEnum confidenceCategoryEnum = null;
+            RetentionConfidenceCategoryEnum confidenceCategoryEnum;
             if (confidenceCategoryId != null) {
                 confidenceCategoryEnum = java.util.Arrays.stream(RetentionConfidenceCategoryEnum.values())
                     .filter(e -> e.getId().equals(confidenceCategoryId))
                     .findFirst()
                     .orElse(null);
+            } else {
+                confidenceCategoryEnum = RetentionConfidenceCategoryEnum.UNKNOWN;
             }
             retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCaseEntity, confidenceCategoryEnum);
             courtCaseEntity.setRetentionUpdated(true);

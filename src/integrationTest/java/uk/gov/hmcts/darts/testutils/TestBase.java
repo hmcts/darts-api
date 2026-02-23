@@ -46,6 +46,7 @@ public class TestBase {
     @BeforeEach
     void beforeEach() {
         dartsDatabase.clearDb();
+        clearEntityManagerCache();
         evictCache();
     }
 
