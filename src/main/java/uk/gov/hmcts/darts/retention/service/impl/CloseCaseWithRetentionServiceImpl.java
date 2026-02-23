@@ -145,22 +145,22 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         caseRetentionEntity.setCaseManagementRetention(caseManagementRetentionEntity);
         if (dartsEventRetentionPolicy != null) {
             caseRetentionEntity.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
+            OffsetDateTime eventTimestamp = dartsEvent.getDateTime();
+            LocalDate eventDate = DateConverterUtil.toLocalDate(eventTimestamp);
+            LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,
+                                                                           dartsEventRetentionPolicy.getCaseTotalSentence(),
+                                                                           caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
+
+            caseRetentionEntity.setRetainUntil(retentionDate.atStartOfDay().atOffset(ZoneOffset.UTC));
         }
         caseRetentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED.getId());
-        OffsetDateTime eventTimestamp = dartsEvent.getDateTime();
-        LocalDate eventDate = DateConverterUtil.toLocalDate(eventTimestamp);
-        LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,
-                                                                       dartsEventRetentionPolicy.getCaseTotalSentence(),
-                                                                       caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
 
-        caseRetentionEntity.setRetainUntil(retentionDate.atStartOfDay().atOffset(ZoneOffset.UTC));
         caseRetentionEntity.setCurrentState(CaseRetentionStatus.PENDING.name());
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();
         caseRetentionEntity.setSubmittedBy(currentUser);
         caseRetentionEntity.setCreatedBy(currentUser);
         caseRetentionEntity.setLastModifiedBy(currentUser);
         caseRetentionRepository.save(caseRetentionEntity);
-
     }
 
 }
