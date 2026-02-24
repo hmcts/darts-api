@@ -18,6 +18,8 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -44,7 +46,8 @@ public class RetentionServiceImpl implements RetentionService {
     @Override
     public CourtCaseEntity updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase,
                                                                            RetentionConfidenceCategoryEnum confidenceCategory) {
-        retentionConfidenceCategoryMapperRepository.findByConfidenceCategory(confidenceCategory.getId())
+        Integer confidenceCategoryId = nonNull(confidenceCategory) ? confidenceCategory.getId() : null;
+        retentionConfidenceCategoryMapperRepository.findByConfidenceCategory(confidenceCategoryId)
             .ifPresentOrElse(categoryMapperEntity -> {
                 courtCase.setRetConfScore(categoryMapperEntity.getConfidenceScore());
                 courtCase.setRetConfReason(categoryMapperEntity.getConfidenceReason());
