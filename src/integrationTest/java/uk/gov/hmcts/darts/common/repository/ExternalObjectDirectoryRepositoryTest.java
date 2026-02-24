@@ -458,7 +458,6 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         Pageable pageable = PageRequest.of(0, 10);
         ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
 
-
         // When
         Page<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(
             status, startDateTime, endDateTime, pageable
@@ -1256,6 +1255,37 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         // assert that the test has inserted the data into the database
         assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+    }
+
+    @Test
+    void findOldestByInputUploadProcessedTsAndStatusAndLocation() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // Given
+        OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(200);
+        OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusHours(2);
+
+        List<ExternalObjectDirectoryEntity> matchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 10, Optional.of(pastCurrentDateTime1));
+        matchingEods.forEach(eod -> {
+            eod.setInputUploadProcessedTs(pastCurrentDateTime1);
+        });
+        dartsPersistence.saveAll(matchingEods);
+        assertEquals(10, matchingEods.size());
+
+        List<ExternalObjectDirectoryEntity> nonMatchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 4, Optional.of(pastCurrentDateTime2));
+        nonMatchingEods.forEach(eod -> {
+            eod.setInputUploadProcessedTs(pastCurrentDateTime2);
+        });
+        dartsPersistence.saveAll(nonMatchingEods);
+        assertEquals(4, nonMatchingEods.size());
+
+        // When
+        ExternalObjectDirectoryEntity result = externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(
+            EodHelper.armRpoPendingStatus(), EodHelper.armLocation());
+
+        // Then
+        assertThat(result).isNotNull();
+
     }
 
 }
