@@ -125,6 +125,11 @@ public class RetentionServiceImpl implements RetentionService {
         Optional<EventEntity> latestNonLogEvent =
             eventList.stream().filter(eventEntity -> !eventEntity.isLogEntry()).findFirst();
 
+        if (latestNonLogEvent.isEmpty()) {
+            // if there are no non-log events, then we will categorise based on the closed event
+            confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;
+            return confidenceCategory;
+        }
         OffsetDateTime nonLogEventDateTime = latestNonLogEvent.get().getCreatedDateTime();
         OffsetDateTime latestClosedEventDateTime = latestClosedEvent.getCreatedDateTime();
         long daysBetween = between(latestClosedEventDateTime, nonLogEventDateTime).toDays();
