@@ -66,8 +66,9 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         }
 
         // ignore the caseTotalSentence if it's not an overridable policy
-        if (dartsEvent.getRetentionPolicy() != null && dartsEvent.getRetentionPolicy().getCaseTotalSentence() != null && !overridableFixedPolicyKeys.contains(
-            dartsEvent.getRetentionPolicy().getCaseRetentionFixedPolicy())) {
+        if (nonNull(dartsEvent.getRetentionPolicy())
+            && nonNull(dartsEvent.getRetentionPolicy().getCaseTotalSentence())
+            && !overridableFixedPolicyKeys.contains(dartsEvent.getRetentionPolicy().getCaseRetentionFixedPolicy())) {
             dartsEvent.getRetentionPolicy().setCaseTotalSentence(null);
         }
 
@@ -76,8 +77,8 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
             createRetention(caseManagementRetentionEntity, hearingAndEvent, dartsEvent);
         } else {
             PendingRetention latestPendingRetention = latestPendingRetentionOpt.get();
-            if (dartsEvent.getDateTime() != null && latestPendingRetention.getEventTimestamp() != null && dartsEvent.getDateTime().isAfter(
-                latestPendingRetention.getEventTimestamp())) {
+            if (nonNull(dartsEvent.getDateTime()) && nonNull(latestPendingRetention.getEventTimestamp())
+                && dartsEvent.getDateTime().isAfter(latestPendingRetention.getEventTimestamp())) {
                 updateExistingRetention(caseManagementRetentionEntity, latestPendingRetention.getCaseRetention(), dartsEvent);
             } else {
                 log.info("Ignoring event with id {} because its event time {} is not after the latest pending entry {} for caseId {}.", dartsEvent.getEventId(),

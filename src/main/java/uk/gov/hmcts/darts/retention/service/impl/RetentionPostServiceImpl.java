@@ -91,7 +91,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                 confidenceCategoryEnum = java.util.Arrays.stream(RetentionConfidenceCategoryEnum.values())
                     .filter(e -> e.getId().equals(confidenceCategoryId))
                     .findFirst()
-                    .orElse(null);
+                    .orElse(RetentionConfidenceCategoryEnum.UNKNOWN);
             }
             retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCase, confidenceCategoryEnum);
         }

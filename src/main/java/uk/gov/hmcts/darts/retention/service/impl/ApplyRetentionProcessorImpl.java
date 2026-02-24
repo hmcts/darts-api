@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
 import uk.gov.hmcts.darts.retention.service.RetentionService;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -78,14 +79,12 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
             caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
             caseRetentionEntity.setCurrentState(CaseRetentionStatus.COMPLETE.name());
             Integer confidenceCategoryId = caseRetentionEntity.getConfidenceCategory();
-            RetentionConfidenceCategoryEnum confidenceCategoryEnum;
+            RetentionConfidenceCategoryEnum confidenceCategoryEnum = null;
             if (confidenceCategoryId != null) {
-                confidenceCategoryEnum = java.util.Arrays.stream(RetentionConfidenceCategoryEnum.values())
+                confidenceCategoryEnum = Arrays.stream(RetentionConfidenceCategoryEnum.values())
                     .filter(e -> e.getId().equals(confidenceCategoryId))
                     .findFirst()
-                    .orElse(null);
-            } else {
-                confidenceCategoryEnum = RetentionConfidenceCategoryEnum.UNKNOWN;
+                    .orElse(RetentionConfidenceCategoryEnum.UNKNOWN);
             }
             retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCaseEntity, confidenceCategoryEnum);
             courtCaseEntity.setRetentionUpdated(true);
