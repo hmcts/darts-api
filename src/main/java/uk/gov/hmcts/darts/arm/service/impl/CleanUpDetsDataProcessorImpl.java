@@ -39,21 +39,22 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
     public void processCleanUpDetsData(int batchSize, CleanUpDetsDataAutomatedTaskConfig config) {
         log.info("Processing clean up of DETS data with batch size: {}", batchSize);
 
-        List<Long> eodIdsToCleanUp = externalObjectDirectoryRepository.findEodsWithMatchingRecordInArm(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(),
-            OffsetDateTime.now(clock),
-            Limit.of(batchSize)
-        );
+        OffsetDateTime minimumStoredAge = OffsetDateTime.now(clock).minus(config.getMinimumStoredAge());
+        int chunkSize = config.getChunkSize();
 
-        log.info("Found {} EOD records to clean up", eodIdsToCleanUp.size());
-        if (CollectionUtils.isNotEmpty(eodIdsToCleanUp)) {
-            //Chunk the EOD IDs into batches and process each batch in parallel
-            List<List<Long>> batchesForArm = ListUtils.partition(eodIdsToCleanUp, config.getChunkSize());
+        int totalProcessed = 0;
+
+        while (totalProcessed < batchSize && chunkSize > 0) {
+            log.info("Processing clean up of DETS data with chunk size: {}", chunkSize);
+            List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> eodIdsToCleanUp = externalObjectDirectoryRepository.cleanUpDetsDataProcedure(
+                chunkSize,
+                minimumStoredAge);
 
 
-            List<Callable<Void>> tasks = batchesForArm
+            List<List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse>> batchesToDeleteBlobStoreRecordFor = ListUtils.partition(eodIdsToCleanUp,
+                                                                                                                                          config.getChunkSize() / config.getThreads());
+
+            List<Callable<Void>> tasks = batchesToDeleteBlobStoreRecordFor
                 .stream()
                 .map(eodsForBatch -> (Callable<Void>) () -> {
                     //Call another serive to ensure the batch is processed within a transaction
@@ -70,9 +71,16 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
             } catch (Exception e) {
                 log.error("Clean up dets data unexpected exception", e);
             }
-        } else {
-            log.info("No DETS EODs require clean up");
+            //Update total processed count and adjust chunk size for next iteration if needed
+            totalProcessed += eodIdsToCleanUp.size();
+            //Ensure we do not exceed the batch size in the next iteration
+            //Takes into account the possibility that the procedure may return more records than requested
+            if (totalProcessed + chunkSize > batchSize) {
+                chunkSize = batchSize - totalProcessed;
+            }
+            log.info("Processed batch of DETS data clean up. Total processed so far: {}. Batch size: {}", totalProcessed, eodIdsToCleanUp.size());
         }
+        log.info("Completed processing clean up of DETS data. Total processed: {}", totalProcessed);
     }
 
     @Component
@@ -83,30 +91,26 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
         private final ObjectStateRecordRepository objectStateRecordRepository;
         private final DetsApiService detsApiService;
 
-        @Transactional
-        public void process(List<Long> eodsForBatch) {
-            log.info("Cleaning up DETS data for batch of EOD IDs: {}", eodsForBatch);
-            List<CleanUpDetsProcedureResponse> responses = externalObjectDirectoryRepository.cleanUpDetsDataProcedure(eodsForBatch);
-            log.info("Clean up DETS data procedure completed for batch. Responses: {}", responses);
-
+        public void process(List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> eodsCleanedUp) {
             List<Long> objectStateRecordsForDetsRecordsCleanedUpSuccessfully = new ArrayList<>();
             List<Long> objectStateRecordsForDetsRecordsFailedToCleanUp = new ArrayList<>();
-            for (CleanUpDetsProcedureResponse response : responses) {
+
+            for (CleanUpDetsProcedureResponse response : eodsCleanedUp) {
                 try {
-                    log.debug("Processing clean up response for EOD ID: {}, Location: {}", response.getId(), response.getLocation());
-                    if (detsApiService.deleteBlobDataFromContainer(response.location)) {
-                        log.debug("Successfully deleted DETS blob for EOD ID: {}, Location: {}", response.getId(), response.getLocation());
-                        objectStateRecordsForDetsRecordsCleanedUpSuccessfully.add(response.getId());
+                    log.debug("Processing clean up response for EOD ID: {}, Location: {}", response.getOsrUuid(), response.getDetsLocation());
+                    if (detsApiService.deleteBlobDataFromContainer(response.getDetsLocation())) {
+                        log.debug("Successfully deleted DETS blob for EOD ID: {}, Location: {}", response.getOsrUuid(), response.getDetsLocation());
+                        objectStateRecordsForDetsRecordsCleanedUpSuccessfully.add(response.getOsrUuid());
                         continue;
                     } else {
                         log.error("Failed to delete DETS blob for EOD ID: {}, Location: {}. Blob may not exist or deletion failed.",
-                                  response.getId(), response.getLocation());
+                                  response.getOsrUuid(), response.getDetsLocation());
                     }
                 } catch (AzureDeleteBlobException azureDeleteBlobException) {
                     log.error("AzureDeleteBlobException while deleting DETS blob for EOD Location: {}, object state record id: {}.",
-                              response.getLocation(), response.getId(), azureDeleteBlobException);
+                              response.getDetsLocation(), response.getOsrUuid(), azureDeleteBlobException);
                 }
-                objectStateRecordsForDetsRecordsFailedToCleanUp.add(response.getId());
+                objectStateRecordsForDetsRecordsFailedToCleanUp.add(response.getOsrUuid());
             }
             objectStateRecordRepository.markDetsCleanupStatusAsComplete(objectStateRecordsForDetsRecordsCleanedUpSuccessfully);
             log.info("Marked object state records as clean up complete for EOD IDs: {}", objectStateRecordsForDetsRecordsCleanedUpSuccessfully);
@@ -121,7 +125,7 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
     @Getter
     @Setter
     public static class CleanUpDetsProcedureResponse {
-        private Long id;
-        private String location;
+        private Long osrUuid;
+        private String detsLocation;
     }
 }
