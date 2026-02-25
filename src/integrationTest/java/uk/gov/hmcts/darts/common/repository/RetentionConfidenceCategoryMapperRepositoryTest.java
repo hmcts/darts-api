@@ -42,7 +42,7 @@ public class RetentionConfidenceCategoryMapperRepositoryTest extends PostgresInt
         void shouldSaveEntity_withStringValueForReason_andNumericsForCategoryAndScore() throws SQLException {
             // Given
             TestRetentionConfidenceCategoryMapperEntity mapperTestEntity = CATEGORY_MAPPER_TEST_DATA.someMinimalBuilder()
-                .confidenceCategory(RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE)
+                .confidenceCategory(RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE.getId())
                 .confidenceReason(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE)
                 .confidenceScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
                 .build();
@@ -76,13 +76,13 @@ public class RetentionConfidenceCategoryMapperRepositoryTest extends PostgresInt
             RetentionConfidenceCategoryEnum category = RetentionConfidenceCategoryEnum.CASE_CLOSED;
 
             TestRetentionConfidenceCategoryMapperEntity mapperTestEntity = CATEGORY_MAPPER_TEST_DATA.someMinimalBuilder()
-                .confidenceCategory(category)
+                .confidenceCategory(category.getId())
                 .build();
 
             var preparedEntity = dartsPersistence.save(mapperTestEntity.getEntity());
 
             // When
-            Optional<RetentionConfidenceCategoryMapperEntity> returnedEntity = repository.findByConfidenceCategory(category);
+            Optional<RetentionConfidenceCategoryMapperEntity> returnedEntity = repository.findByConfidenceCategory(category.getId());
 
             // Then
             assertTrue(returnedEntity.isPresent());
@@ -96,24 +96,24 @@ public class RetentionConfidenceCategoryMapperRepositoryTest extends PostgresInt
             RetentionConfidenceCategoryEnum category = RetentionConfidenceCategoryEnum.CASE_CLOSED;
 
             TestRetentionConfidenceCategoryMapperEntity mapperTestEntity1 = CATEGORY_MAPPER_TEST_DATA.someMinimalBuilder()
-                .confidenceCategory(category)
+                .confidenceCategory(category.getId())
                 .build();
             dartsPersistence.save(mapperTestEntity1.getEntity());
 
             TestRetentionConfidenceCategoryMapperEntity mapperTestEntity2 = CATEGORY_MAPPER_TEST_DATA.someMinimalBuilder()
-                .confidenceCategory(category)
+                .confidenceCategory(category.getId())
                 .build();
             dartsPersistence.save(mapperTestEntity2.getEntity());
 
             // When
             IncorrectResultSizeDataAccessException exception = assertThrows(IncorrectResultSizeDataAccessException.class, () ->
-                repository.findByConfidenceCategory(category));
+                repository.findByConfidenceCategory(category.getId()));
             assertEquals("Query did not return a unique result: 2 results were returned", exception.getMessage());
         }
 
         @Test
         void shouldReturnEmptyOptional_whenNoMatchExists() {
-            Optional<RetentionConfidenceCategoryMapperEntity> result = repository.findByConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
+            Optional<RetentionConfidenceCategoryMapperEntity> result = repository.findByConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED.getId());
 
             assertFalse(result.isPresent());
         }
