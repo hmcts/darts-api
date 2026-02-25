@@ -282,26 +282,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                           OffsetDateTime unstructuredLastModifiedBefore,
                                                           Limit limit);
 
-    @Query(
-        """
-            SELECT eod.id FROM ExternalObjectDirectoryEntity parentEod, ExternalObjectDirectoryEntity armEod
-            WHERE parentEod.media = armEod.media
-            AND parentEod.status = :storedStatus
-            AND parentEod.externalLocationType = :parentEodLocation
-            AND parentEod.lastModifiedDateTime <= :lastModifiedBefore
-            AND armEod.externalLocationType = :armLocation
-            AND armEod.status = :storedStatus
-            """
-    )
-    List<Long> findEodsWithMatchingRecordInArm(
-        ObjectRecordStatusEntity storedStatus,
-        ExternalLocationTypeEntity parentEodLocation,
-        ExternalLocationTypeEntity armLocation,
-        OffsetDateTime lastModifiedBefore,
-        Limit limit);
-
-    @Query(value = "SELECT * FROM dmp4312_del_eod_upd_osr_conf_loc(:ids)", nativeQuery = true)
-    List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> cleanUpDetsDataProcedure(@Param("ids") List<Long> ids);
+    @Query(value = "SELECT * FROM dets_cleanup_eod_osr(:pi_limit, :pi_last_modified_ts)", nativeQuery = true)
+    List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> cleanUpDetsDataProcedure(@Param("pi_limit") Integer limit, @Param("pi_last_modified_ts") OffsetDateTime lastModifiedBefore);
 
     @Query(
         """                       
