@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.retention.service;
 
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
@@ -13,6 +14,7 @@ public interface RetentionService {
 
     CourtCaseEntity updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase, RetentionConfidenceCategoryEnum confidenceCategory);
 
-    RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase, Duration pendingRetentionDuration);
+    RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase, Duration pendingRetentionDuration,
+                                                          CaseRetentionEntity caseRetentionEntity);
 
 }

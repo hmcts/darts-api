@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionConfidenceCategoryMapperRepository;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.mapper.RetentionMapper;
 import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.time.Duration.between;
-import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -77,61 +75,46 @@ public class RetentionServiceImpl implements RetentionService {
     }
 
     @Override
-    public RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase, Duration pendingRetentionDuration) {
+    public RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase, Duration pendingRetentionDuration,
+                                                                 CaseRetentionEntity caseRetention) {
         RetentionConfidenceCategoryEnum confidenceCategory = null;
 
         List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentEvents(courtCase);
         if (CollectionUtils.isNotEmpty(eventList)) {
-            eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
+            eventList.sort(Comparator.comparing(EventEntity::getTimestamp).reversed());
             EventEntity latestEvent = eventList.get(0);
             //find latest closed event
             Optional<EventEntity> latestClosedEvent =
                 eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getEventName())).findFirst();
 
-            if (RetentionConfidenceReasonEnum.MANUAL_OVERRIDE.name().equals(
-                courtCase.getRetConfReason() != null ? courtCase.getRetConfReason().name() : null)) {
-                confidenceCategory = RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE;
-
-            } else if (latestClosedEvent.isEmpty()) {
-                confidenceCategory = getRetentionConfidenceCategoryEnumFromReason(courtCase);
-            } else if (latestEvent.getId().equals(latestClosedEvent.get().getId())) {
-                // If the latest event in the case is "Case Closed" or "Archive Case" event
-                confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;
+            if (latestClosedEvent.isPresent()) {
+                if (latestEvent.getId().equals(latestClosedEvent.get().getId())) {
+                    // If the latest event in the case is "Case Closed" or "Archive Case" event
+                    confidenceCategory = caseRetention.getConfidenceCategory();
+                } else {
+                    confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(eventList, latestClosedEvent.get(), pendingRetentionDuration,
+                                                                                        caseRetention);
+                }
             } else {
-                confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(eventList, latestClosedEvent.get(), pendingRetentionDuration);
+                confidenceCategory = caseRetention.getConfidenceCategory();
             }
-        }
-        return confidenceCategory;
-    }
-
-    private static RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumFromReason(CourtCaseEntity courtCase) {
-        RetentionConfidenceCategoryEnum confidenceCategory;
-        var courtCaseRetentionConfidenceReason = courtCase.getRetConfReason();
-        if (nonNull(courtCaseRetentionConfidenceReason)) {
-            try {
-                confidenceCategory = RetentionConfidenceCategoryEnum.valueOf(courtCaseRetentionConfidenceReason.name());
-            } catch (IllegalArgumentException e) {
-                confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
-            }
-        } else {
-            confidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
         }
         return confidenceCategory;
     }
 
     private RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryEnumBasedOnDates(List<EventEntity> eventList,
-                                                                                           EventEntity latestClosedEvent, Duration pendingRetentionDuration) {
+                                                                                           EventEntity latestClosedEvent, Duration pendingRetentionDuration,
+                                                                                           CaseRetentionEntity caseRetention) {
         RetentionConfidenceCategoryEnum confidenceCategory;
         Optional<EventEntity> latestNonLogEvent =
             eventList.stream().filter(eventEntity -> !eventEntity.isLogEntry()).findFirst();
 
         if (latestNonLogEvent.isEmpty()) {
-            // if there are no non-log events, then we will categorise based on the closed event
-            confidenceCategory = RetentionConfidenceCategoryEnum.CASE_CLOSED;
-            return confidenceCategory;
+            // if there are no non-log events, then we will categorise based on the closed event;
+            return caseRetention.getConfidenceCategory();
         }
-        OffsetDateTime nonLogEventDateTime = latestNonLogEvent.get().getCreatedDateTime();
-        OffsetDateTime latestClosedEventDateTime = latestClosedEvent.getCreatedDateTime();
+        OffsetDateTime nonLogEventDateTime = latestNonLogEvent.get().getTimestamp();
+        OffsetDateTime latestClosedEventDateTime = latestClosedEvent.getTimestamp();
         long daysBetween = between(latestClosedEventDateTime, nonLogEventDateTime).toDays();
         if (daysBetween <= pendingRetentionDuration.toDays()) {
             // if the latest non-log event occurs WITHIN 10 days of the "Case Closed" or "Archive Case" event

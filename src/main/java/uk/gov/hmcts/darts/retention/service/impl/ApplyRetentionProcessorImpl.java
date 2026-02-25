@@ -80,7 +80,8 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
                 caseRetentionRepository.save(caseRetentionEntity);
                 return;
             }
-            RetentionConfidenceCategoryEnum confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity, daysBetweenEvents);
+            RetentionConfidenceCategoryEnum confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity, daysBetweenEvents,
+                                                                                                        caseRetentionEntity);
             if (isNull(confidenceCategory)) {
                 confidenceCategory = nonNull(caseRetentionEntity.getConfidenceCategory())
                     ? caseRetentionEntity.getConfidenceCategory()
