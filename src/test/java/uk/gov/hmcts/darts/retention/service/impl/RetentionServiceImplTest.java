@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.RetentionConfidenceCategoryMapperTestData;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.Period;
 import java.time.ZoneId;
@@ -74,8 +75,7 @@ class RetentionServiceImplTest {
                                                     retentionMapper,
                                                     clock,
                                                     findCurrentEntitiesHelper,
-                                                    closeEvents,
-                                                    daysBetweenEvents);
+                                                    closeEvents);
     }
 
     @Nested
@@ -212,7 +212,7 @@ class RetentionServiceImplTest {
             List<EventEntity> events = new ArrayList<>(List.of(closedEvent));
             when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
 
-            var result = retentionService.getConfidenceCategory(courtCase);
+            var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10));
             assertEquals(RetentionConfidenceCategoryEnum.CASE_CLOSED, result);
         }
 
@@ -227,7 +227,7 @@ class RetentionServiceImplTest {
             List<EventEntity> events = new ArrayList<>(List.of(closedEvent, otherEvent));
             when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
 
-            var result = retentionService.getConfidenceCategory(courtCase);
+            var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10));
             assertEquals(RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN, result);
         }
 
@@ -252,7 +252,7 @@ class RetentionServiceImplTest {
             List<EventEntity> events = new ArrayList<>(List.of(closedEvent, otherEvent));
             when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
 
-            var result = retentionService.getConfidenceCategory(courtCase);
+            var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10));
             assertEquals(RetentionConfidenceCategoryEnum.MAX_EVENT_OUTWITH, result);
         }
 
@@ -260,9 +260,9 @@ class RetentionServiceImplTest {
         void shouldReturnNull_whenNoEvents() {
             CourtCaseEntity courtCase = new CourtCaseEntity();
             when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(new ArrayList<>());
-            var result = retentionService.getConfidenceCategory(courtCase);
+            var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10));
             assertNull(result);
         }
     }
-    
+
 }

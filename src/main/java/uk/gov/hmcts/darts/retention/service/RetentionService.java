@@ -4,6 +4,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 
+import java.time.Duration;
 import java.util.List;
 
 public interface RetentionService {
@@ -12,7 +13,7 @@ public interface RetentionService {
 
     CourtCaseEntity updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase, RetentionConfidenceCategoryEnum confidenceCategory);
 
-    RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase);
+    RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase, Duration pendingRetentionDuration);
 
     RetentionConfidenceCategoryEnum getRetentionConfidenceCategoryForMedia(CourtCaseEntity courtCase);
 }
