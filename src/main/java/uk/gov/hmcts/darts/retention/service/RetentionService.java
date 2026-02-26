@@ -14,7 +14,7 @@ public interface RetentionService {
 
     CourtCaseEntity updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase, RetentionConfidenceCategoryEnum confidenceCategory);
 
-    RetentionConfidenceCategoryEnum getConfidenceCategory(CourtCaseEntity courtCase, Duration pendingRetentionDuration,
-                                                          CaseRetentionEntity caseRetentionEntity);
+    Integer getConfidenceCategory(CourtCaseEntity courtCase, Duration pendingRetentionDuration,
+                                  CaseRetentionEntity caseRetentionEntity);
 
 }

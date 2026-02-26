@@ -74,30 +74,31 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
             CaseRetentionEntity caseRetentionEntity = caseRetentionEntityOpt.get();
             CourtCaseEntity courtCaseEntity = caseRetentionEntity.getCourtCase();
 
-            RetentionConfidenceCategoryEnum confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity);
             if (processedCases.contains(courtCaseEntity.getId())) {
                 caseRetentionEntity.setCurrentState(CaseRetentionStatus.IGNORED.name());
                 caseRetentionRepository.save(caseRetentionEntity);
                 return;
             }
-            RetentionConfidenceCategoryEnum confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity, daysBetweenEvents,
-                                                                                                        caseRetentionEntity);
+            caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
+            caseRetentionEntity.setCurrentState(CaseRetentionStatus.COMPLETE.name());
+
+            Integer confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity, daysBetweenEvents, caseRetentionEntity);
             if (isNull(confidenceCategory)) {
                 confidenceCategory = nonNull(caseRetentionEntity.getConfidenceCategory())
                     ? caseRetentionEntity.getConfidenceCategory()
-                    : RetentionConfidenceCategoryEnum.AGED_CASE;
+                    : RetentionConfidenceCategoryEnum.UNKNOWN.getId();
             }
-            caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
-            caseRetentionEntity.setCurrentState(CaseRetentionStatus.COMPLETE.name());
-            Integer confidenceCategoryId = caseRetentionEntity.getConfidenceCategory();
-            RetentionConfidenceCategoryEnum confidenceCategoryEnum = null;
-            if (confidenceCategoryId != null) {
-                confidenceCategoryEnum = Arrays.stream(RetentionConfidenceCategoryEnum.values())
-                    .filter(e -> e.getId().equals(confidenceCategoryId))
+            RetentionConfidenceCategoryEnum retentionConfidenceCategoryEnum;
+            if (confidenceCategory != null) {
+                Integer finalConfidenceCategory = confidenceCategory;
+                retentionConfidenceCategoryEnum = Arrays.stream(RetentionConfidenceCategoryEnum.values())
+                    .filter(e -> e.getId().equals(finalConfidenceCategory))
                     .findFirst()
                     .orElse(RetentionConfidenceCategoryEnum.UNKNOWN);
+            } else {
+                retentionConfidenceCategoryEnum = RetentionConfidenceCategoryEnum.UNKNOWN;
             }
-            retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCaseEntity, confidenceCategoryEnum);
+            retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCaseEntity, retentionConfidenceCategoryEnum);
             courtCaseEntity.setRetentionUpdated(true);
             courtCaseEntity.setRetentionRetries(0);
 
