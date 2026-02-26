@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.cases.helper.FindCurrentEntitiesHelper;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.time.Duration.between;
+import static java.util.Objects.nonNull;
 
 
 @Service
@@ -62,7 +62,8 @@ public class RetentionServiceImpl implements RetentionService {
     @Override
     public CourtCaseEntity updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase,
                                                                            RetentionConfidenceCategoryEnum confidenceCategory) {
-        retentionConfidenceCategoryMapperRepository.findByConfidenceCategory(confidenceCategory)
+        Integer confidenceCategoryId = nonNull(confidenceCategory) ? confidenceCategory.getId() : null;
+        retentionConfidenceCategoryMapperRepository.findByConfidenceCategory(confidenceCategoryId)
             .ifPresentOrElse(categoryMapperEntity -> {
                 courtCase.setRetConfScore(categoryMapperEntity.getConfidenceScore());
                 courtCase.setRetConfReason(categoryMapperEntity.getConfidenceReason());
