@@ -89,7 +89,7 @@ public class RetentionServiceImpl implements RetentionService {
                 if (latestEvent.getId().equals(latestClosedEvent.get().getId())) {
                     // If the latest event in the case is "Case Closed" or "Archive Case" event
                     confidenceCategory = caseRetention.getConfidenceCategory();
-                    log.info("Latest event is a close event, setting confidence category to case retention confidence category: {} for case id: {}",)
+                    log.info("Latest event is a close event, setting confidence category to case retention confidence category: {} for case id: {}",
                              confidenceCategory, courtCase.getId());
                 } else {
                     confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(eventList, latestClosedEvent.get(), pendingRetentionDuration,
@@ -97,7 +97,8 @@ public class RetentionServiceImpl implements RetentionService {
                 }
             } else {
                 confidenceCategory = caseRetention.getConfidenceCategory();
-                log.info("No close events found, setting confidence category to case retention confidence category: {} for case id: {}", confidenceCategory, courtCase.getId());
+                log.info("No close events found, setting confidence category to case retention confidence category: {} for case id: {}",
+                         confidenceCategory, courtCase.getId());
             }
         }
         return confidenceCategory;
