@@ -88,6 +88,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
                     ? caseRetentionEntity.getConfidenceCategory()
                     : RetentionConfidenceCategoryEnum.UNKNOWN.getId();
             }
+            log.info("Updating case {} with confidence category {}", courtCaseEntity.getId(), confidenceCategory);
             RetentionConfidenceCategoryEnum retentionConfidenceCategoryEnum;
             if (confidenceCategory != null) {
                 Integer finalConfidenceCategory = confidenceCategory;
