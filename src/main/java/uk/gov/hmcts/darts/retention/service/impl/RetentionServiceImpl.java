@@ -119,20 +119,27 @@ public class RetentionServiceImpl implements RetentionService {
         }
         OffsetDateTime nonLogEventDateTime = latestNonLogEvent.get().getTimestamp();
         OffsetDateTime latestClosedEventDateTime = latestClosedEvent.getTimestamp();
+        log.info("Latest closed event date time is {} and latest non-log event date time is {} for case id: {}", latestClosedEventDateTime,
+                 nonLogEventDateTime, courtCase.getId());
         long daysBetween = between(latestClosedEventDateTime, nonLogEventDateTime).toDays();
-
+        log.info("Days between latest closed event and latest non-log event is {} for case id: {} with pending duration {}",
+                 daysBetween, courtCase.getId(), pendingRetentionDuration.toDays());
         if (daysBetween <= pendingRetentionDuration.toDays()) {
             // if the latest non-log event occurs WITHIN 10 days of the "Case Closed" or "Archive Case" event
             log.info("Latest non-log event occurs within {} duration of close event, setting confidence category to CASE_CLOSED_WITHIN for case id: {}",
                      pendingRetentionDuration, courtCase.getId());
+            caseRetention.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN.getId());
+            caseRetentionRepository.save(caseRetention);
             return RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN.getId();
         } else {
             // if the latest "Case Closed" or "Archive Case" event is NOT the latest non-log event, but the latest non-log event occurs
             // MORE THAN 10 days after the "Case Closed" or "Archive Case" event
             log.info("Latest non-log event occurs outside retention duration of close event, setting confidence category to MAX_EVENT_OUTWITH for case id: {}",
                      courtCase.getId());
+            caseRetention.setConfidenceCategory(RetentionConfidenceCategoryEnum.MAX_EVENT_OUTWITH.getId());
+            caseRetentionRepository.save(caseRetention);
             return RetentionConfidenceCategoryEnum.MAX_EVENT_OUTWITH.getId();
         }
     }
-    
+
 }

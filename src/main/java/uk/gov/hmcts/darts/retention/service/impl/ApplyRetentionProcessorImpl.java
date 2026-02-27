@@ -108,8 +108,6 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
             processedCases.add(courtCaseEntity.getId());
         }
-
-
     }
 
 }
