@@ -217,7 +217,7 @@ darts:
     close-open-cases-older-than-period: ${CLOSE_OPEN_CASES_OLDER_THAN_PERIOD:P6Y}
     close-events: "Case closed,Archive case"
     max-retention-retries: 3
-    days-between-events: 10
+
   storage:
     inbound:
       temp-blob-workspace: ${user.home}/inbound/tempworkspace
@@ -396,6 +396,7 @@ darts:
           at-least-for: PT1M
           at-most-for: PT30M
       apply-retention:
+        days-between-events: 10
         system-user-email: system_ApplyRetention@hmcts.net
         lock:
           at-least-for: PT1M
