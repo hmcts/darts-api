@@ -88,17 +88,17 @@ public class RetentionServiceImpl implements RetentionService {
             if (latestClosedEvent.isPresent()) {
                 if (latestEvent.getId().equals(latestClosedEvent.get().getId())) {
                     // If the latest event in the case is "Case Closed" or "Archive Case" event
-                    confidenceCategory = caseRetention.getConfidenceCategory();
                     log.info("Latest event is a close event, setting confidence category to case retention confidence category: {} for case id: {}",
                              confidenceCategory, courtCase.getId());
+                    confidenceCategory = caseRetention.getConfidenceCategory();
                 } else {
                     confidenceCategory = getRetentionConfidenceCategoryEnumBasedOnDates(eventList, latestClosedEvent.get(), pendingRetentionDuration,
-                                                                                        caseRetention);
+                                                                                        caseRetention, courtCase);
                 }
             } else {
-                confidenceCategory = caseRetention.getConfidenceCategory();
                 log.info("No close events found, setting confidence category to case retention confidence category: {} for case id: {}",
                          confidenceCategory, courtCase.getId());
+                confidenceCategory = caseRetention.getConfidenceCategory();
             }
         }
         return confidenceCategory;
@@ -106,14 +106,15 @@ public class RetentionServiceImpl implements RetentionService {
 
     private Integer getRetentionConfidenceCategoryEnumBasedOnDates(List<EventEntity> eventList,
                                                                    EventEntity latestClosedEvent, Duration pendingRetentionDuration,
-                                                                   CaseRetentionEntity caseRetention) {
+                                                                   CaseRetentionEntity caseRetention,
+                                                                   CourtCaseEntity courtCase) {
         Optional<EventEntity> latestNonLogEvent =
             eventList.stream().filter(eventEntity -> !eventEntity.isLogEntry()).findFirst();
 
         if (latestNonLogEvent.isEmpty()) {
             // if there are no non-log events, then we will categorise based on the closed event;
             log.info("No non-log events found, setting confidence category to case retention confidence category: {} for case id: {}",
-                     caseRetention.getConfidenceCategory(), caseRetention.getCourtCase().getId());
+                     caseRetention.getConfidenceCategory(), courtCase.getId());
             return caseRetention.getConfidenceCategory();
         }
         OffsetDateTime nonLogEventDateTime = latestNonLogEvent.get().getTimestamp();
@@ -123,13 +124,13 @@ public class RetentionServiceImpl implements RetentionService {
         if (daysBetween <= pendingRetentionDuration.toDays()) {
             // if the latest non-log event occurs WITHIN 10 days of the "Case Closed" or "Archive Case" event
             log.info("Latest non-log event occurs within {} duration of close event, setting confidence category to CASE_CLOSED_WITHIN for case id: {}",
-                     pendingRetentionDuration, caseRetention.getCourtCase().getId());
+                     pendingRetentionDuration, courtCase.getId());
             return RetentionConfidenceCategoryEnum.CASE_CLOSED_WITHIN.getId();
         } else {
             // if the latest "Case Closed" or "Archive Case" event is NOT the latest non-log event, but the latest non-log event occurs
             // MORE THAN 10 days after the "Case Closed" or "Archive Case" event
             log.info("Latest non-log event occurs outside retention duration of close event, setting confidence category to MAX_EVENT_OUTWITH for case id: {}",
-                     caseRetention.getCourtCase().getId());
+                     courtCase.getId());
             return RetentionConfidenceCategoryEnum.MAX_EVENT_OUTWITH.getId();
         }
     }
