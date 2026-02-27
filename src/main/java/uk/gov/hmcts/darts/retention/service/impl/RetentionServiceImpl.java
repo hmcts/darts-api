@@ -134,6 +134,5 @@ public class RetentionServiceImpl implements RetentionService {
             return RetentionConfidenceCategoryEnum.MAX_EVENT_OUTWITH.getId();
         }
     }
-
-
+    
 }
