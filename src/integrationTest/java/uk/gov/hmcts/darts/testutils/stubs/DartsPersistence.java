@@ -9,7 +9,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -913,6 +912,7 @@ public class DartsPersistence {
             .setParameter("id", mediaRequestEntity.getId())
             .executeUpdate();
     }
+
     @Transactional
     public void overrideLastModifiedBy(ExternalObjectDirectoryEntity externalObjectDirectoryEntity, OffsetDateTime lastModifiedDate) {
         entityManager.createNativeQuery("UPDATE external_object_directory SET last_modified_ts = :lastModifiedDate WHERE eod_id = :id")
