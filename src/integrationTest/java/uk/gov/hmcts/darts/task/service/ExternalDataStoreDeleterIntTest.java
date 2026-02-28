@@ -4,11 +4,13 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import uk.gov.hmcts.darts.audio.deleter.impl.ExternalDataStoreEntityDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalDetsDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.ExternalOutboundDataStoreDeleter;
@@ -76,7 +78,7 @@ class ExternalDataStoreDeleterIntTest extends IntegrationBase {
 
     @MockitoBean
     private DetsApiService detsApiService;
-    
+
     private UserAccountEntity requestor;
     private HearingEntity hearing;
 
@@ -86,7 +88,7 @@ class ExternalDataStoreDeleterIntTest extends IntegrationBase {
     private ExternalDetsDataStoreDeleter externalDetsDataStoreDeleter;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IllegalAccessException {
         this.requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         this.hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -99,22 +101,26 @@ class ExternalDataStoreDeleterIntTest extends IntegrationBase {
             dartsDatabase.getExternalObjectDirectoryRepository(),
             dataManagementApi
         );
+        FieldUtils.writeField(externalInboundDataStoreDeleter, "entityDeleter", new ExternalDataStoreEntityDeleter(), true);
 
         externalUnstructuredDataStoreDeleter = new ExternalUnstructuredDataStoreDeleter(
             dartsDatabase.getExternalObjectDirectoryRepository(),
             dataManagementApi
         );
+        FieldUtils.writeField(externalUnstructuredDataStoreDeleter, "entityDeleter", new ExternalDataStoreEntityDeleter(), true);
 
         externalOutboundDataStoreDeleter = new ExternalOutboundDataStoreDeleter(
             dartsDatabase.getTransientObjectDirectoryRepository(),
             transformedMediaRepository,
             dataManagementApi
         );
+        FieldUtils.writeField(externalOutboundDataStoreDeleter, "entityDeleter", new ExternalDataStoreEntityDeleter(), true);
 
         externalDetsDataStoreDeleter = new ExternalDetsDataStoreDeleter(
             dartsDatabase.getExternalObjectDirectoryRepository(),
             detsDataManagementApi
         );
+        FieldUtils.writeField(externalDetsDataStoreDeleter, "entityDeleter", new ExternalDataStoreEntityDeleter(), true);
     }
 
     @SneakyThrows
@@ -289,3 +295,4 @@ class ExternalDataStoreDeleterIntTest extends IntegrationBase {
 
     }
 }
+

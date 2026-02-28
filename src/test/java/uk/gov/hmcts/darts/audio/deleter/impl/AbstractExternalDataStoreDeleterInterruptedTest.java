@@ -1,10 +1,12 @@
 package uk.gov.hmcts.darts.audio.deleter.impl;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.deleter.AbstractExternalDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -16,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.DoNotUseThreads"})
@@ -64,12 +67,18 @@ class AbstractExternalDataStoreDeleterInterruptedTest {
     }
 
     @Test
-    void delete_shouldRethrowInterruptedException() {
+    void delete_shouldRethrowInterruptedException() throws IllegalAccessException {
         var deleter = new TestDeleter(repository);
+        // Inject the mock entityDeleter via reflection (safe, no setAccessible)
+        ExternalDataStoreEntityDeleter entityDeleter = Mockito.mock(ExternalDataStoreEntityDeleter.class);
+        FieldUtils.writeField(deleter, "entityDeleter", entityDeleter, true);
+        when(entityDeleter.deleteEntity(Mockito.any(), Mockito.any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            return ((TestDeleter) args[0]).deleteInternal((ExternalObjectDirectoryEntity) args[1]);
+        });
 
         Thread.currentThread().interrupt();
 
-        // Should rethrow the InterruptedException
         assertThrows(InterruptedException.class, () -> deleter.delete(1));
 
         verifyNoInteractions(repository);

@@ -27,7 +27,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtR
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
-class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
+class CaseServiceAdvancedSearchUseInterpreterIntTest extends IntegrationBase {
 
     @Autowired
     SecurityGroupRepository securityGroupRepository;

@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true") // To override Clock bean
-class CloseOldCasesProcessorTest extends IntegrationBase {
+class CloseOldCasesProcessorIntTest extends IntegrationBase {
     @Autowired
     private CloseOldCasesProcessor closeOldCasesProcessor;
 
@@ -112,7 +112,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
         RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
         TestRetentionConfidenceCategoryMapperEntity agedCaseMappingEntity = testData.someMinimalBuilder()
-            .confidenceCategory(retentionConfidenceCategoryEnum)
+            .confidenceCategory(retentionConfidenceCategoryEnum.getId())
             .confidenceReason(retentionConfidenceReasonEnum)
             .confidenceScore(retentionConfidenceScoreEnum)
             .build();
@@ -153,7 +153,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         assertEquals(closeDate.plusYears(7).truncatedTo(ChronoUnit.DAYS), caseRetentionEntity.getRetainUntil());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -196,7 +196,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         // add one day to close date as close date is 24th Aug in UTC but 25th Aug BST and retain until should be 25th Aug + 7 years
         assertEquals(closeDate.plusYears(7).plusDays(1).truncatedTo(ChronoUnit.DAYS), caseRetentionEntity.getRetainUntil());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -238,7 +238,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
         // Close date is 20th Dec 23:58 in UTC so retain until is 20th Dec + 7 years when in GMT
         assertEquals(closeDate.plusYears(7).truncatedTo(ChronoUnit.DAYS), caseRetentionEntity.getRetainUntil());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -290,9 +290,9 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getRetConfScore());
         assertNull(updatedCourtCaseEntity.getRetConfReason());
         assertNull(updatedCourtCaseEntity.getRetConfUpdatedTs());
-        
+
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -327,7 +327,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getRetConfReason());
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -386,7 +386,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getRetConfReason());
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -422,7 +422,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getRetConfReason());
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
         assertEquals(courtCaseId.get(), caseRetentionEntity.getCourtCase().getId());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -465,7 +465,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getRetConfReason());
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -556,7 +556,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getRetConfReason());
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -585,7 +585,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getRetConfReason());
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -609,7 +609,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getRetConfReason());
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
         assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
     }
 
@@ -649,7 +649,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity1.getRetConfReason());
         CaseRetentionEntity caseRetentionEntity = getCaseRetentionEagerLoaded();
         assertEquals(courtCaseEntity1.getId(), caseRetentionEntity.getCourtCase().getId());
-        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertEquals(RetentionPolicyEnum.DEFAULT.getPolicyKey(), caseRetentionEntity.getRetentionPolicyType().getFixedPolicyKey());
 
         CourtCaseEntity updatedCourtCaseEntity2 = dartsDatabase.getCaseRepository().findById(courtCaseEntity2.getId()).orElse(null);
@@ -706,3 +706,4 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getRetConfReason());
     }
 }
+
