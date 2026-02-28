@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.data.ExternalLocationTypeTestData.locationTypeOf;
 import static uk.gov.hmcts.darts.test.common.data.ObjectRecordStatusTestData.statusOf;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getAnnotationDocumentTestData;
@@ -233,14 +232,11 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
 
     @Getter
     public abstract class TestData<T> {
-        public static long uniqueCounter = 0;
+        private static long uniqueCounter;
         ExternalObjectDirectoryEntity detsEod;
         ExternalObjectDirectoryEntity armEod;
         ObjectStateRecordEntity objectStateRecordEntity;
         T confidenceAware;
-
-        public TestData() {
-        }
 
         public TestData<T> createDataThatShouldBeCleanedUp() {
             return createDataThatShouldBeCleanedUp(true);
