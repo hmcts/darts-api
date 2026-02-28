@@ -7,10 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import uk.gov.hmcts.darts.arm.service.impl.CleanUpDetsDataProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -18,13 +16,11 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.task.runner.impl.CleanUpDetsDataAutomatedTask;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -281,9 +277,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                           ExternalLocationTypeEntity armLocation,
                                                           OffsetDateTime unstructuredLastModifiedBefore,
                                                           Limit limit);
-
-    @Query(value = "SELECT * FROM dets_cleanup_eod_osr(:pi_limit, :pi_last_modified_ts)", nativeQuery = true)
-    List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> cleanUpDetsDataProcedure(@Param("pi_limit") Integer limit, @Param("pi_last_modified_ts") OffsetDateTime lastModifiedBefore);
 
     @Query(
         """                       

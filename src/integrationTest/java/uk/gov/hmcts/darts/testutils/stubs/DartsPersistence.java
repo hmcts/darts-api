@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -79,6 +80,7 @@ import uk.gov.hmcts.darts.common.repository.NotificationRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionConfidenceCategoryMapperRepository;
@@ -170,6 +172,7 @@ public class DartsPersistence {
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
     private final RetentionConfidenceCategoryMapperRepository retentionConfidenceCategoryMapperRepository;
+    private final ObjectStateRecordRepository objectStateRecordRepository;
 
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
@@ -908,6 +911,13 @@ public class DartsPersistence {
         entityManager.createNativeQuery("UPDATE media_request SET last_modified_ts = :lastModifiedDate WHERE mer_id = :id")
             .setParameter("lastModifiedDate", lastModifiedDate)
             .setParameter("id", mediaRequestEntity.getId())
+            .executeUpdate();
+    }
+    @Transactional
+    public void overrideLastModifiedBy(ExternalObjectDirectoryEntity externalObjectDirectoryEntity, OffsetDateTime lastModifiedDate) {
+        entityManager.createNativeQuery("UPDATE external_object_directory SET last_modified_ts = :lastModifiedDate WHERE eod_id = :id")
+            .setParameter("lastModifiedDate", lastModifiedDate)
+            .setParameter("id", externalObjectDirectoryEntity.getId())
             .executeUpdate();
     }
 
