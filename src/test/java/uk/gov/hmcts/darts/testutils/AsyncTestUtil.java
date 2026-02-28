@@ -10,7 +10,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mockStatic;
 
-public class AsyncTestUtil {
+public final class AsyncTestUtil {
+
+    private AsyncTestUtil() {
+
+    }
 
     public static void processTasksSynchronously(Runnable runnable) {
         try (MockedStatic<AsyncUtil> asyncUtilMock = mockStatic(AsyncUtil.class)) {

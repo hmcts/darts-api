@@ -33,6 +33,8 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
     private final Clock clock;
 
     @Override
+    //Required for async batch processing
+    @SuppressWarnings({"PMD.DoNotUseThreads"})
     public void processCleanUpDetsData(int batchSize, CleanUpDetsDataAutomatedTaskConfig config) {
         log.info("Processing clean up of DETS data with batch size: {}", batchSize);
 

@@ -147,7 +147,6 @@ class CleanUpDetsDataProcessorImplTest {
             List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> firstBatch = List.of(
                 response(1L), response(2L), response(3L), response(4L)
             );
-            //Second batch should be ignored as batch size limit of 4 will have been reached after processing first batch, even though repository returns more data
             List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> secondBatch = List.of(
                 response(5L), response(6L), response(7L), response(8L)
             );

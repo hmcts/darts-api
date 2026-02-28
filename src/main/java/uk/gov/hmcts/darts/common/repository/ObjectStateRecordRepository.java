@@ -19,7 +19,9 @@ public interface ObjectStateRecordRepository extends JpaRepository<ObjectStateRe
     void markDetsCleanupStatusAsComplete(List<Long> uuids);
 
 
-    @Query(value = "SELECT osr_uuid AS osrUuid, dets_location AS detsLocation  FROM dets_cleanup_eod_osr_rows(:limit, :last_modified_before_ts)", nativeQuery = true)
-    List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> cleanUpDetsDataProcedure(@Param("limit") Integer limit, @Param("last_modified_before_ts") OffsetDateTime lastModifiedBefore);
+    @Query(value = "SELECT osr_uuid AS osrUuid, dets_location AS detsLocation  " +
+        "FROM dets_cleanup_eod_osr_rows(:limit, :last_modified_before_ts)", nativeQuery = true)
+    List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> cleanUpDetsDataProcedure(
+        @Param("limit") Integer limit, @Param("last_modified_before_ts") OffsetDateTime lastModifiedBefore);
 
 }
