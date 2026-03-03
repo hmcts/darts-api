@@ -74,7 +74,15 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
 
         Optional<PendingRetention> latestPendingRetentionOpt = caseRetentionRepository.findLatestPendingRetention(courtCase);
         if (latestPendingRetentionOpt.isEmpty()) {
-            createRetention(caseManagementRetentionEntity, hearingAndEvent, dartsEvent);
+            if (nonNull(courtCase.getCaseClosedTimestamp()) && nonNull(dartsEvent.getDateTime())
+                && courtCase.getCaseClosedTimestamp().isAfter(dartsEvent.getDateTime())) {
+                log.info("Ignoring event with id {} because its event time {} is not after the case closed timestamp {} for caseId {}.",
+                         dartsEvent.getEventId(),
+                         dartsEvent.getDateTime(), courtCase.getCaseClosedTimestamp(), courtCase.getId());
+            } else {
+                // create a new retention record if the case is closed timestamp is same as or before the event timestamp, and there are no existing pending retentions
+                createRetention(caseManagementRetentionEntity, hearingAndEvent, dartsEvent);
+            }
         } else {
             PendingRetention latestPendingRetention = latestPendingRetentionOpt.get();
             if (nonNull(dartsEvent.getDateTime()) && nonNull(latestPendingRetention.getEventTimestamp())
