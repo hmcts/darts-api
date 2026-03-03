@@ -44,8 +44,8 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
     private final RetentionApi retentionApi;
     private final CaseRepository caseRepository;
 
-    @Value("${darts.retention.overridable-fixed-policy-keys}")
-    List<String> overridableFixedPolicyKeys;
+    @Value("${darts.retention.overridable-fixed-policy-keys:}")
+    private List<String> overridableFixedPolicyKeys;
 
     @Override
     public void closeCaseAndSetRetention(DartsEvent dartsEvent, CreatedHearingAndEvent hearingAndEvent, CourtCaseEntity courtCase) {
