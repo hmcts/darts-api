@@ -67,8 +67,6 @@ class CloseCaseWithRetentionServiceImplTest {
 
     private CourtCaseEntity courtCase;
     private DartsEvent dartsEvent;
-    private HearingEntity hearing;
-    private UserAccountEntity currentUser;
     private CaseManagementRetentionEntity caseManagementRetention;
     private RetentionPolicyTypeEntity retentionPolicyType;
 
@@ -77,7 +75,7 @@ class CloseCaseWithRetentionServiceImplTest {
         dartsEvent = new DartsEvent();
         dartsEvent.setEventId("1");
 
-        currentUser = new UserAccountEntity();
+        UserAccountEntity currentUser = new UserAccountEntity();
         currentUser.setId(123);
         lenient().when(authorisationApi.getCurrentUser()).thenReturn(currentUser);
 
@@ -85,7 +83,7 @@ class CloseCaseWithRetentionServiceImplTest {
         courtCase.setId(99);
         courtCase.setClosed(false);
 
-        hearing = new HearingEntity();
+        HearingEntity hearing = new HearingEntity();
         hearing.setCourtCase(courtCase);
         lenient().when(hearingAndEvent.getHearingEntity()).thenReturn(hearing);
 
@@ -157,7 +155,7 @@ class CloseCaseWithRetentionServiceImplTest {
         when(caseRetentionRepository.findLatestPendingRetention(courtCase)).thenReturn(Optional.empty());
 
         service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
-        
+
         verify(caseRepository).saveAndFlush(courtCase);
 
         // no retention should be created because the event time is before existing caseClosedTimestamp
