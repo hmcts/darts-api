@@ -72,6 +72,11 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
             dartsEvent.getRetentionPolicy().setCaseTotalSentence(null);
         }
 
+        createOrUpdateCaseRetention(dartsEvent, hearingAndEvent, courtCase, caseManagementRetentionEntity);
+    }
+
+    private void createOrUpdateCaseRetention(DartsEvent dartsEvent, CreatedHearingAndEvent hearingAndEvent, CourtCaseEntity courtCase,
+                                             CaseManagementRetentionEntity caseManagementRetentionEntity) {
         Optional<PendingRetention> latestPendingRetentionOpt = caseRetentionRepository.findLatestPendingRetention(courtCase);
         if (latestPendingRetentionOpt.isEmpty()) {
             if (nonNull(courtCase.getCaseClosedTimestamp()) && nonNull(dartsEvent.getDateTime())
@@ -87,11 +92,11 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         } else {
             PendingRetention latestPendingRetention = latestPendingRetentionOpt.get();
             if (nonNull(dartsEvent.getDateTime()) && nonNull(latestPendingRetention.getEventTimestamp())
-                && latestPendingRetention.getEventTimestamp().isAfter(dartsEvent.getDateTime())) {
+                && dartsEvent.getDateTime().isAfter(latestPendingRetention.getEventTimestamp())) {
+                updateExistingRetention(caseManagementRetentionEntity, latestPendingRetention.getCaseRetention(), dartsEvent);
+            } else {
                 log.info("Ignoring event with id {} because its event time {} is not after the latest pending entry {} for caseId {}.", dartsEvent.getEventId(),
                          dartsEvent.getDateTime(), latestPendingRetention.getEventTimestamp(), courtCase.getId());
-            } else {
-                updateExistingRetention(caseManagementRetentionEntity, latestPendingRetention.getCaseRetention(), dartsEvent);
             }
         }
     }
