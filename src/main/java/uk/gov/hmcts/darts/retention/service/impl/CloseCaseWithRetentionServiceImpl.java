@@ -80,17 +80,18 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
                          dartsEvent.getEventId(),
                          dartsEvent.getDateTime(), courtCase.getCaseClosedTimestamp(), courtCase.getId());
             } else {
-                // create a new retention record if the case is closed timestamp is same as or before the event timestamp, and there are no existing pending retentions
+                // create a new retention record if the case is closed timestamp is same as or before the event timestamp,
+                // and there are no existing pending retentions
                 createRetention(caseManagementRetentionEntity, hearingAndEvent, dartsEvent);
             }
         } else {
             PendingRetention latestPendingRetention = latestPendingRetentionOpt.get();
             if (nonNull(dartsEvent.getDateTime()) && nonNull(latestPendingRetention.getEventTimestamp())
-                && dartsEvent.getDateTime().isAfter(latestPendingRetention.getEventTimestamp())) {
-                updateExistingRetention(caseManagementRetentionEntity, latestPendingRetention.getCaseRetention(), dartsEvent);
-            } else {
+                && latestPendingRetention.getEventTimestamp().isAfter(dartsEvent.getDateTime())) {
                 log.info("Ignoring event with id {} because its event time {} is not after the latest pending entry {} for caseId {}.", dartsEvent.getEventId(),
                          dartsEvent.getDateTime(), latestPendingRetention.getEventTimestamp(), courtCase.getId());
+            } else {
+                updateExistingRetention(caseManagementRetentionEntity, latestPendingRetention.getCaseRetention(), dartsEvent);
             }
         }
     }
