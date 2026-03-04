@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -137,6 +138,7 @@ class CloseCaseWithRetentionServiceImplTest {
         service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
 
         verify(caseRepository).saveAndFlush(any(CourtCaseEntity.class));
+        assertTrue(courtCase.getClosed());
         verify(caseRetentionRepository).save(any());
     }
 
@@ -157,6 +159,7 @@ class CloseCaseWithRetentionServiceImplTest {
         service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
 
         verify(caseRepository).saveAndFlush(courtCase);
+        assertTrue(courtCase.getClosed());
 
         // no retention should be created because the event time is before existing caseClosedTimestamp
         verify(caseRetentionRepository, never()).save(any(CaseRetentionEntity.class));
@@ -279,6 +282,7 @@ class CloseCaseWithRetentionServiceImplTest {
         service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
 
         // should still close the case
+        assertTrue(courtCase.getClosed());
         verify(caseRepository).saveAndFlush(courtCase);
 
         // but should not attempt to create/update retention when manual retention exists
