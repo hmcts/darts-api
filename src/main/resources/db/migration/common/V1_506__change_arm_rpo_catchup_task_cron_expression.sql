@@ -1,0 +1,1 @@
+update automated_task set cron_expression = '0 21,51 * * * *' where task_name = 'ArmRpoBacklogCatchup';
