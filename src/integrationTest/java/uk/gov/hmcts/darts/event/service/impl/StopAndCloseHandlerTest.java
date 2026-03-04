@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestRetentionConfidenceCatego
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -72,6 +73,8 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     private final OffsetDateTime eventTimeAfterTestTime = OffsetDateTime.of(2020, 11, 11, 11, 11, 11, 0, ZoneOffset.UTC);
     private final OffsetDateTime crossoverTestTimeBst = OffsetDateTime.of(2020, 10, 9, 23, 30, 0, 0, ZoneOffset.UTC);
     private final OffsetDateTime crossoverTestTimeGmt = OffsetDateTime.of(2020, 12, 20, 23, 30, 0, 0, ZoneOffset.UTC);
+
+    private final Duration daysBetweenEvents = Duration.ofDays(10);
 
     @Autowired
     private EventDispatcher eventDispatcher;
@@ -117,7 +120,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
 
         TestRetentionConfidenceCategoryMapperEntity closedMappingEntity = testData.someMinimalBuilder()
-            .confidenceCategory(CASE_CLOSED)
+            .confidenceCategory(CASE_CLOSED.getId())
             .confidenceReason(RetentionConfidenceReasonEnum.CASE_CLOSED)
             .confidenceScore(CASE_PERFECTLY_CLOSED)
             .build();
@@ -345,7 +348,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(OffsetDateTime.of(2041, 1, 14, 0, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("PENDING", caseRetentionEntity.getCurrentState());
         assertEquals(5, caseRetentionEntity.getRetentionPolicyType().getId());
-        assertEquals(CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
     }
 
@@ -399,7 +402,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(OffsetDateTime.of(2040, 10, 10, 0, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("PENDING", caseRetentionEntity.getCurrentState());
         assertEquals(5, caseRetentionEntity.getRetentionPolicyType().getId());
-        assertEquals(CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
     }
 
@@ -454,7 +457,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(OffsetDateTime.of(2040, 12, 20, 0, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("PENDING", caseRetentionEntity.getCurrentState());
         assertEquals(5, caseRetentionEntity.getRetentionPolicyType().getId());
-        assertEquals(CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
     }
 
@@ -513,7 +516,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(date7YearsLater, caseRetentionEntity.getRetainUntil());
         assertEquals(String.valueOf(PENDING), caseRetentionEntity.getCurrentState());
         assertEquals(4, caseRetentionEntity.getRetentionPolicyType().getId());
-        assertEquals(CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
+        assertEquals(CASE_CLOSED.getId(), caseRetentionEntity.getConfidenceCategory());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
 
         List<EventEntity> eventsForHearing = dartsDatabase.getEventRepository().findAllByHearingId(hearing.getId());
@@ -541,7 +544,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         // apply retention and check it was applied correctly
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now().plusMonths(1));
-        applyRetentionProcessor.processApplyRetention(1000);
+        applyRetentionProcessor.processApplyRetention(1000, daysBetweenEvents);
         CaseRetentionEntity processedCaseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findById(caseRetentionEntity.getId()).get();
         assertEquals(String.valueOf(COMPLETE), processedCaseRetentionEntity.getCurrentState());
     }
@@ -629,7 +632,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         // apply retention and check it was applied correctly
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now().plusMonths(1));
-        applyRetentionProcessor.processApplyRetention(1000);
+        applyRetentionProcessor.processApplyRetention(1000, daysBetweenEvents);
         CaseRetentionEntity processedCaseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findById(caseRetentionEntity.getId()).get();
         assertEquals(String.valueOf(COMPLETE), processedCaseRetentionEntity.getCurrentState());
         verify(caseRetentionRepository, never()).saveAndFlush(any());
@@ -697,7 +700,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(date7YearsLater, latestCaseRetentionEntity.getRetainUntil());
         assertEquals(String.valueOf(PENDING), latestCaseRetentionEntity.getCurrentState());
         assertEquals(4, latestCaseRetentionEntity.getRetentionPolicyType().getId());
-        assertEquals(CASE_CLOSED, latestCaseRetentionEntity.getConfidenceCategory());
+        assertEquals(CASE_CLOSED.getId(), latestCaseRetentionEntity.getConfidenceCategory());
         assertNotNull(latestCaseRetentionEntity.getCaseManagementRetention().getId());
 
         // the initial one is untouched by the new event, with no CMR link
@@ -733,7 +736,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         // apply retention and check it was applied correctly
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now().plusMonths(1));
-        applyRetentionProcessor.processApplyRetention(1000);
+        applyRetentionProcessor.processApplyRetention(1000, daysBetweenEvents);
         CaseRetentionEntity processedInitialCaseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findById(initialCaseRetentionEntity.getId()).get();
         CaseRetentionEntity processedLatestCaseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findById(latestCaseRetentionEntity.getId()).get();
         assertEquals(String.valueOf(IGNORED), processedInitialCaseRetentionEntity.getCurrentState());
@@ -1126,3 +1129,4 @@ class StopAndCloseHandlerTest extends HandlerTestData {
             .orElseThrow();
     }
 }
+

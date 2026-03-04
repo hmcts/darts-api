@@ -43,7 +43,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class RetentionPostServiceImpl implements RetentionPostService {
 
     private static final List<SecurityRoleEnum> JUDGE_AND_SUPER_ADMIN_USER_ROLES = List.of(JUDICIARY, SUPER_ADMIN, SUPER_USER);
@@ -85,7 +85,15 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                                                                        authorisationApi.getCurrentUser(),
                                                                        CaseRetentionStatus.COMPLETE,
                                                                        RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE);
-            retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCase, caseRetention.getConfidenceCategory());
+            Integer confidenceCategoryId = caseRetention.getConfidenceCategory();
+            RetentionConfidenceCategoryEnum confidenceCategoryEnum = null;
+            if (confidenceCategoryId != null) {
+                confidenceCategoryEnum = java.util.Arrays.stream(RetentionConfidenceCategoryEnum.values())
+                    .filter(e -> e.getId().equals(confidenceCategoryId))
+                    .findFirst()
+                    .orElse(RetentionConfidenceCategoryEnum.UNKNOWN);
+            }
+            retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCase, confidenceCategoryEnum);
         }
 
         PostRetentionResponse response = new PostRetentionResponse();
@@ -119,7 +127,8 @@ public class RetentionPostServiceImpl implements RetentionPostService {
 
             //Only Judges, Super Admin, Super User can reduce a set retention date
             LocalDate currentRetentionDate = getLatestCompletedCaseRetention(courtCase).getRetainUntil().toLocalDate();
-            if (newRetentionDate.isBefore(currentRetentionDate) && !authorisationApi.userHasOneOfRoles(JUDGE_AND_SUPER_ADMIN_USER_ROLES)) {
+            if (newRetentionDate != null && currentRetentionDate != null && newRetentionDate.isBefore(
+                currentRetentionDate) && !authorisationApi.userHasOneOfRoles(JUDGE_AND_SUPER_ADMIN_USER_ROLES)) {
                 throw new DartsApiException(
                     RetentionApiError.NO_PERMISSION_REDUCE_RETENTION, "You do not have permission to reduce the retention period."
                 );
@@ -218,7 +227,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         caseRetention.setCurrentState(String.valueOf(caseRetentionStatus));
         caseRetention.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
         caseRetention.setRetentionPolicyType(getRetentionPolicy(retentionPolicyEnum));
-        caseRetention.setConfidenceCategory(retentionConfidenceCategory);
+        caseRetention.setConfidenceCategory(retentionConfidenceCategory != null ? retentionConfidenceCategory.getId() : null);
 
         caseRetentionRepository.saveAndFlush(caseRetention);
         auditApi.record(

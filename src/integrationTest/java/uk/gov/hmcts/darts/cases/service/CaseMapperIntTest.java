@@ -25,7 +25,7 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_4_1981_D
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
-class CaseMapperTest extends IntegrationBase {
+class CaseMapperIntTest extends IntegrationBase {
 
     @Autowired
     private CasesMapper casesMapper;

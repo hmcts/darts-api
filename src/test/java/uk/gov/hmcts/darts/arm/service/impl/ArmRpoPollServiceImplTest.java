@@ -55,8 +55,6 @@ class ArmRpoPollServiceImplTest {
     private static final int BATCH_SIZE = 10;
     private static final String BEARER_TOKEN = "bearerToken";
 
-    //private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
-
     @Mock
     private ArmRpoApi armRpoApi;
     @Mock

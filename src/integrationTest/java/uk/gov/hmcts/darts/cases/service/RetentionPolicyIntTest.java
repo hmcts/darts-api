@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
-class RetentionPolicyTest extends IntegrationBase {
+class RetentionPolicyIntTest extends IntegrationBase {
 
     @Autowired
     private CasesMapper casesMapper;
@@ -128,6 +128,5 @@ class RetentionPolicyTest extends IntegrationBase {
     private CaseRetentionEntity createCompleteCaseRetention(CourtCaseEntity courtCase) {
         return dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.parse("2029-01-31T15:42:10.361Z"), false);
     }
-
 
 }

@@ -44,7 +44,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getCourtCas
     "darts.cases.admin-search.max-results=20"
 })
 @SuppressWarnings({"PMD.NcssCount"})
-class CaseServiceAdminSearchTest extends IntegrationBase {
+class CaseServiceAdminSearchIntTest extends IntegrationBase {
 
     @Autowired
     private CaseService service;
@@ -54,7 +54,7 @@ class CaseServiceAdminSearchTest extends IntegrationBase {
     private CourthouseEntity londonCourthouse;
     private UserAccountEntity user;
     private CourtroomEntity courtroom1;
-    
+
     @BeforeEach
     void setupData() {
         swanseaCourthouse = someMinimalCourthouse();
