@@ -235,8 +235,8 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     }
     
     @Override
-    public List<Integer> findIdsByStatusAndLastModifiedDateTimeAfter(ArmRpoStatusEntity armRpoStatusEntity, OffsetDateTime offsetDateTime) {
-        return armRpoExecutionDetailRepository.findIdsByStatusAndLastModifiedDateTimeAfter(armRpoStatusEntity, offsetDateTime);
+    public List<Integer> findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(ArmRpoStatusEntity armRpoStatusEntity, OffsetDateTime offsetDateTime) {
+        return armRpoExecutionDetailRepository.findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(armRpoStatusEntity, offsetDateTime);
     }
 
 }

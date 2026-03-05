@@ -31,6 +31,7 @@ class RemoveRpoProductionsServiceImplTest {
     
     private static final int BATCH_SIZE = 50;
     private static final String BEARER_TOKEN = "some token";
+    private static final String PRODUCTION_ID = "some production id";
     
     @Mock
     private RemoveRpoProductionsService removeRpoProductionsService;
@@ -64,13 +65,14 @@ class RemoveRpoProductionsServiceImplTest {
         
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
+        armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         lenient().when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
     }
     
     @Test
     void removeOldArmRpoProductions_ShouldRemoveProductions_WhenRemovableExecutionsExist() {
         // given
-        when(armRpoService.findIdsByStatusAndLastModifiedDateTimeAfter(
+        when(armRpoService.findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(
             eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
             any(OffsetDateTime.class)
         )).thenReturn(java.util.List.of(EXECUTION_ID));
@@ -106,7 +108,7 @@ class RemoveRpoProductionsServiceImplTest {
     @Test
     void removeOldArmRpoProductions_ShouldHandleException_WhenRpoServiceThrowsException() {
         // given
-        when(armRpoService.findIdsByStatusAndLastModifiedDateTimeAfter(
+        when(armRpoService.findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(
             eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
             any(OffsetDateTime.class)
         )).thenThrow(new RuntimeException("Mocked RuntimeException"));
@@ -124,7 +126,7 @@ class RemoveRpoProductionsServiceImplTest {
     @Test
     void removeOldArmRpoProductions_ShouldHandleException_WhenArmApiServiceThrowsException() {
         // given
-        when(armRpoService.findIdsByStatusAndLastModifiedDateTimeAfter(
+        when(armRpoService.findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(
             eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
             any(OffsetDateTime.class)
         )).thenReturn(java.util.List.of(EXECUTION_ID));
