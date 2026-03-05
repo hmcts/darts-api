@@ -39,9 +39,10 @@ public interface ArmRpoExecutionDetailRepository extends JpaRepository<ArmRpoExe
         SELECT ared.id
         FROM ArmRpoExecutionDetailEntity ared
         WHERE ared.armRpoStatus = :armRpoStatusEntity
+        AND ared.productionId IS NOT NULL
         AND ared.lastModifiedDateTime < :cutoffDateTime
         """)
-    List<Integer> findIdsByStatusAndLastModifiedDateTimeAfter(ArmRpoStatusEntity armRpoStatusEntity, OffsetDateTime cutoffDateTime);
+    List<Integer> findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(ArmRpoStatusEntity armRpoStatusEntity, OffsetDateTime cutoffDateTime);
 
     @Modifying
     @Transactional

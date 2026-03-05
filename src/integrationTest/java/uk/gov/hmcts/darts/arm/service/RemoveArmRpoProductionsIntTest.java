@@ -92,6 +92,7 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         //given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
+        armRpoExecutionDetailEntity.setProductionId("some-production-id");
         dartsPersistence.save(armRpoExecutionDetailEntity);
         
         // update automatically set lastModifiedDateTime to be older than waitDuration. This defaults to now() on save
@@ -126,6 +127,7 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         // create execution detail with FAILED status and last modified date older than duration
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
+        armRpoExecutionDetailEntity.setProductionId("some-production-id");
         dartsPersistence.save(armRpoExecutionDetailEntity);
 
         // update automatically set lastModifiedDateTime to be older than waitDuration. This defaults to now() on save
@@ -159,6 +161,7 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         //given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
+        armRpoExecutionDetailEntity.setProductionId("some-production-id");
         dartsPersistence.save(armRpoExecutionDetailEntity);
 
         // update automatically set lastModifiedDateTime to be older than waitDuration. This defaults to now() on save
@@ -182,6 +185,40 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
     }
 
     @Test
+    void removeOldArmRpoProductions_ShouldNotRemoveProductions_WhenProductionIdIsNull() {
+        RemoveProductionResponse response = new RemoveProductionResponse();
+        response.setStatus(200);
+        response.setIsError(false);
+        when(armApiBaseClient.removeProduction(any(), any())).thenReturn(response);
+        doReturn("token").when(armRpoUtil).getBearerToken("removeProduction");
+        when(armApiBaseClient.removeProduction(eq("token"), any())).thenReturn(response);
+        //given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
+        // production id remains null
+        dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        // update automatically set lastModifiedDateTime to be older than waitDuration. This defaults to now() on save
+        dartsPersistence.getArmRpoExecutionDetailRepository()
+            .updateLastModifiedDateTimeById(
+                armRpoExecutionDetailEntity.getId(),
+                OffsetDateTime.now().minusDays(31)
+            );
+
+        // when
+        removeRpoProductionsService.removeOldArmRpoProductions(false, waitDuration, 10);
+
+        // then
+        var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
+
+        assertNotNull(updatedArmRpoExecutionDetailEntity);
+        assertEquals(ArmRpoHelper.saveBackgroundSearchRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.failedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
+        verify(armApiBaseClient, times(0)).removeProduction(any(), any());
+        verifyNoMoreInteractions(armApiBaseClient);
+    }
+
+    @Test
     void removeOldArmRpoProductions_ShouldRetryOnUnauthorisedThenSucceed_WhenFailedAndOlderThanDuration() {
         RemoveProductionResponse response = new RemoveProductionResponse();
         response.setStatus(200);
@@ -190,6 +227,7 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         //given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
+        armRpoExecutionDetailEntity.setProductionId("some-production-id");
         dartsPersistence.save(armRpoExecutionDetailEntity);
 
         // update automatically set lastModifiedDateTime to be older than waitDuration. This defaults to now() on save
@@ -242,6 +280,7 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
+        armRpoExecutionDetailEntity.setProductionId("some-production-id");
         dartsPersistence.save(armRpoExecutionDetailEntity);
 
         // update automatically set lastModifiedDateTime to be older than waitDuration. This defaults to now() on save

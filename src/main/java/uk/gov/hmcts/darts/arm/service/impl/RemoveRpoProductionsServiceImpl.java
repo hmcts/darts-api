@@ -36,7 +36,7 @@ public class RemoveRpoProductionsServiceImpl implements RemoveRpoProductionsServ
         List<Integer> ardIdsToRemove;
         try {
             log.info("Finding ARM RPO executions with status FAILED older than: {}", waitDuration);
-            ardIdsToRemove = armRpoService.findIdsByStatusAndLastModifiedDateTimeAfter(
+            ardIdsToRemove = armRpoService.findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(
                 ArmRpoHelper.failedRpoStatus(), OffsetDateTime.now().minus(waitDuration)
             );
             if (ardIdsToRemove.isEmpty()) {
