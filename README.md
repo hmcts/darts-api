@@ -16,6 +16,7 @@
 
 - [Java 21](https://www.oracle.com/java)
 - ffmpeg
+- redis
 
 ### Environment variables
 
