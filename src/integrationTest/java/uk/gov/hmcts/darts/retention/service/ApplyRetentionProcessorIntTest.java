@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.retention.service.impl.ApplyRetentionProcessorImpl;
 import uk.gov.hmcts.darts.retention.util.RetentionConfidenceCategoryUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -29,6 +30,8 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime CASE_CLOSED_TIME = OffsetDateTime.now().minusDays(8);
     private static final String RETAIN_UNTIL = "2030-01-01T12:00Z";
+
+    private final Duration daysBetweenEvents = Duration.ofDays(10);
 
     @Autowired
     private CaseRetentionRepository caseRetentionRepository;
@@ -66,7 +69,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
 
         caseRetentionRepository.saveAndFlush(caseRetentionEntity);
 
-        applyRetentionProcessor.processApplyRetention(1000);
+        applyRetentionProcessor.processApplyRetention(1000, daysBetweenEvents);
 
         transactionalUtil.executeInTransaction(() -> {
             List<CaseRetentionEntity> caseRetentionEntitiesPostUpdate = caseRetentionRepository.findAllByCourtCase(courtCase);
@@ -98,7 +101,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.getFirst();
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntity.getCurrentState());
-        applyRetentionProcessor.processApplyRetention(1000);
+        applyRetentionProcessor.processApplyRetention(1000, daysBetweenEvents);
 
         transactionalUtil.executeInTransaction(() -> {
             List<CaseRetentionEntity> caseRetentionEntitiesPostUpdate = caseRetentionRepository.findAllByCourtCase(courtCase);
@@ -125,7 +128,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
 
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntities.getFirst().getCurrentState());
-        applyRetentionProcessor.processApplyRetention(1000);
+        applyRetentionProcessor.processApplyRetention(1000, daysBetweenEvents);
 
         caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         assertTrue(caseRetentionEntities.getFirst().getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));

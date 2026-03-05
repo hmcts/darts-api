@@ -13,8 +13,8 @@ plugins {
   id 'io.spring.dependency-management' version '1.1.7'
   id 'org.springframework.boot' version '3.5.11'
   id 'org.owasp.dependencycheck' version '12.2.0'
-  id 'com.github.ben-manes.versions' version '0.52.0'
-  id 'org.sonarqube' version '6.2.0.5505'
+  id 'com.github.ben-manes.versions' version '0.53.0'
+  id 'org.sonarqube' version '6.3.1.5724'
   id "io.freefair.lombok" version "8.14"
   id "org.openapi.generator" version "7.13.0"
   id "org.flywaydb.flyway" version "11.20.3"
@@ -439,7 +439,7 @@ dependencies {
   implementation 'org.openapitools:jackson-databind-nullable:0.2.9'
   implementation 'org.zalando:problem-spring-web-starter:0.29.1'
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.15'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.16'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.3.1'
   implementation 'org.springframework.retry:spring-retry:2.0.12'
 
@@ -479,8 +479,8 @@ dependencies {
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.2.3'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.5.9'
-  implementation 'org.hibernate.orm:hibernate-ant:6.6.43.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.6.43.Final'
+  implementation 'org.hibernate.orm:hibernate-ant:6.6.44.Final'
+  implementation 'org.hibernate:hibernate-spatial:6.6.44.Final'
 
   // https://mvnrepository.com/artifact/com.querydsl/querydsl-core
   implementation 'com.querydsl:querydsl-core:5.1.0'
@@ -488,12 +488,12 @@ dependencies {
 
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.43.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.44.Final')
   annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
-  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.9'
+  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.9.2'
 
   testImplementation 'org.testcontainers:postgresql:1.21.4'
   testImplementation 'com.h2database:h2:2.4.240'
@@ -513,7 +513,7 @@ dependencies {
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility-proxy
   testImplementation group: 'org.awaitility', name: 'awaitility-proxy', version: '3.1.6'
-  testImplementation 'io.github.hakky54:logcaptor:2.12.2'
+  testImplementation 'io.github.hakky54:logcaptor:2.12.5'
   testImplementation 'org.testcontainers:testcontainers:1.21.4'
 
   testImplementation group: 'org.jeasy', name: 'easy-random-core', version: '5.0.0'
