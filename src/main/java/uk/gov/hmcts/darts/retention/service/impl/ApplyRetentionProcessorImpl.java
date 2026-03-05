@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -38,7 +41,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
     private final Duration pendingRetentionDuration;
 
     @Override
-    public void processApplyRetention(Integer batchSize) {
+    public void processApplyRetention(Integer batchSize, Duration daysBetweenEvents) {
         List<Integer> caseRetentionEntitiesIds =
             caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minus(pendingRetentionDuration),
                                                          Limit.of(batchSize));
@@ -47,7 +50,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
         //List is ordered in createdDateTime desc order
         for (Integer caseRetentionEntitiesId : caseRetentionEntitiesIds) {
-            applyRetentionCaseProcessor.process(processedCases, caseRetentionEntitiesId);
+            applyRetentionCaseProcessor.process(processedCases, caseRetentionEntitiesId, daysBetweenEvents);
         }
 
     }
@@ -62,7 +65,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
         private final RetentionService retentionService;
 
         @Transactional
-        public void process(Set<Integer> processedCases, int caseRetentionEntitiesId) {
+        public void process(Set<Integer> processedCases, int caseRetentionEntitiesId, Duration daysBetweenEvents) {
             Optional<CaseRetentionEntity> caseRetentionEntityOpt = caseRetentionRepository.findById(caseRetentionEntitiesId);
             if (caseRetentionEntityOpt.isEmpty()) {
                 log.error("CaseRetentionEntity with id {} not found", caseRetentionEntitiesId);
@@ -70,23 +73,33 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
             }
             CaseRetentionEntity caseRetentionEntity = caseRetentionEntityOpt.get();
             CourtCaseEntity courtCaseEntity = caseRetentionEntity.getCourtCase();
+
             if (processedCases.contains(courtCaseEntity.getId())) {
                 caseRetentionEntity.setCurrentState(CaseRetentionStatus.IGNORED.name());
                 caseRetentionRepository.save(caseRetentionEntity);
                 return;
             }
-
             caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
             caseRetentionEntity.setCurrentState(CaseRetentionStatus.COMPLETE.name());
-            Integer confidenceCategoryId = caseRetentionEntity.getConfidenceCategory();
-            RetentionConfidenceCategoryEnum confidenceCategoryEnum = null;
-            if (confidenceCategoryId != null) {
-                confidenceCategoryEnum = Arrays.stream(RetentionConfidenceCategoryEnum.values())
-                    .filter(e -> e.getId().equals(confidenceCategoryId))
+
+            Integer confidenceCategory = retentionService.getConfidenceCategory(courtCaseEntity, daysBetweenEvents, caseRetentionEntity);
+            if (isNull(confidenceCategory)) {
+                confidenceCategory = nonNull(caseRetentionEntity.getConfidenceCategory())
+                    ? caseRetentionEntity.getConfidenceCategory()
+                    : RetentionConfidenceCategoryEnum.UNKNOWN.getId();
+            }
+            log.info("Updating case {} with confidence category {}", courtCaseEntity.getId(), confidenceCategory);
+            RetentionConfidenceCategoryEnum retentionConfidenceCategoryEnum;
+            if (confidenceCategory != null) {
+                Integer finalConfidenceCategory = confidenceCategory;
+                retentionConfidenceCategoryEnum = Arrays.stream(RetentionConfidenceCategoryEnum.values())
+                    .filter(e -> e.getId().equals(finalConfidenceCategory))
                     .findFirst()
                     .orElse(RetentionConfidenceCategoryEnum.UNKNOWN);
+            } else {
+                retentionConfidenceCategoryEnum = RetentionConfidenceCategoryEnum.UNKNOWN;
             }
-            retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCaseEntity, confidenceCategoryEnum);
+            retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCaseEntity, retentionConfidenceCategoryEnum);
             courtCaseEntity.setRetentionUpdated(true);
             courtCaseEntity.setRetentionRetries(0);
 
@@ -96,4 +109,5 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
             processedCases.add(courtCaseEntity.getId());
         }
     }
+
 }
