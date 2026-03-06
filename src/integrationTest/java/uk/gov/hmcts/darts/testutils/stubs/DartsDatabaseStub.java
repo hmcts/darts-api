@@ -336,6 +336,7 @@ public class DartsDatabaseStub {
             transcriptionRepository.deleteAllInBatch();
             transcriptionWorkflowRepository.deleteAllInBatch();
             retentionConfidenceCategoryMapperRepository.deleteAllInBatch();
+            objectStateRecordRepository.deleteAllInBatch();
         });
     }
 
