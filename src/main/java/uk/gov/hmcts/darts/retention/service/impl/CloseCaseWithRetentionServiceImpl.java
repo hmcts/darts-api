@@ -92,7 +92,8 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         } else {
             PendingRetention latestPendingRetention = latestPendingRetentionOpt.get();
             if (nonNull(dartsEvent.getDateTime()) && nonNull(latestPendingRetention.getEventTimestamp())
-                && dartsEvent.getDateTime().isAfter(latestPendingRetention.getEventTimestamp())) {
+                && dartsEvent.getDateTime().isAfter(latestPendingRetention.getEventTimestamp())
+                || dartsEvent.getDateTime().isEqual(latestPendingRetention.getEventTimestamp())) {
                 updateExistingRetention(caseManagementRetentionEntity, latestPendingRetention.getCaseRetention(), dartsEvent);
             } else {
                 log.info("Ignoring event with id {} because its event time {} is not after the latest pending entry {} for caseId {}.", dartsEvent.getEventId(),

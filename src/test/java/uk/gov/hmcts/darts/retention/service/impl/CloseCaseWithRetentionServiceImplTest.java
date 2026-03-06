@@ -242,9 +242,9 @@ class CloseCaseWithRetentionServiceImplTest {
     }
 
     @Test
-    void closeCaseAndSetRetention_shouldNotUpdateExistingRetention_whenPendingRetentionExists_andEventNotAfterPendingTimestamp() {
+    void closeCaseAndSetRetention_shouldUpdateExistingRetention_whenPendingRetentionExists_andEventEqualsPendingTimestamp() {
         OffsetDateTime pendingEventTime = OffsetDateTime.of(2024, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
-        OffsetDateTime eventTime = pendingEventTime; // equal => should be ignored
+        OffsetDateTime eventTime = pendingEventTime;
 
         DartsEventRetentionPolicy retentionPolicy = new DartsEventRetentionPolicy();
         retentionPolicy.setCaseRetentionFixedPolicy("OVERRIDABLE_POLICY");
@@ -255,14 +255,17 @@ class CloseCaseWithRetentionServiceImplTest {
 
         CaseRetentionEntity existingRetention = new CaseRetentionEntity();
         existingRetention.setCourtCase(courtCase);
+        existingRetention.setCurrentState(CaseRetentionStatus.PENDING.name());
 
         when(caseRetentionRepository.findLatestPendingRetention(courtCase)).thenReturn(Optional.of(pendingRetention));
         when(pendingRetention.getEventTimestamp()).thenReturn(pendingEventTime);
+        when(pendingRetention.getCaseRetention()).thenReturn(existingRetention);
+        when(retentionApi.applyPolicyStringToDate(any(), any(), any())).thenReturn(LocalDate.of(2030, 1, 1));
 
         service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
 
-        verify(caseRetentionRepository, never()).save(any(CaseRetentionEntity.class));
-        verify(retentionApi, never()).applyPolicyStringToDate(any(), any(), any());
+        verify(caseRetentionRepository).save(any(CaseRetentionEntity.class));
+        verify(retentionApi).applyPolicyStringToDate(any(), any(), any());
     }
 
     @Test
@@ -291,4 +294,78 @@ class CloseCaseWithRetentionServiceImplTest {
         verify(retentionApi, never()).applyPolicyStringToDate(any(), any(), any());
     }
 
+    @Test
+    void closeCaseAndSetRetention_shouldCreateRetention_whenCaseClosedTimestampEqualsEventDateTimeAndNoRetentionExists() {
+        OffsetDateTime eventTime = OffsetDateTime.of(2026, 3, 6, 12, 0, 0, 0, ZoneOffset.UTC);
+        courtCase.setCaseClosedTimestamp(eventTime); // Set to same as event time
+
+        DartsEventRetentionPolicy retentionPolicy = new DartsEventRetentionPolicy();
+        retentionPolicy.setCaseRetentionFixedPolicy("OVERRIDABLE_POLICY");
+        retentionPolicy.setCaseTotalSentence("P1Y");
+
+        dartsEvent.setDateTime(eventTime);
+        dartsEvent.setRetentionPolicy(retentionPolicy);
+
+        when(caseRetentionRepository.findLatestPendingRetention(courtCase)).thenReturn(Optional.empty());
+        LocalDate expectedRetainUntilDate = LocalDate.of(2030, 3, 6);
+        when(retentionApi.applyPolicyStringToDate(eq(eventTime.toLocalDate()), eq("P1Y"), eq(retentionPolicyType)))
+            .thenReturn(expectedRetainUntilDate);
+
+        service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
+
+        verify(caseRepository).saveAndFlush(courtCase);
+        assertTrue(courtCase.getClosed());
+        verify(caseRetentionRepository).save(caseRetentionCaptor.capture());
+        CaseRetentionEntity saved = caseRetentionCaptor.getValue();
+        assertThat(saved.getCourtCase()).isSameAs(courtCase);
+        assertThat(saved.getRetentionPolicyType()).isSameAs(retentionPolicyType);
+        assertThat(saved.getCaseManagementRetention()).isSameAs(caseManagementRetention);
+        assertThat(saved.getTotalSentence()).isEqualTo("P1Y");
+        assertThat(saved.getCurrentState()).isEqualTo(CaseRetentionStatus.PENDING.name());
+        assertThat(saved.getConfidenceCategory()).isEqualTo(RetentionConfidenceCategoryEnum.CASE_CLOSED.getId());
+        assertThat(saved.getRetainUntil())
+            .isEqualTo(expectedRetainUntilDate.atStartOfDay().atOffset(ZoneOffset.UTC));
+    }
+
+    @Test
+    void closeCaseAndSetRetention_shouldUpdatePendingRetention_whenCaseClosedTimestampEqualsEventDateTimeAndPendingRetentionExists() {
+        OffsetDateTime eventTime = OffsetDateTime.of(2026, 3, 6, 12, 0, 0, 0, ZoneOffset.UTC);
+        courtCase.setCaseClosedTimestamp(eventTime); // Set to same as event time
+
+        DartsEventRetentionPolicy retentionPolicy = new DartsEventRetentionPolicy();
+        retentionPolicy.setCaseRetentionFixedPolicy("OVERRIDABLE_POLICY");
+        retentionPolicy.setCaseTotalSentence("P1Y");
+
+        dartsEvent.setDateTime(eventTime);
+        dartsEvent.setRetentionPolicy(retentionPolicy);
+
+        // Simulate an existing pending retention with the same event timestamp
+        CaseRetentionEntity existingRetention = new CaseRetentionEntity();
+        existingRetention.setCourtCase(courtCase);
+        existingRetention.setCurrentState(CaseRetentionStatus.PENDING.name());
+        //existingRetention.setCurrentState()
+        when(caseRetentionRepository.findLatestPendingRetention(courtCase)).thenReturn(Optional.of(pendingRetention));
+        when(pendingRetention.getEventTimestamp()).thenReturn(eventTime);
+        when(pendingRetention.getCaseRetention()).thenReturn(existingRetention);
+
+        LocalDate expectedRetainUntilDate = LocalDate.of(2030, 3, 6);
+        when(retentionApi.applyPolicyStringToDate(eq(eventTime.toLocalDate()), eq("P1Y"), eq(retentionPolicyType)))
+            .thenReturn(expectedRetainUntilDate);
+
+        service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
+
+        verify(caseRepository).saveAndFlush(courtCase);
+        assertTrue(courtCase.getClosed());
+        verify(caseRetentionRepository).save(caseRetentionCaptor.capture());
+        CaseRetentionEntity saved = caseRetentionCaptor.getValue();
+        assertThat(saved).isSameAs(existingRetention);
+        assertThat(saved.getCourtCase()).isSameAs(courtCase);
+        assertThat(saved.getRetentionPolicyType()).isSameAs(retentionPolicyType);
+        assertThat(saved.getCaseManagementRetention()).isSameAs(caseManagementRetention);
+        assertThat(saved.getTotalSentence()).isEqualTo("P1Y");
+        assertThat(saved.getCurrentState()).isEqualTo(CaseRetentionStatus.PENDING.name());
+        assertThat(saved.getConfidenceCategory()).isEqualTo(RetentionConfidenceCategoryEnum.CASE_CLOSED.getId());
+        assertThat(saved.getRetainUntil())
+            .isEqualTo(expectedRetainUntilDate.atStartOfDay().atOffset(ZoneOffset.UTC));
+    }
 }
