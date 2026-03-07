@@ -44,8 +44,8 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
     private final RetentionApi retentionApi;
     private final CaseRepository caseRepository;
 
-    @Value("${darts.retention.overridable-fixed-policy-keys}")
-    List<String> overridableFixedPolicyKeys;
+    @Value("${darts.retention.overridable-fixed-policy-keys:}")
+    private List<String> overridableFixedPolicyKeys;
 
     @Override
     public void closeCaseAndSetRetention(DartsEvent dartsEvent, CreatedHearingAndEvent hearingAndEvent, CourtCaseEntity courtCase) {
@@ -72,13 +72,28 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
             dartsEvent.getRetentionPolicy().setCaseTotalSentence(null);
         }
 
+        createOrUpdateCaseRetention(dartsEvent, hearingAndEvent, courtCase, caseManagementRetentionEntity);
+    }
+
+    private void createOrUpdateCaseRetention(DartsEvent dartsEvent, CreatedHearingAndEvent hearingAndEvent, CourtCaseEntity courtCase,
+                                             CaseManagementRetentionEntity caseManagementRetentionEntity) {
         Optional<PendingRetention> latestPendingRetentionOpt = caseRetentionRepository.findLatestPendingRetention(courtCase);
         if (latestPendingRetentionOpt.isEmpty()) {
-            createRetention(caseManagementRetentionEntity, hearingAndEvent, dartsEvent);
+            if (nonNull(courtCase.getCaseClosedTimestamp()) && nonNull(dartsEvent.getDateTime())
+                && courtCase.getCaseClosedTimestamp().isAfter(dartsEvent.getDateTime())) {
+                log.info("Ignoring event with id {} because its event time {} is not after the case closed timestamp {} for caseId {}.",
+                         dartsEvent.getEventId(),
+                         dartsEvent.getDateTime(), courtCase.getCaseClosedTimestamp(), courtCase.getId());
+            } else {
+                // create a new retention record if the case is closed timestamp is same as or before the event timestamp,
+                // and there are no existing pending retentions
+                createRetention(caseManagementRetentionEntity, hearingAndEvent, dartsEvent);
+            }
         } else {
             PendingRetention latestPendingRetention = latestPendingRetentionOpt.get();
             if (nonNull(dartsEvent.getDateTime()) && nonNull(latestPendingRetention.getEventTimestamp())
-                && dartsEvent.getDateTime().isAfter(latestPendingRetention.getEventTimestamp())) {
+                && dartsEvent.getDateTime().isAfter(latestPendingRetention.getEventTimestamp())
+                || dartsEvent.getDateTime().isEqual(latestPendingRetention.getEventTimestamp())) {
                 updateExistingRetention(caseManagementRetentionEntity, latestPendingRetention.getCaseRetention(), dartsEvent);
             } else {
                 log.info("Ignoring event with id {} because its event time {} is not after the latest pending entry {} for caseId {}.", dartsEvent.getEventId(),
