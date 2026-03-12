@@ -137,12 +137,12 @@ darts:
     merge-workspace: ${user.home}/audiotransform/merge
     outbounddeleter:
       last-accessed-deletion-day: 2
-    pre-amble-duration: 30m
+    pre-amble-duration: 0m
     preview:
       redis-ttl-mins: ${AUDIO_PREVIEW_REDIS_TTL:10}
       redis-failed-ttl-mins: ${AUDIO_PREVIEW_REDIS_FAILED_TTL:2}
       redis-folder: audio-previews
-    post-amble-duration: 30m
+    post-amble-duration: 0m
     re-encode-workspace: ${user.home}/audiotransform/encode
     temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
     audio-transformation-service:
@@ -170,7 +170,7 @@ darts:
       unstructured:
         arm-minimum:
           weeks: 30
-    pending-retention-duration: 7d
+    pending-retention-duration: 2d
   daily-list:
     housekeeping:
       enabled: true
@@ -214,7 +214,7 @@ darts:
         transcription_request_unfulfilled: c19da6f7-9304-445a-9f30-3827f7c74103
   retention:
     overridable-fixed-policy-keys: 3
-    close-open-cases-older-than-period: ${CLOSE_OPEN_CASES_OLDER_THAN_PERIOD:P6Y}
+    close-open-cases-older-than-period: P3D
     close-events: "Case closed,Archive case"
     max-retention-retries: 3
 
