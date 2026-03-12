@@ -43,6 +43,7 @@ public enum AutomatedTaskName {
     ARM_MISSING_RESPONSE_REPLY_TASK_NAME("ArmMissingResponseReplay"),
     DETS_CLEANUP_ARM_RESPONSE_FILES("DETSCleanupArmResponseFiles"),
     MEDIA_REQUEST_CLEANUP("MediaRequestCleanUp"),
+    REMOVE_OLD_ARM_RPO_PRODUCTIONS("RemoveOldArmRpoProductions"),
     ARM_RPO_BACKLOG_CATCHUP("ArmRpoBacklogCatchup", Constants.AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE);
 
     private final String taskName;

@@ -233,5 +233,10 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         }
         return csvEodList;
     }
+    
+    @Override
+    public List<Integer> findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(ArmRpoStatusEntity armRpoStatusEntity, OffsetDateTime offsetDateTime) {
+        return armRpoExecutionDetailRepository.findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(armRpoStatusEntity, offsetDateTime);
+    }
 
 }
