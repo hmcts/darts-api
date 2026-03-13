@@ -69,14 +69,14 @@ services:
       - darts-network
 
   darts-gateway:
-    image: sdshmctspublic.azurecr.io/darts/gateway:latest
+    image: hmctsprod.azurecr.io/darts/gateway:latest
     ports:
       - "8070:8070"
     networks:
       - darts-network
 
   darts-stub-services:
-    image: sdshmctspublic.azurecr.io/darts/stub-services:latest
+    image: hmctsprod.azurecr.io/darts/stub-services:latest
     ports:
       - "4551:4551"
     networks:
@@ -110,7 +110,7 @@ services:
       - darts-network
 
   darts-portal:
-    image: sdshmctspublic.azurecr.io/darts/portal:latest
+    image: hmctsprod.azurecr.io/darts/portal:latest
     depends_on:
       - darts-redis
     ports:
