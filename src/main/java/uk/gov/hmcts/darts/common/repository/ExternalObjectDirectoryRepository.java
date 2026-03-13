@@ -278,7 +278,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                           OffsetDateTime unstructuredLastModifiedBefore,
                                                           Limit limit);
 
-
     @Query(
         """                       
             SELECT eod FROM ExternalObjectDirectoryEntity eod
