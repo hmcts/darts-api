@@ -26,7 +26,7 @@ public class PostgresIntegrationBase extends TestBase {
 
     static {
         POSTGRES = new PostgreSQLContainer<>(
-            DockerImageName.parse("hmctspublic.azurecr.io/imported/postgres")
+            DockerImageName.parse("hmctsprod.azurecr.io/imported/postgres")
                 .asCompatibleSubstituteFor("postgres")
         ).withDatabaseName("darts")
             .withUsername("darts")
