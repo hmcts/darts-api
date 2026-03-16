@@ -44,11 +44,12 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
     private final RetentionApi retentionApi;
     private final CaseRepository caseRepository;
 
-    @Value("${darts.retention.overridable-fixed-policy-keys}")
-    List<String> overridableFixedPolicyKeys;
+    @Value("${darts.retention.overridable-fixed-policy-keys:}")
+    private List<String> overridableFixedPolicyKeys;
 
     @Override
     public void closeCaseAndSetRetention(DartsEvent dartsEvent, CreatedHearingAndEvent hearingAndEvent, CourtCaseEntity courtCase) {
+        log.info("About to close case and set retention for caseId {} and eventId {}", courtCase.getId(), dartsEvent.getEventId());
         setDefaultPolicyIfNotDefined(dartsEvent);
 
         CaseManagementRetentionEntity caseManagementRetentionEntity = caseManagementRetentionService.createCaseManagementRetention(
@@ -72,19 +73,35 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
             dartsEvent.getRetentionPolicy().setCaseTotalSentence(null);
         }
 
+        createOrUpdateCaseRetention(dartsEvent, hearingAndEvent, courtCase, caseManagementRetentionEntity);
+    }
+
+    private void createOrUpdateCaseRetention(DartsEvent dartsEvent, CreatedHearingAndEvent hearingAndEvent, CourtCaseEntity courtCase,
+                                             CaseManagementRetentionEntity caseManagementRetentionEntity) {
         Optional<PendingRetention> latestPendingRetentionOpt = caseRetentionRepository.findLatestPendingRetention(courtCase);
         if (latestPendingRetentionOpt.isEmpty()) {
-            createRetention(caseManagementRetentionEntity, hearingAndEvent, dartsEvent);
+            if (nonNull(courtCase.getCaseClosedTimestamp()) && nonNull(dartsEvent.getDateTime())
+                && courtCase.getCaseClosedTimestamp().isAfter(dartsEvent.getDateTime())) {
+                log.info("Ignoring event with id {} because its event time {} is not after the case closed timestamp {} for caseId {}.",
+                         dartsEvent.getEventId(),
+                         dartsEvent.getDateTime(), courtCase.getCaseClosedTimestamp(), courtCase.getId());
+            } else {
+                // create a new retention record if the case is closed timestamp is same as or before the event timestamp,
+                // and there are no existing pending retentions
+                createRetention(caseManagementRetentionEntity, hearingAndEvent, dartsEvent);
+            }
         } else {
             PendingRetention latestPendingRetention = latestPendingRetentionOpt.get();
             if (nonNull(dartsEvent.getDateTime()) && nonNull(latestPendingRetention.getEventTimestamp())
-                && dartsEvent.getDateTime().isAfter(latestPendingRetention.getEventTimestamp())) {
+                && dartsEvent.getDateTime().isAfter(latestPendingRetention.getEventTimestamp())
+                || dartsEvent.getDateTime().isEqual(latestPendingRetention.getEventTimestamp())) {
                 updateExistingRetention(caseManagementRetentionEntity, latestPendingRetention.getCaseRetention(), dartsEvent);
             } else {
                 log.info("Ignoring event with id {} because its event time {} is not after the latest pending entry {} for caseId {}.", dartsEvent.getEventId(),
                          dartsEvent.getDateTime(), latestPendingRetention.getEventTimestamp(), courtCase.getId());
             }
         }
+        log.info("Closed case and set retention for caseId {} and eventId {}", courtCase.getId(), dartsEvent.getEventId());
     }
 
     private void setDefaultPolicyIfNotDefined(DartsEvent dartsEvent) {
@@ -96,6 +113,7 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
     }
 
     private void closeCase(DartsEvent dartsEvent, CourtCaseEntity courtCase) {
+        log.info("Setting case with id {} as closed for event with id {}", courtCase.getId(), dartsEvent.getEventId());
         courtCase.setClosed(TRUE);
 
         //If the case is being closed again, we only want to update the closed timestamp to the latest event
@@ -107,6 +125,8 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
         }
 
         caseRepository.saveAndFlush(courtCase);
+        log.info("Updated case with id {} as closed for event with id {} with timestamp {}",
+                 courtCase.getId(), dartsEvent.getEventId(), courtCase.getCaseClosedTimestamp());
     }
 
     private void updateExistingRetention(CaseManagementRetentionEntity caseManagementRetentionEntity, CaseRetentionEntity existingCaseRetention,
