@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.hearings.model.HearingTranscriptModel;
 import uk.gov.hmcts.darts.hearings.model.Transcript;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -92,7 +93,6 @@ public class HearingsServiceImpl implements HearingsService {
         return GetEventsResponseMapper.mapToEvents(eventEntities);
     }
 
-
     @Override
     public List<Transcript> getTranscriptsByHearingId(Integer hearingId) {
         validateCaseIsNotExpiredFromHearingId(hearingId);
@@ -131,7 +131,8 @@ public class HearingsServiceImpl implements HearingsService {
             })
             .forEach(media -> {
                 Set<HearingEntity> hearingEntities = media.getHearings();
-                hearingEntities.forEach(media::removeHearing);
+                // media.removeHearing mutates media.getHearings(); iterate over a copy to avoid ConcurrentModificationException
+                new HashSet<>(hearingEntities).forEach(media::removeHearing);
                 mediaRepository.save(media);
                 hearingRepository.saveAll(hearingEntities);
 

@@ -35,6 +35,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -228,7 +229,8 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     @Override
     public void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
-        Set<HearingEntity> hearingList = mediaEntity.getHearings();
+        // removeHearing mutates mediaEntity.getHearings(); iterate over a copy to avoid ConcurrentModificationException
+        Set<HearingEntity> hearingList = new HashSet<>(mediaEntity.getHearings());
         for (HearingEntity hearing : hearingList) {
             mediaEntity.removeHearing(hearing);
         }
