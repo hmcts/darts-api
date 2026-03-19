@@ -6,6 +6,9 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.batch.BlobBatchClient;
+import com.azure.storage.blob.batch.BlobBatchClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobListDetails;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
@@ -276,6 +279,58 @@ public class ArmServiceImpl implements ArmService {
 
         } catch (Exception e) {
             log.error("Could not delete from storage container={}, blobPathAndName {}", containerName, blobPathAndName, e);
+            return false;
+        }
+    }
+
+    @Override
+    @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
+    public boolean deleteMultipleBlobs(String containerName, List<String> blobPathAndName) {
+        if (blobPathAndName == null || blobPathAndName.isEmpty()) {
+            log.info("No blobs provided to delete for containerName={}", containerName);
+            return true;
+        }
+
+        try {
+            BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
+
+            // Delete *all* blobs in one go using Azure Storage Blob Batch.
+            // IMPORTANT: We intentionally do NOT fall back to single deletes because that can lead to partial deletion.
+            BlobServiceClient blobServiceClient = containerClient.getServiceClient();
+            BlobBatchClient batchClient = new BlobBatchClientBuilder(blobServiceClient).buildClient();
+
+            // Azure SDK 12.29.x exposes per-blob results via deleteBlobs, which issues a single batch request.
+            boolean allSuccessful = true;
+            PagedIterable<Response<Void>> responses = batchClient.deleteBlobs(
+                blobPathAndName,
+                DeleteSnapshotsOptionType.INCLUDE,
+                Duration.of(TIMEOUT, ChronoUnit.SECONDS),
+                null
+            );
+
+            int index = 0;
+            for (Response<Void> response : responses) {
+                int statusCode = response.getStatusCode();
+                HttpStatus httpStatus = valueOf(statusCode);
+                String blobName = index < blobPathAndName.size() ? blobPathAndName.get(index) : "<unknown>";
+                index++;
+
+                // treat NOT_FOUND as success (idempotent delete)
+                if (!(httpStatus.is2xxSuccessful() || NOT_FOUND.equals(httpStatus))) {
+                    allSuccessful = false;
+                    log.warn("Failed to delete blob in batch containerName={}, blobPathAndName={}, statusCode={}, httpStatus={}",
+                             containerName, blobName, statusCode, httpStatus);
+                }
+            }
+
+            if (allSuccessful) {
+                log.info("Successfully deleted {} blobs from containerName={} using batch", blobPathAndName.size(), containerName);
+            } else {
+                log.error("Batch deletion completed with one or more failures for containerName={}", containerName);
+            }
+            return allSuccessful;
+        } catch (Exception e) {
+            log.error("Could not delete multiple blobs from storage container={}", containerName, e);
             return false;
         }
     }
