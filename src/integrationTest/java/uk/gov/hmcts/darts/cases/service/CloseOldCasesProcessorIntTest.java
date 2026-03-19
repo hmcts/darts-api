@@ -78,47 +78,6 @@ class CloseOldCasesProcessorIntTest extends IntegrationBase {
         dartsDatabase.createTestUserAccount();
     }
 
-    private void createAndSaveRetentionConfidenceCategoryMappings() {
-        createRetentionConfidenceCategoryMapperEntity(
-            RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED,
-            RetentionConfidenceReasonEnum.AGED_CASE,
-            RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED
-        );
-        createRetentionConfidenceCategoryMapperEntity(
-            RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED,
-            RetentionConfidenceReasonEnum.MAX_EVENT_CLOSED,
-            RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED
-        );
-        createRetentionConfidenceCategoryMapperEntity(
-            RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED,
-            RetentionConfidenceReasonEnum.MAX_MEDIA_CLOSED,
-            RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED
-        );
-        createRetentionConfidenceCategoryMapperEntity(
-            RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED,
-            RetentionConfidenceReasonEnum.MAX_HEARING_CLOSED,
-            RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED
-        );
-        createRetentionConfidenceCategoryMapperEntity(
-            RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED,
-            RetentionConfidenceReasonEnum.CASE_CREATION_CLOSED,
-            RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED
-        );
-    }
-
-    private void createRetentionConfidenceCategoryMapperEntity(RetentionConfidenceCategoryEnum retentionConfidenceCategoryEnum,
-                                                               RetentionConfidenceReasonEnum retentionConfidenceReasonEnum,
-                                                               RetentionConfidenceScoreEnum retentionConfidenceScoreEnum) {
-
-        RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
-        TestRetentionConfidenceCategoryMapperEntity agedCaseMappingEntity = testData.someMinimalBuilder()
-            .confidenceCategory(retentionConfidenceCategoryEnum.getId())
-            .confidenceReason(retentionConfidenceReasonEnum)
-            .confidenceScore(retentionConfidenceScoreEnum)
-            .build();
-        dartsPersistence.save(agedCaseMappingEntity.getEntity());
-    }
-
     @Test
     void givenClosedEventsUseDateAsClosedDate() {
         createAndSaveRetentionConfidenceCategoryMappings();
@@ -704,6 +663,47 @@ class CloseOldCasesProcessorIntTest extends IntegrationBase {
         assertNull(updatedCourtCaseEntity.getCaseClosedTimestamp());
         assertNull(updatedCourtCaseEntity.getRetConfScore());
         assertNull(updatedCourtCaseEntity.getRetConfReason());
+    }
+
+    private void createAndSaveRetentionConfidenceCategoryMappings() {
+        createRetentionConfidenceCategoryMapperEntity(
+            RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CLOSED,
+            RetentionConfidenceReasonEnum.AGED_CASE,
+            RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED
+        );
+        createRetentionConfidenceCategoryMapperEntity(
+            RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED,
+            RetentionConfidenceReasonEnum.MAX_EVENT_CLOSED,
+            RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED
+        );
+        createRetentionConfidenceCategoryMapperEntity(
+            RetentionConfidenceCategoryEnum.AGED_CASE_MAX_MEDIA_CLOSED,
+            RetentionConfidenceReasonEnum.MAX_MEDIA_CLOSED,
+            RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED
+        );
+        createRetentionConfidenceCategoryMapperEntity(
+            RetentionConfidenceCategoryEnum.AGED_CASE_MAX_HEARING_CLOSED,
+            RetentionConfidenceReasonEnum.MAX_HEARING_CLOSED,
+            RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED
+        );
+        createRetentionConfidenceCategoryMapperEntity(
+            RetentionConfidenceCategoryEnum.AGED_CASE_CASE_CREATION_CLOSED,
+            RetentionConfidenceReasonEnum.CASE_CREATION_CLOSED,
+            RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED
+        );
+    }
+
+    private void createRetentionConfidenceCategoryMapperEntity(RetentionConfidenceCategoryEnum retentionConfidenceCategoryEnum,
+                                                               RetentionConfidenceReasonEnum retentionConfidenceReasonEnum,
+                                                               RetentionConfidenceScoreEnum retentionConfidenceScoreEnum) {
+
+        RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
+        TestRetentionConfidenceCategoryMapperEntity agedCaseMappingEntity = testData.someMinimalBuilder()
+            .confidenceCategory(retentionConfidenceCategoryEnum.getId())
+            .confidenceReason(retentionConfidenceReasonEnum)
+            .confidenceScore(retentionConfidenceScoreEnum)
+            .build();
+        dartsPersistence.save(agedCaseMappingEntity.getEntity());
     }
 }
 
