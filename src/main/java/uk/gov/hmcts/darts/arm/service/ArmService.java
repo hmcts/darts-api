@@ -34,4 +34,6 @@ public interface ArmService {
      */
     boolean deleteBlobData(String containerName, String blobPathAndName);
 
+    boolean deleteMultipleBlobs(String containerName, List<String> blobPathAndName);
+
 }

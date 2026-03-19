@@ -172,6 +172,31 @@ class ArmServiceFunctionalTest extends FunctionalTest {
 
     }
 
+    @Test
+    void saveAndDeleteMultipleBlobs() {
+        log.info("------------------  saveAndDeleteMultipleBlobs test");
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+        String filename1 = String.format("%s_functional_test", UUID.randomUUID());
+        String actualResult1 = armService.saveBlobData(armContainerName, filename1, data);
+        armSubmissionBlobsToBeDeleted.add(actualResult1);
+        assertNotNull(actualResult1);
+        log.info("Blob filename1: {}", actualResult1);
+
+        String filename2 = String.format("%s_functional_test", UUID.randomUUID());
+        String actualResult2 = armService.saveBlobData(armContainerName, filename2, data);
+        armSubmissionBlobsToBeDeleted.add(actualResult2);
+        assertNotNull(actualResult2);
+        log.info("Blob filename2: {}", actualResult2);
+
+        armService.deleteMultipleBlobs(armContainerName, List.of(
+            armSubmissionDropZone + filename1,
+            armSubmissionDropZone + filename2
+        ));
+        cleanupArmBlobData();
+    }
+
     private void uploadBatchedSubmissionBlobs(BinaryData data) {
         for (int counter = 0; counter < 11; counter++) {
             String filename = String.format("functional_test_%s", UUID.randomUUID());
