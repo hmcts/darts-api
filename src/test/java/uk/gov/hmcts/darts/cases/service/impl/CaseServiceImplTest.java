@@ -168,7 +168,7 @@ class CaseServiceImplTest {
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CaseServiceTest/getCasesById/expectedResponse.json");
+            "Tests/cases/CaseServiceTest/GetCasesById/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
