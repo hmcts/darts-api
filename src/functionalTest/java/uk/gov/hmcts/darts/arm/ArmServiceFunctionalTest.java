@@ -191,8 +191,8 @@ class ArmServiceFunctionalTest extends FunctionalTest {
         log.info("Blob filename2: {}", actualResult2);
 
         armService.deleteMultipleBlobs(armContainerName, List.of(
-            armSubmissionDropZone + filename1,
-            armSubmissionDropZone + filename2
+            actualResult1,
+            actualResult2
         ));
         cleanupArmBlobData();
     }

@@ -39,7 +39,7 @@ import static org.springframework.http.HttpStatus.valueOf;
 
 @Service
 @Slf4j
-@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
 public class ArmServiceImpl implements ArmService {
 
     private static final String FILE_PATH_DELIMITER = "/";
@@ -284,7 +284,6 @@ public class ArmServiceImpl implements ArmService {
     }
 
     @Override
-    @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
     public boolean deleteMultipleBlobs(String containerName, List<String> blobPathAndName) {
         if (blobPathAndName == null || blobPathAndName.isEmpty()) {
             log.info("No blobs provided to delete for containerName={}", containerName);
@@ -295,11 +294,9 @@ public class ArmServiceImpl implements ArmService {
             BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
 
             // Delete *all* blobs in one go using Azure Storage Blob Batch.
-            // IMPORTANT: We intentionally do NOT fall back to single deletes because that can lead to partial deletion.
             BlobServiceClient blobServiceClient = containerClient.getServiceClient();
             BlobBatchClient batchClient = new BlobBatchClientBuilder(blobServiceClient).buildClient();
 
-            // Azure SDK 12.29.x exposes per-blob results via deleteBlobs, which issues a single batch request.
             boolean allSuccessful = true;
             PagedIterable<Response<Void>> responses = batchClient.deleteBlobs(
                 blobPathAndName,
