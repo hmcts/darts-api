@@ -64,7 +64,7 @@ public class EventStub {
     @Transactional
     public EventEntity createEvent(HearingEntity hearing, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName, Integer eventId) {
         EventEntity eventEntity = new EventEntity();
-        eventEntity.setEventText("testEventText");
+        eventEntity.setEventText(eventName);
         EventHandlerEntity eventHandlerEntity = eventHandlerRepository.findById(eventHandlerId).get();
         eventEntity.setEventType(eventHandlerEntity);
         eventEntity.setTimestamp(eventTimestamp);
@@ -90,7 +90,7 @@ public class EventStub {
     @Transactional
     public EventEntity createEvent(CourtroomEntity courtroom, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName, Integer eventId) {
         EventEntity eventEntity = new EventEntity();
-        eventEntity.setEventText("testEventText");
+        eventEntity.setEventText(eventName);
         EventHandlerEntity eventHandlerEntity = eventHandlerRepository.findById(eventHandlerId).get();
         eventEntity.setEventType(eventHandlerEntity);
         eventEntity.setTimestamp(eventTimestamp);

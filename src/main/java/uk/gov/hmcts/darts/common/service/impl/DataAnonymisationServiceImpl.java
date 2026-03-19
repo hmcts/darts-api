@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.DataAnonymisationRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
@@ -63,7 +64,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     private final CaseService caseService;
     private final EventService eventService;
     private final DataAnonymisationRepository dataAnonymisationRepository;
-
+    private final MediaRequestRepository mediaRequestRepository;
 
     @Override
     @Transactional
@@ -111,9 +112,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         eveIds.stream()
             .map(eventService::getEventByEveId)
             .distinct()
-            .forEach(eventEntity -> {
-                anonymiseEvent(userAccount, eventEntity, isManuallyRequested);
-            });
+            .forEach(eventEntity -> anonymiseEvent(userAccount, eventEntity, isManuallyRequested));
     }
 
     @Override
@@ -203,6 +202,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     void expiredMediaRequest(UserAccountEntity userAccount, MediaRequestEntity mediaRequestEntity) {
         mediaRequestEntity.setStatus(MediaRequestStatus.EXPIRED);
         anonymiseCreatedModifiedBaseEntity(userAccount, mediaRequestEntity);
+        mediaRequestRepository.save(mediaRequestEntity);
     }
 
     void registerDataAnonymisation(UserAccountEntity userAccount, EventEntity eventEntity, boolean isManualRequest) {

@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -128,6 +129,86 @@ class MediaEntityTest {
             .hasSize(1)
             .contains(hearing);
         verify(hearing, never()).addMedia(any());
+    }
+
+    @Test
+    void removeHearing_shouldRemoveBidirectionalLink() {
+        MediaEntity media = new MediaEntity();
+        media.setId(1L);
+
+        HearingEntity hearing = new HearingEntity();
+        hearing.setId(101);
+
+        // establish link on both sides
+        hearing.setMedias(new HashSet<>());
+        hearing.getMedias().add(media);
+
+        media.setHearings(new HashSet<>());
+        media.getHearings().add(hearing);
+
+        // sanity check
+        assertThat(hearing.getMedias()).contains(media);
+        assertThat(media.getHearings()).contains(hearing);
+
+        media.removeHearing(hearing);
+
+        assertThat(hearing.getMedias()).doesNotContain(media);
+        assertThat(media.getHearings()).doesNotContain(hearing);
+    }
+
+    @Test
+    void removeHearing_shouldBeIdempotent_whenLinkDoesNotExist() {
+        MediaEntity media = new MediaEntity();
+        media.setId(1L);
+
+        HearingEntity hearing = new HearingEntity();
+        hearing.setId(101);
+
+        hearing.setMedias(new HashSet<>());
+        media.setHearings(new HashSet<>());
+
+        media.removeHearing(hearing);
+
+        assertThat(hearing.getMedias()).isEmpty();
+        assertThat(media.getHearings()).isEmpty();
+    }
+
+    @Test
+    void removeHearing_shouldRemoveFromHearingSide_evenIfMediaSideWasNotLinked() {
+        MediaEntity media = new MediaEntity();
+        media.setId(1L);
+
+        HearingEntity hearing = new HearingEntity();
+        hearing.setId(101);
+
+        hearing.setMedias(new HashSet<>());
+        hearing.getMedias().add(media);
+
+        media.setHearings(new HashSet<>()); // no back-link
+
+        media.removeHearing(hearing);
+
+        assertThat(hearing.getMedias()).doesNotContain(media);
+        assertThat(media.getHearings()).isEmpty();
+    }
+
+    @Test
+    void removeHearing_shouldRemoveFromMediaSide_evenIfHearingSideWasNotLinked() {
+        MediaEntity media = new MediaEntity();
+        media.setId(1L);
+
+        HearingEntity hearing = new HearingEntity();
+        hearing.setId(101);
+
+        hearing.setMedias(new HashSet<>()); // no link
+
+        media.setHearings(new HashSet<>());
+        media.getHearings().add(hearing);
+
+        media.removeHearing(hearing);
+
+        assertThat(hearing.getMedias()).isEmpty();
+        assertThat(media.getHearings()).doesNotContain(hearing);
     }
 
 }
