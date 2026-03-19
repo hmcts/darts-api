@@ -311,8 +311,7 @@ public class ArmServiceImpl implements ArmService {
                 HttpStatus httpStatus = valueOf(statusCode);
                 String blobName = index < blobPathAndName.size() ? blobPathAndName.get(index) : "<unknown>";
                 index++;
-
-                // treat NOT_FOUND as success (idempotent delete)
+                
                 if (!(httpStatus.is2xxSuccessful() || NOT_FOUND.equals(httpStatus))) {
                     allSuccessful = false;
                     log.warn("Failed to delete blob in batch containerName={}, blobPathAndName={}, statusCode={}, httpStatus={}",
