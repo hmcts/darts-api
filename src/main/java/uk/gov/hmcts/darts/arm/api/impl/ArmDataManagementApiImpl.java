@@ -26,6 +26,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     private final ArmService armService;
@@ -86,6 +87,11 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     @Override
     public boolean deleteBlobData(String blobPathAndName) {
         return armService.deleteBlobData(armDataManagementConfiguration.getContainerName(), blobPathAndName);
+    }
+
+    @Override
+    public boolean deleteMultipleBlobs(List<String> blobPathAndNames) {
+        return armService.deleteMultipleBlobs(armDataManagementConfiguration.getContainerName(), blobPathAndNames);
     }
 
     @Override
