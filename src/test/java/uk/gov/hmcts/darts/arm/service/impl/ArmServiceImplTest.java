@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
-import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -63,7 +62,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testSaveBlobDataUsingFilename() {
+    void saveBlobData_shouldSaveBlobUsingFilename() {
         var foldersConfig = new ArmDataManagementConfiguration.Folders();
         foldersConfig.setSubmission(TEST_BINARY_STRING);
         when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
@@ -77,7 +76,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testSaveBlobDataUsingBlobPathAndFilename() {
+    void saveBlobData_shouldSaveBlobUsingBlobPathAndFilename() {
         String blobPathAndFilename = TEST_DROP_ZONE + BLOB_FILENAME;
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
@@ -87,7 +86,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testListSubmissionBlobs() {
+    void listSubmissionBlobs_shouldListSubmissionBlobs() {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
         when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
@@ -104,7 +103,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testListResponseBlobs() {
+    void listResponseBlobs_shouldListResponseBlobs() {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
         when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
@@ -121,7 +120,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testGetBlobData() {
+    void getBlobData_shouldReturnBlob() {
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
         when(blobClient.exists()).thenReturn(Boolean.TRUE);
@@ -146,7 +145,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testDeleteResponseBlobIsNotSuccessful() {
+    void deleteResponseBlob_shouldReturnIsNotSuccessful_when500Error() {
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
 
@@ -160,7 +159,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testListSubmissionBlobsUsingBatch() {
+    void listSubmissionBlobsUsingBatch_shouldListSubmissionBlobsUsingBatch() {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
         when(blobContainerClient.listBlobs(any(), any())).thenReturn(pagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
@@ -178,7 +177,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testListResponseBlobsUsingBatch() {
+    void listResponseBlobsUsingBatch_shouldListResponseBlobsUsingBatch() {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
         when(blobContainerClient.listBlobs(any(), any())).thenReturn(pagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
@@ -296,7 +295,7 @@ class ArmServiceImplTest {
 
         BlobBatchClient batchClient = mock(BlobBatchClient.class);
         when(batchClient.deleteBlobs(anyList(), eq(DeleteSnapshotsOptionType.INCLUDE), any(Duration.class), eq(null)))
-            .thenThrow(new AzureDeleteBlobException("Azure error"));
+            .thenThrow(new RuntimeException("Azure error"));
 
         try (var ignored = mockConstruction(BlobBatchClientBuilder.class,
                                             (builder, context) -> when(builder.buildClient()).thenReturn(batchClient))) {
