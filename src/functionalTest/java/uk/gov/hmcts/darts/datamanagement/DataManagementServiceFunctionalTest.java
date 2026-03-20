@@ -43,14 +43,14 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
     private static final String TEST_BLOB_ID = "b0f23c62-8dd3-4e4e-ae6a-321ff6eb61d8";
 
     @Value("${darts.storage.blob.container-name.unstructured}")
-    String unstructuredStorageContainerName;
+    private String unstructuredStorageContainerName;
 
     @Autowired
-    DataManagementService dataManagementService;
+    private DataManagementService dataManagementService;
     @Autowired
-    DataManagementConfiguration dataManagementConfiguration;
+    private DataManagementConfiguration dataManagementConfiguration;
     @Autowired
-    ArmDataManagementConfiguration armDataManagementConfiguration;
+    private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Test
     void saveBinaryDataToBlobStorage() {
