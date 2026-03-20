@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -122,7 +122,7 @@ class DeleteArmResponseFilesHelperImplTest {
     }
 
     @Test
-    void deleteResponseBlobs_Individually_shouldUpdateEodWhenResponsesAreDeleted() {
+    void deleteResponseBlobs_shouldUpdateEodWhenResponsesAreDeleted() {
         // given
         ArmResponseBatchData batchData = mock(ArmResponseBatchData.class);
         when(batchData.getExternalObjectDirectoryId()).thenReturn(1L);
@@ -130,7 +130,7 @@ class DeleteArmResponseFilesHelperImplTest {
 
         eod.setStatus(EodHelper.armResponseChecksumVerificationFailedStatus());
 
-        when(armDataManagementApi.deleteBlobData(anyString())).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(anyList())).thenReturn(true);
         when(batchData.getCreateRecordFilenameProcessor()).thenReturn(createRecordFilenameProcessor);
         when(batchData.getUploadFileFilenameProcessor()).thenReturn(uploadFileFilenameProcessor);
         when(batchData.getInvalidLineFileFilenameProcessors()).thenReturn(Collections.emptyList());
