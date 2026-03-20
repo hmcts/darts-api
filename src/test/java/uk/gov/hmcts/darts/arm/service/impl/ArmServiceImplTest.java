@@ -5,6 +5,9 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.batch.BlobBatchClient;
+import com.azure.storage.blob.batch.BlobBatchClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -26,7 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -191,7 +198,7 @@ class ArmServiceImplTest {
     @Test
     void listSubmissionBlobsWithMarker_ShouldSucceed() {
 
-        PagedIterable mockPagedIterable = mock(PagedIterable.class);
+        PagedIterable<BlobItem> mockPagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
 
         when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(mockPagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
@@ -210,7 +217,7 @@ class ArmServiceImplTest {
 
     @Test
     void listResponseBlobsWithMarker_ShouldReturnToken() {
-        PagedIterable mockPagedTableEntities = mock(PagedIterable.class);
+        PagedIterable<BlobItem> mockPagedTableEntities = (PagedIterable<BlobItem>) mock(PagedIterable.class);
         when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(mockPagedTableEntities);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
 
@@ -225,4 +232,78 @@ class ArmServiceImplTest {
             ARM_BLOB_CONTAINER_NAME, prefix, 10, null);
         assertNotNull(continuationTokenBlobs);
     }
+
+    @Test
+    void deleteMultipleBlobs_shouldReturnFalseAndNotCallAzure_whenNoBlobsProvided() {
+        assertFalse(armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, null));
+        assertFalse(armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, List.of()));
+    }
+
+    @Test
+    void deleteMultipleBlobs_shouldReturnTrue_whenAllDeletesSucceed() {
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
+        when(blobContainerClient.getServiceClient()).thenReturn(blobServiceClient);
+
+
+        PagedIterable<Response<Void>> pagedResponses = (PagedIterable<Response<Void>>) mock(PagedIterable.class);
+        Response<Void> r1 = (Response<Void>) mock(Response.class);
+        Response<Void> r2 = (Response<Void>) mock(Response.class);
+        when(r1.getStatusCode()).thenReturn(202);
+        when(r2.getStatusCode()).thenReturn(404);
+        when(pagedResponses.iterator()).thenReturn(List.of(r1, r2).iterator());
+
+        BlobBatchClient batchClient = mock(BlobBatchClient.class);
+        when(batchClient.deleteBlobs(anyList(), eq(DeleteSnapshotsOptionType.INCLUDE), any(Duration.class), eq(null)))
+            .thenReturn(pagedResponses);
+
+        try (var ignored = mockConstruction(BlobBatchClientBuilder.class,
+                                            (builder, context) -> when(builder.buildClient()).thenReturn(batchClient))) {
+            boolean result = armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
+            assertTrue(result);
+        }
+    }
+
+    @Test
+    void deleteMultipleBlobs_shouldReturnFalse_whenAnyDeleteFails() {
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
+        when(blobContainerClient.getServiceClient()).thenReturn(blobServiceClient);
+
+        PagedIterable<Response<Void>> pagedResponses = (PagedIterable<Response<Void>>) mock(PagedIterable.class);
+        Response<Void> r1 = (Response<Void>) mock(Response.class);
+        Response<Void> r2 = (Response<Void>) mock(Response.class);
+        when(r1.getStatusCode()).thenReturn(202);
+        when(r2.getStatusCode()).thenReturn(500);
+        when(pagedResponses.iterator()).thenReturn(List.of(r1, r2).iterator());
+
+        BlobBatchClient batchClient = mock(BlobBatchClient.class);
+        when(batchClient.deleteBlobs(anyList(), eq(DeleteSnapshotsOptionType.INCLUDE), any(Duration.class), eq(null)))
+            .thenReturn(pagedResponses);
+
+        try (var ignored = mockConstruction(BlobBatchClientBuilder.class,
+                                            (builder, context) -> when(builder.buildClient()).thenReturn(batchClient))) {
+            boolean result = armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
+            assertFalse(result);
+        }
+    }
+
+    @Test
+    void deleteMultipleBlobs_shouldReturnFalse_whenAzureThrowsException() {
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
+        when(blobContainerClient.getServiceClient()).thenReturn(blobServiceClient);
+
+        BlobBatchClient batchClient = mock(BlobBatchClient.class);
+        when(batchClient.deleteBlobs(anyList(), eq(DeleteSnapshotsOptionType.INCLUDE), any(Duration.class), eq(null)))
+            .thenThrow(new AzureDeleteBlobException("Azure error"));
+
+        try (var ignored = mockConstruction(BlobBatchClientBuilder.class,
+                                            (builder, context) -> when(builder.buildClient()).thenReturn(batchClient))) {
+            boolean result = armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
+            assertFalse(result);
+        }
+    }
+
+
 }

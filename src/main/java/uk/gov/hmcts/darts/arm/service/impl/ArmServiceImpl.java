@@ -287,7 +287,7 @@ public class ArmServiceImpl implements ArmService {
     public boolean deleteMultipleBlobs(String containerName, List<String> blobPathAndName) {
         if (blobPathAndName == null || blobPathAndName.isEmpty()) {
             log.info("No blobs provided to delete for containerName={}", containerName);
-            return true;
+            return false;
         }
 
         try {
@@ -311,7 +311,7 @@ public class ArmServiceImpl implements ArmService {
                 HttpStatus httpStatus = valueOf(statusCode);
                 String blobName = index < blobPathAndName.size() ? blobPathAndName.get(index) : "<unknown>";
                 index++;
-                
+
                 if (!(httpStatus.is2xxSuccessful() || NOT_FOUND.equals(httpStatus))) {
                     allSuccessful = false;
                     log.warn("Failed to delete blob in batch containerName={}, blobPathAndName={}, statusCode={}, httpStatus={}",
