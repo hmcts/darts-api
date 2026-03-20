@@ -68,7 +68,7 @@ class DeleteArmResponseFilesHelperImplTest {
     }
 
     @Test
-    void deleteResponseBlobsByManifestName_shouldDeleteBlobsWhenAllResponsesAreCompletedAndCleaned() {
+    void deleteResponseBlobsByManifestName_shouldDeleteBlobsIndividuallyWhenAllResponsesAreCompletedAndCleaned() {
         // given
         String manifestName = "DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360";
         eod.setStatus(EodHelper.armRpoPendingStatus());
@@ -108,21 +108,21 @@ class DeleteArmResponseFilesHelperImplTest {
     }
 
     @Test
-    void deleteResponseBlobs_shouldDeleteAllResponseBlobs() {
+    void deleteResponseBlobs_shouldDeleteAllResponseBlobsIndividually() {
         // given
         List<String> responseBlobs = List.of("blob1", "blob2");
         when(armDataManagementApi.deleteBlobData("blob1")).thenReturn(true);
         when(armDataManagementApi.deleteBlobData("blob2")).thenReturn(true);
 
         // when
-        List<Boolean> result = deleteArmResponseFilesHelper.deleteResponseBlobs(responseBlobs);
+        List<Boolean> result = deleteArmResponseFilesHelper.deleteResponseBlobsIndividually(responseBlobs);
 
         // then
         assertTrue(result.stream().allMatch(Boolean::booleanValue));
     }
 
     @Test
-    void deleteResponseBlobs_shouldUpdateEodWhenResponsesAreDeleted() {
+    void deleteResponseBlobs_Individually_shouldUpdateEodWhenResponsesAreDeleted() {
         // given
         ArmResponseBatchData batchData = mock(ArmResponseBatchData.class);
         when(batchData.getExternalObjectDirectoryId()).thenReturn(1L);

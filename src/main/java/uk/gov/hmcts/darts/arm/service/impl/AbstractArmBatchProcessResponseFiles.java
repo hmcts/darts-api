@@ -575,7 +575,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             return objectMapper.readValue(createRecordBinary.toString(), ArmResponseCreateRecord.class);
         } catch (Exception e) {
             log.error("Unable to read ARM response create record file {} - About to delete ", createRecordFilenameAndPath, e);
-            deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(createRecordFilenameAndPath));
+            deleteArmResponseFilesHelper.deleteResponseBlobsIndividually(List.of(createRecordFilenameAndPath));
             throw e;
         }
     }
@@ -628,7 +628,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             return objectMapper.readValue(uploadFileBinary.toString(), ArmResponseUploadFileRecord.class);
         } catch (Exception e) {
             log.error("Unable to read ARM response upload file {} - About to delete ", uploadFileFilenameAndPath, e);
-            deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(uploadFileFilenameAndPath));
+            deleteArmResponseFilesHelper.deleteResponseBlobsIndividually(List.of(uploadFileFilenameAndPath));
             throw e;
         }
     }
@@ -759,7 +759,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             } catch (IllegalArgumentException e) {
                 // This occurs when the filename is not parsable
                 log.error("Invalid ARM response filename: {} for manifest {}", responseFile, manifestName);
-                deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(responseFile));
+                deleteArmResponseFilesHelper.deleteResponseBlobsIndividually(List.of(responseFile));
             }
         }
         return responseFilenames;
@@ -798,7 +798,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 } else {
                     log.warn("Failed to obtain EOD id (relation id) from invalid line record {} from file {}", input,
                              invalidLineFileFilenameProcessor.getInvalidLineFilename());
-                    deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(invalidLineFileFilenameAndPath));
+                    deleteArmResponseFilesHelper.deleteResponseBlobsIndividually(List.of(invalidLineFileFilenameAndPath));
                 }
 
             } catch (Exception e) {
@@ -815,7 +815,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             return objectMapper.readValue(invalidLineFileBinary.toString(), ArmResponseInvalidLineRecord.class);
         } catch (Exception e) {
             log.error("Unable to read ARM response {} - About to delete ", invalidLineFileFilenameAndPath, e);
-            deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(invalidLineFileFilenameAndPath));
+            deleteArmResponseFilesHelper.deleteResponseBlobsIndividually(List.of(invalidLineFileFilenameAndPath));
             throw e;
         }
     }
@@ -852,7 +852,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                          invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath(),
                          armResponseFile);
                 List<String> invalidResponseFiles = getInvalidResponseFiles(invalidLineFileFilenameProcessor, armResponseFile);
-                deleteArmResponseFilesHelper.deleteResponseBlobs(invalidResponseFiles);
+                deleteArmResponseFilesHelper.deleteResponseBlobsIndividually(invalidResponseFiles);
             }
         } catch (Exception e) {
             log.error("Unable to update invalid line responses", e);

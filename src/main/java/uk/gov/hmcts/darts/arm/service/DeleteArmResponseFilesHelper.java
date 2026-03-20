@@ -11,10 +11,12 @@ public interface DeleteArmResponseFilesHelper {
 
     void deleteDanglingResponses(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor);
 
-    List<Boolean> deleteResponseBlobs(List<String> responseBlobsToBeDeleted);
+    List<Boolean> deleteResponseBlobsIndividually(List<String> responseBlobsToBeDeleted);
+
+    Boolean deleteResponseBlobs(List<String> responseBlobsToBeDeleted);
 
     void deleteResponseBlobs(ArmResponseBatchData armResponseBatchData);
 
     List<String> getResponseBlobsToBeDeleted(ArmResponseBatchData armResponseBatchData);
-    
+
 }
