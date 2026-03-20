@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
-import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
@@ -44,9 +43,6 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
 
     @MockitoBean
     private UserIdentity userIdentity;
-
-    @Autowired
-    private ExternalObjectDirectoryService externalObjectDirectoryService;
 
     @Autowired
     private DeleteArmResponseFilesHelperImpl deleteArmResponseFilesHelper;
