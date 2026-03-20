@@ -131,7 +131,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testDeleteResponseBlobIsSuccessful() {
+    void deleteResponseBlob_shouldReturnIsSuccessful() {
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
 
@@ -303,6 +303,5 @@ class ArmServiceImplTest {
             assertFalse(result);
         }
     }
-
 
 }
