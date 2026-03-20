@@ -74,7 +74,7 @@ class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesHelper {
         }
 
         if (CollectionUtils.isNotEmpty(responseFiles)) {
-            List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobs(responseFiles);
+            List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobsIndividually(responseFiles);
 
             if (deletedResponseBlobStatuses.contains(false)) {
                 log.warn("Unable to delete dangling ARM batch input upload file {} as referenced data is not all deleted",
@@ -90,14 +90,18 @@ class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesHelper {
     }
 
     @Override
-    public List<Boolean> deleteResponseBlobs(List<String> responseBlobsToBeDeleted) {
+    public List<Boolean> deleteResponseBlobsIndividually(List<String> responseBlobsToBeDeleted) {
         return responseBlobsToBeDeleted.stream()
             .map(armDataManagementApi::deleteBlobData)
             .toList();
     }
 
     @Override
-    @SuppressWarnings("PMD.CyclomaticComplexity")
+    public Boolean deleteResponseBlobs(List<String> responseBlobsToBeDeleted) {
+        return armDataManagementApi.deleteMultipleBlobs(responseBlobsToBeDeleted);
+    }
+
+    @Override
     public void deleteResponseBlobs(ArmResponseBatchData armResponseBatchData) {
         List<String> responseBlobsToBeDeleted = getResponseBlobsToBeDeleted(armResponseBatchData);
         ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectory(armResponseBatchData.getExternalObjectDirectoryId());
@@ -109,9 +113,9 @@ class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesHelper {
                 || ARM_RESPONSE_MANIFEST_FAILED.equals(status)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
                 log.info("About to  delete ARM responses for EOD {}", externalObjectDirectory.getId());
-                List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobs(responseBlobsToBeDeleted);
+                boolean deletedResponseBlobStatuses = deleteResponseBlobs(responseBlobsToBeDeleted);
 
-                if (deletedResponseBlobStatuses.size() == 2 && !deletedResponseBlobStatuses.contains(false)) {
+                if (deletedResponseBlobStatuses) {
                     externalObjectDirectory.setResponseCleaned(true);
                     externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
                 } else {
