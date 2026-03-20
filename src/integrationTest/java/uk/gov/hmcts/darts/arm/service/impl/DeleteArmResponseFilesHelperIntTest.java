@@ -66,7 +66,7 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void deleteResponseBlobsByManifestName_shouldDeleteBlobsWhenAllResponsesAreCompletedAndCleaned() {
+    void deleteResponseBlobsByManifestName_shouldDeleteBlobsIndividuallyWhenAllResponsesAreCompletedAndCleaned() {
         // given
         String manifestName = MANIFEST_PREFIX + ".a360";
         eodRpoPending.setManifestFile(manifestName);
@@ -107,13 +107,13 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void deleteResponseBlobs_shouldDeleteAllResponseBlobs() {
+    void deleteResponseBlobsIndividually_shouldDeleteAllResponseBlobsIndividually() {
         // given
         List<String> responseBlobs = List.of("blob1", "blob2");
         when(armDataManagementApi.deleteBlobData(anyString())).thenReturn(true);
 
         // when
-        List<Boolean> result = deleteArmResponseFilesHelper.deleteResponseBlobs(responseBlobs);
+        List<Boolean> result = deleteArmResponseFilesHelper.deleteResponseBlobsIndividually(responseBlobs);
 
         // then
         assertTrue(result.stream().allMatch(Boolean::booleanValue));
@@ -134,14 +134,13 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
             .uploadFileFilenameProcessor(new UploadFileFilenameProcessor(uploadFileFilename1))
             .build();
 
-        when(armDataManagementApi.deleteBlobData(anyString())).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(any())).thenReturn(true);
 
         // when
         deleteArmResponseFilesHelper.deleteResponseBlobs(batchData);
 
         // then
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
         verifyNoMoreInteractions(armDataManagementApi);
     }
 

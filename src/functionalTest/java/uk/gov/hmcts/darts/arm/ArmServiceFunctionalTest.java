@@ -184,7 +184,7 @@ class ArmServiceFunctionalTest extends FunctionalTest {
         assertNotNull(actualResult1);
         log.info("Blob filename1: {}", actualResult1);
 
-        String filename2 = String.format("%s_functional_test", UUID.randomUUID());
+        String filename2 = String.format("%s_functional_test2", UUID.randomUUID());
         String actualResult2 = armService.saveBlobData(armContainerName, filename2, data);
         armSubmissionBlobsToBeDeleted.add(actualResult2);
         assertNotNull(actualResult2);

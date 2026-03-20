@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.FunctionalTest;
-import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
@@ -49,8 +48,6 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
     private DataManagementService dataManagementService;
     @Autowired
     private DataManagementConfiguration dataManagementConfiguration;
-    @Autowired
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Test
     void saveBinaryDataToBlobStorage() {
