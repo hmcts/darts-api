@@ -45,7 +45,6 @@ class DeleteArmResponseFilesHelperImplTest {
 
     private ExternalObjectDirectoryEntity eod;
 
-
     private DeleteArmResponseFilesHelperImpl deleteArmResponseFilesHelper;
 
     @BeforeEach
@@ -95,7 +94,7 @@ class DeleteArmResponseFilesHelperImplTest {
         BatchInputUploadFileFilenameProcessor processor = mock(BatchInputUploadFileFilenameProcessor.class);
         when(processor.getHashcode()).thenReturn("testHashcode");
         when(armDataManagementApi.listResponseBlobs("testHashcode")).thenReturn(List.of("responseBlob"));
-        when(armDataManagementApi.deleteBlobData("responseBlob")).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of("responseBlob"))).thenReturn(true);
         when(processor.getBatchMetadataFilename()).thenReturn("testFile");
         when(processor.getBatchMetadataFilenameAndPath()).thenReturn("testFilePath");
 
@@ -103,22 +102,20 @@ class DeleteArmResponseFilesHelperImplTest {
         deleteArmResponseFilesHelper.deleteDanglingResponses(processor);
 
         // then
-        verify(armDataManagementApi).deleteBlobData("responseBlob");
-        verify(armDataManagementApi).deleteBlobData("testFilePath");
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of("responseBlob"));
     }
 
     @Test
-    void deleteResponseBlobs_shouldDeleteAllResponseBlobsIndividually() {
+    void deleteResponseBlob_shouldDeletResponseBlob() {
         // given
-        List<String> responseBlobs = List.of("blob1", "blob2");
+        String responseBlob = "blob1";
         when(armDataManagementApi.deleteBlobData("blob1")).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData("blob2")).thenReturn(true);
 
         // when
-        List<Boolean> result = deleteArmResponseFilesHelper.deleteResponseBlobsIndividually(responseBlobs);
+        Boolean result = deleteArmResponseFilesHelper.deleteResponseBlobIndividually(responseBlob);
 
         // then
-        assertTrue(result.stream().allMatch(Boolean::booleanValue));
+        assertTrue(result);
     }
 
     @Test

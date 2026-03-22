@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.util.List;
@@ -34,9 +33,6 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
         "dropzone/DARTS/response/DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_iu.rsp";
     private static final String MANIFEST_PREFIX = "DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb";
     private static final String RESPONSE_FILE_PREFIX = "04e6bc3b-952a-79b6-8362-13259aae1895";
-
-    @Autowired
-    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     @MockitoBean
     private ArmDataManagementApi armDataManagementApi;
@@ -88,33 +84,36 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
     void deleteDanglingResponses_shouldDeleteDanglingResponses() {
         // given
         BatchInputUploadFileFilenameProcessor batchInputUploadFileFilenameProcessor = new BatchInputUploadFileFilenameProcessor(DARTS_INPUT_UPLOAD_FILE);
-        String responseFile = "dropzone/DARTS/response/" + RESPONSE_FILE_PREFIX + "_ABC_1_rsp";
-        when(armDataManagementApi.listResponseBlobs(any())).thenReturn(List.of(responseFile));
+        String otherResponseFile = "dropzone/DARTS/response/" + RESPONSE_FILE_PREFIX + "_ABC_1_rsp";
+        String crResponseFile = "dropzone/DARTS/response/" + RESPONSE_FILE_PREFIX + "_b17b9015-e6ad-77c5-8d1e-13259aae1896_0_cr.rsp";
+        String ilResponseFile = "dropzone/DARTS/response/" + RESPONSE_FILE_PREFIX + "_c17b9015-e6ad-77c5-8d1e-13259aae1896_1_il.rsp";
+
+        when(armDataManagementApi.listResponseBlobs(any())).thenReturn(List.of(otherResponseFile, crResponseFile, ilResponseFile));
+        when(armDataManagementApi.deleteMultipleBlobs(any())).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(anyString())).thenReturn(true);
 
         // when
         deleteArmResponseFilesHelper.deleteDanglingResponses(batchInputUploadFileFilenameProcessor);
 
         // then
-        verify(armDataManagementApi).deleteBlobData(responseFile);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(otherResponseFile, crResponseFile, ilResponseFile));
         verify(armDataManagementApi).deleteBlobData(DARTS_INPUT_UPLOAD_FILE);
         verify(armDataManagementApi).listResponseBlobs(batchInputUploadFileFilenameProcessor.getHashcode());
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
-    void deleteResponseBlobsIndividually_shouldDeleteAllResponseBlobsIndividually() {
+    void deleteResponseBlobsIndividually_shouldDeleteAllResponseBlobIndividually() {
         // given
-        List<String> responseBlobs = List.of("blob1", "blob2");
+        String responseBlob = "blob1";
         when(armDataManagementApi.deleteBlobData(anyString())).thenReturn(true);
 
         // when
-        List<Boolean> result = deleteArmResponseFilesHelper.deleteResponseBlobsIndividually(responseBlobs);
+        Boolean result = deleteArmResponseFilesHelper.deleteResponseBlobIndividually(responseBlob);
 
         // then
-        assertTrue(result.stream().allMatch(Boolean::booleanValue));
+        assertTrue(result);
         verify(armDataManagementApi).deleteBlobData("blob1");
-        verify(armDataManagementApi).deleteBlobData("blob2");
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
