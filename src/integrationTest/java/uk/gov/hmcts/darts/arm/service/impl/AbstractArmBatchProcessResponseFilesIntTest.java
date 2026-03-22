@@ -240,12 +240,12 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         String uploadFileFilename3 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1897_1_uf.rsp", hashcode1);
         String invalidLineFileFilename3 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1897_0_il.rsp", hashcode1);
         String invalidLineFileFilename4 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1892_0_il.rsp", hashcode1);
-        String invalidLineFileFilename5 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1893_0_il.rsp", hashcode1);
+        String invalidLineFileFilename4b = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1893_0_il.rsp", hashcode1);
 
         List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
                                                  createRecordFilename2, invalidLineFileFilename2,
                                                  uploadFileFilename3, invalidLineFileFilename3,
-                                                 invalidLineFileFilename4, invalidLineFileFilename5);
+                                                 invalidLineFileFilename4, invalidLineFileFilename4b);
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
 
@@ -256,7 +256,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         String validUploadFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
         String invalidLineFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
         String invalidLineFileTest4 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
-        String invalidLineFileTest5 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile2.rsp";
+        String invalidLineFileTest4b = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile2.rsp";
 
         BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, armEod1.getId()));
         BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(getUploadFileContents(validUploadFileTest1, armEod1.getId(), media1.getChecksum()));
@@ -265,7 +265,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         BinaryData uploadFileBinaryDataTest3 = convertStringToBinaryData(getUploadFileContents(validUploadFileTest3, armEod3.getId(), media3.getChecksum()));
         BinaryData invalidLineFileBinaryDataTest3 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest3, armEod3.getId()));
         BinaryData invalidLineFileBinaryDataTest4 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest4, armEod4.getId()));
-        BinaryData invalidLineFileBinaryDataTest5 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest5, armEod4.getId()));
+        BinaryData invalidLineFileBinaryDataTest4b = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest4b, armEod4.getId()));
 
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
@@ -274,16 +274,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenReturn(uploadFileBinaryDataTest3);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename4)).thenReturn(invalidLineFileBinaryDataTest4);
-        when(armDataManagementApi.getBlobData(invalidLineFileFilename5)).thenReturn(invalidLineFileBinaryDataTest5);
-
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename3)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename4)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename5)).thenReturn(true);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename4b)).thenReturn(invalidLineFileBinaryDataTest4b);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
 
@@ -294,7 +285,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenReturn(uploadFileBinaryDataTest3);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename4)).thenReturn(invalidLineFileBinaryDataTest4);
-        when(armDataManagementApi.getBlobData(invalidLineFileFilename5)).thenReturn(invalidLineFileBinaryDataTest5);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename4b)).thenReturn(invalidLineFileBinaryDataTest4b);
 
         String hashcode2 = "7a374f19a9ce7dc9cc480ea8d4eca0fc";
         String createRecordFilename5 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1890_1_cr.rsp", hashcode2);
@@ -304,17 +295,10 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         BinaryData createRecordBinaryDataTest5 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest5, armEod5.getId()));
         when(armDataManagementApi.getBlobData(createRecordFilename5)).thenReturn(createRecordBinaryDataTest5);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename3)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(blobNameAndPath1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename4)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename5)).thenReturn(true);
-
-        when(armDataManagementApi.deleteBlobData(createRecordFilename5)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename2, invalidLineFileFilename2))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(uploadFileFilename3, invalidLineFileFilename3))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(invalidLineFileFilename4, invalidLineFileFilename4b))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
 
@@ -395,22 +379,16 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename2);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename3);
 
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename2);
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
-
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
-
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename3);
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename3);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename2, invalidLineFileFilename2));
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(uploadFileFilename3, invalidLineFileFilename3));
 
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
 
         verify(armDataManagementApi).listResponseBlobs(hashcode2);
         verify(armDataManagementApi).getBlobData(createRecordFilename5);
 
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename4);
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename5);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(invalidLineFileFilename4, invalidLineFileFilename4b));
 
         verify(armDataManagementApi, never()).deleteBlobData(blobNameAndPath2);
     }
@@ -464,8 +442,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename2)).thenReturn(invalidLineFileBinaryDataTest2);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, invalidLineFileFilename2))).thenReturn(true);
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -488,8 +465,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename2);
         verify(armDataManagementApi).getBlobData(blobNameAndPath1);
 
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, invalidLineFileFilename2));
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
 
         verifyNoMoreInteractions(armDataManagementApi);
@@ -558,8 +534,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -582,8 +557,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(uploadFileFilename1);
         verify(armDataManagementApi).getBlobData(blobNameAndPath1);
 
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
 
         verifyNoMoreInteractions(armDataManagementApi);
@@ -642,8 +616,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -664,8 +637,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         verify(armDataManagementApi).getBlobData(blobNameAndPath1);
 
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
 
         verifyNoMoreInteractions(armDataManagementApi);
@@ -725,17 +697,11 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(invalidLineFileFilename2)).thenReturn(invalidLineFileBinaryDataTest2);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
 
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(invalidLineFileFilename1, invalidLineFileFilename2, invalidLineFileFilename3))).thenReturn(true);
 
         when(armDataManagementApi.getBlobData(invalidLineFileFilename1)).thenReturn(invalidLineFileBinaryDataTest1);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename2)).thenReturn(invalidLineFileBinaryDataTest2);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
-
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
 
         // when
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE, asyncTaskConfig);
@@ -757,9 +723,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename2);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename3);
 
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename1);
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename3);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(invalidLineFileFilename1, invalidLineFileFilename2, invalidLineFileFilename3));
 
         verify(armDataManagementApi).getBlobData(blobNameAndPath1);
 
@@ -879,12 +843,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         BinaryData createRecordBinaryDataTest5 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest5, armEod5.getId()));
         when(armDataManagementApi.getBlobData(createRecordFilename5)).thenReturn(createRecordBinaryDataTest5);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename3)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename2, invalidLineFileFilename2))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(uploadFileFilename3, invalidLineFileFilename3))).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(blobNameAndPath1)).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
@@ -948,14 +909,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename2);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename3);
 
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename2);
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
-
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
-
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename3);
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename3);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename2, invalidLineFileFilename2));
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(uploadFileFilename3, invalidLineFileFilename3));
 
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
 
@@ -1077,12 +1033,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         BinaryData createRecordBinaryDataTest4 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest4, armEod4.getId()));
         when(armDataManagementApi.getBlobData(createRecordFilename4)).thenReturn(createRecordBinaryDataTest4);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename3)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename2, invalidLineFileFilename2))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(uploadFileFilename3, invalidLineFileFilename3))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
 
@@ -1265,12 +1218,9 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         BinaryData createRecordBinaryDataTest4 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest4, armEod4.getId()));
         when(armDataManagementApi.getBlobData(createRecordFilename4)).thenReturn(createRecordBinaryDataTest4);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename3)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename2, invalidLineFileFilename2))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(uploadFileFilename3, invalidLineFileFilename3))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
 
@@ -1392,10 +1342,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename2)).thenReturn(createRecordBinaryDataTest2);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename2)).thenReturn(invalidLineFileBinaryDataTest2);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename2, invalidLineFileFilename2))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime);
 
@@ -1497,8 +1445,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(transcriptionEntity.getEndTime());
 
@@ -1568,8 +1515,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(annotationDocument.getUploadedDateTime());
 
@@ -1590,9 +1536,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
         verify(armDataManagementApi).getBlobData(uploadFileFilename1);
 
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
-
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
 
@@ -1664,8 +1608,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
@@ -1686,8 +1629,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
         verify(armDataManagementApi).getBlobData(uploadFileFilename1);
 
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
 
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
@@ -1767,8 +1709,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenReturn(uploadFileBinaryDataTest3);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
@@ -1845,8 +1786,15 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenReturn(uploadFileBinaryDataTest3);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename2, invalidLineFileFilename2))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(uploadFileFilename3, invalidLineFileFilename3))).thenReturn(true);
+
+        // When no EOD exists for a response file, the code treats it as a dangling response and deletes it individually.
+        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename3)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
@@ -1869,7 +1817,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         verify(armDataManagementApi).deleteBlobData(createRecordFilename2);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
-
         verify(armDataManagementApi).deleteBlobData(uploadFileFilename3);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename3);
 
@@ -1930,8 +1877,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename2)).thenReturn(createRecordBinaryDataTest2);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename2)).thenReturn(invalidLineFileBinaryDataTest2);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename2, invalidLineFileFilename2))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
@@ -1999,8 +1945,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename2)).thenReturn(createRecordBinaryDataTest2);
         when(armDataManagementApi.getBlobData(uploadFileFileFilename2)).thenReturn(uploadFileBinaryDataTest2);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFileFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename2, uploadFileFileFilename2))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
@@ -2158,8 +2103,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(transcriptionEntity.getEndTime());
 
@@ -2229,8 +2173,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(annotationDocument.getUploadedDateTime());
 
@@ -2293,8 +2236,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(blobNameAndPath1)).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(annotationDocument.getUploadedDateTime());
@@ -2312,8 +2254,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
         verify(armDataManagementApi).getBlobData(uploadFileFilename1);
 
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
 
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
@@ -2434,8 +2375,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
-        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(transcriptionEntity.getEndTime());
 
@@ -2456,8 +2396,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
         verify(armDataManagementApi).getBlobData(uploadFileFilename1);
 
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
 
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
