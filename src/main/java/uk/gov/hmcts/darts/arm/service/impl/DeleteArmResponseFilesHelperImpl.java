@@ -74,14 +74,14 @@ class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesHelper {
         }
 
         if (CollectionUtils.isNotEmpty(responseFiles)) {
-            List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobsIndividually(responseFiles);
+            boolean deletedResponseBlobStatuses = deleteResponseBlobs(responseFiles);
 
-            if (deletedResponseBlobStatuses.contains(false)) {
-                log.warn("Unable to delete dangling ARM batch input upload file {} as referenced data is not all deleted",
-                         batchUploadFileFilenameProcessor.getBatchMetadataFilename());
-            } else {
+            if (deletedResponseBlobStatuses) {
                 log.info("About to delete dangling ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
                 armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
+            } else {
+                log.warn("Unable to delete dangling ARM batch input upload file {} as referenced data is not all deleted",
+                         batchUploadFileFilenameProcessor.getBatchMetadataFilename());
             }
         } else {
             log.info("Unable to delete dangling ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
@@ -90,10 +90,8 @@ class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesHelper {
     }
 
     @Override
-    public List<Boolean> deleteResponseBlobsIndividually(List<String> responseBlobsToBeDeleted) {
-        return responseBlobsToBeDeleted.stream()
-            .map(armDataManagementApi::deleteBlobData)
-            .toList();
+    public Boolean deleteResponseBlobIndividually(String responseBlobToBeDeleted) {
+        return armDataManagementApi.deleteBlobData(responseBlobToBeDeleted);
     }
 
     @Override

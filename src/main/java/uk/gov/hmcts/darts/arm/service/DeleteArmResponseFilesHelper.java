@@ -11,7 +11,7 @@ public interface DeleteArmResponseFilesHelper {
 
     void deleteDanglingResponses(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor);
 
-    List<Boolean> deleteResponseBlobsIndividually(List<String> responseBlobsToBeDeleted);
+    Boolean deleteResponseBlobIndividually(String responseBlobsToBeDeleted);
 
     Boolean deleteResponseBlobs(List<String> responseBlobsToBeDeleted);
 
