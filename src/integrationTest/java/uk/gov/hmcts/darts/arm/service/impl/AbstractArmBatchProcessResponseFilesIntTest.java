@@ -1791,10 +1791,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementApi.deleteMultipleBlobs(List.of(uploadFileFilename3, invalidLineFileFilename3))).thenReturn(true);
 
         // When no EOD exists for a response file, the code treats it as a dangling response and deletes it individually.
-        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileFilename3)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(invalidLineFileFilename2, createRecordFilename2))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of(invalidLineFileFilename3, uploadFileFilename3))).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
@@ -1815,10 +1813,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(uploadFileFilename3);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename3);
 
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename2);
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename3);
-        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename3);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(invalidLineFileFilename2, createRecordFilename2));
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(invalidLineFileFilename3, uploadFileFilename3));
 
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
