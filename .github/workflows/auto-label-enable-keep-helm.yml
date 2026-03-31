@@ -18,7 +18,7 @@ jobs:
     if: github.actor != 'renovate[bot]' # Add this condition to skip if the author is Renovate
     steps:
       - name: Add a specific label to all new PRs
-        uses: actions/github-script@v6 # Use github-script for direct API interaction
+        uses: actions/github-script@v8 # Use github-script for direct API interaction
         with:
           script: |
             const labelToAdd = 'enable_keep_helm';
