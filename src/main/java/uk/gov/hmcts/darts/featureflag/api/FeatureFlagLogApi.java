@@ -7,4 +7,6 @@ public interface FeatureFlagLogApi {
     void logDetsToArmPush(String logMessage);
 
     void logArmPull(String logMessage);
+
+    void logDetsCleanUp(String logMessage);
 }
