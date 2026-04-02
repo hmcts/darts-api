@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.arm.service.CleanUpDetsDataProcessor;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
+import uk.gov.hmcts.darts.featureflag.api.FeatureFlagLogApi;
 import uk.gov.hmcts.darts.task.config.CleanUpDetsDataAutomatedTaskConfig;
 import uk.gov.hmcts.darts.util.AsyncUtil;
 
@@ -54,8 +55,9 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
                 break;
             }
 
+            int itemsPerThread = config.getChunkSize() / config.getThreads();
             List<List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse>> batchesToDeleteBlobStoreRecordFor =
-                ListUtils.partition(eodIdsToCleanUp, config.getChunkSize() / config.getThreads());
+                ListUtils.partition(eodIdsToCleanUp, itemsPerThread);
 
             List<Callable<Void>> tasks = batchesToDeleteBlobStoreRecordFor
                 .stream()
@@ -92,6 +94,7 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
         private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
         private final ObjectStateRecordRepository objectStateRecordRepository;
         private final DetsApiService detsApiService;
+        private final FeatureFlagLogApi featureFlagLogApi;
 
         @Transactional(propagation = Propagation.REQUIRES_NEW)
         public void process(List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> eodsCleanedUp) {
@@ -104,9 +107,16 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
 
             for (CleanUpDetsProcedureResponse response : eodsCleanedUp) {
                 try {
-                    log.debug("Processing clean up response for EOD ID: {}, Location: {}", response.getOsrUuid(), response.getDetsLocation());
+                    String logMessage = String.format("Processing clean up response for EOD ID: %s, Location: %s",
+                                                      response.getOsrUuid(),
+                                                      response.getDetsLocation());
+                    featureFlagLogApi.logDetsCleanUp(logMessage);
                     if (detsApiService.deleteBlobDataFromContainer(response.getDetsLocation())) {
-                        log.debug("Successfully deleted DETS blob for EOD ID: {}, Location: {}", response.getOsrUuid(), response.getDetsLocation());
+                        featureFlagLogApi.logDetsCleanUp(logMessage);
+                        logMessage = String.format("Successfully deleted DETS blob for EOD ID: %s, Location: %s",
+                                                   response.getOsrUuid(),
+                                                   response.getDetsLocation());
+                        featureFlagLogApi.logDetsCleanUp(logMessage);
                         objectStateRecordsForDetsRecordsCleanedUpSuccessfully.add(response.getOsrUuid());
                         continue;
                     } else {

@@ -647,6 +647,7 @@ darts:
       arm-rpo-feature-flag-logs-enabled: ${ARM_RPO_FEATURE_FLAG_LOGS_ENABLED:false}
       dets-to-arm-push-feature-flag-logs-enabled: ${DETS_TO_ARM_PUSH_FEATURE_FLAG_LOGS_ENABLED:false}
       arm-pull-feature-flag-logs-enabled: ${ARM_PULL_FEATURE_FLAG_LOGS_ENABLED:false}
+      clean-up-dets-data-feature-flag-logs-enabled: ${CLEAN_UP_DETS_DATA_FEATURE_FLAG_LOGS_ENABLED:false}
 
 dbMigration:
   # When true, the app will run DB migration on startup.

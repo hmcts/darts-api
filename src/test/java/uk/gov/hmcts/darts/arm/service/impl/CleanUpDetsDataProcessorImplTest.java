@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
+import uk.gov.hmcts.darts.featureflag.api.FeatureFlagLogApi;
 import uk.gov.hmcts.darts.task.config.CleanUpDetsDataAutomatedTaskConfig;
 import uk.gov.hmcts.darts.testutils.AsyncTestUtil;
 
@@ -59,6 +60,8 @@ class CleanUpDetsDataProcessorImplTest {
 
     @Mock
     private DetsApiService detsApiService;
+    @Mock
+    private FeatureFlagLogApi featureFlagLogApi;
 
     @InjectMocks
     private CleanUpDetsDataProcessorImpl processor;
@@ -247,6 +250,9 @@ class CleanUpDetsDataProcessorImplTest {
     }
 
     private CleanUpDetsDataProcessorImpl.CleanUpDetsDataBatchProcessor createBatchProcessor() {
-        return new CleanUpDetsDataProcessorImpl.CleanUpDetsDataBatchProcessor(externalObjectDirectoryRepository, objectStateRecordRepository, detsApiService);
+        return new CleanUpDetsDataProcessorImpl.CleanUpDetsDataBatchProcessor(externalObjectDirectoryRepository,
+                                                                              objectStateRecordRepository,
+                                                                              detsApiService,
+                                                                              featureFlagLogApi);
     }
 }
