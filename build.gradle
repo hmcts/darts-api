@@ -485,8 +485,7 @@ dependencies {
   // https://mvnrepository.com/artifact/com.querydsl/querydsl-core
   implementation 'com.querydsl:querydsl-core:5.1.0'
   implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
-
-
+  
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.43.Final')
   annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
