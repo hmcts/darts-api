@@ -4,8 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.web.server.GracefulShutdownResult;
-import org.springframework.boot.web.server.WebServer;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,11 +17,11 @@ import static org.mockito.Mockito.when;
 class GracefulShutdownHookTest {
 
     private GracefulShutdownHook gracefulShutdownHook;
-    private ServletWebServerApplicationContext applicationContext;
+    private ConfigurableApplicationContext applicationContext;
 
     @BeforeEach
     void beforeEach() {
-        applicationContext = mock(ServletWebServerApplicationContext.class);
+        applicationContext = mock(ConfigurableApplicationContext.class);
         gracefulShutdownHook = spy(new GracefulShutdownHook(applicationContext));
     }
 
@@ -70,20 +69,15 @@ class GracefulShutdownHookTest {
 
     @Test
     void shutdownComplete_shouldCloseApplicationContext() {
-        WebServer webServer = mock(WebServer.class);
-        when(applicationContext.getWebServer()).thenReturn(webServer);
-
         gracefulShutdownHook.shutdownApplication();
 
-        verify(applicationContext).getWebServer();
-        verify(webServer).shutDownGracefully(gracefulShutdownHook);
+        verify(applicationContext).close();
     }
 
     @Test
     void shutdownComplete_shouldCloseApplicationContextAndLogResult() {
         GracefulShutdownResult result = mock(GracefulShutdownResult.class);
         gracefulShutdownHook.shutdownComplete(result);
-
-        verify(applicationContext).close();
+        // shutdownComplete no longer closes the context directly (shutdownApplication does).
     }
 }

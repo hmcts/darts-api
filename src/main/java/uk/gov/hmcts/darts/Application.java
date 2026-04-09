@@ -6,9 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
@@ -18,7 +15,10 @@ import java.util.TimeZone;
 
 import static java.time.ZoneOffset.UTC;
 
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class})
+@SpringBootApplication(excludeName = {
+    "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration",
+    "org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration"
+})
 @EnableTransactionManagement
 @Slf4j
 @RequiredArgsConstructor
@@ -42,7 +42,7 @@ public class Application implements CommandLineRunner {
 
         ConfigurableApplicationContext applicationContext = application.run(args);
 
-        Thread shutdownHookThread = new Thread(new GracefulShutdownHook((ServletWebServerApplicationContext) applicationContext));
+        Thread shutdownHookThread = new Thread(new GracefulShutdownHook(applicationContext));
         shutdownHookThread.setName("GracefulShutdownHook");
         Runtime.getRuntime().addShutdownHook(shutdownHookThread);
 

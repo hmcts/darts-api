@@ -106,7 +106,8 @@ public final class EntityIdPopulator {
                 MethodType.methodType(void.class, entity.getClass(), Integer.class)
             );
 
-            BiConsumer<T, Integer> setter = (BiConsumer<T, Integer>) setterSite.getTarget().invokeExact();
+            @SuppressWarnings("unchecked")
+            BiConsumer<T, Integer> setter = (BiConsumer<T, Integer>) (BiConsumer<?, ?>) setterSite.getTarget().invokeExact();
             setter.accept(entity, id);
         } catch (Throwable e) {
             throw new RuntimeException("Failed to set ID", e);
@@ -127,7 +128,8 @@ public final class EntityIdPopulator {
                 MethodType.methodType(void.class, entity.getClass(), Long.class)
             );
 
-            BiConsumer<T, Long> setter = (BiConsumer<T, Long>) setterSite.getTarget().invokeExact();
+            @SuppressWarnings("unchecked")
+            BiConsumer<T, Long> setter = (BiConsumer<T, Long>) (BiConsumer<?, ?>) setterSite.getTarget().invokeExact();
             setter.accept(entity, id);
         } catch (Throwable e) {
             throw new RuntimeException("Failed to set ID", e);

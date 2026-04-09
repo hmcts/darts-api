@@ -13,8 +13,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 
@@ -45,13 +46,13 @@ public class BankHolidayCacheConfig {
             .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer()));
     }
 
-    private static GenericJackson2JsonRedisSerializer redisSerializer() {
-        var serializer = new GenericJackson2JsonRedisSerializer();
-        serializer.configure(objectMapper -> {
-            objectMapper.registerModule(new JavaTimeModule());
-            objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        });
-        return serializer;
+    @SuppressWarnings("removal")
+    private static Jackson2JsonRedisSerializer<Object> redisSerializer() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        return new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
     }
 
 }

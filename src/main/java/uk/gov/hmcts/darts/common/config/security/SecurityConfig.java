@@ -89,7 +89,7 @@ public class SecurityConfig {
                 "/internal-user/refresh-access-token",
                 "/"
             )
-            .authorizeHttpRequests().anyRequest().permitAll();
+            .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
 
         return http.build();
     }
@@ -100,9 +100,8 @@ public class SecurityConfig {
         applyCommonConfig(http)
             .addFilterBefore(new AuthorisationTokenExistenceFilter(), OAuth2LoginAuthenticationFilter.class)
             .addFilterAfter(new InactiveUserAuthorisationCheck(mapper), OAuth2LoginAuthenticationFilter.class)
-            .authorizeHttpRequests().anyRequest().authenticated()
-            .and()
-            .oauth2ResourceServer().authenticationManagerResolver(jwtIssuerAuthenticationManagerResolver());
+            .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+            .oauth2ResourceServer(oauth2 -> oauth2.authenticationManagerResolver(jwtIssuerAuthenticationManagerResolver()));
 
         return http.build();
     }
@@ -110,11 +109,10 @@ public class SecurityConfig {
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private HttpSecurity applyCommonConfig(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .csrf().disable()
-            .formLogin().disable()
-            .logout().disable();
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(csrf -> csrf.disable())
+            .formLogin(form -> form.disable())
+            .logout(logout -> logout.disable());
     }
 
     private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() {

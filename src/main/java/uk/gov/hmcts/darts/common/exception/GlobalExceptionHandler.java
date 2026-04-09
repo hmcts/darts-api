@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.exception;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,7 +13,7 @@ import org.zalando.problem.spring.web.advice.ProblemHandling;
 
 
 @ControllerAdvice
-@EnableAutoConfiguration(exclude = ErrorMvcAutoConfiguration.class)
+@EnableAutoConfiguration
 public class GlobalExceptionHandler implements ProblemHandling, DartsApiTrait, ErrorResponseAdviceTrait {
 
     // Override the default HttpMessageNotReadableException as this reveals class names in the exception message (DMP-3682)

@@ -20,7 +20,10 @@ class ErrorResponseAdviceTraitTest implements ErrorResponseAdviceTrait {
     @Test
     void shouldProduceProblemResponseFromErrorResponseException() {
 
-        var exampleErrorResponseException = new NoResourceFoundException(HttpMethod.GET, "not-existing-resource");
+        var exampleErrorResponseException = new NoResourceFoundException(
+            HttpMethod.GET,
+            "not-existing-resource"
+        );
 
         var responseEntity = handleErrorResponseException(exampleErrorResponseException, exampleErrorResponseException, nativeRequest);
 

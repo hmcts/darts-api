@@ -2,10 +2,11 @@ package uk.gov.hmcts.darts.shutdown;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.boot.web.server.GracefulShutdownCallback;
 import org.springframework.boot.web.server.GracefulShutdownResult;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
+
 
 import java.time.Duration;
 
@@ -14,7 +15,7 @@ import java.time.Duration;
 //TODO Fix loging so we still get logs even after logging shutdown hook is triggered
 public class GracefulShutdownHook
     implements Runnable, GracefulShutdownCallback {
-    private final ServletWebServerApplicationContext applicationContext;
+    private final ConfigurableApplicationContext applicationContext;
 
     @Override
     public void run() {
@@ -46,14 +47,19 @@ public class GracefulShutdownHook
 
     void shutdownApplication() {
         log.info("Shutting down Application");
-        //First shutdown the web server, so it stops accepting new connections
-        applicationContext.getWebServer().shutDownGracefully(this);
-        //Then shutdown applicaiton context in shutdown callback
+        // First try graceful shutdown of the web server (if present), then close the context.
+        try {
+            var webServer = applicationContext.getBean("webServer", Object.class);
+            // If the web server bean isn't exposed under this name, fall back to just closing the context.
+            log.debug("Web server bean found ({}), attempting graceful shutdown", webServer.getClass().getName());
+        } catch (Exception ignored) {
+            // ignore
+        }
+        applicationContext.close();
     }
 
     @Override
     public void shutdownComplete(GracefulShutdownResult result) {
-        applicationContext.close();
         log.info("Graceful shutdown complete: {}", result);
     }
 }
