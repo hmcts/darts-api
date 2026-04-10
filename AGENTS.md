@@ -2,40 +2,81 @@
 
 ## Project Structure & Module Organization
 
-`src/main/java` houses the Spring Boot controllers, services, and configuration while Flyway migrations live under `src/main/resources/db/migration/common` and
-`src/main/resources/db/migration/postgres` (with environment-specific data under `src/main/resources/db/migration/dev` and `src/main/resources/db/migration/local`).
-OpenAPI specs live under `src/main/resources/openapi` and generate clients into `build/generated/openapi`. Tests are
-split across `src/test/java`, `src/testCommon/java`, `src/integrationTest/java`, `src/functionalTest/java`, and `src/smokeTest/java`, with Serenity reports
-landing in `functional-test-report/`. Operational assets stay in `charts/`, `config/`, and `infrastructure/`, helper scripts live under `bin/`, and
-docker-compose files live in the repository root.
+`src/main/java` houses the Spring Boot app (root package `uk.gov.hmcts.darts`) across the standard layers:
+
+- `**/controller` / `**/api`: HTTP entry points.
+- `**/service`: business logic / orchestration.
+- `**/repository`: persistence (Spring Data / JDBC).
+- `**/entity`: JPA entities.
+- `**/config`: Spring configuration.
+- `**/util`: shared helpers (check before adding new utilities).
+
+Flyway migrations live under `src/main/resources/db/migration/common` and `src/main/resources/db/migration/postgres`.
+
+OpenAPI specs live under `src/main/resources/openapi`. They are processed + versioned into `build/processedSpecs/` and server stubs are generated into
+`build/generated/openapi/src/main/java` (wired into the `main` source set).
+
+Tests are split across Gradle source sets:
+
+- `src/test/java` (unit)
+- `src/testCommon/java` (shared test helpers)
+- `src/integrationTest/java`
+- `src/functionalTest/java`
+- `src/smokeTest/java`
+
+Operational assets stay in `charts/`, `config/`, and `infrastructure/`. Helper scripts live under `bin/`. Docker Compose files live in the repository root.
 
 ## Build, Test, and Development Commands
 
-- `./gradlew bootTestRun`: bootstraps the service with Testcontainers Postgres for a realistic dev loop.
-- `./gradlew run`: expects external infrastructure and connects to an already provisioned stack.
 - `./gradlew build`: compiles, runs unit tests, and produces the service artifact; use before PRs.
-- `./gradlew integration`: executes the Spring integration slice; add `--tests 'Pattern'` to focus.
-- `./gradlew functional` (or `smoke`): launches Serenity suites, writing results to `functional-test-report/`.
+- `./gradlew check`: runs static analysis + unit tests (what CI typically expects as a baseline). Note: this project finalizes `check` by running
+  the `integration` test task.
+- `./gradlew integration`: runs integration tests (source set `integrationTest`). Add `--tests 'Pattern'` to focus.
+- `./gradlew functional`: runs functional tests (source set `functionalTest`). Add `--tests 'Pattern'` to focus.
+- `./gradlew smoke`: runs smoke tests (source set `smokeTest`). Add `--tests 'Pattern'` to focus.
+- `./gradlew build`: compiles, runs unit tests, and produces the service artifact; use before PRs.
 - `./gradlew jacocoTestReport`: refreshes coverage for Sonar; rerun after touching logic-heavy classes.
-- `./gradlew check`: runs static analysis + unit tests (what CI typically expects as a baseline).
 - `./gradlew runAllStyleChecks`: runs Checkstyle + PMD across all source sets (handy before pushing formatting-heavy changes).
 - `./gradlew dependencyCheckAnalyze`: OWASP dependency check for known vulnerabilities (CVE scan).
 - `./bin/run-in-docker.sh -h`: shows Docker Compose flags for parity checks.
 
+Database migrations:
+
+- `./gradlew migratePostgresDatabase -Pdburl=<host:port/db>`
+- `./gradlew cleanPostgresDatabase -Pdburl=<host:port/db>` (requires temporarily setting `flyway.cleanDisabled = false` in `build.gradle`)
+
+OpenAPI generation:
+
+- `./gradlew openApiGenerate<SpecName>` (one task per yaml under `src/main/resources/openapi`, excluding `problem.yaml`)
+
 ## Coding Style & Naming Conventions
 
 Target Java 21 with Spring Boot 3.5 and Lombok. The `uk.gov.hmcts.java` Gradle plugin enforces Checkstyle, PMD, and SpotBugs: 4-space indentation, 120-character
-lines, fail-fast warnings. Use constructor injection and `@Slf4j` for logging. Packages use lowercase dot notation (e.g., `uk.gov.hmcts.opal.fines`);
-classes/enums stay PascalCase and beans end with `Service`, `Controller`, or `Repository`. Agents must consult the active Checkstyle profile (
-`config/checkstyle/checkstyle.xml`) and (when available) the JetBrains scheme `.idea/codeStyles/project.xml` when generating code so formatting, imports, and annotations align
-with what CI enforces. ORM entities should default to `FetchType.LAZY`; when richer graphs are required, define JPA entity graphs rather than flipping
+lines, fail-fast warnings.
+
+Code style in this repo is effectively:
+
+- 4-space indentation for Java.
+- Preferred max line length is **160** (see `config/checkstyle/checkstyle.xml` and `.idea/codeStyles/project.xml`).
+- Avoid wildcard imports; keep imports ordered per IntelliJ scheme.
+
+Use constructor injection and `@Slf4j` for logging. Packages use lowercase dot notation (root `uk.gov.hmcts.darts`); classes/enums stay PascalCase and beans end
+with `Service`, `Controller`, or `Repository`.
+
+Agents must consult the active Checkstyle profile (`config/checkstyle/checkstyle.xml`) and the JetBrains scheme (`.idea/codeStyles/project.xml`) when generating
+code so formatting, imports, and annotations align with what CI enforces.
+
+ORM entities should default to `FetchType.LAZY`; when richer graphs are required, define JPA entity graphs or DTO projections rather than flipping
 associations to eager.
 
 ## Testing Guidelines
 
-JUnit 5 backs unit, integration, and db tests, so mirror source packages and name test classes `*Test`. Functional and smoke suites rely on Serenity runners (
-`OpalTestRunner`, `LegacyTestRunner`, `SmokeTestRunner`). Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` and the PR description.
-Run `./gradlew bootTestRun` or `integration` before submitting cross-cutting changes.
+JUnit 5 backs unit, integration, functional, and smoke tests. Mirror source packages and name test classes `*Test`.
+
+Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` and the PR description. Before submitting cross-cutting changes, run at minimum:
+
+- `./gradlew check` (includes static analysis + unit tests and triggers `integration` afterwards)
+- plus any relevant focused suite (`functional` / `smoke`) depending on the feature.
 
 - **Must-unit-test logic that hides bugs:** branching/conditionals, business rules, calculations, validation (including cross-field), error handling, mapping
   layers, security checks, helpers, caching decisions, and ID/correlation logic.
@@ -100,5 +141,4 @@ traces when responses or docs change. Confirm CI (Gradle, Sonar, Docker) is gree
 ## Security & Configuration Tips
 
 Do not commit secrets such as `AAD_CLIENT_ID` or `AAD_CLIENT_SECRET`; source them from the local secret manager or Vault. Redis is
-optional locally—set `OPAL_REDIS_ENABLED=true` and run `docker compose up redis` to mirror cloud behavior. Prefer `./gradlew bootTestRun` for local testing to
-ensure Testcontainers handles Postgres credentials safely.
+optional locally—set `OPAL_REDIS_ENABLED=true` and run `docker compose up redis` to mirror cloud behavior.
