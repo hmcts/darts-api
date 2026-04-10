@@ -149,7 +149,6 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
          ORDER BY t.id DESC               
         """)
     @SuppressWarnings("java:S107")
-// Suppressing "Methods should not have too many parameters" as this is a search method as such requires many parameters
     List<TranscriptionSearchResult> searchTranscriptionsFilteringOn(
         List<Long> ids,
         String caseNumber,
