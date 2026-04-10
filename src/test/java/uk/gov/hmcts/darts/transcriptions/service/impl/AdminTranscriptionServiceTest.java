@@ -176,6 +176,10 @@ class AdminTranscriptionServiceTest {
             OffsetDateTime.parse("2021-02-05T00:00:00Z"));
         assertThat(searchResponses).extracting("transcriptionStatusId").containsExactly(21, 22, 23);
         assertThat(searchResponses).extracting("isManualTranscription").containsExactly(false, true, false);
+        assertThat(searchResponses).extracting("uploadedAt").containsExactly(
+            OffsetDateTime.parse("2021-02-03T00:00:00Z"),
+            OffsetDateTime.parse("2021-02-04T00:00:00Z"),
+            OffsetDateTime.parse("2021-02-05T00:00:00Z"));
 
         verifyNoMoreInteractions(transcriptionSearchQuery);
     }
@@ -229,10 +233,8 @@ class AdminTranscriptionServiceTest {
 
         Mockito.doThrow(new DartsApiException(UserManagementError.USER_NOT_FOUND)).when(userAccountExistsValidator).validate(userId);
 
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> {
-            adminTranscriptionService
-                .getTranscriptionsForUser(userId, dateTimeOfSearch);
-        });
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> adminTranscriptionService
+            .getTranscriptionsForUser(userId, dateTimeOfSearch));
         assertEquals(UserManagementError.USER_NOT_FOUND, exception.getError());
     }
 
@@ -405,6 +407,7 @@ class AdminTranscriptionServiceTest {
             OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed),
             seed + 20,
             seed % 2 == 0,
+            OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed),
             OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed));
     }
 
