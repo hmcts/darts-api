@@ -128,7 +128,9 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              (SELECT MAX(w.workflowTimestamp) 
                      FROM TranscriptionWorkflowEntity w 
                              WHERE w.transcription = t AND w.transcriptionStatus = :transcriptionStatus),
-             trd.uploadedDateTime)
+             (SELECT MAX(trd.uploadedDateTime)
+                      FROM TranscriptionDocumentEntity trd
+                              WHERE trd.transcription = t))
         
          FROM TranscriptionEntity t
          JOIN t.transcriptionStatus ts
@@ -139,7 +141,6 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
          LEFT JOIN hcr.courthouse hcth
          LEFT JOIN t.courtCases tcc
          LEFT JOIN tcc.courthouse tcth
-         LEFT JOIN t.transcriptionDocumentEntities trd 
          WHERE (:ids IS NULL OR t.id IN :ids)
              AND (:caseNumber IS NULL OR coalesce(hcc.caseNumber, tcc.caseNumber) = :caseNumber)
              AND (coalesce(hcth.displayName, tcth.displayName) ILIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
