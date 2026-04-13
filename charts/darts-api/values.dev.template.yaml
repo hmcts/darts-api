@@ -153,7 +153,7 @@ darts-portal:
   nodejs:
     releaseNameOverride: '{{ .Release.Name }}-portal'
     applicationPort: 3000
-    image: 'sdshmctspublic.azurecr.io/darts/portal:${DEV_DARTS_PORTAL_IMAGE_SUFFIX}'
+    image: 'hmctsprod.azurecr.io/darts/portal:${DEV_DARTS_PORTAL_IMAGE_SUFFIX}'
     ingressHost: "darts-portal-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
     aadIdentityName: darts
     keyVaults:
@@ -174,7 +174,7 @@ darts-gateway:
   java:
     releaseNameOverride: '{{ .Release.Name }}-gateway'
     applicationPort: 8070
-    image: 'sdshmctspublic.azurecr.io/darts/gateway:${DEV_DARTS_GATEWAY_IMAGE_SUFFIX}'
+    image: 'hmctsprod.azurecr.io/darts/gateway:${DEV_DARTS_GATEWAY_IMAGE_SUFFIX}'
     ingressHost: "darts-gateway-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
     aadIdentityName: darts
     keyVaults:
