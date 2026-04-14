@@ -129,8 +129,6 @@ class CloseCaseWithRetentionServiceImplTest {
 
         when(retentionApi.applyPolicyStringToDate(any(), eq(null), any(RetentionPolicyTypeEntity.class)))
             .thenReturn(LocalDate.now());
-        when(caseRetentionRepository.findLatestCompletedManualRetention(courtCase))
-            .thenReturn(Optional.empty());
         when(caseRetentionRepository.findLatestPendingRetention(courtCase))
             .thenReturn(Optional.empty());
         when(authorisationApi.getCurrentUser()).thenReturn(mock(UserAccountEntity.class));
@@ -269,7 +267,7 @@ class CloseCaseWithRetentionServiceImplTest {
     }
 
     @Test
-    void closeCaseAndSetRetention_shouldReturnEarly_whenCompletedManualRetentionExists() {
+    void closeCaseAndSetRetention_shouldAddCaseRetention_whenCompletedManualRetentionExists() {
         OffsetDateTime eventTime = OffsetDateTime.of(2024, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
 
         DartsEventRetentionPolicy retentionPolicy = new DartsEventRetentionPolicy();
@@ -279,9 +277,6 @@ class CloseCaseWithRetentionServiceImplTest {
         dartsEvent.setDateTime(eventTime);
         dartsEvent.setRetentionPolicy(retentionPolicy);
 
-        when(caseRetentionRepository.findLatestCompletedManualRetention(courtCase))
-            .thenReturn(Optional.of(new CaseRetentionEntity()));
-
         service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
 
         // should still close the case
@@ -289,9 +284,9 @@ class CloseCaseWithRetentionServiceImplTest {
         verify(caseRepository).saveAndFlush(courtCase);
 
         // but should not attempt to create/update retention when manual retention exists
-        verify(caseRetentionRepository, never()).findLatestPendingRetention(any());
-        verify(caseRetentionRepository, never()).save(any(CaseRetentionEntity.class));
-        verify(retentionApi, never()).applyPolicyStringToDate(any(), any(), any());
+        verify(caseRetentionRepository).findLatestPendingRetention(any());
+        verify(caseRetentionRepository).save(any(CaseRetentionEntity.class));
+        verify(retentionApi).applyPolicyStringToDate(any(), any(), any());
     }
 
     @Test

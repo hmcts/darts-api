@@ -59,13 +59,6 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
 
         closeCase(dartsEvent, courtCase);
 
-        Optional<CaseRetentionEntity> latestCompletedManualRetention = caseRetentionRepository.findLatestCompletedManualRetention(courtCase);
-        if (latestCompletedManualRetention.isPresent()) {
-            log.info("Ignoring retention for event with id {} because there is an existing manual retention for caseId {}.",
-                     dartsEvent.getEventId(), courtCase.getId());
-            return;
-        }
-
         // ignore the caseTotalSentence if it's not an overridable policy
         if (nonNull(dartsEvent.getRetentionPolicy())
             && nonNull(dartsEvent.getRetentionPolicy().getCaseTotalSentence())
@@ -171,8 +164,9 @@ public class CloseCaseWithRetentionServiceImpl implements CloseCaseWithRetention
             LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,
                                                                            dartsEventRetentionPolicy.getCaseTotalSentence(),
                                                                            caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
-
-            caseRetentionEntity.setRetainUntil(retentionDate.atStartOfDay().atOffset(ZoneOffset.UTC));
+            if (nonNull(retentionDate)) {
+                caseRetentionEntity.setRetainUntil(retentionDate.atStartOfDay().atOffset(ZoneOffset.UTC));
+            }
         }
         caseRetentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED.getId());
 

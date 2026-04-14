@@ -18,11 +18,10 @@ import java.util.Optional;
 public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRetentionCaseAssociatedObjectsProcessor {
 
     @Value("${darts.retention.max-retention-retries: 3}")
-    int maxRetentionRetries;
+    private int maxRetentionRetries;
 
     private final CaseRepository caseRepository;
     private final ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl singleCaseProcessor;
-
 
     //Required to prevent duplicate logic with generic exception handling
     @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")
