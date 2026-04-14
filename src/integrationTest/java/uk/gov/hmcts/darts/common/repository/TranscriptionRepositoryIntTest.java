@@ -121,7 +121,6 @@ class TranscriptionRepositoryIntTest extends IntegrationBase {
     @Test
     void searchTranscriptionsFilteringOn_shouldFilterByIsManual() {
         // given
-        TranscriptionStatusEntity approvedStatus = transcriptionStub.getTranscriptionStatusByEnum(APPROVED);
         OffsetDateTime workflowTimestamp = OffsetDateTime.now().minusDays(1);
 
         TranscriptionEntity manual = transcriptionStub.createAndSaveApprovedTranscription(
@@ -145,6 +144,7 @@ class TranscriptionRepositoryIntTest extends IntegrationBase {
         automated.setIsManualTranscription(false);
         dartsDatabase.save(automated);
         transcriptionDocumentStub.createTranscriptionDocumentForTranscription(automated);
+        TranscriptionStatusEntity approvedStatus = transcriptionStub.getTranscriptionStatusByEnum(APPROVED);
 
         // when
         List<TranscriptionSearchResult> results = transcriptionRepository.searchTranscriptionsFilteringOn(
@@ -294,7 +294,7 @@ class TranscriptionRepositoryIntTest extends IntegrationBase {
         legacyTranscription.setLegacyObjectId("legacy");
         legacyTranscription.setIsManualTranscription(false);
         dartsDatabase.save(legacyTranscription);
-        
+
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingIdManualOrLegacyIncludeDeletedTranscriptionDocuments(
             hearingEntity.getId()
         );
