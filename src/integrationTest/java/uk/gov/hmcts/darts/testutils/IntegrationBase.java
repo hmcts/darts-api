@@ -83,9 +83,16 @@ public class IntegrationBase extends TestBase {
 
     protected TokenStub tokenStub = new TokenStub();
 
-    private static final GenericContainer<?> REDIS = new GenericContainer<>(
-        "hmctsprod.azurecr.io/imported/redis"
-    ).withExposedPorts(6379);
+    /**
+     * Redis container image used for integration tests.
+     * <p>
+     * Defaulting to a public image avoids requiring developers/CI to authenticate to a private registry.
+     * If you need to use a private mirror, override with: -DDARTS_TEST_REDIS_IMAGE=your.registry/redis:tag
+     */
+    private static final String REDIS_IMAGE = System.getProperty("DARTS_TEST_REDIS_IMAGE", "redis:8.6.1-alpine");
+
+    private static final GenericContainer<?> REDIS = new GenericContainer<>(REDIS_IMAGE)
+        .withExposedPorts(6379);
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
