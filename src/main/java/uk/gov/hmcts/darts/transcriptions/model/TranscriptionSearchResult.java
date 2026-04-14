@@ -13,8 +13,7 @@ public record TranscriptionSearchResult(
     OffsetDateTime requestedAt,
     Integer transcriptionStatusId,
     Boolean isManualTranscription,
-    OffsetDateTime approvedAt,
-    OffsetDateTime uploadedAt
+    OffsetDateTime approvedAt
 ) {
 
 }

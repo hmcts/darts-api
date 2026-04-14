@@ -125,13 +125,12 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              t.createdDateTime,
              ts.id,
              t.isManualTranscription,
-             (SELECT MAX(w.workflowTimestamp) 
+             (
+                     SELECT MAX(w.workflowTimestamp) 
                      FROM TranscriptionWorkflowEntity w 
-                             WHERE w.transcription = t AND w.transcriptionStatus = :transcriptionStatus),
-             (SELECT MAX(trd.uploadedDateTime)
-                      FROM TranscriptionDocumentEntity trd
-                              WHERE trd.transcription = t))
-        
+                     WHERE w.transcription = t AND w.transcriptionStatus = :transcriptionStatus
+             )
+         )
          FROM TranscriptionEntity t
          JOIN t.transcriptionStatus ts
          JOIN UserAccountEntity ua on ua.id = t.createdById

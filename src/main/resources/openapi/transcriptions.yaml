@@ -1174,9 +1174,6 @@ components:
         approved_at:
           type: string
           format: date-time
-        uploaded_at:
-          type: string
-          format: date-time
     TranscriptionStatus:
       type: object
       properties:
@@ -1740,6 +1737,10 @@ components:
           type: boolean
         is_hidden:
           type: boolean
+        uploaded_at:
+          type: string
+          format: date-time
+          description: 'The transcription document date time of the transcription document'
 
     GetTranscriptionDocumentByIdResponse:
       type: object

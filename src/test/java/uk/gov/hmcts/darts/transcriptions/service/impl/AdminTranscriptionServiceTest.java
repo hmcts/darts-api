@@ -407,7 +407,6 @@ class AdminTranscriptionServiceTest {
             OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed),
             seed + 20,
             seed % 2 == 0,
-            OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed),
             OffsetDateTime.parse("2021-02-02T00:00:00Z").plusDays(seed));
     }
 
