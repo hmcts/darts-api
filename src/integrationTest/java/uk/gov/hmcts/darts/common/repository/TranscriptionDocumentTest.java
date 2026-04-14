@@ -892,7 +892,8 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                hearingCourthouseDisplayName,
                                                hearingDate,
                                                transcriptionDocumentEntity.getTranscription().getIsManualTranscription(),
-                                               transcriptionDocumentEntity.isHidden()
+                                               transcriptionDocumentEntity.isHidden(),
+                                               transcriptionDocumentEntity.getUploadedDateTime()
         );
     }
 
