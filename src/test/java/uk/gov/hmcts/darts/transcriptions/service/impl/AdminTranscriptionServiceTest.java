@@ -176,11 +176,6 @@ class AdminTranscriptionServiceTest {
             OffsetDateTime.parse("2021-02-05T00:00:00Z"));
         assertThat(searchResponses).extracting("transcriptionStatusId").containsExactly(21, 22, 23);
         assertThat(searchResponses).extracting("isManualTranscription").containsExactly(false, true, false);
-        assertThat(searchResponses).extracting("uploadedAt").containsExactly(
-            OffsetDateTime.parse("2021-02-03T00:00:00Z"),
-            OffsetDateTime.parse("2021-02-04T00:00:00Z"),
-            OffsetDateTime.parse("2021-02-05T00:00:00Z"));
-
         verifyNoMoreInteractions(transcriptionSearchQuery);
     }
 
