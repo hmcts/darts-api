@@ -65,8 +65,7 @@ class CleanUpDetsDataProcessorImplTest {
 
     @BeforeEach
     void setUp() {
-        processor = new CleanUpDetsDataProcessorImpl(externalObjectDirectoryRepository, cleanUpDetsDataBatchProcessor,
-                                                     Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC));
+        processor = new CleanUpDetsDataProcessorImpl(cleanUpDetsDataBatchProcessor, Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC));
     }
 
 
@@ -78,14 +77,14 @@ class CleanUpDetsDataProcessorImplTest {
         @DisplayName("Skips processing when no EOD rows are returned")
         void shouldSkipProcessingWhenRepositoryReturnsEmptyList() {
             configureTaskConfig(4, 2);
-            when(externalObjectDirectoryRepository.cleanUpDetsDataProcedure(eq(4), any()))
+            when(cleanUpDetsDataBatchProcessor.callDetsCleanUpStoredProcedure(eq(4), any()))
                 .thenReturn(Collections.emptyList());
 
             assertDoesNotThrow(() -> processor.processCleanUpDetsData(10, config));
 
             verify(cleanUpDetsDataBatchProcessor, never()).process(anyList());
-            verify(externalObjectDirectoryRepository, times(1))
-                .cleanUpDetsDataProcedure(4, expectedMinimumStoredAge(DEFAULT_MINIMUM_STORED_AGE));
+            verify(cleanUpDetsDataBatchProcessor, times(1))
+                .callDetsCleanUpStoredProcedure(4, expectedMinimumStoredAge(DEFAULT_MINIMUM_STORED_AGE));
         }
 
 
@@ -96,7 +95,7 @@ class CleanUpDetsDataProcessorImplTest {
             List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> responses =
                 List.of(response(1L), response(2L), response(3L), response(4L));
 
-            when(externalObjectDirectoryRepository.cleanUpDetsDataProcedure(eq(4), any()))
+            when(cleanUpDetsDataBatchProcessor.callDetsCleanUpStoredProcedure(eq(4), any()))
                 .thenReturn(responses)//First call returns 4 records to process
                 .thenReturn(Collections.emptyList()); //Second call returns empty list to end processing
 
@@ -124,7 +123,7 @@ class CleanUpDetsDataProcessorImplTest {
                 response(5L), response(6L), response(7L), response(8L)
             );
 
-            when(externalObjectDirectoryRepository.cleanUpDetsDataProcedure(eq(4), any()))
+            when(cleanUpDetsDataBatchProcessor.callDetsCleanUpStoredProcedure(eq(4), any()))
                 .thenReturn(firstBatch)
                 .thenReturn(secondBatch)
                 .thenReturn(Collections.emptyList());
@@ -132,8 +131,8 @@ class CleanUpDetsDataProcessorImplTest {
             AsyncTestUtil.processTasksSynchronously(() -> processor.processCleanUpDetsData(12, config));
 
             //Called 3 times - first batch, second batch, then empty list to end processing
-            verify(externalObjectDirectoryRepository, times(3))
-                .cleanUpDetsDataProcedure(4, expectedMinimumStoredAge(DEFAULT_MINIMUM_STORED_AGE));
+            verify(cleanUpDetsDataBatchProcessor, times(3))
+                .callDetsCleanUpStoredProcedure(4, expectedMinimumStoredAge(DEFAULT_MINIMUM_STORED_AGE));
             verify(cleanUpDetsDataBatchProcessor).process(List.of(firstBatch.get(0), firstBatch.get(1)));
             verify(cleanUpDetsDataBatchProcessor).process(List.of(firstBatch.get(2), firstBatch.get(3)));
             verify(cleanUpDetsDataBatchProcessor).process(List.of(secondBatch.get(0), secondBatch.get(1)));
@@ -153,15 +152,15 @@ class CleanUpDetsDataProcessorImplTest {
                 response(5L), response(6L), response(7L), response(8L)
             );
 
-            when(externalObjectDirectoryRepository.cleanUpDetsDataProcedure(eq(4), any()))
+            when(cleanUpDetsDataBatchProcessor.callDetsCleanUpStoredProcedure(eq(4), any()))
                 .thenReturn(firstBatch)
                 .thenReturn(secondBatch)
                 .thenReturn(Collections.emptyList());
 
             AsyncTestUtil.processTasksSynchronously(() -> processor.processCleanUpDetsData(4, config));
 
-            verify(externalObjectDirectoryRepository, times(1))
-                .cleanUpDetsDataProcedure(4, expectedMinimumStoredAge(DEFAULT_MINIMUM_STORED_AGE));
+            verify(cleanUpDetsDataBatchProcessor, times(1))
+                .callDetsCleanUpStoredProcedure(4, expectedMinimumStoredAge(DEFAULT_MINIMUM_STORED_AGE));
             verify(cleanUpDetsDataBatchProcessor).process(List.of(firstBatch.get(0), firstBatch.get(1)));
             verify(cleanUpDetsDataBatchProcessor).process(List.of(firstBatch.get(2), firstBatch.get(3)));
         }
@@ -249,6 +248,6 @@ class CleanUpDetsDataProcessorImplTest {
     }
 
     private CleanUpDetsDataProcessorImpl.CleanUpDetsDataBatchProcessor createBatchProcessor() {
-        return processor.new CleanUpDetsDataBatchProcessor(externalObjectDirectoryRepository, objectStateRecordRepository, detsApiService);
+        return new CleanUpDetsDataProcessorImpl.CleanUpDetsDataBatchProcessor(externalObjectDirectoryRepository, objectStateRecordRepository, detsApiService);
     }
 }

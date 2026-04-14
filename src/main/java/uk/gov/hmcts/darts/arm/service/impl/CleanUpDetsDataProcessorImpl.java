@@ -7,15 +7,13 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.service.CleanUpDetsDataProcessor;
-import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
-import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
 import uk.gov.hmcts.darts.task.config.CleanUpDetsDataAutomatedTaskConfig;
 import uk.gov.hmcts.darts.util.AsyncUtil;
@@ -31,7 +29,6 @@ import java.util.concurrent.Callable;
 @RequiredArgsConstructor
 public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
 
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final CleanUpDetsDataBatchProcessor cleanUpDetsDataBatchProcessor;
     private final Clock clock;
 
@@ -46,8 +43,9 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
 
         while (totalProcessed < batchSize && chunkSize > 0) {
             log.info("Processing clean up of DETS data with chunk size: {}", chunkSize);
-            List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> eodIdsToCleanUp = externalObjectDirectoryRepository
-                .cleanUpDetsDataProcedure(chunkSize, minimumStoredAge);
+
+            List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> eodIdsToCleanUp =
+                cleanUpDetsDataBatchProcessor.callDetsCleanUpStoredProcedure(chunkSize, minimumStoredAge);
 
             if (eodIdsToCleanUp.isEmpty()) {
                 log.info("No more DETS data to clean up. Ending process.");
@@ -60,7 +58,6 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
             List<Callable<Void>> tasks = batchesToDeleteBlobStoreRecordFor
                 .stream()
                 .map(eodsForBatch -> (Callable<Void>) () -> {
-                    //Call another serive to ensure the batch is processed within a transaction
                     cleanUpDetsDataBatchProcessor.process(eodsForBatch);
                     return null;
                 })
@@ -88,12 +85,13 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
 
     @Component
     @RequiredArgsConstructor
-    public class CleanUpDetsDataBatchProcessor {
+    public static class CleanUpDetsDataBatchProcessor {
 
         private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
         private final ObjectStateRecordRepository objectStateRecordRepository;
         private final DetsApiService detsApiService;
 
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
         public void process(List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> eodsCleanedUp) {
             List<Long> objectStateRecordsForDetsRecordsCleanedUpSuccessfully = new ArrayList<>();
             List<Long> objectStateRecordsForDetsRecordsFailedToCleanUp = new ArrayList<>();
@@ -125,6 +123,11 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
             if (CollectionUtils.isNotEmpty(objectStateRecordsForDetsRecordsFailedToCleanUp)) {
                 log.error("Dets clean up failed for Object state record Ids: {}", objectStateRecordsForDetsRecordsFailedToCleanUp);
             }
+        }
+
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> callDetsCleanUpStoredProcedure(int chunkSize, OffsetDateTime minimumStoredAge) {
+            return objectStateRecordRepository.cleanUpDetsDataProcedure(chunkSize, minimumStoredAge);
         }
     }
 
