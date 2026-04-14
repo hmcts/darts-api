@@ -55,7 +55,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.CouplingBetweenObjects")//TODO - refactor to reduce coupling when this class is next edited
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class AdminTranscriptionServiceImpl implements AdminTranscriptionService {
 
     private final TranscriptionSearchQuery transcriptionSearchQuery;
@@ -166,7 +166,6 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         transcriptionSearchResponse.setIsManualTranscription(transcriptionSearchResult.isManualTranscription());
         transcriptionSearchResponse.setTranscriptionStatusId(transcriptionSearchResult.transcriptionStatusId());
         transcriptionSearchResponse.setApprovedAt(transcriptionSearchResult.approvedAt());
-        transcriptionSearchResponse.setUploadedAt(transcriptionSearchResult.uploadedAt());
         return transcriptionSearchResponse;
     }
 

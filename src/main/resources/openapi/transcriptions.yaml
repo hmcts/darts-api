@@ -1174,6 +1174,7 @@ components:
         approved_at:
           type: string
           format: date-time
+
     TranscriptionStatus:
       type: object
       properties:
@@ -1735,8 +1736,10 @@ components:
               description: 'The hearing date'
         is_manual_transcription:
           type: boolean
+          description: 'Is a manual transcription'
         is_hidden:
           type: boolean
+          description: 'The transcription document hidden state'
         uploaded_at:
           type: string
           format: date-time

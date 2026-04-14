@@ -362,7 +362,7 @@ public class TranscriptionResponseMapper {
             hearingResponse.setId(transcriptionDocumentResponse.hearingId());
             transformedMediaDetails.setHearing(hearingResponse);
         }
-
+        transformedMediaDetails.setUploadedAt(transcriptionDocumentResponse.uploadedAt());
         return transformedMediaDetails;
     }
 

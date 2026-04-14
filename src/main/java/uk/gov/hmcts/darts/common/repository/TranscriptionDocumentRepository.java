@@ -16,7 +16,9 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
     SoftDeleteRepository<TranscriptionDocumentEntity, Long> {
 
     @Query("""
-         SELECT distinct new uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult(tmd.id, t.id,
+         SELECT distinct new uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult(
+         tmd.id,
+         t.id,
          courtCase.id,
          courtCase.caseNumber,
          hearings.id,
@@ -27,7 +29,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
          coalesce(hearings.hearingDate, t.hearingDate),
          t.isManualTranscription,
          tmd.isHidden,
-         tmp.uploadedDateTime)
+         tmd.uploadedDateTime)
               FROM TranscriptionDocumentEntity tmd
               JOIN tmd.transcription t
               LEFT JOIN t.requestedBy
