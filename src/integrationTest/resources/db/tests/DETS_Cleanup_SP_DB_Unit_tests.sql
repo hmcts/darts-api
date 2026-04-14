@@ -86,8 +86,6 @@ DO $$
 
         CALL darts.dets_cleanup_eod_osr(10, now() - interval '7 days', results);
 
-        --ASSERT (results IS NULL OR cardinality(results) = 0), 'TEST 1 FAILED: expected empty results but got non-empty array';
-
         -- Check results
         IF results IS NULL OR cardinality(results) > 0 THEN
             RAISE NOTICE 'TEST 1 FAILED: expected 0 results but got %', cardinality(results);
@@ -172,9 +170,6 @@ DO $$
 
         CALL darts.dets_cleanup_eod_osr(10, now() - interval '7 days', results);
 
-        --ASSERT cardinality(results) = 5, 'TEST 2 FAILED: expected 5 results but got ' || cardinality(results);
-        --ASSERT results = expected, 'TEST 2 FAILED: results array does not match expected values';
-
         -- Check count
         IF cardinality(results) <> 5 THEN
             RAISE NOTICE 'TEST 2 FAILED: expected 5 results but got %', cardinality(results);
@@ -258,9 +253,6 @@ DO $$
             ];
 
         CALL darts.dets_cleanup_eod_osr(3, (now()::date - 7)::timestamp, results);
-
-        --ASSERT cardinality(results) = 3, 'TEST 3 FAILED: expected 3 results but got ' || cardinality(results);
-        --ASSERT results = expected, 'TEST 3 FAILED: results array does not match expected values';
 
         -- Check count
         IF cardinality(results) <> 3 THEN
@@ -352,9 +344,6 @@ DO $$
 
         CALL darts.dets_cleanup_eod_osr(3, (now()::date - 7)::timestamp, results);
 
-        --ASSERT cardinality(results) = 3, 'TEST 4 CALL 1 FAILED: expected 3 results but got ' || cardinality(results);
-        --ASSERT results = expected, 'TEST 4 CALL 1 FAILED: results array does not match expected values';
-
         -- Check count
         IF cardinality(results) <> 3 THEN
             RAISE NOTICE 'TEST 4 CALL 1 FAILED: expected 3 results but got %', cardinality(results);
@@ -379,9 +368,6 @@ DO $$
             ];
 
         CALL darts.dets_cleanup_eod_osr(3, now() - interval '7 days', results);
-
-        --ASSERT cardinality(results) = 5, 'TEST 4 CALL 2 FAILED: expected 5 results but got ' || cardinality(results);
-        --ASSERT results = expected, 'TEST 4 CALL 2 FAILED: results array does not match expected values';
 
         -- Check count
         IF cardinality(results) <> 5 THEN
