@@ -3,13 +3,15 @@ INSERT INTO darts.automated_task (aut_id, task_name, task_description, cron_expr
 VALUES (35, 'CleanUpDetsData', 'Cleans up Dets files that have successfully been stored in ARM', '0 24 0-6,19-23 ? * *', true, 100_000,
         current_timestamp, 0, current_timestamp, 0, false);
 
-INSERT INTO user_account
-VALUES (-40, NULL, '', 'systemCleanUpDetsData@hmcts.net',
-        'systemCleanUpDetsDataAutomatedTask', '2025-02-16 00:00:00+00', '2025-02-16 00:00:00+00', NULL, 0, 0, NULL, true,
-        true, d 'systemCleanUpDetsDataAutomatedTask');
+INSERT INTO user_account (usr_id, user_name, user_email_address, description, created_ts, last_modified_ts, last_modified_by, created_by, is_system_user,
+                          is_active, user_full_name)
+
+VALUES (-40, 'systemCleanUpDetsDataAutomatedTask', 'systemCleanUpDetsDataAutomatedTask@hmcts.net', 'systemCleanUpDetsDataAutomatedTask',
+        '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', 0, 0, true, true, 'systemCleanUpDetsDataAutomatedTask');
 
 SET SEARCH_PATH TO darts;
 
+DROP FUNCTION IF EXISTS dets_cleanup_eod_osr_rows;
 DROP PROCEDURE IF EXISTS dets_cleanup_eod_osr;
 DROP TYPE IF EXISTS id_location_pair;
 
@@ -149,14 +151,16 @@ BEGIN
             RAISE NOTICE '% Error in dets_cleanup_eod_osr: % - %', c_msg_prefix, SQLSTATE, SQLERRM;
             RAISE;
     END;
-
-    --Only COMMIT if there were values to process
-    IF v_dets_eod_count > 0 THEN
-        RAISE NOTICE '%   Commit started at %', c_msg_prefix, clock_timestamp();
-        COMMIT;
-        RAISE NOTICE '%   Commit finished at %', c_msg_prefix, clock_timestamp();
-    END IF;
-
     RAISE NOTICE '% Finished at %', c_msg_prefix, clock_timestamp();
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION dets_cleanup_eod_osr_rows(pi_limit int, pi_last_modified_ts timestamptz)
+    RETURNS TABLE (osr_uuid bigint, dets_location text)
+    LANGUAGE plpgsql AS $$
+DECLARE v_arr id_location_pair[];
+BEGIN
+    CALL dets_cleanup_eod_osr(pi_limit, pi_last_modified_ts, v_arr);
+    RETURN QUERY SELECT (x).osr_uuid, (x).dets_location
+                 FROM unnest(COALESCE(v_arr, '{}'::id_location_pair[])) x;
+END $$;
