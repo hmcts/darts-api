@@ -100,7 +100,7 @@ services:
 
   darts-redis:
     container_name: darts-redis
-    image: redis:8.6.1-alpine
+    image: hmctsprod.azurecr.io/imported/redis:latest
     restart: always
     ports:
       - "6379:6379"
