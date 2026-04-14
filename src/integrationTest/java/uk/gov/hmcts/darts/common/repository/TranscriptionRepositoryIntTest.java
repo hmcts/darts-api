@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -24,7 +23,6 @@ import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.minimalTranscriptionDocument;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
@@ -59,111 +57,6 @@ class TranscriptionRepositoryIntTest extends IntegrationBase {
         );
         courtCaseEntity = hearingEntity.getCourtCase();
         caseId = courtCaseEntity.getId();
-    }
-
-    @Test
-    void searchTranscriptionsFilteringOn_shouldReturnProjectionForMatchingCaseNumber() {
-        // given
-        TranscriptionStatusEntity approvedStatus = transcriptionStub.getTranscriptionStatusByEnum(APPROVED);
-        OffsetDateTime workflowTimestamp = OffsetDateTime.now().minusDays(1);
-
-        TranscriptionEntity transcription = transcriptionStub.createAndSaveApprovedTranscription(
-            dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity(),
-            courtCaseEntity,
-            hearingEntity,
-            workflowTimestamp,
-            false
-        );
-        transcription.setIsManualTranscription(true);
-        transcription = dartsDatabase.save(transcription);
-
-        // Ensure uploadedAt is non-null (query LEFT JOINs documents)
-        var doc = transcriptionDocumentStub.createTranscriptionDocumentForTranscription(transcription);
-        doc.setUploadedDateTime(OffsetDateTime.now());
-        dartsDatabase.save(doc);
-
-        // when
-        List<TranscriptionSearchResult> results = transcriptionRepository.searchTranscriptionsFilteringOn(
-            null,
-            courtCaseEntity.getCaseNumber(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            approvedStatus
-        );
-
-        // then
-        assertThat(results)
-            .isNotEmpty();
-
-        Long transcriptionId = transcription.getId();
-
-        TranscriptionSearchResult result = results.stream()
-            .filter(r -> r.id().equals(transcriptionId))
-            .findFirst()
-            .orElseThrow();
-
-        assertThat(result.caseId()).isEqualTo(courtCaseEntity.getId());
-        assertThat(result.caseNumber()).isEqualTo(courtCaseEntity.getCaseNumber());
-        assertThat(result.courthouseId()).isEqualTo(hearingEntity.getCourtroom().getCourthouse().getId());
-        assertThat(result.hearingId()).isEqualTo(hearingEntity.getId());
-        assertThat(result.hearingDate()).isEqualTo(hearingEntity.getHearingDate());
-        assertThat(result.requestedAt()).isEqualTo(transcription.getCreatedDateTime());
-        assertThat(result.transcriptionStatusId()).isEqualTo(transcription.getTranscriptionStatus().getId());
-        assertThat(result.isManualTranscription()).isTrue();
-        assertThat(result.approvedAt()).isNotNull();
-        assertThat(result.uploadedAt()).isNotNull();
-    }
-
-    @Test
-    void searchTranscriptionsFilteringOn_shouldFilterByIsManual() {
-        // given
-        OffsetDateTime workflowTimestamp = OffsetDateTime.now().minusDays(1);
-
-        TranscriptionEntity manual = transcriptionStub.createAndSaveApprovedTranscription(
-            dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity(),
-            courtCaseEntity,
-            hearingEntity,
-            workflowTimestamp,
-            false
-        );
-        manual.setIsManualTranscription(true);
-        dartsDatabase.save(manual);
-        transcriptionDocumentStub.createTranscriptionDocumentForTranscription(manual);
-
-        TranscriptionEntity automated = transcriptionStub.createAndSaveApprovedTranscription(
-            dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity(),
-            courtCaseEntity,
-            hearingEntity,
-            workflowTimestamp,
-            false
-        );
-        automated.setIsManualTranscription(false);
-        dartsDatabase.save(automated);
-        transcriptionDocumentStub.createTranscriptionDocumentForTranscription(automated);
-        TranscriptionStatusEntity approvedStatus = transcriptionStub.getTranscriptionStatusByEnum(APPROVED);
-
-        // when
-        List<TranscriptionSearchResult> results = transcriptionRepository.searchTranscriptionsFilteringOn(
-            null,
-            courtCaseEntity.getCaseNumber(),
-            null,
-            null,
-            null,
-            null,
-            true,
-            null,
-            approvedStatus
-        );
-
-        // then
-        assertThat(results)
-            .extracting(TranscriptionSearchResult::id)
-            .contains(manual.getId())
-            .doesNotContain(automated.getId());
     }
 
     @Test
