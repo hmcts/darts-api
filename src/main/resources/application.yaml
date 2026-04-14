@@ -442,6 +442,15 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
+      clean-up-dets-data:
+        system-user-email: systemCleanUpDetsData@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT90M
+        minimum-stored-age: 7D
+        chunk-size: 1000
+        async-timeout: 80M
+        threads: 20
       cleanup-arm-response-files:
         system-user-email: system_CleanupArmResponseFiles@hmcts.net
         lock:
