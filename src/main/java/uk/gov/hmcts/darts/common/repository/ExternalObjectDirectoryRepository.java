@@ -7,8 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import uk.gov.hmcts.darts.arm.service.impl.CleanUpDetsDataProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -16,11 +18,13 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.task.runner.impl.CleanUpDetsDataAutomatedTask;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -278,6 +282,26 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                           OffsetDateTime unstructuredLastModifiedBefore,
                                                           Limit limit);
 
+    @Query(
+        """
+            SELECT eod.id FROM ExternalObjectDirectoryEntity parentEod, ExternalObjectDirectoryEntity armEod
+            WHERE parentEod.media = armEod.media
+            AND parentEod.status = :storedStatus
+            AND parentEod.externalLocationType = :parentEodLocation
+            AND parentEod.lastModifiedDateTime <= :lastModifiedBefore
+            AND armEod.externalLocationType = :armLocation
+            AND armEod.status = :storedStatus
+            """
+    )
+    List<Long> findEodsWithMatchingRecordInArm(
+        ObjectRecordStatusEntity storedStatus,
+        ExternalLocationTypeEntity parentEodLocation,
+        ExternalLocationTypeEntity armLocation,
+        OffsetDateTime lastModifiedBefore,
+        Limit limit);
+
+    @Query(value = "SELECT * FROM dmp4312_del_eod_upd_osr_conf_loc(:ids)", nativeQuery = true)
+    List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> cleanUpDetsDataProcedure(@Param("ids") List<Long> ids);
 
     @Query(
         """                       
