@@ -71,7 +71,6 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
     private static final String ENDPOINT_DOCUMENT_MARKED_FOR_DELETION = "/admin/transcription-documents/marked-for-deletion";
 
-
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
@@ -377,7 +376,8 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                      },
                      "is_manual_transcription": false,
                      "is_hidden": false,
-                     "case": {
+                     "uploaded_at":"%UPLOAD_DATE_3%",
+                      "case": {
                        "id": 1,
                        "case_number": "%CASE_NUMBER%"
                      }
@@ -394,7 +394,8 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                      },
                      "is_manual_transcription": false,
                      "is_hidden": false,
-                     "case": {
+                     "uploaded_at":"%UPLOAD_DATE_2%",
+                      "case": {
                        "id": 1,
                        "case_number": "%CASE_NUMBER%"
                      }
@@ -403,7 +404,11 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                 """
                 .replace("%CASE_NUMBER%", request.getCaseNumber())
                 .replace("%DATE_2%", OffsetDateTime.now().plusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE))
-                .replace("%DATE_3%", OffsetDateTime.now().plusDays(8).format(DateTimeFormatter.ISO_LOCAL_DATE)),
+                .replace("%DATE_3%", OffsetDateTime.now().plusDays(8).format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .replace("%UPLOAD_DATE_2%", transcriptionDocumentResults.get(1).getUploadedDateTime().withOffsetSameInstant(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                .replace("%UPLOAD_DATE_3%", transcriptionDocumentResults.get(2).getUploadedDateTime().withOffsetSameInstant(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
             mvcResult.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
@@ -445,6 +450,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                       },
                       "is_manual_transcription": false,
                       "is_hidden": true,
+                      "uploaded_at":"%UPLOAD_DATE_4%",
                       "case": {
                         "id": 1,
                         "case_number": "%CASE_NUMBER%"
@@ -462,6 +468,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                       },
                       "is_manual_transcription": false,
                       "is_hidden": false,
+                      "uploaded_at":"%UPLOAD_DATE_3%",
                       "case": {
                         "id": 1,
                         "case_number": "%CASE_NUMBER%"
@@ -479,6 +486,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                       },
                       "is_manual_transcription": false,
                       "is_hidden": false,
+                      "uploaded_at":"%UPLOAD_DATE_2%",
                       "case": {
                         "id": 1,
                         "case_number": "%CASE_NUMBER%"
@@ -496,6 +504,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                       },
                       "is_manual_transcription": false,
                       "is_hidden": true,
+                      "uploaded_at":"%UPLOAD_DATE_1%",
                       "case": {
                         "id": 1,
                         "case_number": "%CASE_NUMBER%"
@@ -507,7 +516,16 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                 .replace("%DATE_1%", OffsetDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
                 .replace("%DATE_2%", OffsetDateTime.now().plusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE))
                 .replace("%DATE_3%", OffsetDateTime.now().plusDays(8).format(DateTimeFormatter.ISO_LOCAL_DATE))
-                .replace("%DATE_4%", OffsetDateTime.now().plusDays(12).format(DateTimeFormatter.ISO_LOCAL_DATE)),
+                .replace("%DATE_4%", OffsetDateTime.now().plusDays(12).format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .replace("%UPLOAD_DATE_1%", transcriptionDocumentResults.get(0).getUploadedDateTime().withOffsetSameInstant(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                .replace("%UPLOAD_DATE_2%", transcriptionDocumentResults.get(1).getUploadedDateTime().withOffsetSameInstant(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                .replace("%UPLOAD_DATE_3%", transcriptionDocumentResults.get(2).getUploadedDateTime().withOffsetSameInstant(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                .replace("%UPLOAD_DATE_4%", transcriptionDocumentResults.get(3).getUploadedDateTime().withOffsetSameInstant(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+            ,
             mvcResult.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
