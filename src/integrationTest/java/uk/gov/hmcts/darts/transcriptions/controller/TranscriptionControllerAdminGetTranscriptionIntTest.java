@@ -524,8 +524,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                 .replace("%UPLOAD_DATE_3%", transcriptionDocumentResults.get(2).getUploadedDateTime().withOffsetSameInstant(ZoneOffset.UTC)
                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                 .replace("%UPLOAD_DATE_4%", transcriptionDocumentResults.get(3).getUploadedDateTime().withOffsetSameInstant(ZoneOffset.UTC)
-                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-            ,
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
             mvcResult.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
