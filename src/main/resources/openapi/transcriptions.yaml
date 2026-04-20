@@ -1743,7 +1743,7 @@ components:
         uploaded_at:
           type: string
           format: date-time
-          description: 'The transcription document date time of the transcription document'
+          description: 'The uploaded date time of the transcription document'
 
     GetTranscriptionDocumentByIdResponse:
       type: object
@@ -1768,7 +1768,7 @@ components:
         uploaded_at:
           type: string
           format: date-time
-          description: 'The transcription document date time of the transcription document'
+          description: 'The uploaded date time of the transcription document'
         uploaded_by:
           type: integer
           description: 'The transcription document uploaded by'
