@@ -396,7 +396,7 @@ darts:
           at-least-for: PT1M
           at-most-for: PT30M
       apply-retention:
-        days-between-events: 10d
+        days-between-events: 3d
         system-user-email: system_ApplyRetention@hmcts.net
         lock:
           at-least-for: PT1M
