@@ -52,7 +52,6 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
     @MockitoBean
     private DetsApiService detsApiService;
 
-
     @Test
     void cleanUpDetsData_typical() {
         //Valid data that should be cleaned up
@@ -83,7 +82,6 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         TestData<?> fullCleanUpData2 = new MediaTestData().createDataThatShouldBeCleanedUp(true);
         TestData<?> partialCleanUpData1 = new MediaTestData().createDataThatShouldBeCleanedUp(false);
 
-
         cleanUpDetsDataProcessor.processCleanUpDetsData(3, getCleanUpDetsDataAutomatedTaskConfig());
 
         assertSuccessfull(fullCleanUpData1);
@@ -100,7 +98,6 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         assertSuccessfull(partialCleanUpData1);
         assertSuccessfull(fullCleanUpData3);
     }
-
 
     private void assertNoChange(List<TestData<?>> testDataList) {
         testDataList.forEach(this::assertNoChange);
@@ -229,7 +226,6 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         }
     }
 
-
     @Getter
     public abstract class TestData<T> {
         private static long uniqueCounter;
@@ -294,8 +290,7 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
             lenient().when(detsApiService.deleteBlobDataFromContainer(detsEod.getLocation()))
                 .thenReturn(shouldBlobDeleteSucceed);
         }
-
-
+        
         private ObjectStateRecordEntity createObjectStateRecordEntity(ExternalObjectDirectoryEntity detsEod, ExternalObjectDirectoryEntity armEod) {
             ObjectStateRecordEntity osrEntity = new ObjectStateRecordEntity();
             osrEntity.setUuid(uniqueCounter++);
