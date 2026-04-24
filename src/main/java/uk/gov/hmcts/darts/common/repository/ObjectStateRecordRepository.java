@@ -21,7 +21,7 @@ public interface ObjectStateRecordRepository extends JpaRepository<ObjectStateRe
     @Query(value =
         """
             SELECT osr_uuid AS osrUuid, dets_location AS detsLocation
-            FROM dets_cleanup_eod_osr_rows(:limit, CAST(:last_modified_before_ts AS timestamptz))
+            FROM darts.dets_cleanup_eod_osr_rows(:limit, CAST(:last_modified_before_ts AS timestamptz))
             """, nativeQuery = true)
     List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> cleanUpDetsDataProcedure(
         @Param("limit") Integer limit, @Param("last_modified_before_ts") OffsetDateTime lastModifiedBefore);
