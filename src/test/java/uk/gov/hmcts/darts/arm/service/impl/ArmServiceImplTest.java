@@ -244,6 +244,13 @@ class ArmServiceImplTest {
         BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
         when(blobContainerClient.getServiceClient()).thenReturn(blobServiceClient);
 
+        BlobClient blobClient1 = mock(BlobClient.class);
+        BlobClient blobClient2 = mock(BlobClient.class);
+        when(blobContainerClient.getBlobClient("blob1")).thenReturn(blobClient1);
+        when(blobContainerClient.getBlobClient("blob2")).thenReturn(blobClient2);
+        when(blobClient1.getBlobUrl()).thenReturn("https://example/blob1");
+        when(blobClient2.getBlobUrl()).thenReturn("https://example/blob2");
+
 
         PagedIterable<Response<Void>> pagedResponses = (PagedIterable<Response<Void>>) mock(PagedIterable.class);
         Response<Void> r1 = (Response<Void>) mock(Response.class);
@@ -269,6 +276,13 @@ class ArmServiceImplTest {
         BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
         when(blobContainerClient.getServiceClient()).thenReturn(blobServiceClient);
 
+        BlobClient blobClient1 = mock(BlobClient.class);
+        BlobClient blobClient2 = mock(BlobClient.class);
+        when(blobContainerClient.getBlobClient("blob1")).thenReturn(blobClient1);
+        when(blobContainerClient.getBlobClient("blob2")).thenReturn(blobClient2);
+        when(blobClient1.getBlobUrl()).thenReturn("https://example/blob1");
+        when(blobClient2.getBlobUrl()).thenReturn("https://example/blob2");
+
         PagedIterable<Response<Void>> pagedResponses = (PagedIterable<Response<Void>>) mock(PagedIterable.class);
         Response<Void> r1 = (Response<Void>) mock(Response.class);
         Response<Void> r2 = (Response<Void>) mock(Response.class);
@@ -292,6 +306,13 @@ class ArmServiceImplTest {
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
         when(blobContainerClient.getServiceClient()).thenReturn(blobServiceClient);
+
+        BlobClient blobClient1 = mock(BlobClient.class);
+        BlobClient blobClient2 = mock(BlobClient.class);
+        when(blobContainerClient.getBlobClient("blob1")).thenReturn(blobClient1);
+        when(blobContainerClient.getBlobClient("blob2")).thenReturn(blobClient2);
+        when(blobClient1.getBlobUrl()).thenReturn("https://example/blob1");
+        when(blobClient2.getBlobUrl()).thenReturn("https://example/blob2");
 
         BlobBatchClient batchClient = mock(BlobBatchClient.class);
         when(batchClient.deleteBlobs(anyList(), eq(DeleteSnapshotsOptionType.INCLUDE), any(Duration.class), eq(null)))
