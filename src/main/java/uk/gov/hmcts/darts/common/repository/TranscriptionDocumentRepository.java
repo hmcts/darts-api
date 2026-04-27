@@ -15,7 +15,6 @@ import java.util.List;
 public interface TranscriptionDocumentRepository extends JpaRepository<TranscriptionDocumentEntity, Long>,
     SoftDeleteRepository<TranscriptionDocumentEntity, Long> {
 
-
     @Query("""
          SELECT distinct new uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult(tmd.id, t.id,
          courtCase.id,
@@ -52,7 +51,8 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
              AND (tmd.isHidden = false OR tmd.isHidden = :allowHidden)
           ORDER BY tmd.id DESC
         """)
-    @SuppressWarnings({"java:S107", "PMD.UseObjectForClearerAPI"})//Required for JPA
+    @SuppressWarnings({"java:S107", "PMD.UseObjectForClearerAPI"})
+//Required for JPA
     List<TranscriptionDocumentResult> findTranscriptionMedia(String caseNumber,
                                                              String courtHouseDisplayName,
                                                              LocalDate hearingDate,
