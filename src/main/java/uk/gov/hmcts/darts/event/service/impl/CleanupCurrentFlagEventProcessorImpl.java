@@ -57,14 +57,15 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
     /*
     Mark all but the latest identical event as is_current=false and remove link to hearing.
      */
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")//TODO - refactor to avoid instantiating objects in loops when this is next edited
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     private void supersedeOldEvents(EventRepository.EventIdAndHearingIds eventIdAndHearingIds) {
         List<EventEntity> eventsWithSameEventIdAndHearings = getEventsWithSameEventIdAndHearings(eventIdAndHearingIds.getEveId(),
                                                                                                  eventIdAndHearingIds.getEventId());
         List<EventEntity> eventsToBeSuperseded = eventsWithSameEventIdAndHearings.stream()
             .sorted(Comparator.comparing(EventEntity::getCreatedDateTime).reversed())
+            .skip(1)
             .collect(Collectors.toList());
-        eventsToBeSuperseded.removeFirst();
+
         if (CollectionUtils.isNotEmpty(eventsToBeSuperseded)) {
             List<EventEntity> eventsThatHaveBeenSuperseded = new ArrayList<>();
             for (EventEntity eventToBeSuperseded : eventsToBeSuperseded) {
