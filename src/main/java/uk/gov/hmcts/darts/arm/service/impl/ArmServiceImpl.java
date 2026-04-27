@@ -11,6 +11,7 @@ import com.azure.storage.blob.batch.BlobBatchClient;
 import com.azure.storage.blob.batch.BlobBatchClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobListDetails;
+import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ListBlobsOptions;
 import lombok.extern.slf4j.Slf4j;
@@ -284,8 +285,8 @@ public class ArmServiceImpl implements ArmService {
     }
 
     @Override
-    public boolean deleteMultipleBlobs(String containerName, List<String> blobPathAndName) {
-        if (blobPathAndName == null || blobPathAndName.isEmpty()) {
+    public boolean deleteMultipleBlobs(String containerName, List<String> blobsWithPathAndName) {
+        if (blobsWithPathAndName == null || blobsWithPathAndName.isEmpty()) {
             log.info("No blobs provided to delete for containerName={}", containerName);
             return false;
         }
@@ -293,13 +294,18 @@ public class ArmServiceImpl implements ArmService {
         try {
             BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
 
+            // Blob Batch expects fully-qualified blob URLs (not just blob names/paths).
+            List<String> blobUrls = blobsWithPathAndName.stream()
+                .map(name -> containerClient.getBlobClient(name).getBlobUrl())
+                .toList();
+
             // Delete *all* blobs in one go using Azure Storage Blob Batch.
             BlobServiceClient blobServiceClient = containerClient.getServiceClient();
             BlobBatchClient batchClient = new BlobBatchClientBuilder(blobServiceClient).buildClient();
 
             boolean allSuccessful = true;
             PagedIterable<Response<Void>> responses = batchClient.deleteBlobs(
-                blobPathAndName,
+                blobUrls,
                 DeleteSnapshotsOptionType.INCLUDE,
                 Duration.of(TIMEOUT, ChronoUnit.SECONDS),
                 null
@@ -309,26 +315,54 @@ public class ArmServiceImpl implements ArmService {
             for (Response<Void> response : responses) {
                 int statusCode = response.getStatusCode();
                 HttpStatus httpStatus = valueOf(statusCode);
-                String blobName = index < blobPathAndName.size() ? blobPathAndName.get(index) : "<unknown>";
+                String blobName = index < blobsWithPathAndName.size() ? blobsWithPathAndName.get(index) : "<unknown>";
                 index++;
 
                 if (!(httpStatus.is2xxSuccessful() || NOT_FOUND.equals(httpStatus))) {
                     allSuccessful = false;
-                    log.warn("Failed to delete blob in batch containerName={}, blobPathAndName={}, statusCode={}, httpStatus={}",
+                    log.warn("Failed to delete blob in batch containerName={}, blobsWithPathAndName={}, statusCode={}, httpStatus={}",
                              containerName, blobName, statusCode, httpStatus);
                 }
             }
 
             if (allSuccessful) {
-                log.info("Successfully deleted {} blobs from containerName={} using batch", blobPathAndName.size(), containerName);
+                log.info("Successfully deleted {} blobs from containerName={} using batch", blobsWithPathAndName.size(), containerName);
             } else {
                 log.error("Batch deletion completed with one or more failures for containerName={}", containerName);
             }
             return allSuccessful;
+        } catch (BlobStorageException bse) {
+            // Common scenario: single-blob delete works but batch is forbidden for the current auth scope
+            // (e.g., SAS token doesn't allow signed resource level for batch).
+            if (bse.getStatusCode() == 403) {
+                log.warn("Batch deletion forbidden for containerName={} (statusCode=403). Falling back to individual deletes. Message={}",
+                         containerName, bse.getMessage());
+                return deleteBlobsIndividually(containerName, blobsWithPathAndName);
+            }
+            log.error("BlobStorageException during batch delete for containerName={}", containerName, bse);
+            return false;
         } catch (Exception e) {
             log.error("Could not delete multiple blobs from storage container={}", containerName, e);
             return false;
         }
+    }
+
+    private boolean deleteBlobsIndividually(String containerName, List<String> blobPathAndName) {
+        boolean allSuccessful = true;
+
+        for (String blob : blobPathAndName) {
+            boolean deleted = deleteBlobData(containerName, blob);
+            if (!deleted) {
+                allSuccessful = false;
+            }
+        }
+
+        if (allSuccessful) {
+            log.info("Successfully deleted {} blobs from containerName={} using individual deletes", blobPathAndName.size(), containerName);
+        } else {
+            log.error("Individual deletion completed with one or more failures for containerName={}", containerName);
+        }
+        return allSuccessful;
     }
 
 }
