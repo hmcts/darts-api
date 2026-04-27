@@ -59,24 +59,11 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
+                LEFT JOIN transcription_document trd on tra.tra_id=tra_id and trd.is_hidden =false
                 WHERE trw.workflow_actor = :usr_id
                 AND trw.trs_id = 1
                 AND tra.trs_id <> 7
                 AND (:include_hidden_from_requester OR tra.hide_request_from_requestor = false)
-                AND (
-                    EXISTS (
-                        SELECT 1
-                        FROM darts.transcription_document trd
-                        WHERE trd.tra_id = tra.tra_id
-                        AND trd.is_hidden = false
-                    )
-                    OR
-                    NOT EXISTS (
-                        SELECT 1
-                        FROM darts.transcription_document trd
-                        WHERE trd.tra_id = tra.tra_id
-                    )
-                )
                 AND tra.is_current = true
                 UNION
                 -- Migrated "requester_transcriptions"
@@ -101,6 +88,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
+                LEFT JOIN transcription_document trd on tra.tra_id=tra_id and trd.is_hidden =false
                 WHERE trw.workflow_actor = :usr_id
                 AND trw.trs_id = 1
                 AND tra.trs_id <> 7
@@ -110,20 +98,6 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     WHERE tra.tra_id = hear_tran.tra_id
                 )
                 AND (:include_hidden_from_requester OR tra.hide_request_from_requestor = false)
-                AND (
-                    EXISTS (
-                        SELECT 1
-                        FROM darts.transcription_document trd
-                        WHERE trd.tra_id = tra.tra_id
-                        AND trd.is_hidden = false
-                    )
-                    OR
-                    NOT EXISTS (
-                        SELECT 1
-                        FROM darts.transcription_document trd
-                        WHERE trd.tra_id = tra.tra_id
-                    )
-                )
                 AND tra.is_current = true
                 ORDER BY requested_ts DESC
                 LIMIT :max_result_size
