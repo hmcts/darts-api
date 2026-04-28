@@ -423,7 +423,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
-  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.16'
+  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.18'
 
   implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.5.6'
 
@@ -478,9 +478,9 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.2.3'
-  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.5.9'
+  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.5.11'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.44.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.6.48.Final'
+  implementation 'org.hibernate:hibernate-spatial:6.6.49.Final'
 
   // https://mvnrepository.com/artifact/com.querydsl/querydsl-core
   implementation 'com.querydsl:querydsl-core:5.1.0'
@@ -505,7 +505,7 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.3.1'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.13.4'
-  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.8.4'
+  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.8.5'
   testImplementation 'org.springframework.security:spring-security-test:6.5.8'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
