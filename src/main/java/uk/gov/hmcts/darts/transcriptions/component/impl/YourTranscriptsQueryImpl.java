@@ -59,7 +59,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
-                LEFT JOIN transcription_document trd on tra.tra_id=tra_id and trd.is_hidden =false
+                LEFT JOIN darts.transcription_document trd on trd.tra_id = tra.tra_id and trd.is_hidden = false
                 WHERE trw.workflow_actor = :usr_id
                 AND trw.trs_id = 1
                 AND tra.trs_id <> 7
@@ -88,7 +88,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
-                LEFT JOIN transcription_document trd on tra.tra_id=tra_id and trd.is_hidden =false
+                LEFT JOIN darts.transcription_document trd on trd.tra_id = tra.tra_id and trd.is_hidden = false
                 WHERE trw.workflow_actor = :usr_id
                 AND trw.trs_id = 1
                 AND tra.trs_id <> 7
