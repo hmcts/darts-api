@@ -52,7 +52,6 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
           ORDER BY tmd.id DESC
         """)
     @SuppressWarnings({"java:S107", "PMD.UseObjectForClearerAPI"})
-//Required for JPA
     List<TranscriptionDocumentResult> findTranscriptionMedia(String caseNumber,
                                                              String courtHouseDisplayName,
                                                              LocalDate hearingDate,
