@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -31,8 +32,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -322,6 +327,56 @@ class ArmServiceImplTest {
                                             (builder, context) -> when(builder.buildClient()).thenReturn(batchClient))) {
             boolean result = armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
             assertFalse(result);
+        }
+    }
+
+    @Test
+    void deleteBlobsIndividually_shouldReturnTrueAndCallDeleteForEachBlob_whenAllDeletesSucceed() {
+        ArmServiceImpl serviceSpy = spy(armService);
+        doReturn(true).when(serviceSpy).deleteBlobData(eq(ARM_BLOB_CONTAINER_NAME), any());
+
+        boolean result = invokeDeleteBlobsIndividually(serviceSpy, ARM_BLOB_CONTAINER_NAME, List.of("b1", "b2", "b3"));
+
+        assertTrue(result);
+        verify(serviceSpy, times(3)).deleteBlobData(eq(ARM_BLOB_CONTAINER_NAME), any());
+        verify(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b1");
+        verify(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b2");
+        verify(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b3");
+    }
+
+    @Test
+    void deleteBlobsIndividually_shouldReturnFalseAndStillAttemptAllDeletes_whenAnyDeleteFails() {
+        ArmServiceImpl serviceSpy = spy(armService);
+        doReturn(true).when(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b1");
+        doReturn(false).when(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b2");
+        doReturn(true).when(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b3");
+
+        boolean result = invokeDeleteBlobsIndividually(serviceSpy, ARM_BLOB_CONTAINER_NAME, List.of("b1", "b2", "b3"));
+
+        assertFalse(result);
+        verify(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b1");
+        verify(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b2");
+        verify(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b3");
+        verify(serviceSpy, times(3)).deleteBlobData(eq(ARM_BLOB_CONTAINER_NAME), any());
+    }
+
+    @Test
+    void deleteBlobsIndividually_shouldReturnTrueAndNotCallDelete_whenBlobListIsEmpty() {
+        ArmServiceImpl serviceSpy = spy(armService);
+
+        boolean result = invokeDeleteBlobsIndividually(serviceSpy, ARM_BLOB_CONTAINER_NAME, List.of());
+
+        assertTrue(result);
+        verify(serviceSpy, times(0)).deleteBlobData(eq(ARM_BLOB_CONTAINER_NAME), any());
+    }
+
+    private boolean invokeDeleteBlobsIndividually(ArmServiceImpl service, String containerName, List<String> blobs) {
+        try {
+            Method method = ArmServiceImpl.class.getDeclaredMethod("deleteBlobsIndividually", String.class, List.class);
+            method.setAccessible(true);
+            return (boolean) method.invoke(service, containerName, blobs);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
