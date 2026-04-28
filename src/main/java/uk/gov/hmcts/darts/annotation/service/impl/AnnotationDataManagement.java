@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
+import static uk.gov.hmcts.darts.arm.enums.ArmApiError.ARM_DOWN_FOR_MAINTENANCE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 
@@ -58,6 +60,10 @@ public class AnnotationDataManagement {
             DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(externalObjectDirectoryEntities);
 
             return downloadResponseMetaData.getResource();
+        } catch (ArmDownForMaintenanceException e) {
+            log.error("ARM is down for maintenance, failed to download annotation document {}",
+                      externalObjectDirectoryEntities.getFirst().getAnnotationDocumentEntity().getId(), e);
+            throw new DartsApiException(ARM_DOWN_FOR_MAINTENANCE, e);
         } catch (IOException | FileNotDownloadedException e) {
             log.error("Failed to download annotation document {}",
                       externalObjectDirectoryEntities.getFirst().getAnnotationDocumentEntity().getId(), e);

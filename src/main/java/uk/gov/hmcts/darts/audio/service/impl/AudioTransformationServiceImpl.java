@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
@@ -256,7 +257,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     private Map<MediaEntity, Path> downloadAndSaveMediaToWorkspace(List<MediaEntity> mediaEntitiesForRequest)
-        throws IOException {
+        throws IOException, ArmDownForMaintenanceException {
         Map<MediaEntity, Path> downloadedMedias = new LinkedHashMap<>();
         for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
             Path downloadPath = retrieveFromStorageAndSaveToTempWorkspace(mediaEntity);
@@ -268,7 +269,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes"})
-    public Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException {
+    public Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException, ArmDownForMaintenanceException {
 
         try (DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
             String id = downloadResponseMetaData.getEodEntity().getExternalLocation();
