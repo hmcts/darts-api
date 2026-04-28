@@ -135,6 +135,7 @@ java:
     SHEDLOCK_LOG_LEVEL: INFO
     ARM_RPO_TOTAL_CATCHUP_HOURS: 5
     ARM_RPO_TOTAL_CATCHUP_MAX_HOURS_ENDING_POINT: 50
+    ARM_DOWN_FOR_MAINTENANCE: false
   secrets:
     DARTS_API_DB_PASSWORD:
       secretRef: "postgres"
@@ -168,6 +169,7 @@ darts-portal:
       DARTS_AZUREAD_B2C_ORIGIN_HOST: https://hmctsstgextid.b2clogin.com
       DARTS_AZUREAD_B2C_HOSTNAME: https://darts.staging.apps.hmcts.net
       MANUAL_DELETION_ENABLED: true
+      ARM_DOWN_FOR_MAINTENANCE: false
 
 darts-gateway:
   enabled: ${DEV_ENABLE_DARTS_GATEWAY}
@@ -340,6 +342,7 @@ function:
     ENABLE_ARM_V5_2_UPGRADE: true
     ARM_RPO_TOTAL_CATCHUP_HOURS: 5
     ARM_RPO_TOTAL_CATCHUP_MAX_HOURS_ENDING_POINT: 50
+    ARM_DOWN_FOR_MAINTENANCE: false
 
   secrets:
     DARTS_API_DB_PASSWORD:
