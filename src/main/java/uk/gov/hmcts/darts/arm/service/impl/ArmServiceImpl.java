@@ -40,7 +40,7 @@ import static org.springframework.http.HttpStatus.valueOf;
 
 @Service
 @Slf4j
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 public class ArmServiceImpl implements ArmService {
 
     private static final String FILE_PATH_DELIMITER = "/";
@@ -299,7 +299,6 @@ public class ArmServiceImpl implements ArmService {
                 .map(name -> containerClient.getBlobClient(name).getBlobUrl())
                 .toList();
 
-            // Delete *all* blobs in one go using Azure Storage Blob Batch.
             BlobServiceClient blobServiceClient = containerClient.getServiceClient();
             BlobBatchClient batchClient = new BlobBatchClientBuilder(blobServiceClient).buildClient();
 
@@ -334,7 +333,7 @@ public class ArmServiceImpl implements ArmService {
         } catch (BlobStorageException bse) {
             // Common scenario: single-blob delete works but batch is forbidden for the current auth scope
             // (e.g., SAS token doesn't allow signed resource level for batch).
-            if (bse.getStatusCode() == 403) {
+            if (bse.getStatusCode() == HttpStatus.FORBIDDEN.value()) {
                 log.warn("Batch deletion forbidden for containerName={} (statusCode=403). Falling back to individual deletes. Message={}",
                          containerName, bse.getMessage());
                 return deleteBlobsIndividually(containerName, blobsWithPathAndName);
@@ -349,12 +348,15 @@ public class ArmServiceImpl implements ArmService {
 
     private boolean deleteBlobsIndividually(String containerName, List<String> blobPathAndName) {
         boolean allSuccessful = true;
-
+        List<Boolean> allDeleted = new ArrayList<>();
         for (String blob : blobPathAndName) {
             boolean deleted = deleteBlobData(containerName, blob);
-            if (!deleted) {
-                allSuccessful = false;
-            }
+            allDeleted.add(deleted);
+        }
+        if (!allDeleted.isEmpty()) {
+            allSuccessful = allDeleted.stream().allMatch(Boolean.TRUE::equals);
+        } else {
+            allSuccessful = false;
         }
 
         if (allSuccessful) {
