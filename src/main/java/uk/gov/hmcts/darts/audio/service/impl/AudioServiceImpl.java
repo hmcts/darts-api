@@ -4,6 +4,8 @@ import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.enums.ArmApiError;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
@@ -71,6 +73,9 @@ public class AudioServiceImpl implements AudioService {
             Path encodedAudioPath = encodedAudioFileInfo.getPath();
 
             mediaBinaryData = fileOperationService.convertFileToBinaryData(encodedAudioPath.toFile().getAbsolutePath());
+
+        } catch (ArmDownForMaintenanceException e) {
+            throw new DartsApiException(ArmApiError.ARM_DOWN_FOR_MAINTENANCE, e);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
