@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
@@ -104,7 +105,7 @@ class TranscriptionDownloaderTest {
     }
 
     @Test
-    void throwsExceptionIfTranscriptionDocumentHasNoExternalObjectDirectories() throws IOException, FileNotDownloadedException {
+    void throwsExceptionIfTranscriptionDocumentHasNoExternalObjectDirectories() throws FileNotDownloadedException, ArmDownForMaintenanceException {
         var transcriptionDocument = someTranscriptionDocumentWithUploadDate(now());
         transcriptionDocument.setExternalObjectDirectoryEntities(emptyList());
 
@@ -123,7 +124,7 @@ class TranscriptionDownloaderTest {
 
 
     @Test
-    void throwsExceptionIfFailsToGetDownloadResponseInputStream() throws IOException, FileNotDownloadedException {
+    void throwsExceptionIfFailsToGetDownloadResponseInputStream() throws IOException, FileNotDownloadedException, ArmDownForMaintenanceException {
         var transcriptionDocument = someTranscriptionDocumentWithUploadDate(now());
         transcriptionDocument.setExternalObjectDirectoryEntities(List.of(someExternalObjectDirectoryWithCreationDate(now())));
 
@@ -143,7 +144,7 @@ class TranscriptionDownloaderTest {
     }
 
     @Test
-    void retrievesTranscriptionFromUnstructuredContainer() throws IOException, FileNotDownloadedException {
+    void retrievesTranscriptionFromUnstructuredContainer() throws IOException, FileNotDownloadedException, ArmDownForMaintenanceException {
         // Given
         var inboundExternalObjectDirectoryCreatedToday = someExternalObjectDirectoryWithCreationDate(now());
         inboundExternalObjectDirectoryCreatedToday.setExternalLocationType(externalLocationTypeFor(INBOUND));
@@ -159,7 +160,6 @@ class TranscriptionDownloaderTest {
         var transcription = someTranscriptionWith(transcriptionDocuments);
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
         when(dataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(fileBasedDownloadResponseMetaData);
-
 
         Resource resource = Mockito.mock(Resource.class);
         when(fileBasedDownloadResponseMetaData.getResource()).thenReturn(resource);
@@ -197,7 +197,7 @@ class TranscriptionDownloaderTest {
     }
 
     @Test
-    void downloadsDocumentIfTranscriptionDocumentHiddenAndUserIsSuperAdmin() throws FileNotDownloadedException, IOException {
+    void downloadsDocumentIfTranscriptionDocumentHiddenAndUserIsSuperAdmin() throws FileNotDownloadedException, IOException, ArmDownForMaintenanceException {
         when(userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN))).thenReturn(true);
 
         var transcriptionDocuments = someTranscriptionDocumentsUploadedAtLeast2DaysAgo(1);
