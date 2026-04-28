@@ -60,6 +60,9 @@ public class DataManagementConfiguration extends StorageConfiguration {
     @Value("${darts.storage.blob.az-copy-output-level}")
     private String azCopyOutputLevel;
 
+    @Value("${darts.storage.arm-down-for-maintenance}")
+    private Boolean armDownForMaintenance;
+
     @Override
     @Value("${darts.storage.blob.temp-blob-workspace}")
     public void setTempBlobWorkspace(String tempBlobWorkspace) {
