@@ -38,6 +38,7 @@ import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType.ARM;
+import static uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Slf4j
@@ -168,6 +169,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
      * Loop through each storage type in order to see if it has a matched EodEntity, and if it does, try to download the file from there. If it fails,
      * move to the next one, if they all fail then throw a FileNotDownloadedException.
      */
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     private DownloadResponseMetaData getDataFromStorage(
         List<ExternalObjectDirectoryEntity> storedEodEntities) throws FileNotDownloadedException, ArmDownForMaintenanceException {
         List<DatastoreContainerType> storageOrder = storageOrderHelper.getStorageOrder();
@@ -189,10 +191,10 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                 continue;
             }
             if (dataManagementConfiguration.getArmDownForMaintenance()
-                && datastoreContainerType.equals(DatastoreContainerType.ARM)) {
+                && datastoreContainerType.equals(ARM)) {
                 throw new ArmDownForMaintenanceException("ARM is currently down for maintenance, cannot download files from ARM at this time");
             }
-            if (datastoreContainerType.equals(DatastoreContainerType.UNSTRUCTURED)) {
+            if (datastoreContainerType.equals(UNSTRUCTURED)) {
                 eodEntityToDelete = eodEntity;
             }
             Optional<BlobContainerDownloadable> container = getSupportedContainer(datastoreContainerType);
