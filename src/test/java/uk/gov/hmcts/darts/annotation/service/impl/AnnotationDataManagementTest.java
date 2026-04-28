@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
@@ -120,7 +121,7 @@ class AnnotationDataManagementTest {
     }
 
     @Test
-    void throwsIfDownloadAnnotationDocumentResponseFails() throws FileNotDownloadedException {
+    void throwsIfDownloadAnnotationDocumentResponseFails() throws FileNotDownloadedException, ArmDownForMaintenanceException {
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenThrow(new FileNotDownloadedException());
         assertThatThrownBy(() -> annotationDataManagement.download(Arrays.asList(someExternalObjectDirectoryEntity())))
             .isInstanceOf(DartsApiException.class)
@@ -129,7 +130,7 @@ class AnnotationDataManagementTest {
 
     @Test
     @SuppressWarnings("PMD.CloseResource")
-    void throwsIfDownloadAnnotationDocumentInputStreamFails() throws FileNotDownloadedException, IOException {
+    void throwsIfDownloadAnnotationDocumentInputStreamFails() throws FileNotDownloadedException, IOException, ArmDownForMaintenanceException {
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(mockFileBasedDownloadResponseMetaData);
 

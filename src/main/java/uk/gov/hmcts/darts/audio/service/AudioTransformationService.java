@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.IOException;
@@ -18,7 +19,7 @@ public interface AudioTransformationService {
                                                                                      OffsetDateTime startTime,
                                                                                      OffsetDateTime endTime);
 
-    Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException;
+    Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException, ArmDownForMaintenanceException;
 
     void handleKedaInvocationForMediaRequests();
 
