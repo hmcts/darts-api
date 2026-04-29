@@ -106,9 +106,6 @@ public class DataStoreToArmHelper {
             externalObjectDirectoryEntity.getId()
         );
         externalObjectDirectoryEntity.setTransferAttempts(newNumberOfAttempts);
-        if (newNumberOfAttempts > armDataManagementConfiguration.getMaxRetryAttempts()) {
-            logApi.armPushFailed(externalObjectDirectoryEntity.getId());
-        }
     }
 
     public void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEntity armStatus,

@@ -306,7 +306,6 @@ class DataStoreToArmHelperTest {
 
         // then
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntity);
-        verify(logApi).armPushFailed(123L);
     }
 
     @Test

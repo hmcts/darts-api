@@ -5,7 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -28,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
@@ -44,6 +48,8 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     private UserIdentity userIdentity;
     @MockitoBean
     private ArmDataManagementApi armDataManagementApi;
+    @MockitoSpyBean
+    private DataStoreToArmHelper dataStoreToArmHelper;
 
     @Autowired
     private DetsToArmBatchPushProcessor detsToArmBatchPushProcessor;
@@ -406,5 +412,67 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(uuid);
         return objectStateRecordEntity;
+    }
+
+    @Test
+    void processDetsToArm_StopsIncrementingTransferAttempts_WhenProcessDetsToArmFails() {
+        // given
+        ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
+            .save(createObjectStateRecordEntity(111L));
+        dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
+
+        ExternalObjectDirectoryEntity detsEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            STORED,
+            DETS,
+            UUID.randomUUID().toString()
+        );
+        OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+
+        detsEod.setLastModifiedDateTime(latestDateTime);
+        detsEod.setTransferAttempts(1);
+        detsEod.setResponseCleaned(false);
+        detsEod.setOsrUuid(objectStateRecordEntity.getUuid());
+        detsEod = dartsDatabase.save(detsEod);
+
+        objectStateRecordEntity.setEodId(detsEod.getId());
+        dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
+
+        String rawFilename = String.format("%s_%s_%s", detsEod.getId(), savedMedia.getId(), detsEod.getTransferAttempts());
+        doNothing().when(armDataManagementApi).copyDetsBlobDataToArm(detsEod.getExternalLocation(), rawFilename);
+        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(new BlobStorageException("Error", null, 500));
+
+        // when
+        detsToArmBatchPushProcessor.processDetsToArm(5);
+        detsToArmBatchPushProcessor.processDetsToArm(5);
+        detsToArmBatchPushProcessor.processDetsToArm(5);
+        detsToArmBatchPushProcessor.processDetsToArm(5);
+        detsToArmBatchPushProcessor.processDetsToArm(5);
+
+        // then
+        Optional<ExternalObjectDirectoryEntity> foundArmEodOptional = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findMatchingExternalObjectDirectoryEntityByLocation(
+                EodHelper.failedArmManifestFileStatus(),
+                EodHelper.armLocation(),
+                savedMedia,
+                null,
+                null,
+                null
+            );
+        assertTrue(foundArmEodOptional.isPresent());
+        ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
+        assertEquals(EodHelper.failedArmManifestFileStatus().getId(), foundArmEod.getStatus().getId());
+        assertNotNull(foundArmEod.getOsrUuid());
+
+        ObjectStateRecordEntity objectStateRecord = dartsDatabase.getObjectStateRecordRepository()
+            .findById(objectStateRecordEntity.getUuid()).orElseThrow();
+        verifyObjectStateRecordFailed(foundArmEod, detsEod, objectStateRecord);
+
+        // verify transfer attempts stops after 4 
+        assertEquals(4, foundArmEod.getTransferAttempts());
+        // verify recoverByUpdatingEodToFailedArmStatus called 4 times
+        verify(dataStoreToArmHelper,    times(4))
+            .recoverByUpdatingEodToFailedArmStatus(any(), any());
+
     }
 }
