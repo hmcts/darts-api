@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.DataAnonymisationRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.event.service.EventService;
@@ -78,6 +79,8 @@ class DataAnonymisationServiceImplTest {
     private EventService eventService;
     @Mock
     private DataAnonymisationRepository dataAnonymisationRepository;
+    @Mock
+    private MediaRequestRepository mediaRequestRepository;
 
     @InjectMocks
     @Spy
@@ -227,7 +230,6 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService).registerDataAnonymisation(userAccount, transcriptionCommentEntity, isManuallyRequested);
     }
 
-
     @ParameterizedTest(name = "Anonymise CourtCase with isManuallyRequested = {0}")
     @ValueSource(booleans = {true, false})
     void anonymiseCourtCaseById_typical(boolean isManuallyRequested) {
@@ -294,7 +296,6 @@ class DataAnonymisationServiceImplTest {
         verify(eventService).allAssociatedCasesAnonymised(eventEntity2);
     }
 
-
     @ParameterizedTest(name = "Anonymise Transcription with isManuallyRequested = {0}")
     @ValueSource(booleans = {true, false})
     void anonymiseTranscriptionEntity_typical(boolean isManuallyRequested) {
@@ -310,7 +311,6 @@ class DataAnonymisationServiceImplTest {
 
         doNothing().when(dataAnonymisationService).anonymiseTranscriptionCommentEntity(any(), any(), anyBoolean());
         doNothing().when(dataAnonymisationService).anonymiseTranscriptionWorkflowEntity(any());
-
 
         UserAccountEntity userAccount = new UserAccountEntity();
         dataAnonymisationService.anonymiseTranscriptionEntity(userAccount, transcriptionEntity, isManuallyRequested);
@@ -344,17 +344,20 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService).anonymiseTranscriptionEntity(userAccount, transcriptionEntity2, isManuallyRequested);
     }
 
-
     @Test
-    void positiveExpireMediaRequest() {
+    void expiredMediaRequest_updatesStatusAndSavesEntity() {
         setupOffsetDateTime();
-        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(42);
+
+        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+        mediaRequestEntity.setStatus(MediaRequestStatus.COMPLETED);
 
         dataAnonymisationService.expiredMediaRequest(userAccount, mediaRequestEntity);
 
         assertThat(mediaRequestEntity.getStatus()).isEqualTo(MediaRequestStatus.EXPIRED);
         assertLastModifiedByAndAt(mediaRequestEntity, userAccount);
+        verify(mediaRequestRepository).save(mediaRequestEntity);
     }
 
     @Test
@@ -425,7 +428,6 @@ class DataAnonymisationServiceImplTest {
 
         UserAccountEntity userAccount = new UserAccountEntity();
 
-
         TransformedMediaEntity transformedMediaEntity1 = new TransformedMediaEntity();
         TransformedMediaEntity transformedMediaEntity2 = new TransformedMediaEntity();
         TransformedMediaEntity transformedMediaEntity3 = new TransformedMediaEntity();
@@ -452,13 +454,11 @@ class DataAnonymisationServiceImplTest {
             transformedMediaEntity4
         ));
 
-
         dataAnonymisationService.tidyUpTransformedMediaEntities(userAccount, courtCase);
 
         verify(dataAnonymisationService).expiredMediaRequest(userAccount, hearing1MediaRequestEntity1);
         verify(dataAnonymisationService).expiredMediaRequest(userAccount, hearing1MediaRequestEntity2);
         verify(dataAnonymisationService).expiredMediaRequest(userAccount, hearing1MediaRequestEntity3);
-
 
         verify(dataAnonymisationService).expiredMediaRequest(userAccount, hearing2MediaRequestEntity1);
         verify(dataAnonymisationService).expiredMediaRequest(userAccount, hearing2MediaRequestEntity2);
@@ -466,17 +466,12 @@ class DataAnonymisationServiceImplTest {
 
         verify(dataAnonymisationService).expiredMediaRequest(userAccount, hearing3MediaRequestEntity1);
 
+        verify(dataAnonymisationService).deleteTransformedMediaEntity(transformedMediaEntity1);
+        verify(dataAnonymisationService).deleteTransformedMediaEntity(transformedMediaEntity2);
+        verify(dataAnonymisationService).deleteTransformedMediaEntity(transformedMediaEntity3);
+        verify(dataAnonymisationService).deleteTransformedMediaEntity(transformedMediaEntity4);
+        verify(dataAnonymisationService).deleteTransformedMediaEntity(transformedMediaEntity5);
 
-        verify(dataAnonymisationService)
-            .deleteTransformedMediaEntity(transformedMediaEntity1);
-        verify(dataAnonymisationService)
-            .deleteTransformedMediaEntity(transformedMediaEntity2);
-        verify(dataAnonymisationService)
-            .deleteTransformedMediaEntity(transformedMediaEntity3);
-        verify(dataAnonymisationService)
-            .deleteTransformedMediaEntity(transformedMediaEntity4);
-        verify(dataAnonymisationService)
-            .deleteTransformedMediaEntity(transformedMediaEntity5);
     }
 
     @ParameterizedTest(name = "Anonymise event by ids with isManuallyRequested = {0}")
@@ -486,7 +481,6 @@ class DataAnonymisationServiceImplTest {
         EventEntity event2 = mock(EventEntity.class);
         EventEntity event3 = mock(EventEntity.class);
 
-
         doReturn(event1).when(eventService).getEventByEveId(1L);
         doReturn(event2).when(eventService).getEventByEveId(2L);
         doReturn(event3).when(eventService).getEventByEveId(3L);
@@ -495,7 +489,6 @@ class DataAnonymisationServiceImplTest {
         doNothing().when(dataAnonymisationService).registerDataAnonymisation(any(), any(EventEntity.class), anyBoolean());
 
         dataAnonymisationService.anonymiseEventByIds(userAccount, List.of(1L, 2L, 3L, 4L), isManuallyRequested);
-
 
         verify(dataAnonymisationService).anonymiseEventEntity(userAccount, event1, false, isManuallyRequested);
         verify(dataAnonymisationService).anonymiseEventEntity(userAccount, event2, false, isManuallyRequested);
