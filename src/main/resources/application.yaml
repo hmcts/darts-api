@@ -442,6 +442,15 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
+      clean-up-dets-data:
+        system-user-email: systemCleanUpDetsDataAutomatedTask@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT90M
+        minimum-stored-age: 7D
+        chunk-size: 10000
+        async-timeout: 20M
+        threads: 20
       cleanup-arm-response-files:
         system-user-email: system_CleanupArmResponseFiles@hmcts.net
         lock:
@@ -638,6 +647,7 @@ darts:
       arm-rpo-feature-flag-logs-enabled: ${ARM_RPO_FEATURE_FLAG_LOGS_ENABLED:false}
       dets-to-arm-push-feature-flag-logs-enabled: ${DETS_TO_ARM_PUSH_FEATURE_FLAG_LOGS_ENABLED:false}
       arm-pull-feature-flag-logs-enabled: ${ARM_PULL_FEATURE_FLAG_LOGS_ENABLED:false}
+      clean-up-dets-data-feature-flag-logs-enabled: ${CLEAN_UP_DETS_DATA_FEATURE_FLAG_LOGS_ENABLED:false}
 
 dbMigration:
   # When true, the app will run DB migration on startup.
