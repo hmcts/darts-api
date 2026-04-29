@@ -26,6 +26,29 @@ Tests are split across Gradle source sets:
 
 Operational assets stay in `charts/`, `config/`, and `infrastructure/`. Helper scripts live under `bin/`. Docker Compose files live in the repository root.
 
+## Getting Started (Local)
+
+Prerequisites (see `README.md` for full detail):
+
+- Java 21
+- ffmpeg
+- redis
+- Optional: Azurite for local Azure Storage testing
+
+Environment variables are required for functional tests and some local runs. Values live in Azure Key Vault; use:
+
+- `source bin/secrets-stg.sh` (shell exports)
+- `source bin/secrets-stg-environment.sh` (IDE run configs)
+
+Do not commit secrets. See `README.md` for the full variable list and setup steps.
+
+Local run (minimal path):
+
+- Start redis via Docker: `docker compose -f docker-compose-local.yml up darts-redis`
+- Run the service via IntelliJ or `./gradlew bootRun` with `spring.profiles.active=local`
+
+For a full stack in Docker (API + dependencies), use `./bin/dcup` or `./bin/run-in-docker.sh`.
+
 ## Build, Test, and Development Commands
 
 - `./gradlew build`: compiles, runs unit tests, and produces the service artifact; use before PRs.
@@ -34,7 +57,6 @@ Operational assets stay in `charts/`, `config/`, and `infrastructure/`. Helper s
 - `./gradlew integration`: runs integration tests (source set `integrationTest`). Add `--tests 'Pattern'` to focus.
 - `./gradlew functional`: runs functional tests (source set `functionalTest`). Add `--tests 'Pattern'` to focus.
 - `./gradlew smoke`: runs smoke tests (source set `smokeTest`). Add `--tests 'Pattern'` to focus.
-- `./gradlew build`: compiles, runs unit tests, and produces the service artifact; use before PRs.
 - `./gradlew jacocoTestReport`: refreshes coverage for Sonar; rerun after touching logic-heavy classes.
 - `./gradlew runAllStyleChecks`: runs Checkstyle + PMD across all source sets (handy before pushing formatting-heavy changes).
 - `./gradlew dependencyCheckAnalyze`: OWASP dependency check for known vulnerabilities (CVE scan).
@@ -48,6 +70,18 @@ Database migrations:
 OpenAPI generation:
 
 - `./gradlew openApiGenerate<SpecName>` (one task per yaml under `src/main/resources/openapi`, excluding `problem.yaml`)
+
+OpenAPI validation:
+
+- `lint-openapi "src/main/resources/openapi/**/*.yaml"`
+- IBM OpenAPI validator + Spectral are used (see `README.md` for installation links)
+
+## Spring Profiles
+
+- `local`: local development with `docker-compose-local.yml`
+- `intTest`: integration tests (embedded db, mocks; security disabled)
+- `functionalTest`: functional tests against deployed environment
+- `dev`: PR environment configuration
 
 ## Coding Style & Naming Conventions
 
@@ -96,7 +130,7 @@ Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` an
 - **P2 advisory:** naming, duplicate code, or documentation gaps—note these only when they clarify future work.
 - Prefer descriptive names over abbreviations for classes, methods, and variables.
 - Prefer clarity over terseness: avoid dense one-liners or deep nesting that hurts readability.
-- Flag solutions that diverge from established HMCTS Opal patterns for layering, naming, or error handling.
+- Flag solutions that diverge from established HMCTS patterns for layering, naming, or error handling.
 - Avoid duplicating validation already enforced by OpenAPI constraints or global HMCTS handlers; confirm the correct HMCTS exception type/mapper is used.
 - Prefer shared validators/handlers over bespoke checks when behavior already exists.
 - Prefer small, deterministic examples (e.g., reference `src/main/java/...Service`) and remind contributors to run local Checkstyle/PMD (`./gradlew check`)
@@ -119,7 +153,7 @@ Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` an
 - Hibernate entities must lazy load by default; when richer object graphs are required use named entity graphs or DTO projections, not eager joins.
 - Per TD.44 (“Coded value display names”), persist coded values and map them to human-readable strings in the Java layer before returning responses; avoid
   bespoke database tables or UI-only mappings unless the Tech Decisions Register says otherwise.
-- When unsure, check the Opal Confluence Tech Decision Register (TD.* links) and raise deviations early so code review can flag anything “off piste.”
+- When unsure, check the DARTS Confluence Tech Decision Register (TD.* links) and raise deviations early so code review can flag anything “off piste.”
 - Mention applicable TDR IDs in PR descriptions when implementing or diverging from a decision.
 
 ## Definition of Done – Code Quality & Best Practice
@@ -140,5 +174,10 @@ traces when responses or docs change. Confirm CI (Gradle, Sonar, Docker) is gree
 
 ## Security & Configuration Tips
 
-Do not commit secrets such as `AAD_CLIENT_ID` or `AAD_CLIENT_SECRET`; source them from the local secret manager or Vault. Redis is
-optional locally—set `OPAL_REDIS_ENABLED=true` and run `docker compose up redis` to mirror cloud behavior.
+Do not commit secrets such as `AAD_CLIENT_ID` or `AAD_CLIENT_SECRET`; source them from the local secret manager or Vault.
+
+## Troubleshooting
+
+- OpenAPI generator warnings are expected during local builds; see `build/reports/problems/problems-report.html` for Gradle problem details.
+- For a clean local database, use `./bin/db-stg-to-local.sh` (bash script) or the Flyway tasks listed above.
+- Docker cleanup: `docker-compose rm` (see `README.md` for guidance).
