@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,7 +44,6 @@ class DeleteArmResponseFilesHelperImplTest {
     private UploadFileFilenameProcessor uploadFileFilenameProcessor;
 
     private ExternalObjectDirectoryEntity eod;
-
 
     private DeleteArmResponseFilesHelperImpl deleteArmResponseFilesHelper;
 
@@ -68,7 +67,7 @@ class DeleteArmResponseFilesHelperImplTest {
     }
 
     @Test
-    void deleteResponseBlobsByManifestName_shouldDeleteBlobsWhenAllResponsesAreCompletedAndCleaned() {
+    void deleteResponseBlobsByManifestName_shouldDeleteBlobsIndividuallyWhenAllResponsesAreCompletedAndCleaned() {
         // given
         String manifestName = "DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360";
         eod.setStatus(EodHelper.armRpoPendingStatus());
@@ -95,7 +94,7 @@ class DeleteArmResponseFilesHelperImplTest {
         BatchInputUploadFileFilenameProcessor processor = mock(BatchInputUploadFileFilenameProcessor.class);
         when(processor.getHashcode()).thenReturn("testHashcode");
         when(armDataManagementApi.listResponseBlobs("testHashcode")).thenReturn(List.of("responseBlob"));
-        when(armDataManagementApi.deleteBlobData("responseBlob")).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(List.of("responseBlob"))).thenReturn(true);
         when(processor.getBatchMetadataFilename()).thenReturn("testFile");
         when(processor.getBatchMetadataFilenameAndPath()).thenReturn("testFilePath");
 
@@ -103,22 +102,20 @@ class DeleteArmResponseFilesHelperImplTest {
         deleteArmResponseFilesHelper.deleteDanglingResponses(processor);
 
         // then
-        verify(armDataManagementApi).deleteBlobData("responseBlob");
-        verify(armDataManagementApi).deleteBlobData("testFilePath");
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of("responseBlob"));
     }
 
     @Test
-    void deleteResponseBlobs_shouldDeleteAllResponseBlobs() {
+    void deleteResponseBlob_shouldDeletResponseBlob() {
         // given
-        List<String> responseBlobs = List.of("blob1", "blob2");
+        String responseBlob = "blob1";
         when(armDataManagementApi.deleteBlobData("blob1")).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData("blob2")).thenReturn(true);
 
         // when
-        List<Boolean> result = deleteArmResponseFilesHelper.deleteResponseBlobs(responseBlobs);
+        Boolean result = deleteArmResponseFilesHelper.deleteResponseBlobIndividually(responseBlob);
 
         // then
-        assertTrue(result.stream().allMatch(Boolean::booleanValue));
+        assertTrue(result);
     }
 
     @Test
@@ -130,7 +127,7 @@ class DeleteArmResponseFilesHelperImplTest {
 
         eod.setStatus(EodHelper.armResponseChecksumVerificationFailedStatus());
 
-        when(armDataManagementApi.deleteBlobData(anyString())).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(anyList())).thenReturn(true);
         when(batchData.getCreateRecordFilenameProcessor()).thenReturn(createRecordFilenameProcessor);
         when(batchData.getUploadFileFilenameProcessor()).thenReturn(uploadFileFilenameProcessor);
         when(batchData.getInvalidLineFileFilenameProcessors()).thenReturn(Collections.emptyList());
