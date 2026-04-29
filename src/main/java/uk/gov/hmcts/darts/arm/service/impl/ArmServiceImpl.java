@@ -346,7 +346,7 @@ public class ArmServiceImpl implements ArmService {
         }
     }
 
-    private boolean deleteBlobsIndividually(String containerName, List<String> blobPathAndName) {
+    boolean deleteBlobsIndividually(String containerName, List<String> blobPathAndName) {
         boolean allSuccessful = true;
 
         for (String blob : blobPathAndName) {
