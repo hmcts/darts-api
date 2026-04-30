@@ -159,8 +159,13 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     }
 
     public void removeHearing(HearingEntity hearing) {
-        hearing.getMedias().remove(this);
-        getHearings().remove(this);
+        // HearingEntity is the owning side of the ManyToMany (join table), so update it first.
+        if (hearing != null) {
+            hearing.getMedias().remove(this);
+            // Callers may iterate mediaEntity.getHearings(); mutating via hearing.getMedias() above
+            // doesn't necessarily mutate this Set depending on persistence state, so explicitly remove.
+            hearings.remove(hearing);
+        }
     }
 
     public void addHearing(HearingEntity hearing) {

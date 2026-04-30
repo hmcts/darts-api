@@ -157,7 +157,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testGetCasesById() throws Exception {
+    void getCasesById_ReturnsCase() throws Exception {
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
         CourtCaseEntity courtCaseEntity = hearings.getFirst().getCourtCase();
         courtCaseEntity.setHearings(hearings);
@@ -168,13 +168,13 @@ class CaseServiceImplTest {
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CaseServiceTest/testGetCasesById/expectedResponse.json");
+            "Tests/cases/CaseServiceTest/GetCasesById/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
 
     @Test
-    void testGetCasesByIdHearingsNotActual() {
+    void getCasesById_HearingsNotActual() {
         CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
 
         when(caseRepository.findById(any())).thenReturn(Optional.of(courtCaseEntity));
@@ -185,7 +185,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testGetCasesWithMultipleHearing() throws IOException {
+    void getHearings_GetsCasesWithMultipleHearings() throws IOException {
 
         List<HearingEntity> hearingEntities = CommonTestDataUtil.createHearings(8);
         when(hearingRepository.findByCourthouseCourtroomAndDate(
@@ -202,14 +202,14 @@ class CaseServiceImplTest {
         List<ScheduledCase> resultList = caseService.getHearings(request);
         String actualResponse = objectMapper.writeValueAsString(resultList);
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CaseServiceTest/testGetCasesWithMultipleHearing/expectedResponse.json");
+            "Tests/cases/CaseServiceTest/GetCasesWithMultipleHearing/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verify(logApi, times(1)).casesRequestedByDarPc(request);
     }
 
     @Test
-    void testGetCasesWithSingleHearingAndDifferentCourtroom() throws IOException {
+    void getHearings_GetsCasesWithSingleHearingAndDifferentCourtroom() throws IOException {
         HearingEntity hearingEntity = createHearingEntity();
         when(hearingRepository.findByCourthouseCourtroomAndDate(
             any(),
@@ -225,14 +225,14 @@ class CaseServiceImplTest {
         List<ScheduledCase> resultList = caseService.getHearings(request);
         String actualResponse = objectMapper.writeValueAsString(resultList);
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CaseServiceTest/testGetCasesWithSingleHearingAndDifferentCourtroom/expectedResponse.json");
+            "Tests/cases/CaseServiceTest/GetCasesWithSingleHearingAndDifferentCourtroom/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
         verify(logApi, times(1)).casesRequestedByDarPc(request);
     }
 
 
     @Test
-    void testGetCasesCreateCourtroom() {
+    void getHearings_ReturnsHearing() {
         String courtroomName = "99";
 
         when(hearingRepository.findByCourthouseCourtroomAndDate(
@@ -256,7 +256,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testAddCase() throws IOException {
+    void addCaseOrUpdate_ReturnsSuccess() throws IOException {
         when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             return args[0];
@@ -272,7 +272,7 @@ class CaseServiceImplTest {
 
         String actualResponse = TestUtils.removeTags(List.of("case_id"), objectMapper.writeValueAsString(result));
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CaseServiceTest/testAddCase/expectedResponseWithoutCourtroom.json");
+            "Tests/cases/CaseServiceTest/AddCase/expectedResponseWithoutCourtroom.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verify(caseRepository, times(1)).saveAndFlush(caseEntityArgumentCaptor.capture());
@@ -293,7 +293,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testAddCaseNonExistingCourthouse() {
+    void addCaseOrUpdate_NonExistingCourthouse() {
 
         AddCaseRequest request = CommonTestDataUtil.createAddCaseRequest();
         when(retrieveCoreObjectService.retrieveOrCreateCase(
@@ -311,7 +311,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testGetCaseHearingsWhenHearingIsActualTrue() {
+    void getCaseHearings_WhenHearingIsActualTrue() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
@@ -335,7 +335,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testGetCaseHearingsWhenHearingIsActualFalse() {
+    void getCaseHearings_WhenHearingIsActualFalse() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
@@ -356,7 +356,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testGetCaseHearingsWhenCaseDoesNotExistThrowsException() {
+    void getCaseHearings_WhenCaseDoesNotExistThrowsException() {
         when(hearingRepository.findByCaseIds(any())).thenReturn(Collections.emptyList());
 
         var exception = assertThrows(DartsApiException.class, () ->
@@ -366,7 +366,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testGetCaseHearingsWhenCaseIsExpiredThrowsException() {
+    void getCaseHearings_WhenCaseIsExpiredThrowsException() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
         existingCaseEntity.setId(1);
@@ -382,7 +382,7 @@ class CaseServiceImplTest {
 
 
     @Test
-    void updateCase_WithNonExistingCourtroomAndMatchingHearingDate() {
+    void addCaseOrUpdate_WithNonExistingCourtroomAndMatchingHearingDate() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
         existingCaseEntity.setId(1);
@@ -409,41 +409,10 @@ class CaseServiceImplTest {
         assertEquals(3, updatedCaseEntity.getProsecutorList().size());
         assertEquals(3, updatedCaseEntity.getDefenceList().size());
 
-
     }
 
     @Test
-    void updateCase_WithMultipleHearingsWithOldHearingDateWithCourtroomInRequest() {
-        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
-        CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
-        existingCaseEntity.setId(1);
-
-        when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
-            existingCaseEntity);
-
-        JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
-        when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
-        when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            return args[0];
-        });
-
-        AddCaseRequest request = CommonTestDataUtil.createUpdateCaseRequest();
-        caseService.addCaseOrUpdate(request);
-
-        verify(caseRepository).saveAndFlush(caseEntityArgumentCaptor.capture());
-
-        CourtCaseEntity updatedCaseEntity = caseEntityArgumentCaptor.getValue();
-
-        assertEquals(SWANSEA, updatedCaseEntity.getCourthouse().getCourthouseName());
-        assertEquals("case1", updatedCaseEntity.getCaseNumber());
-        assertEquals(3, updatedCaseEntity.getDefendantList().size());
-        assertEquals(3, updatedCaseEntity.getProsecutorList().size());
-        assertEquals(3, updatedCaseEntity.getDefenceList().size());
-    }
-
-    @Test
-    void updateCase_WithMultipleHearingsWithCourtroomInRequest() {
+    void addCaseOrUpdate_WithMultipleHearingsWithOldHearingDateWithCourtroomInRequest() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
         existingCaseEntity.setId(1);
@@ -473,7 +442,37 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void updateCase_WithMultipleHearingsWithoutCourtroomInRequest() {
+    void addCaseOrUpdate_WithMultipleHearingsWithCourtroomInRequest() {
+        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
+        CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
+        existingCaseEntity.setId(1);
+
+        when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
+            existingCaseEntity);
+
+        JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
+        when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
+        when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            return args[0];
+        });
+
+        AddCaseRequest request = CommonTestDataUtil.createUpdateCaseRequest();
+        caseService.addCaseOrUpdate(request);
+
+        verify(caseRepository).saveAndFlush(caseEntityArgumentCaptor.capture());
+
+        CourtCaseEntity updatedCaseEntity = caseEntityArgumentCaptor.getValue();
+
+        assertEquals(SWANSEA, updatedCaseEntity.getCourthouse().getCourthouseName());
+        assertEquals("case1", updatedCaseEntity.getCaseNumber());
+        assertEquals(3, updatedCaseEntity.getDefendantList().size());
+        assertEquals(3, updatedCaseEntity.getProsecutorList().size());
+        assertEquals(3, updatedCaseEntity.getDefenceList().size());
+    }
+
+    @Test
+    void addCaseOrUpdate_WithMultipleHearingsWithoutCourtroomInRequest() {
         // given
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
@@ -548,13 +547,6 @@ class CaseServiceImplTest {
         verify(caseRepository, times(1)).findById(1);
     }
 
-    private HearingEntity createHearingEntity() {
-        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
-        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "2");
-        CourtCaseEntity caseEntity = CommonTestDataUtil.createCase("Case0000009", courthouseEntity);
-        return CommonTestDataUtil.createHearing(caseEntity, courtroomEntity, LocalDate.of(2023, Month.JULY, 20), true);
-    }
-
     @Test
     @SuppressWarnings("unchecked")
     void getEventsByCaseIdPaginated_shouldPaginatedCorrectly_whenGivenTypicalData() {
@@ -609,4 +601,12 @@ class CaseServiceImplTest {
         DartsApiException exception = assertThrows(DartsApiException.class, () -> caseService.getEventsByCaseId(caseId, null));
         assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
     }
+
+    private HearingEntity createHearingEntity() {
+        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "2");
+        CourtCaseEntity caseEntity = CommonTestDataUtil.createCase("Case0000009", courthouseEntity);
+        return CommonTestDataUtil.createHearing(caseEntity, courtroomEntity, LocalDate.of(2023, Month.JULY, 20), true);
+    }
+
 }
