@@ -269,6 +269,7 @@ darts:
       url: ${ARM_URL}
       arm-service-entitlement: ${ARM_SERVICE_ENTITLEMENT:}
       arm-storage-account-name: ${ARM_STORAGE_ACCOUNT_NAME:}
+      arm-down-for-maintenance: ${ARM_DOWN_FOR_MAINTENANCE:false}
 
       authentication-url:
         token-path: /auth/account/token
@@ -350,6 +351,7 @@ darts:
       az-copy-preserve-access-tier: "--s2s-preserve-access-tier=false"
       az-copy-log-level: ${AZCOPY_LOG_LEVEL:}
       az-copy-output-level: ${AZCOPY_OUTPUT_LEVEL:}
+      arm-down-for-maintenance: ${ARM_DOWN_FOR_MAINTENANCE:false}
     search:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   case-document:
