@@ -13,7 +13,7 @@ public enum ArmApiError implements DartsApiError {
 
     ARM_DOWN_FOR_MAINTENANCE(
         ArmErrorCode.ARM_DOWN_FOR_MAINTENTANCE.getValue(),
-        HttpStatus.NOT_IMPLEMENTED,
+        HttpStatus.SERVICE_UNAVAILABLE,
         ArmTitleErrors.ARM_DOWN_FOR_MAINTENTANCE.getValue()
     );
 
