@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
-import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
@@ -14,7 +13,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.util.List;
@@ -36,17 +34,11 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
     private static final String MANIFEST_PREFIX = "DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb";
     private static final String RESPONSE_FILE_PREFIX = "04e6bc3b-952a-79b6-8362-13259aae1895";
 
-    @Autowired
-    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-
     @MockitoBean
     private ArmDataManagementApi armDataManagementApi;
 
     @MockitoBean
     private UserIdentity userIdentity;
-
-    @Autowired
-    private ExternalObjectDirectoryService externalObjectDirectoryService;
 
     @Autowired
     private DeleteArmResponseFilesHelperImpl deleteArmResponseFilesHelper;
@@ -66,7 +58,7 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void deleteResponseBlobsByManifestName_shouldDeleteBlobsWhenAllResponsesAreCompletedAndCleaned() {
+    void deleteResponseBlobsByManifestName_shouldDeleteBlobsIndividuallyWhenAllResponsesAreCompletedAndCleaned() {
         // given
         String manifestName = MANIFEST_PREFIX + ".a360";
         eodRpoPending.setManifestFile(manifestName);
@@ -92,33 +84,36 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
     void deleteDanglingResponses_shouldDeleteDanglingResponses() {
         // given
         BatchInputUploadFileFilenameProcessor batchInputUploadFileFilenameProcessor = new BatchInputUploadFileFilenameProcessor(DARTS_INPUT_UPLOAD_FILE);
-        String responseFile = "dropzone/DARTS/response/" + RESPONSE_FILE_PREFIX + "_ABC_1_rsp";
-        when(armDataManagementApi.listResponseBlobs(any())).thenReturn(List.of(responseFile));
+        String otherResponseFile = "dropzone/DARTS/response/" + RESPONSE_FILE_PREFIX + "_ABC_1_rsp";
+        String crResponseFile = "dropzone/DARTS/response/" + RESPONSE_FILE_PREFIX + "_b17b9015-e6ad-77c5-8d1e-13259aae1896_0_cr.rsp";
+        String ilResponseFile = "dropzone/DARTS/response/" + RESPONSE_FILE_PREFIX + "_c17b9015-e6ad-77c5-8d1e-13259aae1896_1_il.rsp";
+
+        when(armDataManagementApi.listResponseBlobs(any())).thenReturn(List.of(otherResponseFile, crResponseFile, ilResponseFile));
+        when(armDataManagementApi.deleteMultipleBlobs(any())).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(anyString())).thenReturn(true);
 
         // when
         deleteArmResponseFilesHelper.deleteDanglingResponses(batchInputUploadFileFilenameProcessor);
 
         // then
-        verify(armDataManagementApi).deleteBlobData(responseFile);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(otherResponseFile, crResponseFile, ilResponseFile));
         verify(armDataManagementApi).deleteBlobData(DARTS_INPUT_UPLOAD_FILE);
         verify(armDataManagementApi).listResponseBlobs(batchInputUploadFileFilenameProcessor.getHashcode());
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
-    void deleteResponseBlobs_shouldDeleteAllResponseBlobs() {
+    void deleteResponseBlobsIndividually_shouldDeleteAllResponseBlobIndividually() {
         // given
-        List<String> responseBlobs = List.of("blob1", "blob2");
+        String responseBlob = "blob1";
         when(armDataManagementApi.deleteBlobData(anyString())).thenReturn(true);
 
         // when
-        List<Boolean> result = deleteArmResponseFilesHelper.deleteResponseBlobs(responseBlobs);
+        Boolean result = deleteArmResponseFilesHelper.deleteResponseBlobIndividually(responseBlob);
 
         // then
-        assertTrue(result.stream().allMatch(Boolean::booleanValue));
+        assertTrue(result);
         verify(armDataManagementApi).deleteBlobData("blob1");
-        verify(armDataManagementApi).deleteBlobData("blob2");
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -134,14 +129,13 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
             .uploadFileFilenameProcessor(new UploadFileFilenameProcessor(uploadFileFilename1))
             .build();
 
-        when(armDataManagementApi.deleteBlobData(anyString())).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobs(any())).thenReturn(true);
 
         // when
         deleteArmResponseFilesHelper.deleteResponseBlobs(batchData);
 
         // then
-        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
-        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
