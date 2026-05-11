@@ -60,7 +60,7 @@ public class DataManagementConfiguration extends StorageConfiguration {
     @Value("${darts.storage.blob.az-copy-output-level}")
     private String azCopyOutputLevel;
 
-    @Value("${darts.storage.arm-down-for-maintenance}")
+    @Value("${darts.storage.blob.arm-down-for-maintenance}")
     private Boolean armDownForMaintenance;
 
     @Override
