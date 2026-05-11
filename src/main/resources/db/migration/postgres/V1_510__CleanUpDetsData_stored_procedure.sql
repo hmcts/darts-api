@@ -86,6 +86,7 @@ BEGIN
         INTO v_incomplete_cleanup
         FROM darts.object_state_record
         WHERE date_file_dets_cleanup IS NOT NULL
+          AND dets_location IS NOT NULL
           AND (flag_file_dets_cleanup_status IS NULL
             OR flag_file_dets_cleanup_status = FALSE);
 

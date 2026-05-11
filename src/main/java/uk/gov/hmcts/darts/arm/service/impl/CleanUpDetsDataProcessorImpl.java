@@ -107,20 +107,20 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
 
             for (CleanUpDetsProcedureResponse response : eodsCleanedUp) {
                 try {
-                    String logMessage = String.format("Processing clean up response for EOD ID: %s, Location: %s",
+                    String logMessage = String.format("Processing clean up response for OSR UUID: %s, Location: %s",
                                                       response.getOsrUuid(),
                                                       response.getDetsLocation());
                     featureFlagLogApi.logDetsCleanUp(logMessage);
                     if (detsApiService.deleteBlobDataFromContainer(response.getDetsLocation())) {
                         featureFlagLogApi.logDetsCleanUp(logMessage);
-                        logMessage = String.format("Successfully deleted DETS blob for EOD ID: %s, Location: %s",
+                        logMessage = String.format("Successfully deleted DETS blob for OSR UUID: %s, Location: %s",
                                                    response.getOsrUuid(),
                                                    response.getDetsLocation());
                         featureFlagLogApi.logDetsCleanUp(logMessage);
                         objectStateRecordsForDetsRecordsCleanedUpSuccessfully.add(response.getOsrUuid());
                         continue;
                     } else {
-                        log.error("Failed to delete DETS blob for EOD ID: {}, Location: {}. Blob may not exist or deletion failed.",
+                        log.error("Failed to delete DETS blob for OSR UUID: {}, Location: {}. Blob may not exist or deletion failed.",
                                   response.getOsrUuid(), response.getDetsLocation());
                     }
                 } catch (Exception exception) {
@@ -130,7 +130,7 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
                 objectStateRecordsForDetsRecordsFailedToCleanUp.add(response.getOsrUuid());
             }
             objectStateRecordRepository.markDetsCleanupStatusAsComplete(objectStateRecordsForDetsRecordsCleanedUpSuccessfully);
-            log.info("Marked object state records as clean up complete for EOD IDs: {}", objectStateRecordsForDetsRecordsCleanedUpSuccessfully);
+            log.info("Marked object state records as clean up complete for OSR UUID: {}", objectStateRecordsForDetsRecordsCleanedUpSuccessfully);
 
             if (CollectionUtils.isNotEmpty(objectStateRecordsForDetsRecordsFailedToCleanUp)) {
                 log.error("Dets clean up failed for Object state record Ids: {}", objectStateRecordsForDetsRecordsFailedToCleanUp);
