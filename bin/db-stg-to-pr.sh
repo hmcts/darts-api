@@ -32,7 +32,7 @@ DATABASE="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-D
 
 PR_HOST="darts-modernisation-dev.postgres.database.azure.com"
 PR_USER="hmcts"
-PR_PASSWORD="$(kubectl --context ss-dev-01-aks -n darts-modernisation get secret postgres -o json | jq .data.PASSWORD -r | base64 -d)"
+PR_PASSWORD="$(kubectl --context ss-dev-00-aks -n darts-modernisation get secret postgres -o json | jq .data.PASSWORD -r | base64 -d)"
 PR_DATABASE="pr-${PR_NUMBER}-darts"
 
 STG_HOST="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-HOST | jq .value -r)"
@@ -40,6 +40,13 @@ STG_USER="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-U
 STG_PASSWORD="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-PASS | jq .value -r)"
 STG_PORT="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-PORT | jq .value -r)"
 
+echo "PR_PASSWORD: $PR_PASSWORD"
+echo "PR_DATABASE: $PR_DATABASE"
+
+echo "STG_HOST: $STG_HOST"
+echo "STG_USER: $STG_USER"
+echo "STG_PASSWORD: $STG_PASSWORD"
+echo "STG_PORT: $STG_PORT"
 echo "Dumping staging database..."
 
 # make the password available for pg_dump
