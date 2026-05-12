@@ -135,6 +135,7 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         assertThat(objectStateRecordEntity.getDateFileDetsCleanup())
             .isCloseTo(OffsetDateTime.now(), within(1, SECONDS));
         assertThat(objectStateRecordEntity.getFlagFileDetsCleanupStatus()).isTrue();
+        
         verify(detsApiService).deleteBlobDataFromContainer(testData.getDetsEod().getLocation());
     }
 
