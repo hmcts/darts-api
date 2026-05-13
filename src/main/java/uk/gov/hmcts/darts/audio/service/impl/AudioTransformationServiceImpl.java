@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
-import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
@@ -72,16 +71,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final OutboundFileZipGenerator outboundFileZipGenerator;
     private final FileOperationService fileOperationService;
     private final MediaRepository mediaRepository;
-    private final ExternalObjectDirectoryService eodService;
-    private final TransformedMediaHelper transformedMediaHelper;
-    private final LogApi logApi;
     private final DataManagementFacade dataManagementFacade;
-    private final UnstructuredDataHelper unstructuredDataHelper;
     private final CurrentTimeHelper currentTimeHelper;
     private final AudioTransformationServiceProperties config;
     private final ProcessMediaRequestsForKeda processMediaRequestsForKeda;
     private final MediaRequestService mediaRequestService;
-
 
     private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
         if (media1.getStart().equals(media2.getStart())) {
@@ -134,7 +128,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         private final TransformedMediaHelper transformedMediaHelper;
         private final LogApi logApi;
         private AudioTransformationServiceImpl audioTransformationService;
-
 
         /**
          * For all audio related to a given AudioRequest, download, transform and upload the processed file to outbound
@@ -238,7 +231,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             }
         }
     }
-
 
     @Override
     public List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
