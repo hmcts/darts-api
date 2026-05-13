@@ -40,7 +40,6 @@ import uk.gov.hmcts.darts.common.repository.ObjectRetrievalQueueRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
-import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.test.common.FileStore;
 
@@ -107,15 +106,14 @@ class DataManagementFacadeImplTest {
     private ObjectRetrievalQueueRepository objectRetrievalQueueRepository;
     @Mock
     private DownloadResponseMetaData downloadResponseMetaDataMock;
-    @Mock
-    private BlobClientUploadResponseImpl blobClientUploadResponseImpl;
 
     private ExternalLocationTypeEntity inboundLocationEntity;
     private ExternalLocationTypeEntity unstructuredLocationEntity;
     private ExternalLocationTypeEntity detsLocationEntity;
     private ExternalLocationTypeEntity armLocationEntity;
-    FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
-    DownloadResponseMetaData downloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+    private FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+    private DownloadResponseMetaData downloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+
     @TempDir
     private File tempDirectory;
 
@@ -497,17 +495,6 @@ class DataManagementFacadeImplTest {
         verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(objectRetrievalQueueEntity);
     }
 
-    private static @NotNull ObjectRetrievalQueueEntity createObjectRetrievalQueueEntity(MediaEntity mediaEntity, UserAccountEntity userAccount) {
-        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
-        objectRetrievalQueueEntity.setMedia(mediaEntity);
-        objectRetrievalQueueEntity.setCreatedBy(userAccount);
-        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
-        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(mediaEntity.getId()));
-        objectRetrievalQueueEntity.setContentObjectId(mediaEntity.getContentObjectId());
-        objectRetrievalQueueEntity.setClipId(mediaEntity.getClipId());
-        return objectRetrievalQueueEntity;
-    }
-
     @Test
     void insertTranscriptionEntityInObjectRetrievalQueueWhenNotFoundIn() {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
@@ -861,51 +848,6 @@ class DataManagementFacadeImplTest {
         assertThat(targetFileActual.getAbsolutePath()).matches(".*/workspace/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
     }
 
-    @NotNull
-    private UnstructuredDataHelper getUnstructuredDataHelper() {
-        return new UnstructuredDataHelper(
-            externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
-            userAccountRepository,
-            dataManagementService,
-            dataManagementConfiguration
-        );
-    }
-
-    private BlobContainerDownloadable setupDownloadableContainer(DatastoreContainerType containerType,
-                                                                 boolean processSuccess) throws IOException, FileNotDownloadedException {
-        BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
-
-        BinaryData data = BinaryData.fromString("Test String");
-
-        fileBasedDownloadResponseMetaData.setInputStream(data.toStream(), dataManagementConfiguration);
-
-        lenient().when(downloadable.getContainerName(containerType)).thenReturn(Optional.of("test"));
-        if (processSuccess) {
-            lenient().when(downloadable
-                               .downloadBlobFromContainer(eq(containerType),
-                                                          Mockito.notNull())).thenReturn(fileBasedDownloadResponseMetaData);
-        } else {
-            lenient().when(downloadable
-                               .downloadBlobFromContainer(eq(containerType),
-                                                          Mockito.notNull())).thenThrow(new FileNotDownloadedException());
-        }
-        return downloadable;
-    }
-
-    private ExternalObjectDirectoryEntity createEodEntity(ExternalLocationTypeEntity locationTypeEntity) {
-        ExternalObjectDirectoryEntity entity = new ExternalObjectDirectoryEntity();
-
-        entity.setExternalLocationType(locationTypeEntity);
-
-        ObjectRecordStatusEntity storedStatus = new ObjectRecordStatusEntity();
-        storedStatus.setId(2);
-        entity.setStatus(storedStatus);
-
-        return entity;
-    }
-
     @Test
     void retrieveFileFromStorage_whenArmDownForMaintenance_shouldThrow() throws Exception {
         List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.ARM);
@@ -1024,4 +966,133 @@ class DataManagementFacadeImplTest {
 
         assertThat(targetFile).exists();
     }
+
+    @Test
+    void retrieveFileFromStorageMedia_whenArmDownForMaintenance_shouldThrow() throws Exception {
+        List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.ARM);
+        when(storageOrderHelper.getStorageOrder()).thenReturn(datastoreOrder);
+        when(dataManagementConfiguration.getArmDownForMaintenance()).thenReturn(true);
+
+        ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(1L);
+
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(eq(mediaEntity), any(ObjectRecordStatusEntity.class)))
+            .thenReturn(List.of(armEntity));
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(List.of(), externalObjectDirectoryRepository,
+                                                                                     objectRecordStatusRepository, storageOrderHelper,
+                                                                                     unstructuredDataHelper, dataManagementConfiguration,
+                                                                                     armApiService, objectRetrievalQueueRepository);
+
+        assertThrows(ArmDownForMaintenanceException.class, () -> dataManagementFacade.retrieveFileFromStorage(mediaEntity));
+        verify(armApiService, times(0)).downloadArmData(any(), any());
+    }
+
+    @Test
+    void retrieveFileFromStorageTranscription_whenArmDownForMaintenance_shouldThrow() throws Exception {
+        List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.ARM);
+        when(storageOrderHelper.getStorageOrder()).thenReturn(datastoreOrder);
+        when(dataManagementConfiguration.getArmDownForMaintenance()).thenReturn(true);
+
+        ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(11L);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setId(21L);
+        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
+
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(eq(transcriptionDocumentEntity), any(ObjectRecordStatusEntity.class)))
+            .thenReturn(List.of(armEntity));
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(List.of(), externalObjectDirectoryRepository,
+                                                                                     objectRecordStatusRepository, storageOrderHelper,
+                                                                                     unstructuredDataHelper, dataManagementConfiguration,
+                                                                                     armApiService, objectRetrievalQueueRepository);
+
+        assertThrows(ArmDownForMaintenanceException.class,
+                     () -> dataManagementFacade.retrieveFileFromStorage(transcriptionDocumentEntity));
+        verify(armApiService, times(0)).downloadArmData(any(), any());
+    }
+
+    @Test
+    void retrieveFileFromStorageAnnotation_whenArmDownForMaintenance_shouldThrow() throws Exception {
+        List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.ARM);
+        when(storageOrderHelper.getStorageOrder()).thenReturn(datastoreOrder);
+        when(dataManagementConfiguration.getArmDownForMaintenance()).thenReturn(true);
+
+        ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
+        AnnotationDocumentEntity annotationDocumentEntity = new AnnotationDocumentEntity();
+        annotationDocumentEntity.setId(31L);
+
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(eq(annotationDocumentEntity), any(ObjectRecordStatusEntity.class)))
+            .thenReturn(List.of(armEntity));
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(List.of(), externalObjectDirectoryRepository,
+                                                                                     objectRecordStatusRepository, storageOrderHelper,
+                                                                                     unstructuredDataHelper, dataManagementConfiguration,
+                                                                                     armApiService, objectRetrievalQueueRepository);
+
+        assertThrows(ArmDownForMaintenanceException.class,
+                     () -> dataManagementFacade.retrieveFileFromStorage(annotationDocumentEntity));
+        verify(armApiService, times(0)).downloadArmData(any(), any());
+    }
+
+    @NotNull
+    private UnstructuredDataHelper getUnstructuredDataHelper() {
+        return new UnstructuredDataHelper(
+            externalObjectDirectoryRepository,
+            objectRecordStatusRepository,
+            externalLocationTypeRepository,
+            userAccountRepository,
+            dataManagementService,
+            dataManagementConfiguration
+        );
+    }
+
+    private BlobContainerDownloadable setupDownloadableContainer(DatastoreContainerType containerType,
+                                                                 boolean processSuccess) throws IOException, FileNotDownloadedException {
+        BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
+
+        BinaryData data = BinaryData.fromString("Test String");
+
+        fileBasedDownloadResponseMetaData.setInputStream(data.toStream(), dataManagementConfiguration);
+
+        lenient().when(downloadable.getContainerName(containerType)).thenReturn(Optional.of("test"));
+        if (processSuccess) {
+            lenient().when(downloadable
+                               .downloadBlobFromContainer(eq(containerType),
+                                                          Mockito.notNull())).thenReturn(fileBasedDownloadResponseMetaData);
+        } else {
+            lenient().when(downloadable
+                               .downloadBlobFromContainer(eq(containerType),
+                                                          Mockito.notNull())).thenThrow(new FileNotDownloadedException());
+        }
+        return downloadable;
+    }
+
+    private ExternalObjectDirectoryEntity createEodEntity(ExternalLocationTypeEntity locationTypeEntity) {
+        ExternalObjectDirectoryEntity entity = new ExternalObjectDirectoryEntity();
+
+        entity.setExternalLocationType(locationTypeEntity);
+
+        ObjectRecordStatusEntity storedStatus = new ObjectRecordStatusEntity();
+        storedStatus.setId(2);
+        entity.setStatus(storedStatus);
+
+        return entity;
+    }
+
+    private static @NotNull ObjectRetrievalQueueEntity createObjectRetrievalQueueEntity(MediaEntity mediaEntity, UserAccountEntity userAccount) {
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
+        objectRetrievalQueueEntity.setMedia(mediaEntity);
+        objectRetrievalQueueEntity.setCreatedBy(userAccount);
+        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
+        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(mediaEntity.getId()));
+        objectRetrievalQueueEntity.setContentObjectId(mediaEntity.getContentObjectId());
+        objectRetrievalQueueEntity.setClipId(mediaEntity.getClipId());
+        return objectRetrievalQueueEntity;
+    }
+
+
 }
