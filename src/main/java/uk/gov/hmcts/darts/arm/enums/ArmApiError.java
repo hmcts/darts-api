@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.model.ArmTitleErrors;
 
 @Getter
 @RequiredArgsConstructor
+@SuppressWarnings("java:S6548")
 public enum ArmApiError implements DartsApiError {
 
     ARM_DOWN_FOR_MAINTENANCE(
