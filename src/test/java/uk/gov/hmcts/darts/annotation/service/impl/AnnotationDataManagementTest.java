@@ -128,7 +128,8 @@ class AnnotationDataManagementTest {
 
     @Test
     @SuppressWarnings("PMD.CloseResource")
-    void retrieveFileFromStorage_throwsIfDownloadAnnotationDocumentInputStreamFails() throws FileNotDownloadedException, IOException, ArmDownForMaintenanceException {
+    void retrieveFileFromStorage_throwsIfDownloadAnnotationDocumentInputStreamFails()
+        throws FileNotDownloadedException, IOException, ArmDownForMaintenanceException {
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(mockFileBasedDownloadResponseMetaData);
 
