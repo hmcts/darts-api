@@ -111,7 +111,7 @@ class DataManagementFacadeImplTest {
     private ExternalLocationTypeEntity unstructuredLocationEntity;
     private ExternalLocationTypeEntity detsLocationEntity;
     private ExternalLocationTypeEntity armLocationEntity;
-    private FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+    private final FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
     private DownloadResponseMetaData downloadResponseMetaData = new FileBasedDownloadResponseMetaData();
 
     @TempDir
