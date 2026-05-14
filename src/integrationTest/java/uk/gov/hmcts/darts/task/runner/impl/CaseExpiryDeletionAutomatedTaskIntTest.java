@@ -146,14 +146,12 @@ class CaseExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
         final CourtCaseEntity courtCase4 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(-1, CaseRetentionStatus.PENDING)));
         final CourtCaseEntity courtCase5 = createCaseWithRetentionRecords(List.of(new RetentionRecordData(1, CaseRetentionStatus.COMPLETE)));
 
-
         caseExpiryDeletionAutomatedTask.preRunTask();
         caseExpiryDeletionAutomatedTask.runTask();
 
         assertCase(courtCase1.getId(), true);
         assertCase(courtCase2.getId(), true);
         assertCase(courtCase3.getId(), true);
-
 
         assertCase(courtCase4.getId(), false);
         assertCase(courtCase5.getId(), false);

@@ -31,6 +31,8 @@ import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProse
 @Slf4j
 class HearingsGetEventsControllerTest extends IntegrationBase {
 
+    private static final String EVENT_ID = "<<eventId>>";
+
     @Autowired
     private transient MockMvc mockMvc;
 
@@ -75,11 +77,11 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
               "id":<<eventId>>,
               "timestamp":"2020-06-20T10:00:00Z",
               "name":"Defendant recalled",
-              "text":"testEventText",
+              "text":"testEventName",
               "is_data_anonymised": false
             }]
             """;
-        expectedJson = expectedJson.replace("<<eventId>>", event.getId().toString());
+        expectedJson = expectedJson.replace(EVENT_ID, event.getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -104,14 +106,14 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
                   "id": 2,
                   "timestamp": "2020-06-20T10:01:00Z",
                   "name": "Defendant recalled",
-                  "text": "testEventText",
+                  "text": "testEventName",
                   "is_data_anonymised": false
                 },
                 {
                   "id": 1,
                   "timestamp": "2020-06-20T10:00:00Z",
                   "name": "Defendant recalled",
-                  "text": "testEventText",
+                  "text": "testEventName",
                   "is_data_anonymised": false
                 }
               ]

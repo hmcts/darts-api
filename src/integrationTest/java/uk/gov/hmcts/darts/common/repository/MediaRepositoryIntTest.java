@@ -30,21 +30,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MediaRepositoryIntTest extends PostgresIntegrationBase {
 
-    @Autowired
-    HearingRepository hearingRepository;
+    private static final int GENERATION_COUNT = 20;
 
     @Autowired
-    MediaRepository mediaRepository;
-
+    private HearingRepository hearingRepository;
     @Autowired
-    MediaLinkedCaseRepository mediaLinkedCaseRepository;
-
+    private MediaRepository mediaRepository;
+    @Autowired
+    private MediaLinkedCaseRepository mediaLinkedCaseRepository;
     @Autowired
     private MediaStub mediaStub;
 
     private List<MediaEntity> generatedMediaEntities;
-
-    private static final int GENERATION_COUNT = 20;
 
     @BeforeEach
     public void before() {
