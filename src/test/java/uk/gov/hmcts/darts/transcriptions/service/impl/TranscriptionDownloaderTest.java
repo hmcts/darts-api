@@ -108,7 +108,8 @@ class TranscriptionDownloaderTest {
     }
 
     @Test
-    void downloadTranscript_throwsExceptionIfTranscriptionDocumentHasNoExternalObjectDirectories() throws FileNotDownloadedException, ArmDownForMaintenanceException {
+    void downloadTranscript_throwsExceptionIfTranscriptionDocumentHasNoExternalObjectDirectories()
+        throws FileNotDownloadedException, ArmDownForMaintenanceException {
         var transcriptionDocument = someTranscriptionDocumentWithUploadDate(now());
         transcriptionDocument.setExternalObjectDirectoryEntities(emptyList());
 
@@ -127,7 +128,8 @@ class TranscriptionDownloaderTest {
 
 
     @Test
-    void downloadTranscript_throwsExceptionIfFailsToGetDownloadResponseInputStream() throws IOException, FileNotDownloadedException, ArmDownForMaintenanceException {
+    void downloadTranscript_throwsExceptionIfFailsToGetDownloadResponseInputStream()
+        throws IOException, FileNotDownloadedException, ArmDownForMaintenanceException {
         var transcriptionDocument = someTranscriptionDocumentWithUploadDate(now());
         transcriptionDocument.setExternalObjectDirectoryEntities(List.of(someExternalObjectDirectoryWithCreationDate(now())));
 
