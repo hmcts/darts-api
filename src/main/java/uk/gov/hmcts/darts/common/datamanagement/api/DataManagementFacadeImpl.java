@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType.ARM;
 import static uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType.UNSTRUCTURED;
@@ -190,7 +191,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                     .append('\n');
                 continue;
             }
-            if (dataManagementConfiguration.getArmDownForMaintenance()
+            if (TRUE.equals(dataManagementConfiguration.getArmDownForMaintenance())
                 && datastoreContainerType.equals(ARM)) {
                 throw new ArmDownForMaintenanceException("ARM is currently down for maintenance, cannot download files from ARM at this time");
             }
