@@ -431,7 +431,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         transcriptFileValidator.validate(transcript);
 
-        final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscriptionRequest(COMPLETE.getId(), null), false);
+        final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscriptionRequest(COMPLETE.getId()), false);
 
         final BlobClient inboundBlobCLient;
         final BlobClient unstructuredBlobClient;

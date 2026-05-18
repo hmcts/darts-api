@@ -198,6 +198,31 @@ class EventMapperTest {
         assertEquals(eventEntity2.getEventStatus(), currentVersion.getEventStatus());
     }
 
+    private static void assertAdminEventResponseDetails(EventEntity eventEntity2, AdminGetEventById200Response currentVersion) {
+        assertEquals(eventEntity2.getId(), currentVersion.getId());
+        assertEquals(eventEntity2.getLegacyObjectId(), currentVersion.getDocumentumId());
+        assertEquals(eventEntity2.getEventId(), currentVersion.getSourceId());
+        assertEquals(eventEntity2.getMessageId(), currentVersion.getMessageId());
+        assertEquals(eventEntity2.getEventText(), currentVersion.getText());
+        assertEquals(eventEntity2.getEventType().getId(), currentVersion.getEventMapping().getId());
+        assertEquals(eventEntity2.isLogEntry(), currentVersion.getIsLogEntry());
+        assertEquals(eventEntity2.getCourtroom().getId(), currentVersion.getCourtroom().getId());
+        assertEquals(eventEntity2.getCourtroom().getName(), currentVersion.getCourtroom().getName());
+        assertEquals(eventEntity2.getCourtroom().getCourthouse().getId(), currentVersion.getCourthouse().getId());
+        assertEquals(eventEntity2.getCourtroom().getCourthouse().getDisplayName(), currentVersion.getCourthouse().getDisplayName());
+        assertEquals(eventEntity2.getLegacyVersionLabel(), currentVersion.getVersion());
+        assertEquals(eventEntity2.getChronicleId(), currentVersion.getChronicleId());
+        assertEquals(eventEntity2.getAntecedentId(), currentVersion.getAntecedentId());
+        assertEquals(eventEntity2.getTimestamp(), currentVersion.getEventTs());
+        assertEquals(eventEntity2.getIsCurrent(), currentVersion.getIsCurrent());
+        assertEquals(eventEntity2.getCreatedDateTime(), currentVersion.getCreatedAt());
+        assertEquals(eventEntity2.getCreatedById(), currentVersion.getCreatedBy());
+        assertEquals(eventEntity2.getLastModifiedDateTime(), currentVersion.getLastModifiedAt());
+        assertEquals(eventEntity2.getLastModifiedById(), currentVersion.getLastModifiedBy());
+        assertEquals(eventEntity2.isDataAnonymised(), currentVersion.getIsDataAnonymised());
+        assertEquals(eventEntity2.getEventStatus(), currentVersion.getEventStatus());
+    }
+
     @Test
     void whenSingleVersionForAnEventIsNotCurrent_mapsEventVersionToAdminGetEventVersionsResponseResultAndVersionSetInPreviousEvent() {
         // When

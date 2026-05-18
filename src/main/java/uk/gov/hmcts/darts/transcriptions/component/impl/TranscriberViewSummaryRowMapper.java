@@ -25,9 +25,7 @@ public class TranscriberViewSummaryRowMapper implements RowMapper<TranscriberVie
             rs.getString("status"),
             rs.getObject("requested_ts", OffsetDateTime.class),
             rs.getObject("state_change_ts", OffsetDateTime.class),
-            rs.getBoolean("is_manual"),
-            null,
-            null
+            rs.getBoolean("is_manual")
         );
 
         summary.setApprovedTs(rs.getObject("approved_ts", OffsetDateTime.class));

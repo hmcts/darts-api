@@ -23,9 +23,7 @@ public class YourTranscriptsSummaryRowMapper implements RowMapper<YourTranscript
             rs.getObject("hearing_date", LocalDate.class),
             rs.getString("transcription_type"),
             rs.getString("status"),
-            rs.getObject("requested_ts", OffsetDateTime.class),
-            null,
-            null
+            rs.getObject("requested_ts", OffsetDateTime.class)
         );
 
         if (rs.getInt("transcription_urgency_id") != 0) {

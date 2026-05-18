@@ -128,7 +128,7 @@ class CasesMapperTest {
         caseEntity.setDefenceList(createDefenceList(caseEntity));
         caseEntity.setDefendantList(createDefendantList(caseEntity));
 
-        AddCaseRequest request = new AddCaseRequest(SWANSEA, "1", null, null, null, null, null);
+        AddCaseRequest request = new AddCaseRequest(SWANSEA, "1");
         request.setProsecutors(new ArrayList<>(List.of("New Prosecutor")));
         request.setDefenders(new ArrayList<>(List.of("New Defenders")));
         request.setDefendants(new ArrayList<>(List.of("New Defendants")));
@@ -154,7 +154,7 @@ class CasesMapperTest {
         caseEntity.setDefenceList(createDefenceList(caseEntity));
         caseEntity.setDefendantList(createDefendantList(caseEntity));
 
-        AddCaseRequest request = new AddCaseRequest(SWANSEA, "1", null, null, null, null, null);
+        AddCaseRequest request = new AddCaseRequest(SWANSEA, "1");
         request.setProsecutors(new ArrayList<>(List.of("prosecutor_casenumber1_1")));
         request.setDefenders(new ArrayList<>(List.of("defence_casenumber1_1")));
         request.setDefendants(new ArrayList<>(List.of("defendant_casenumber1_1")));
@@ -172,7 +172,7 @@ class CasesMapperTest {
     void testDefendantNameMatchingUnallocatedCaseNumberFormat() {
         CourtCaseEntity existingCourtCaseEntity = new CourtCaseEntity();
         existingCourtCaseEntity.setCaseNumber(CASE_NUMBER);
-        AddCaseRequest request = new AddCaseRequest(SWANSEA, CASE_NUMBER, null, null, null, null, null);
+        AddCaseRequest request = new AddCaseRequest(SWANSEA, CASE_NUMBER);
         var unallocatedCaseNumber = "U20240603-103622, U20240603-03622";
         request.setDefendants(new ArrayList<>(List.of(unallocatedCaseNumber, "Mr Defendant")));
 

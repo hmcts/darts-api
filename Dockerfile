@@ -2,7 +2,7 @@
 # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
 ARG APP_INSIGHTS_AGENT_VERSION=3.7.8
 
-FROM mcr.microsoft.com/openjdk/jdk:21-azurelinux AS build
+FROM mcr.microsoft.com/openjdk/jdk:25-azurelinux AS build
 
 WORKDIR /usr/local/bin
 # Linux Static Builds (http://www.ffmpeg.org/download.html#build-linux)

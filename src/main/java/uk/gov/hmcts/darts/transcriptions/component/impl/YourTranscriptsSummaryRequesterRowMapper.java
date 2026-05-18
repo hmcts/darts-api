@@ -22,9 +22,7 @@ public class YourTranscriptsSummaryRequesterRowMapper extends YourTranscriptsSum
             rs.getObject("hearing_date", LocalDate.class),
             rs.getString("transcription_type"),
             rs.getString("status"),
-            rs.getObject("requested_ts", OffsetDateTime.class),
-            null,
-            null
+            rs.getObject("requested_ts", OffsetDateTime.class)
         );
         summary.setApprovedTs(rs.getObject("approved_ts", OffsetDateTime.class));
 

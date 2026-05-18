@@ -87,9 +87,7 @@ class AddAudioRequestMapperImplTest {
                 "test",
                 "courthouse",
                 "courtroom",
-                null,
                 1000L,
-                null,
                 List.of("case1", "case2")
             ), userAccount);
         Assertions.assertEquals(media.getStart(), result.getStart());
