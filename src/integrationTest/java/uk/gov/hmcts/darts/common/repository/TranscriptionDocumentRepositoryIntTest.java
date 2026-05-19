@@ -19,7 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-class TranscriptionDocumentTest extends PostgresIntegrationBase {
+class TranscriptionDocumentRepositoryIntTest extends PostgresIntegrationBase {
 
     @Autowired
     private TranscriptionDocumentStub transcriptionStub;
@@ -71,7 +71,6 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository.findTranscriptionMedia(null, null, null, null, null, null, null, null, false);
 
-
         if (TestType.MODERNISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(2, transcriptionDocumentResults.size());
@@ -91,7 +90,6 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository.findTranscriptionMedia(null, null, null, null, null, null, null, null, true);
 
-
         if (TestType.MODERNISED.equals(testType)) {
             //Mod has two items due to joins that are not valid for legacy data
             Assertions.assertEquals(4, transcriptionDocumentResults.size());
@@ -102,7 +100,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithCaseNumber(TestType testType) {
+    void findTranscriptionMedia_WithCaseNumber(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 0;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -152,7 +150,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithoutAnyParameters(TestType testType) {
+    void findTranscriptionDocument_WithoutAnyParameters(TestType testType) {
         dataSetup(testType);
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository.findTranscriptionMedia(null,
@@ -162,7 +160,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithoutAnyParametersNoHearingCourtCaseWorkflow(TestType testType) {
+    void findTranscriptionDocument_WithoutAnyParametersNoHearingCourtCaseWorkflow(TestType testType) {
         dartsDatabase.clearDatabaseInThisOrder();
 
         generatedDocumentEntities = dataSetup(testType, GENERATION_COUNT, 0, 0,
@@ -188,7 +186,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithCourtDisplayNameSubstringPrefixMatchOne(TestType testType) {
+    void findTranscriptionDocument_WithCourtDisplayNameSubstringPrefixMatchOne(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -212,7 +210,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithCourtDisplayNameCaseInsensitiveSubstringPrefixMatchOne(TestType testType) {
+    void findTranscriptionDocument_WithCourtDisplayNameCaseInsensitiveSubstringPrefixMatchOne(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -234,7 +232,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithCourtDisplayNameSubstringPostFixMatchOne(TestType testType) {
+    void findTranscriptionDocument_WithCourtDisplayNameSubstringPostFixMatchOne(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -258,7 +256,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithCourtDisplayNameCaseInsensitiveSubstringPostFixMatchOne(TestType testType) {
+    void findTranscriptionDocument_WithCourtDisplayNameCaseInsensitiveSubstringPostFixMatchOne(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -281,7 +279,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithCourtDisplayNameSubstringMatchAll(TestType testType) {
+    void findTranscriptionDocument_WithCourtDisplayNameSubstringMatchAll(TestType testType) {
         dataSetup(testType);
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository.findTranscriptionMedia(
@@ -310,7 +308,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithHearingCourthouseDisplayNameNoCaseCourtHouseSubstringMatchAll(TestType testType) {
+    void findTranscriptionDocument_WithHearingCourthouseDisplayNameNoCaseCourtHouseSubstringMatchAll(TestType testType) {
         dartsDatabase.clearDatabaseInThisOrder();
 
         generatedDocumentEntities = dataSetup(testType, GENERATION_COUNT, GENERATION_HEARING_PER_TRANSCRIPTION, GENERATION_CASES_PER_TRANSCRIPTION,
@@ -342,7 +340,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithNoHearingWithCourtCaseMatchAll(TestType testType) {
+    void findTranscriptionDocument_WithNoHearingWithCourtCaseMatchAll(TestType testType) {
         dartsDatabase.clearDatabaseInThisOrder();
 
         generatedDocumentEntities = dataSetup(testType, GENERATION_COUNT, 0, GENERATION_CASES_PER_TRANSCRIPTION, false, false, true);
@@ -374,7 +372,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithHearingDate(TestType testType) {
+    void findTranscriptionDocument_WithHearingDate(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -396,17 +394,9 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         });
     }
 
-    private LocalDate getHearingDate(TestType testType, TranscriptionEntity transcription) {
-        if (TestType.MODERNISED.equals(testType)) {
-            return transcription.getHearing().getHearingDate();
-        } else {
-            return transcription.getHearingDate();
-        }
-    }
-
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithManualTranscription(TestType testType) {
+    void findTranscriptionDocument_WithManualTranscription(TestType testType) {
         dartsDatabase.clearDatabaseInThisOrder();
 
         generatedDocumentEntities = dataSetup(testType, 2, 0, 0, false, false, false);
@@ -430,7 +420,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithOwnerExact(TestType testType) {
+    void findTranscriptionDocument_WithOwnerExact(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -453,7 +443,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithOwnerPrefix(TestType testType) {
+    void findTranscriptionDocument_WithOwnerPrefix(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -476,7 +466,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithOwnerCaseInsensitivePrefix(TestType testType) {
+    void findTranscriptionDocument_WithOwnerCaseInsensitivePrefix(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -499,7 +489,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithOwnerPostfix(TestType testType) {
+    void findTranscriptionDocument_WithOwnerPostfix(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -522,7 +512,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithOwnerCaseInsensitivePostfix(TestType testType) {
+    void findTranscriptionDocument_WithOwnerCaseInsensitivePostfix(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -547,7 +537,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithOwnerSubstringMatchAll(TestType testType) {
+    void findTranscriptionDocument_WithOwnerSubstringMatchAll(TestType testType) {
         dataSetup(testType);
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository.findTranscriptionMedia(
@@ -574,7 +564,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithRequestedByExact(TestType testType) {
+    void findTranscriptionDocument_WithRequestedByExact(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -598,7 +588,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithRequestedByPrefix(TestType testType) {
+    void findTranscriptionDocument_WithRequestedByPrefix(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -622,7 +612,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithRequestedByCaseInsensitivePrefix(TestType testType) {
+    void findTranscriptionDocument_WithRequestedByCaseInsensitivePrefix(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -647,7 +637,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithRequestedByPostfix(TestType testType) {
+    void findTranscriptionDocument_WithRequestedByPostfix(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -670,7 +660,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithRequestedByCaseInsensitivePostfix(TestType testType) {
+    void findTranscriptionDocument_WithRequestedByCaseInsensitivePostfix(TestType testType) {
         dataSetup(testType);
         int nameMatchIndex = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -694,7 +684,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithRequestedBySubstringMatchAll(TestType testType) {
+    void findTranscriptionDocument_WithRequestedBySubstringMatchAll(TestType testType) {
         dataSetup(testType);
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository.findTranscriptionMedia(
@@ -720,7 +710,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithRequestedAtFromAndRequestedAtToSameDay(TestType testType) {
+    void findTranscriptionDocument_WithRequestedAtFromAndRequestedAtToSameDay(TestType testType) {
         dataSetup(testType);
         int fromAtPosition = 0;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -742,7 +732,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithRequestedAtFrom(TestType testType) {
+    void findTranscriptionDocument_WithRequestedAtFrom(TestType testType) {
         dataSetup(testType);
         int fromAtPosition = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -763,7 +753,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithRequestedAtTo(TestType testType) {
+    void findTranscriptionDocument_WithRequestedAtTo(TestType testType) {
         dataSetup(testType);
         int toPosition = 1;
         List<TranscriptionDocumentResult> transcriptionDocumentResults
@@ -791,7 +781,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(TestType.class)
-    void testFindTranscriptionDocumentWithAllQueryParameters(TestType testType) {
+    void findTranscriptionDocument_WithAllQueryParameters(TestType testType) {
         dataSetup(testType);
         generatedDocumentEntities.getFirst().getTranscription().setRequestedBy(null);
         UserAccountEntity createdBy = dartsDatabase.getUserAccountRepository()
@@ -840,6 +830,7 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         Assertions.assertEquals(expected.hearingDate(), asserted.hearingDate());
         Assertions.assertEquals(expected.isManualTranscription(), asserted.isManualTranscription());
         Assertions.assertEquals(expected.isHidden(), asserted.isHidden());
+        Assertions.assertEquals(expected.uploadedAt(), asserted.uploadedAt());
         return true;
     }
 
@@ -892,7 +883,8 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
                                                hearingCourthouseDisplayName,
                                                hearingDate,
                                                transcriptionDocumentEntity.getTranscription().getIsManualTranscription(),
-                                               transcriptionDocumentEntity.isHidden()
+                                               transcriptionDocumentEntity.isHidden(),
+                                               transcriptionDocumentEntity.getUploadedDateTime()
         );
     }
 
@@ -900,4 +892,13 @@ class TranscriptionDocumentTest extends PostgresIntegrationBase {
         return caseEntity != null && caseEntity.getCourthouse().getCourthouseName() != null
             ? caseEntity.getCourthouse().getCourthouseName() : null;
     }
+
+    private LocalDate getHearingDate(TestType testType, TranscriptionEntity transcription) {
+        if (TestType.MODERNISED.equals(testType)) {
+            return transcription.getHearing().getHearingDate();
+        } else {
+            return transcription.getHearingDate();
+        }
+    }
+
 }

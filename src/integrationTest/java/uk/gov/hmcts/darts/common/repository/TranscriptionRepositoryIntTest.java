@@ -26,7 +26,7 @@ import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
-class TranscriptionRepositoryTest extends IntegrationBase {
+class TranscriptionRepositoryIntTest extends IntegrationBase {
 
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
@@ -59,15 +59,8 @@ class TranscriptionRepositoryTest extends IntegrationBase {
         caseId = courtCaseEntity.getId();
     }
 
-    private void createStandardTranscriptionWithDocument() {
-        createTranscriptionWithDocument(hearingEntity, false);
-        createTranscriptionWithDocument(hearingEntity, true);
-        createTranscriptionWithDocument(courtCaseEntity, false);
-        createTranscriptionWithDocument(courtCaseEntity, true);
-    }
-
     @Test
-    void doesNotShowAutomated() {
+    void findByCaseIdManualOrLegacy_shouldNotShowAutomatedTranscriptions() {
         TranscriptionEntity legacyTranscription = createTranscriptionWithDocument(courtCaseEntity, false);
         legacyTranscription.setIsManualTranscription(false);
         dartsDatabase.save(legacyTranscription);
@@ -90,7 +83,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     }
 
     @Test
-    void findByCaseIdManualOrLegacy_dontReturnLegacyTranscriptionIfHasNoDocuments() {
+    void findByCaseIdManualOrLegacy_shouldNotReturnLegacyTranscriptionIfHasNoDocuments() {
         TranscriptionEntity legacyTranscription = transcriptionStub.createTranscription(courtCaseEntity);
         legacyTranscription.setLegacyObjectId("legacy");
         legacyTranscription.setIsManualTranscription(false);
@@ -100,14 +93,14 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     }
 
     @Test
-    void includesHidden() {
+    void findByCaseIdManualOrLegacy_shouldIncludeHidden() {
         createStandardTranscriptionWithDocument();
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, true);
         assertThat(transcriptionEntities).hasSize(4);
     }
 
     @Test
-    void excludesHidden() {
+    void findByCaseIdManualOrLegacy_shouldExcludeHidden() {
         createStandardTranscriptionWithDocument();
         var courtCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         persistTwoHiddenTwoNotHiddenTranscriptionsFor(courtCase);
@@ -171,7 +164,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
 
     @Test
     void findByHearingIdManualOrLegacyIncludeDeletedTranscriptionDocuments_shouldReturnLegacyIfHasDocument() {
-        TranscriptionEntity legacyTranscription = createTranscriptionWithDocument(courtCaseEntity,false);
+        TranscriptionEntity legacyTranscription = createTranscriptionWithDocument(courtCaseEntity, false);
         legacyTranscription.addHearing(hearingEntity);
         legacyTranscription.setLegacyObjectId("legacy");
         legacyTranscription.setIsManualTranscription(false);
@@ -194,7 +187,6 @@ class TranscriptionRepositoryTest extends IntegrationBase {
         legacyTranscription.setLegacyObjectId("legacy");
         legacyTranscription.setIsManualTranscription(false);
         dartsDatabase.save(legacyTranscription);
-
 
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingIdManualOrLegacyIncludeDeletedTranscriptionDocuments(
             hearingEntity.getId()
@@ -230,4 +222,12 @@ class TranscriptionRepositoryTest extends IntegrationBase {
         TranscriptionDocumentEntity transcriptionDocument = transcriptionDocumentStub.createTranscriptionDocumentForTranscription(transcription);
         transcriptionDocument.setHidden(hiddenDoc);
     }
+
+    private void createStandardTranscriptionWithDocument() {
+        createTranscriptionWithDocument(hearingEntity, false);
+        createTranscriptionWithDocument(hearingEntity, true);
+        createTranscriptionWithDocument(courtCaseEntity, false);
+        createTranscriptionWithDocument(courtCaseEntity, true);
+    }
+
 }
