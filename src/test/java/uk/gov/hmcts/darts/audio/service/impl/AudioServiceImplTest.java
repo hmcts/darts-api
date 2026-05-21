@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import uk.gov.hmcts.darts.arm.enums.ArmApiError;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
@@ -21,8 +24,10 @@ import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -192,4 +197,19 @@ class AudioServiceImplTest {
             .containsExactlyInAnyOrder(media1, media2);
         verify(mediaRepository).findAllByHearingIdAndMinimumChannelAndIsCurrentTrue(HEARING_ID);
     }
+
+    @Test
+    void encode_whenArmDownForMaintenance_shouldThrowDartsApiException() throws Exception {
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(11L);
+        when(mediaRepository.findById(mediaEntity.getId())).thenReturn(Optional.of(mediaEntity));
+
+        when(audioTransformationService.retrieveFromStorageAndSaveToTempWorkspace(mediaEntity))
+            .thenThrow(new ArmDownForMaintenanceException("ARM down"));
+
+        assertThatThrownBy(() -> audioService.encode(mediaEntity.getId()))
+            .isExactlyInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", ArmApiError.ARM_DOWN_FOR_MAINTENANCE);
+    }
 }
+
