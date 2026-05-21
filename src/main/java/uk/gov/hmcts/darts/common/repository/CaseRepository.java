@@ -54,12 +54,12 @@ public interface CaseRepository
         """)
     List<Integer> findOpenCasesToClose(OffsetDateTime cutoffDate, Limit limit);
 
+    // Must have join to case retention to ensure all cases returned have CaseRetentionEntity
     @Query("""
         SELECT distinct cc.id
         FROM CourtCaseEntity cc
-        JOIN cc.caseRetentionEntities cr                
-        WHERE cr is not null
-        AND cc.isRetentionUpdated = true
+        JOIN cc.caseRetentionEntities cr
+        WHERE cc.isRetentionUpdated = true
         AND cc.retentionRetries < :maxRetentionRetries
         ORDER BY cc.id ASC
         """)
