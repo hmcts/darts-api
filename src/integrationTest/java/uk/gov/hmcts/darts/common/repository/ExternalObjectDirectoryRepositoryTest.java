@@ -1258,7 +1258,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findOldestByInputUploadProcessedTsAndStatusAndLocation() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    void findOldestByCreateRecordProcessedTsAndStatusAndLocation() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // Given
         OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(200);
         OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusHours(2);
@@ -1266,7 +1266,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         List<ExternalObjectDirectoryEntity> matchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 10, Optional.of(pastCurrentDateTime1));
         matchingEods.forEach(eod -> {
-            eod.setInputUploadProcessedTs(pastCurrentDateTime1);
+            eod.setCreateRecordProcessedTs(pastCurrentDateTime1);
         });
         dartsPersistence.saveAll(matchingEods);
         assertEquals(10, matchingEods.size());
@@ -1274,13 +1274,13 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         List<ExternalObjectDirectoryEntity> nonMatchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 4, Optional.of(pastCurrentDateTime2));
         nonMatchingEods.forEach(eod -> {
-            eod.setInputUploadProcessedTs(pastCurrentDateTime2);
+            eod.setCreateRecordProcessedTs(pastCurrentDateTime2);
         });
         dartsPersistence.saveAll(nonMatchingEods);
         assertEquals(4, nonMatchingEods.size());
 
         // When
-        ExternalObjectDirectoryEntity result = externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(
+        ExternalObjectDirectoryEntity result = externalObjectDirectoryRepository.findOldestByCreateRecordProcessedTsAndStatusAndLocation(
             EodHelper.armRpoPendingStatus(), EodHelper.armLocation());
 
         // Then

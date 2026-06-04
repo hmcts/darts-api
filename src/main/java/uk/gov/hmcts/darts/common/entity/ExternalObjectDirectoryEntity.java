@@ -109,6 +109,9 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "is_dets", nullable = false)
     private boolean isDets;
 
+    @Column(name = "create_record_processed_ts")
+    private OffsetDateTime createRecordProcessedTs;
+
     @Override
     public int getStatusId() {
         return getStatus().getId();
