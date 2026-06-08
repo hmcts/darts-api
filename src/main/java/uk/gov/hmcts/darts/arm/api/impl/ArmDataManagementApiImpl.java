@@ -26,6 +26,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     private final ArmService armService;
