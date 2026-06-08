@@ -61,6 +61,12 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
+    public List<String> listSubmissionBlobs(String prefix) {
+        return armService.listSubmissionBlobs(armDataManagementConfiguration.getContainerName(), prefix);
+    }
+
+
+    @Override
     public List<String> listResponseBlobsUsingBatch(String prefix, int batchSize) {
         return armService.listResponseBlobsUsingBatch(armDataManagementConfiguration.getContainerName(),
                                                       prefix,
