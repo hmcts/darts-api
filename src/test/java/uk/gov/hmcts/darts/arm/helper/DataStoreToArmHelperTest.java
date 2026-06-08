@@ -1,11 +1,9 @@
 package uk.gov.hmcts.darts.arm.helper;
 
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
@@ -13,23 +11,20 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItem;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItems;
+import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
-import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData;
 
-import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,9 +37,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
@@ -54,35 +51,37 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTI
 @ExtendWith(MockitoExtension.class)
 class DataStoreToArmHelperTest {
 
-    @InjectMocks
     private DataStoreToArmHelper dataStoreToArmHelper;
 
-    @Mock
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Mock
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
-    @Mock
     private LogApi logApi;
     @Mock
     private ArmDataManagementApi armDataManagementApi;
     @Mock
-    private FileOperationService fileOperationService;
-    @Mock
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
-
-    @TempDir
-    private File tempDirectory;
+    @Mock
+    private ArchiveRecordService archiveRecordService;
 
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
-
-    private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
+    private EodHelperMocks eodHelperMocks;
 
     @BeforeEach
     void setUp() {
+        eodHelperMocks = new EodHelperMocks(false);
+        eodHelperMocks.simulateInitWithMockedData();
+
+        dataStoreToArmHelper = new DataStoreToArmHelper(
+            externalObjectDirectoryRepository,
+            armDataManagementConfiguration,
+            logApi,
+            armDataManagementApi,
+            archiveRecordFileGenerator,
+            archiveRecordService
+        );
 
         MediaEntity mediaEntity1 = PersistableFactory.getMediaTestData().someMinimal();
         mediaEntity1.setId(456L);
@@ -92,23 +91,22 @@ class DataStoreToArmHelperTest {
             ARM_INGESTION,
             UUID.randomUUID().toString());
         externalObjectDirectoryEntity.setId(123L);
-        externalObjectDirectoryEntity.setStatus(EOD_HELPER_MOCKS.getArmIngestionStatus());
+        externalObjectDirectoryEntity.setStatus(eodHelperMocks.getArmIngestionStatus());
         externalObjectDirectoryEntity.setOsrUuid(1234L);
         externalObjectDirectoryEntity.setTransferAttempts(1);
 
     }
 
-    @AfterAll
-    static void close() {
-        EOD_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        eodHelperMocks.close();
     }
 
     @Test
     void getEodEntitiesToSendToArm_ShouldSucceed() {
         // given
-        EOD_HELPER_MOCKS.simulateInitWithMockedData();
-        ExternalLocationTypeEntity sourceLocation = EOD_HELPER_MOCKS.getUnstructuredLocation();
-        ExternalLocationTypeEntity armLocation = EOD_HELPER_MOCKS.getArmLocation();
+        ExternalLocationTypeEntity sourceLocation = eodHelperMocks.getUnstructuredLocation();
+        ExternalLocationTypeEntity armLocation = eodHelperMocks.getArmLocation();
 
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(anyList(), any(), anyInt(), any(Pageable.class)))
             .thenReturn(List.of(123L));
@@ -142,8 +140,8 @@ class DataStoreToArmHelperTest {
     @Test
     void updateExternalObjectDirectoryStatusToFailed_ShouldSucceed() {
         // given
-        ObjectRecordStatusEntity objectRecordStatus = EOD_HELPER_MOCKS.getArmResponseManifestFailedStatus();
-        externalObjectDirectoryEntity.setStatus(EOD_HELPER_MOCKS.getArmIngestionStatus());
+        ObjectRecordStatusEntity objectRecordStatus = eodHelperMocks.getArmResponseManifestFailedStatus();
+        externalObjectDirectoryEntity.setStatus(eodHelperMocks.getArmIngestionStatus());
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
@@ -156,9 +154,9 @@ class DataStoreToArmHelperTest {
     @Test
     void updateExternalObjectDirectoryStatus_ShouldSucceed() {
         // given
-        ObjectRecordStatusEntity armStatus = EOD_HELPER_MOCKS.getArmDropZoneStatus();
+        ObjectRecordStatusEntity armStatus = eodHelperMocks.getArmDropZoneStatus();
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
-        externalObjectDirectoryEntity.setStatus(EOD_HELPER_MOCKS.getArmIngestionStatus());
+        externalObjectDirectoryEntity.setStatus(eodHelperMocks.getArmIngestionStatus());
 
         // when
         dataStoreToArmHelper.updateExternalObjectDirectoryStatus(externalObjectDirectoryEntity, armStatus, userAccount);
@@ -264,7 +262,7 @@ class DataStoreToArmHelperTest {
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
         ExternalObjectDirectoryEntity armExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
         String filename = "testfile";
-        ObjectRecordStatusEntity previousStatus = EodHelper.armIngestionStatus();
+        ObjectRecordStatusEntity previousStatus = eodHelperMocks.getArmIngestionStatus();
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         doThrow(new RuntimeException("Simulated exception"))
@@ -284,7 +282,7 @@ class DataStoreToArmHelperTest {
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
         ExternalObjectDirectoryEntity armExternalObjectDirectory = mock(ExternalObjectDirectoryEntity.class);
         String filename = "testfile";
-        ObjectRecordStatusEntity previousStatus = EodHelper.armIngestionStatus();
+        ObjectRecordStatusEntity previousStatus = eodHelperMocks.getArmIngestionStatus();
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         doAnswer(invocation -> {
@@ -294,6 +292,111 @@ class DataStoreToArmHelperTest {
         // when
         assertThrows(InterruptedException.class, () -> dataStoreToArmHelper.copyUnstructuredRawDataToArm(
             unstructuredExternalObjectDirectory, armExternalObjectDirectory, filename, previousStatus, userAccount));
+    }
+
+    @Test
+    void shouldPushRawDataToArm_ShouldReturnTrue_WhenPreviousStatusIsArmIngestion() {
+        // given
+        ArmBatchItem batchItem = new ArmBatchItem();
+        batchItem.setPreviousStatus(eodHelperMocks.getArmIngestionStatus());
+        batchItem.setArmEod(externalObjectDirectoryEntity);
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+
+        // when
+        boolean result = dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, "123_456_1", userAccount);
+
+        // then
+        assertThat(result).isTrue();
+        verify(armDataManagementApi, never()).listSubmissionBlobs(anyString());
+        verify(externalObjectDirectoryRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void shouldPushRawDataToArm_ShouldReturnTrue_WhenPreviousStatusIsArmRawDataFailed() {
+        // given
+        ArmBatchItem batchItem = new ArmBatchItem();
+        batchItem.setPreviousStatus(eodHelperMocks.getFailedArmRawDataStatus());
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+
+        // when
+        boolean result = dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, "123_456_1", userAccount);
+
+        // then
+        assertThat(result).isTrue();
+        verify(armDataManagementApi, never()).listSubmissionBlobs(anyString());
+        verify(externalObjectDirectoryRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void shouldPushRawDataToArm_ShouldReturnFalseAndUpdateToPushed_WhenSubmissionBlobExists() {
+        // given
+        ArmBatchItem batchItem = createArmBatchItemWithRetryCheckStatus();
+        UserAccountEntity userAccount = createUserAccount();
+        ArchiveRecord archiveRecord = mock(ArchiveRecord.class);
+        String rawFilename = "123_456_1";
+
+        when(armDataManagementApi.listSubmissionBlobs("123_")).thenReturn(List.of("123_456_1"));
+        when(archiveRecordService.generateArchiveRecordInfo(123L, rawFilename)).thenReturn(archiveRecord);
+
+        // when
+        boolean result = dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, rawFilename, userAccount);
+
+        // then
+        assertThat(result).isFalse();
+        assertThat(batchItem.getRawFilePushSuccessful()).isTrue();
+        assertThat(batchItem.getArchiveRecord()).isSameAs(archiveRecord);
+        assertThat(batchItem.getArmEod().getStatus()).isEqualTo(eodHelperMocks.getArmRawDataPushedStatus());
+        assertThat(batchItem.getArmEod().getLastModifiedById()).isEqualTo(userAccount.getId());
+        assertThat(batchItem.getArmEod().getManifestFile()).isEqualTo("manifest-file.a360");
+        verify(armDataManagementApi).listSubmissionBlobs("123_");
+        verify(archiveRecordService).generateArchiveRecordInfo(123L, rawFilename);
+        verify(externalObjectDirectoryRepository).saveAndFlush(batchItem.getArmEod());
+    }
+
+    @Test
+    void shouldPushRawDataToArm_ShouldReturnTrueAndUpdateToFailed_WhenSubmissionBlobDoesNotExist() {
+        // given
+        ArmBatchItem batchItem = createArmBatchItemWithRetryCheckStatus();
+        UserAccountEntity userAccount = createUserAccount();
+
+        when(armDataManagementApi.listSubmissionBlobs("123_")).thenReturn(List.of());
+
+        // when
+        boolean result = dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, "123_456_1", userAccount);
+
+        // then
+        assertThat(result).isTrue();
+        assertThat(batchItem.getRawFilePushSuccessful()).isFalse();
+        assertThat(batchItem.getArchiveRecord()).isNull();
+        assertThat(batchItem.getArmEod().getStatus().getId()).isEqualTo(eodHelperMocks.getFailedArmRawDataStatus().getId());
+        assertThat(batchItem.getArmEod().getLastModifiedById()).isEqualTo(userAccount.getId());
+        assertThat(batchItem.getArmEod().getManifestFile()).isNull();
+        verify(armDataManagementApi).listSubmissionBlobs("123_");
+        verify(archiveRecordService, never()).generateArchiveRecordInfo(any(), anyString());
+        verify(externalObjectDirectoryRepository).saveAndFlush(batchItem.getArmEod());
+    }
+
+    @Test
+    void shouldPushRawDataToArm_ShouldReturnTrueAndUpdateToFailed_WhenSubmissionBlobListIsNull() {
+        // given
+        ArmBatchItem batchItem = createArmBatchItemWithRetryCheckStatus();
+        UserAccountEntity userAccount = createUserAccount();
+
+        when(armDataManagementApi.listSubmissionBlobs("123_")).thenReturn(null);
+
+        // when
+        boolean result = dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, "123_456_1", userAccount);
+
+        // then
+        assertThat(result).isTrue();
+        assertThat(batchItem.getRawFilePushSuccessful()).isFalse();
+        assertThat(batchItem.getArchiveRecord()).isNull();
+        assertThat(batchItem.getArmEod().getStatus().getId()).isEqualTo(eodHelperMocks.getFailedArmRawDataStatus().getId());
+        assertThat(batchItem.getArmEod().getLastModifiedById()).isEqualTo(userAccount.getId());
+        assertThat(batchItem.getArmEod().getManifestFile()).isNull();
+        verify(armDataManagementApi).listSubmissionBlobs("123_");
+        verify(archiveRecordService, never()).generateArchiveRecordInfo(any(), anyString());
+        verify(externalObjectDirectoryRepository).saveAndFlush(batchItem.getArmEod());
     }
 
     @Test
@@ -329,6 +432,25 @@ class DataStoreToArmHelperTest {
         String name = dataStoreToArmHelper.getArchiveRecordsFileName("DARTS");
 
         assertThat(name).matches("DARTS_.+\\.a360");
+    }
+
+    private ArmBatchItem createArmBatchItemWithRetryCheckStatus() {
+        ObjectRecordStatusEntity retryCheckStatus = new ObjectRecordStatusEntity();
+        retryCheckStatus.setId(999);
+        retryCheckStatus.setDescription("Retry Check");
+
+        externalObjectDirectoryEntity.setStatus(retryCheckStatus);
+        externalObjectDirectoryEntity.setManifestFile("manifest-file.a360");
+
+        ArmBatchItem batchItem = new ArmBatchItem();
+        batchItem.setArmEod(externalObjectDirectoryEntity);
+        return batchItem;
+    }
+
+    private UserAccountEntity createUserAccount() {
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(789);
+        return userAccount;
     }
 
 }
