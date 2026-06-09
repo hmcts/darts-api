@@ -42,6 +42,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
@@ -345,12 +346,12 @@ class DataStoreToArmHelperTest {
         assertThat(result).isFalse();
         assertThat(batchItem.getRawFilePushSuccessful()).isTrue();
         assertThat(batchItem.getArchiveRecord()).isSameAs(archiveRecord);
-        assertThat(batchItem.getArmEod().getStatus()).isEqualTo(eodHelperMocks.getArmRawDataPushedStatus());
+        assertThat(batchItem.getArmEod().getStatus().getId()).isEqualTo(eodHelperMocks.getArmRawDataPushedStatus().getId());
         assertThat(batchItem.getArmEod().getLastModifiedById()).isEqualTo(userAccount.getId());
         assertThat(batchItem.getArmEod().getManifestFile()).isEqualTo("manifest-file.a360");
         verify(armDataManagementApi).listSubmissionBlobs("123_");
         verify(archiveRecordService).generateArchiveRecordInfo(123L, rawFilename);
-        verify(externalObjectDirectoryRepository).saveAndFlush(batchItem.getArmEod());
+        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(batchItem.getArmEod());
     }
 
     @Test
