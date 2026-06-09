@@ -170,7 +170,7 @@ public class DataStoreToArmHelper {
             documentId = externalObjectDirectoryEntity.getCaseDocument().getId();
         }
 
-        return String.format("%s_%s_%s", entityId, documentId, transferAttempts);
+        return format("%s_%s_%s", entityId, documentId, transferAttempts);
     }
 
     @SneakyThrows
@@ -221,10 +221,10 @@ public class DataStoreToArmHelper {
 
     public String getArchiveRecordsFileName(String manifestFilePrefix) {
         String fileNameFormat = "%s_%s.%s";
-        return String.format(fileNameFormat,
-                             manifestFilePrefix,
-                             UUID.randomUUID().toString(),
-                             armDataManagementConfiguration.getFileExtension()
+        return format(fileNameFormat,
+                      manifestFilePrefix,
+                      UUID.randomUUID(),
+                      armDataManagementConfiguration.getFileExtension()
         );
     }
 
