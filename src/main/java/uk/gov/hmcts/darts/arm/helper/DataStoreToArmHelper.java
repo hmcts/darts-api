@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
@@ -267,7 +268,8 @@ public class DataStoreToArmHelper {
             return true;
         } else {
             ExternalObjectDirectoryEntity armEod = batchItem.getArmEod();
-            List<String> submissionBlobs = armDataManagementApi.listSubmissionBlobs(armEod.getId() + SUBMISSION_FILE_SEPARATOR);
+            String prefix = format("%d_", armEod.getId());
+            List<String> submissionBlobs = armDataManagementApi.listSubmissionBlobs(prefix);
 
             if (CollectionUtils.isNotEmpty(submissionBlobs)) {
                 batchItem.setRawFilePushSuccessful(true);
@@ -275,6 +277,12 @@ public class DataStoreToArmHelper {
                 ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename);
                 batchItem.setArchiveRecord(archiveRecord);
                 updateExternalObjectDirectoryStatus(armEod, EodHelper.armRawDataPushedStatus(), userAccount);
+                int index = submissionBlobs.getFirst().lastIndexOf(SUBMISSION_FILE_SEPARATOR);
+                if (index != -1 && index + 1 < submissionBlobs.getFirst().length()) {
+                    Integer attempts = Integer.parseInt(submissionBlobs.getFirst().substring(index + 1));
+                    armEod.setTransferAttempts(attempts);
+                    externalObjectDirectoryRepository.saveAndFlush(armEod);
+                }
                 return false;
             } else {
                 updateExternalObjectDirectoryStatusToFailed(armEod, EodHelper.failedArmRawDataStatus(), userAccount);
