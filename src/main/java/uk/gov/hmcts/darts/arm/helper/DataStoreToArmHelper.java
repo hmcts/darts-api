@@ -43,7 +43,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidInstanceofChecksInCatchClause"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidInstanceofChecksInCatchClause", "PMD.GodClass"})
 public class DataStoreToArmHelper {
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
