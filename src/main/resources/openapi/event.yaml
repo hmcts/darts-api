@@ -63,8 +63,8 @@ paths:
                   event_text: '[Defendant: DEFENDANT ONE]'
                   date_time: '2023-06-14T08:37:30.945Z'
                   retention_policy:
-                    CaseRetentionFixedPolicy: 4
-                    CaseTotalSentence: 26Y0M0D
+                    case_retention_fixed_policy: 4
+                    case_total_sentence: 26Y0M0D
 
       responses:
         '200':
@@ -747,35 +747,46 @@ components:
 
     DartsEvent:
       type: object
+      additionalProperties: false
       properties:
         message_id:
           type: string
+          maxLength: 256
         type:
           type: string
+          maxLength: 256
         sub_type:
           type: string
+          maxLength: 256
         event_id:
           type: string
+          maxLength: 10
+          pattern: '^[0-9]+$'
         courthouse:
           $ref: '#/components/schemas/Courthouse'
         courtroom:
           $ref: '#/components/schemas/Courtroom'
         case_numbers:
           type: array
+          maxItems: 100
           items:
             $ref: '#/components/schemas/CaseNumber'
         event_text:
           type: string
+          maxLength: 2000
         date_time:
           type: string
           format: date-time
         retention_policy:
           type: object
+          additionalProperties: false
           properties:
             case_retention_fixed_policy:
               type: string
+              maxLength: 256
             case_total_sentence:
               type: string
+              maxLength: 256
         start_time:
           type: string
           format: date-time
