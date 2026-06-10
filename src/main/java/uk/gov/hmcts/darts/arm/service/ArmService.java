@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 
 import java.util.List;
 
+@SuppressWarnings({"PMD.TooManyMethods"})
 public interface ArmService {
 
     String saveBlobData(String containerName, String filename, BinaryData binaryData);
@@ -34,6 +35,8 @@ public interface ArmService {
      */
     boolean deleteBlobData(String containerName, String blobPathAndName);
 
-    boolean deleteMultipleBlobs(String containerName, List<String> blobPathAndName);
+    boolean deleteMultipleBlobsUsingBatching(String containerName, List<String> blobPathAndName);
+
+    boolean deleteMultipleBlobsIndividually(String containerName, List<String> blobPathAndName);
 
 }

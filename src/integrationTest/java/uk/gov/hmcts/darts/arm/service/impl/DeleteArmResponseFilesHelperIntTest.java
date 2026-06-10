@@ -89,14 +89,14 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
         String ilResponseFile = "dropzone/DARTS/response/" + RESPONSE_FILE_PREFIX + "_c17b9015-e6ad-77c5-8d1e-13259aae1896_1_il.rsp";
 
         when(armDataManagementApi.listResponseBlobs(any())).thenReturn(List.of(otherResponseFile, crResponseFile, ilResponseFile));
-        when(armDataManagementApi.deleteMultipleBlobs(any())).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobsIndividually(any())).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(anyString())).thenReturn(true);
 
         // when
         deleteArmResponseFilesHelper.deleteDanglingResponses(batchInputUploadFileFilenameProcessor);
 
         // then
-        verify(armDataManagementApi).deleteMultipleBlobs(List.of(otherResponseFile, crResponseFile, ilResponseFile));
+        verify(armDataManagementApi).deleteMultipleBlobsIndividually(List.of(otherResponseFile, crResponseFile, ilResponseFile));
         verify(armDataManagementApi).deleteBlobData(DARTS_INPUT_UPLOAD_FILE);
         verify(armDataManagementApi).listResponseBlobs(batchInputUploadFileFilenameProcessor.getHashcode());
         verifyNoMoreInteractions(armDataManagementApi);
@@ -129,13 +129,13 @@ class DeleteArmResponseFilesHelperIntTest extends PostgresIntegrationBase {
             .uploadFileFilenameProcessor(new UploadFileFilenameProcessor(uploadFileFilename1))
             .build();
 
-        when(armDataManagementApi.deleteMultipleBlobs(any())).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobsIndividually(any())).thenReturn(true);
 
         // when
         deleteArmResponseFilesHelper.deleteResponseBlobs(batchData);
 
         // then
-        verify(armDataManagementApi).deleteMultipleBlobs(List.of(createRecordFilename1, uploadFileFilename1));
+        verify(armDataManagementApi).deleteMultipleBlobsIndividually(List.of(createRecordFilename1, uploadFileFilename1));
         verifyNoMoreInteractions(armDataManagementApi);
     }
 

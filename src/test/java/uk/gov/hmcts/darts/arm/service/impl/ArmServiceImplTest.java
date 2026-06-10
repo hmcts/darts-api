@@ -239,13 +239,13 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void deleteMultipleBlobs_shouldReturnFalseAndNotCallAzure_whenNoBlobsProvided() {
-        assertFalse(armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, null));
-        assertFalse(armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, List.of()));
+    void deleteMultipleBlobsUsingBatching_shouldReturnFalseAndNotCallAzure_whenNoBlobsUsingBatchingProvided() {
+        assertFalse(armService.deleteMultipleBlobsUsingBatching(ARM_BLOB_CONTAINER_NAME, null));
+        assertFalse(armService.deleteMultipleBlobsUsingBatching(ARM_BLOB_CONTAINER_NAME, List.of()));
     }
 
     @Test
-    void deleteMultipleBlobs_shouldReturnTrue_whenAllDeletesSucceed() {
+    void deleteMultipleBlobsUsingBatching_shouldReturnTrue_whenAllDeletesSucceed() {
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
         when(blobContainerClient.getServiceClient()).thenReturn(blobServiceClient);
@@ -271,13 +271,13 @@ class ArmServiceImplTest {
 
         try (var ignored = mockConstruction(BlobBatchClientBuilder.class,
                                             (builder, context) -> when(builder.buildClient()).thenReturn(batchClient))) {
-            boolean result = armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
+            boolean result = armService.deleteMultipleBlobsUsingBatching(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
             assertTrue(result);
         }
     }
 
     @Test
-    void deleteMultipleBlobs_shouldReturnFalse_whenAnyDeleteFails() {
+    void deleteMultipleBlobsUsingBatching_shouldReturnFalse_whenAnyDeleteFailsUsingBatching() {
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
         when(blobContainerClient.getServiceClient()).thenReturn(blobServiceClient);
@@ -302,13 +302,13 @@ class ArmServiceImplTest {
 
         try (var ignored = mockConstruction(BlobBatchClientBuilder.class,
                                             (builder, context) -> when(builder.buildClient()).thenReturn(batchClient))) {
-            boolean result = armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
+            boolean result = armService.deleteMultipleBlobsUsingBatching(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
             assertFalse(result);
         }
     }
 
     @Test
-    void deleteMultipleBlobs_shouldReturnFalse_whenAzureThrowsException() {
+    void deleteMultipleBlobsUsingBatching_shouldReturnFalse_whenAzureThrowsException() {
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
         when(blobContainerClient.getServiceClient()).thenReturn(blobServiceClient);
@@ -326,13 +326,13 @@ class ArmServiceImplTest {
 
         try (var ignored = mockConstruction(BlobBatchClientBuilder.class,
                                             (builder, context) -> when(builder.buildClient()).thenReturn(batchClient))) {
-            boolean result = armService.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
+            boolean result = armService.deleteMultipleBlobsUsingBatching(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
             assertFalse(result);
         }
     }
 
     @Test
-    void deleteMultipleBlobs_shouldFallbackToIndividualDeletes_whenBatchForbidden() {
+    void deleteMultipleBlobsUsingBatching_shouldFallbackToIndividualDeletes_whenBatchForbidden() {
         ArmServiceImpl serviceSpy = spy(armService);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
@@ -356,7 +356,7 @@ class ArmServiceImplTest {
 
         try (var ignored = mockConstruction(BlobBatchClientBuilder.class,
                                             (builder, context) -> when(builder.buildClient()).thenReturn(batchClient))) {
-            boolean result = serviceSpy.deleteMultipleBlobs(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
+            boolean result = serviceSpy.deleteMultipleBlobsUsingBatching(ARM_BLOB_CONTAINER_NAME, List.of("blob1", "blob2"));
             assertTrue(result);
         }
 
@@ -366,11 +366,11 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void deleteBlobsIndividually_shouldReturnTrueAndCallDeleteForEachBlob_whenAllDeletesSucceed() {
+    void deleteMultipleBlobsIndividually_shouldReturnTrueAndCallDeleteMultipleForEachBlob_whenAllDeletesSucceed() {
         ArmServiceImpl serviceSpy = spy(armService);
         doReturn(true).when(serviceSpy).deleteBlobData(eq(ARM_BLOB_CONTAINER_NAME), any());
 
-        boolean result = serviceSpy.deleteBlobsIndividually(ARM_BLOB_CONTAINER_NAME, List.of("b1", "b2", "b3"));
+        boolean result = serviceSpy.deleteMultipleBlobsIndividually(ARM_BLOB_CONTAINER_NAME, List.of("b1", "b2", "b3"));
 
         assertTrue(result);
         verify(serviceSpy, times(3)).deleteBlobData(eq(ARM_BLOB_CONTAINER_NAME), any());
@@ -380,13 +380,13 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void deleteBlobsIndividually_shouldReturnFalseAndStillAttemptAllDeletes_whenAnyDeleteFails() {
+    void deleteMultipleBlobsIndividually_shouldReturnFalseAndStillAttemptAllDeletes_whenAnyDeleteMultipleFails() {
         ArmServiceImpl serviceSpy = spy(armService);
         doReturn(true).when(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b1");
         doReturn(false).when(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b2");
         doReturn(true).when(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b3");
 
-        boolean result = serviceSpy.deleteBlobsIndividually(ARM_BLOB_CONTAINER_NAME, List.of("b1", "b2", "b3"));
+        boolean result = serviceSpy.deleteMultipleBlobsIndividually(ARM_BLOB_CONTAINER_NAME, List.of("b1", "b2", "b3"));
 
         assertFalse(result);
         verify(serviceSpy).deleteBlobData(ARM_BLOB_CONTAINER_NAME, "b1");
@@ -396,10 +396,10 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void deleteBlobsIndividually_shouldReturnTrueAndNotCallDelete_whenBlobListIsEmpty() {
+    void deleteBlobsIndividually_shouldReturnTrueAndNotCallDelete_Multiple_whenBlobListIsEmpty() {
         ArmServiceImpl serviceSpy = spy(armService);
 
-        boolean result = serviceSpy.deleteBlobsIndividually(ARM_BLOB_CONTAINER_NAME, List.of());
+        boolean result = serviceSpy.deleteMultipleBlobsIndividually(ARM_BLOB_CONTAINER_NAME, List.of());
 
         assertTrue(result);
         verify(serviceSpy, times(0)).deleteBlobData(eq(ARM_BLOB_CONTAINER_NAME), any());

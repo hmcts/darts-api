@@ -94,7 +94,7 @@ class DeleteArmResponseFilesHelperImplTest {
         BatchInputUploadFileFilenameProcessor processor = mock(BatchInputUploadFileFilenameProcessor.class);
         when(processor.getHashcode()).thenReturn("testHashcode");
         when(armDataManagementApi.listResponseBlobs("testHashcode")).thenReturn(List.of("responseBlob"));
-        when(armDataManagementApi.deleteMultipleBlobs(List.of("responseBlob"))).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobsIndividually(List.of("responseBlob"))).thenReturn(true);
         when(processor.getBatchMetadataFilename()).thenReturn("testFile");
         when(processor.getBatchMetadataFilenameAndPath()).thenReturn("testFilePath");
 
@@ -102,7 +102,7 @@ class DeleteArmResponseFilesHelperImplTest {
         deleteArmResponseFilesHelper.deleteDanglingResponses(processor);
 
         // then
-        verify(armDataManagementApi).deleteMultipleBlobs(List.of("responseBlob"));
+        verify(armDataManagementApi).deleteMultipleBlobsIndividually(List.of("responseBlob"));
     }
 
     @Test
@@ -127,7 +127,7 @@ class DeleteArmResponseFilesHelperImplTest {
 
         eod.setStatus(EodHelper.armResponseChecksumVerificationFailedStatus());
 
-        when(armDataManagementApi.deleteMultipleBlobs(anyList())).thenReturn(true);
+        when(armDataManagementApi.deleteMultipleBlobsIndividually(anyList())).thenReturn(true);
         when(batchData.getCreateRecordFilenameProcessor()).thenReturn(createRecordFilenameProcessor);
         when(batchData.getUploadFileFilenameProcessor()).thenReturn(uploadFileFilenameProcessor);
         when(batchData.getInvalidLineFileFilenameProcessors()).thenReturn(Collections.emptyList());

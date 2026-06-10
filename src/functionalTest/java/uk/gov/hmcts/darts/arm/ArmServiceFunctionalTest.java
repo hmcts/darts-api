@@ -173,7 +173,7 @@ class ArmServiceFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    void saveAndDeleteMultipleBlobs() {
+    void saveAndDeleteMultipleBlobsUsingBatching() {
         log.info("------------------  saveAndDeleteMultipleBlobs test");
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
@@ -190,7 +190,7 @@ class ArmServiceFunctionalTest extends FunctionalTest {
         assertNotNull(actualResult2);
         log.info("Blob filename2: {}", actualResult2);
 
-        armService.deleteMultipleBlobs(armContainerName, List.of(
+        armService.deleteMultipleBlobsUsingBatching(armContainerName, List.of(
             actualResult1,
             actualResult2
         ));

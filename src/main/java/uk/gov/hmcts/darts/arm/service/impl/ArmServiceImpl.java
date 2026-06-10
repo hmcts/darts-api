@@ -285,7 +285,7 @@ public class ArmServiceImpl implements ArmService {
     }
 
     @Override
-    public boolean deleteMultipleBlobs(String containerName, List<String> blobsWithPathAndName) {
+    public boolean deleteMultipleBlobsUsingBatching(String containerName, List<String> blobsWithPathAndName) {
         if (blobsWithPathAndName == null || blobsWithPathAndName.isEmpty()) {
             log.info("No blobs provided to delete for containerName={}", containerName);
             return false;
@@ -336,7 +336,7 @@ public class ArmServiceImpl implements ArmService {
             if (bse.getStatusCode() == HttpStatus.FORBIDDEN.value()) {
                 log.warn("Batch deletion forbidden for containerName={} (statusCode=403). Falling back to individual deletes. Message={}",
                          containerName, bse.getMessage());
-                return deleteBlobsIndividually(containerName, blobsWithPathAndName);
+                return deleteMultipleBlobsIndividually(containerName, blobsWithPathAndName);
             }
             log.error("BlobStorageException during batch delete for containerName={}", containerName, bse);
             return false;
@@ -346,7 +346,8 @@ public class ArmServiceImpl implements ArmService {
         }
     }
 
-    boolean deleteBlobsIndividually(String containerName, List<String> blobPathAndName) {
+    @Override
+    public boolean deleteMultipleBlobsIndividually(String containerName, List<String> blobPathAndName) {
         boolean allSuccessful = true;
 
         for (String blob : blobPathAndName) {

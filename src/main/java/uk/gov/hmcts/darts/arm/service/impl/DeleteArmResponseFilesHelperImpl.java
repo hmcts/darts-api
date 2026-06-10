@@ -96,7 +96,7 @@ class DeleteArmResponseFilesHelperImpl implements DeleteArmResponseFilesHelper {
 
     @Override
     public Boolean deleteResponseBlobs(List<String> responseBlobsToBeDeleted) {
-        return armDataManagementApi.deleteMultipleBlobs(responseBlobsToBeDeleted);
+        return armDataManagementApi.deleteMultipleBlobsIndividually(responseBlobsToBeDeleted);
     }
 
     @Override
