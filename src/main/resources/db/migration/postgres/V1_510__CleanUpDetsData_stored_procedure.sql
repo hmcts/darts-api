@@ -31,7 +31,7 @@ DECLARE
     v_deleted_count            INTEGER;
     v_updated_count            INTEGER;
 BEGIN
-    RAISE NOTICE '% Started at % [pi_limit = %, pi_last_modified_ts = %]', c_msg_prefix, clock_timestamp(), pi_limit, pi_last_modified_ts;
+    RAISE WARNING '% Started at % [pi_limit = %, pi_last_modified_ts = %]', c_msg_prefix, clock_timestamp(), pi_limit, pi_last_modified_ts;
 
     BEGIN
         --Get DETS records to be deleted, limited by pi_limit
@@ -62,9 +62,9 @@ BEGIN
         v_arm_eod_count := COALESCE(cardinality(v_arm_eod_ids), 0);
         v_results_count := COALESCE(cardinality(po_results_array), 0);
 
-        RAISE NOTICE '% Number of records in DETS EOD id array = %', c_msg_prefix, v_dets_eod_count;
-        RAISE NOTICE '% Number of records in ARM  EOD id array = %', c_msg_prefix, v_arm_eod_count;
-        RAISE NOTICE '% Number of records in results array = %', c_msg_prefix, v_results_count;
+        RAISE WARNING '% Number of records in DETS EOD id array = %', c_msg_prefix, v_dets_eod_count;
+        RAISE WARNING '% Number of records in ARM  EOD id array = %', c_msg_prefix, v_arm_eod_count;
+        RAISE WARNING '% Number of records in results array = %', c_msg_prefix, v_results_count;
 
         -- Check to ensure duplicate records were not returned. Indicates that there is more than one ARM or DETS record, which should not happen
         SELECT COUNT(*)
@@ -74,7 +74,7 @@ BEGIN
               GROUP BY elem
               HAVING COUNT(*) > 1) AS t;
 
-        RAISE NOTICE '% Duplicate count = %', c_msg_prefix, v_dup_count;
+        RAISE WARNING '% Duplicate count = %', c_msg_prefix, v_dup_count;
 
         IF v_dup_count > 0 THEN
             RAISE EXCEPTION 'Validation failed: Duplicate records [%] found.', v_dup_count;
@@ -92,7 +92,7 @@ BEGIN
 
         v_incomplete_cleanup_count := COALESCE(cardinality(v_incomplete_cleanup), 0);
 
-        RAISE NOTICE '% Number of records in incomplete cleanup array = %', c_msg_prefix, v_incomplete_cleanup_count;
+        RAISE WARNING '% Number of records in incomplete cleanup array = %', c_msg_prefix, v_incomplete_cleanup_count;
 
         po_results_array := COALESCE(CASE
                                          WHEN v_results_count > 0
@@ -106,7 +106,7 @@ BEGIN
                                      '{}'::darts.id_location_pair[]
                             );
 
-        RAISE NOTICE '% Number of records in combined results array = %', c_msg_prefix, COALESCE(cardinality(po_results_array), 0);
+        RAISE WARNING '% Number of records in combined results array = %', c_msg_prefix, COALESCE(cardinality(po_results_array), 0);
 
         --Only perform DELETE and UPDATE if there are values to process
         IF v_dets_eod_count > 0 THEN
@@ -117,7 +117,7 @@ BEGIN
             WHERE eod_id = ANY (v_dets_eod_ids);
 
             GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
-            RAISE NOTICE '% Number of EOD records deleted = %', c_msg_prefix, v_deleted_count;
+            RAISE WARNING '% Number of EOD records deleted = %', c_msg_prefix, v_deleted_count;
 
             --Update OSR records
             UPDATE darts.object_state_record
@@ -126,18 +126,18 @@ BEGIN
             WHERE eod_id = ANY (v_dets_eod_ids);
 
             GET DIAGNOSTICS v_updated_count = ROW_COUNT;
-            RAISE NOTICE '% Number of OSR records updated = %', c_msg_prefix, v_updated_count;
+            RAISE WARNING '% Number of OSR records updated = %', c_msg_prefix, v_updated_count;
 
         ELSE
-            RAISE NOTICE '% There is nothing to process. No EOD Deletes or OSR Updates were executed.', c_msg_prefix;
+            RAISE WARNING '% There is nothing to process. No EOD Deletes or OSR Updates were executed.', c_msg_prefix;
         END IF;
 
     EXCEPTION
         WHEN OTHERS THEN
-            RAISE NOTICE '% Error in dets_cleanup_eod_osr: % - %', c_msg_prefix, SQLSTATE, SQLERRM;
+            RAISE WARNING '% Error in dets_cleanup_eod_osr: % - %', c_msg_prefix, SQLSTATE, SQLERRM;
             RAISE;
     END;
-    RAISE NOTICE '% Finished at %', c_msg_prefix, clock_timestamp();
+    RAISE WARNING '% Finished at %', c_msg_prefix, clock_timestamp();
 END;
 $$;
 
