@@ -751,13 +751,13 @@ components:
       properties:
         message_id:
           type: string
-          maxLength: 256
+          maxLength: 512
         type:
           type: string
-          maxLength: 256
+          maxLength: 512
         sub_type:
           type: string
-          maxLength: 256
+          maxLength: 512
         event_id:
           type: string
           maxLength: 10
@@ -773,7 +773,7 @@ components:
             $ref: '#/components/schemas/CaseNumber'
         event_text:
           type: string
-          maxLength: 2000
+          maxLength: 2048
         date_time:
           type: string
           format: date-time
@@ -783,10 +783,10 @@ components:
           properties:
             case_retention_fixed_policy:
               type: string
-              maxLength: 256
+              maxLength: 512
             case_total_sentence:
               type: string
-              maxLength: 256
+              maxLength: 512
         start_time:
           type: string
           format: date-time
