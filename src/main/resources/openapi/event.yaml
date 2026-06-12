@@ -768,7 +768,7 @@ components:
           $ref: '#/components/schemas/Courtroom'
         case_numbers:
           type: array
-          maxItems: 100
+          maxItems: 128
           items:
             $ref: '#/components/schemas/CaseNumber'
         event_text:

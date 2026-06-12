@@ -139,7 +139,7 @@ class EventOpenApiContractTest {
 
     @Test
     void openApi_ShouldReturnError_WhenTooManyCaseNumbersProvided() {
-        String caseNumbers = "\"T20190441\",".repeat(100) + "\"T20190441\"";
+        String caseNumbers = "\"T20190441\",".repeat(128) + "\"T20190441\"";
 
         ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
             {
@@ -154,7 +154,7 @@ class EventOpenApiContractTest {
             }
             """.formatted(caseNumbers)));
 
-        assertHasMessageContaining(report, "must have at most 100 elements");
+        assertHasMessageContaining(report, "must have at most 128 elements");
     }
 
     @Test
