@@ -504,7 +504,7 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.3.3'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.14.3'
-  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.8.5'
+  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.8.6'
   testImplementation 'org.springframework.security:spring-security-test:6.5.10'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
