@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class EventOpenApiContractTest {
 
-    private static final OpenApiInteractionValidator VALIDATOR =
+    private final OpenApiInteractionValidator validator =
         OpenApiInteractionValidator.createForSpecificationUrl(
             Objects.requireNonNull(EventOpenApiContractTest.class
                                        .getResource("/openapi/event.yaml"))
@@ -32,171 +33,168 @@ class EventOpenApiContractTest {
     private static final String STRING_EXCEEDING_512_CHARS = "a".repeat(513);
 
     @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class EventCourtLogsPost {
 
         @ParameterizedTest(name = "/courtlogs POST schema field: {0}")
-        @MethodSource("uk.gov.hmcts.darts.openapi.EventOpenApiContractTest#invalidCourtLogsPostRequests")
+        @MethodSource("invalidCourtLogsPostRequests")
         void openApi_ShouldReturnError_WhenCourtLogsRequestIsInvalid(String testName, String body, String expectedMessage) {
-            ValidationReport report = VALIDATOR.validateRequest(postCourtLogsRequest(body));
+            ValidationReport report = validator.validateRequest(postCourtLogsRequest(body));
 
             assertHasMessageContaining(report, expectedMessage);
         }
 
         @Test
         void openApi_ShouldReturnNoError_WhenValidCourtLogsRequestUsed() {
-            ValidationReport report = VALIDATOR.validateRequest(postCourtLogsRequest(validCourtLogsRequestBody().toString()));
+            ValidationReport report = validator.validateRequest(postCourtLogsRequest(validCourtLogsRequestBody().toString()));
 
             assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid courtlogs request");
+        }
+
+        Stream<Arguments> invalidCourtLogsPostRequests() {
+            return Stream.of(
+                arguments(
+                    "courthouse exceeds maxLength",
+                    courtLogsRequestBody(body -> body.put("courthouse", "a".repeat(51))),
+                    "maximum allowed: 50"
+                ),
+                arguments(
+                    "courtroom exceeds maxLength",
+                    courtLogsRequestBody(body -> body.put("courtroom", "a".repeat(26))),
+                    "maximum allowed: 25"
+                ),
+                arguments(
+                    "case number exceeds maxLength",
+                    courtLogsRequestBody(body -> {
+                        ArrayNode caseNumbers = body.putArray("case_numbers");
+                        caseNumbers.add("a".repeat(26));
+                    }),
+                    "maximum allowed: 25"
+                ),
+                arguments(
+                    "text exceeds maxLength",
+                    courtLogsRequestBody(body -> body.put("text", "a".repeat(257))),
+                    "maximum allowed: 256"
+                ),
+                arguments(
+                    "case numbers exceeds maxItems",
+                    courtLogsRequestBody(EventOpenApiContractTest.this::addTooManyCaseNumbers),
+                    "must have at most 128 elements"
+                ),
+                arguments(
+                    "log entry date time is not date-time",
+                    courtLogsRequestBody(body -> body.put("log_entry_date_time", "not-a-date")),
+                    "is invalid against requested date format"
+                ),
+                arguments(
+                    "log entry date time is required",
+                    courtLogsRequestBody(body -> body.remove("log_entry_date_time")),
+                    "Object has missing required properties"
+                ),
+                arguments(
+                    "courthouse is required",
+                    courtLogsRequestBody(body -> body.remove("courthouse")),
+                    "Object has missing required properties"
+                ),
+                arguments(
+                    "courtroom is required",
+                    courtLogsRequestBody(body -> body.remove("courtroom")),
+                    "Object has missing required properties"
+                ),
+                arguments(
+                    "case numbers is required",
+                    courtLogsRequestBody(body -> body.remove("case_numbers")),
+                    "Object has missing required properties"
+                ),
+                arguments(
+                    "text is required",
+                    courtLogsRequestBody(body -> body.remove("text")),
+                    "Object has missing required properties"
+                )
+            );
         }
     }
 
     @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class EventEventsPost {
 
         @ParameterizedTest(name = "/events POST schema field: {0}")
-        @MethodSource("uk.gov.hmcts.darts.openapi.EventOpenApiContractTest#invalidEventsPostRequests")
+        @MethodSource("invalidEventsPostRequests")
         void openApi_ShouldReturnError_WhenEventsRequestIsInvalid(String testName, String body, String expectedMessage) {
-            ValidationReport report = VALIDATOR.validateRequest(postEventRequest(body));
+            ValidationReport report = validator.validateRequest(postEventRequest(body));
 
             assertHasMessageContaining(report, expectedMessage);
         }
 
         @Test
         void openApi_ShouldReturnNoError_WhenValidEventRequestUsed() {
-            ValidationReport report = VALIDATOR.validateRequest(postEventRequest(validEventRequestBody().toString()));
+            ValidationReport report = validator.validateRequest(postEventRequest(validEventRequestBody().toString()));
 
             assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid event request");
         }
+
+        Stream<Arguments> invalidEventsPostRequests() {
+            return Stream.of(
+                arguments(
+                    "message id exceeds maxLength",
+                    eventRequestBody(body -> body.put("message_id", STRING_EXCEEDING_512_CHARS)),
+                    "maximum allowed: 512"
+                ),
+                arguments(
+                    "type exceeds maxLength",
+                    eventRequestBody(body -> body.put("type", STRING_EXCEEDING_512_CHARS)),
+                    "maximum allowed: 512"
+                ),
+                arguments(
+                    "sub type exceeds maxLength",
+                    eventRequestBody(body -> body.put("sub_type", STRING_EXCEEDING_512_CHARS)),
+                    "maximum allowed: 512"
+                ),
+                arguments(
+                    "case retention fixed policy exceeds maxLength",
+                    eventRequestBody(body -> body.set("retention_policy", retentionPolicy("a".repeat(513), "26Y0M0D"))),
+                    "maximum allowed: 512"
+                ),
+                arguments(
+                    "case total sentence exceeds maxLength",
+                    eventRequestBody(body -> body.set("retention_policy", retentionPolicy("4", "a".repeat(513)))),
+                    "maximum allowed: 512"
+                ),
+                arguments(
+                    "event text exceeds maxLength",
+                    eventRequestBody(body -> body.put("event_text", "a".repeat(2049))),
+                    "maximum allowed: 2048"
+                ),
+                arguments(
+                    "case numbers exceeds maxItems",
+                    eventRequestBody(EventOpenApiContractTest.this::addTooManyCaseNumbers),
+                    "must have at most 128 elements"
+                ),
+                arguments(
+                    "event id is not numeric",
+                    eventRequestBody(body -> body.put("event_id", "ABC123")),
+                    "does not match input string"
+                ),
+                arguments(
+                    "request contains additional property",
+                    eventRequestBody(body -> body.put("unexpected", "value")),
+                    "properties which are not allowed"
+                ),
+                arguments(
+                    "retention policy contains additional property",
+                    eventRequestBody(body -> {
+                        ObjectNode retentionPolicy = retentionPolicy("4", "26Y0M0D");
+                        retentionPolicy.put("unexpected", "value");
+                        body.set("retention_policy", retentionPolicy);
+                    }),
+                    "properties which are not allowed"
+                )
+            );
+        }
     }
 
-    private static Stream<Arguments> invalidCourtLogsPostRequests() {
-        return Stream.of(
-            arguments(
-                "courthouse exceeds maxLength",
-                courtLogsRequestBody(body -> body.put("courthouse", "a".repeat(51))),
-                "maximum allowed: 50"
-            ),
-            arguments(
-                "courtroom exceeds maxLength",
-                courtLogsRequestBody(body -> body.put("courtroom", "a".repeat(26))),
-                "maximum allowed: 25"
-            ),
-            arguments(
-                "case number exceeds maxLength",
-                courtLogsRequestBody(body -> {
-                    ArrayNode caseNumbers = body.putArray("case_numbers");
-                    caseNumbers.add("a".repeat(26));
-                }),
-                "maximum allowed: 25"
-            ),
-            arguments(
-                "text exceeds maxLength",
-                courtLogsRequestBody(body -> body.put("text", "a".repeat(257))),
-                "maximum allowed: 256"
-            ),
-            arguments(
-                "case numbers exceeds maxItems",
-                courtLogsRequestBody(EventOpenApiContractTest::addTooManyCaseNumbers),
-                "must have at most 128 elements"
-            ),
-            arguments(
-                "log entry date time is not date-time",
-                courtLogsRequestBody(body -> body.put("log_entry_date_time", "not-a-date")),
-                "is invalid against requested date format"
-            ),
-            arguments(
-                "missing courthouse",
-                courtLogsRequestBody(body -> body.remove("courthouse")),
-                "Object has missing required properties"
-            ),
-            arguments(
-                "log entry date time is required",
-                courtLogsRequestBody(body -> body.remove("log_entry_date_time")),
-                "Object has missing required properties"
-            ),
-            arguments(
-                "courthouse is required",
-                courtLogsRequestBody(body -> body.remove("courthouse")),
-                "Object has missing required properties"
-            ),
-            arguments(
-                "courtroom is required",
-                courtLogsRequestBody(body -> body.remove("courtroom")),
-                "Object has missing required properties"
-            ),
-            arguments(
-                "case numbers is required",
-                courtLogsRequestBody(body -> body.remove("case_numbers")),
-                "Object has missing required properties"
-            ),
-            arguments(
-                "text is required",
-                courtLogsRequestBody(body -> body.remove("text")),
-                "Object has missing required properties"
-            )
-        );
-    }
-
-    private static Stream<Arguments> invalidEventsPostRequests() {
-        return Stream.of(
-            arguments(
-                "message id exceeds maxLength",
-                eventRequestBody(body -> body.put("message_id", STRING_EXCEEDING_512_CHARS)),
-                "maximum allowed: 512"
-            ),
-            arguments(
-                "type exceeds maxLength",
-                eventRequestBody(body -> body.put("type", STRING_EXCEEDING_512_CHARS)),
-                "maximum allowed: 512"
-            ),
-            arguments(
-                "sub type exceeds maxLength",
-                eventRequestBody(body -> body.put("sub_type", STRING_EXCEEDING_512_CHARS)),
-                "maximum allowed: 512"
-            ),
-            arguments(
-                "case retention fixed policy exceeds maxLength",
-                eventRequestBody(body -> body.set("retention_policy", retentionPolicy("a".repeat(513), "26Y0M0D"))),
-                "maximum allowed: 512"
-            ),
-            arguments(
-                "case total sentence exceeds maxLength",
-                eventRequestBody(body -> body.set("retention_policy", retentionPolicy("4", "a".repeat(513)))),
-                "maximum allowed: 512"
-            ),
-            arguments(
-                "event text exceeds maxLength",
-                eventRequestBody(body -> body.put("event_text", "a".repeat(2049))),
-                "maximum allowed: 2048"
-            ),
-            arguments(
-                "case numbers exceeds maxItems",
-                eventRequestBody(EventOpenApiContractTest::addTooManyCaseNumbers),
-                "must have at most 128 elements"
-            ),
-            arguments(
-                "event id is not numeric",
-                eventRequestBody(body -> body.put("event_id", "ABC123")),
-                "does not match input string"
-            ),
-            arguments(
-                "request contains additional property",
-                eventRequestBody(body -> body.put("unexpected", "value")),
-                "properties which are not allowed"
-            ),
-            arguments(
-                "retention policy contains additional property",
-                eventRequestBody(body -> {
-                    ObjectNode retentionPolicy = retentionPolicy("4", "26Y0M0D");
-                    retentionPolicy.put("unexpected", "value");
-                    body.set("retention_policy", retentionPolicy);
-                }),
-                "properties which are not allowed"
-            )
-        );
-    }
-
-    private static Request postEventRequest(String body) {
+    private Request postEventRequest(String body) {
         return SimpleRequest.Builder
             .post("/events")
             .withContentType("application/json")
@@ -204,7 +202,7 @@ class EventOpenApiContractTest {
             .build();
     }
 
-    private static Request postCourtLogsRequest(String body) {
+    private Request postCourtLogsRequest(String body) {
         return SimpleRequest.Builder
             .post("/courtlogs")
             .withContentType("application/json")
@@ -212,13 +210,13 @@ class EventOpenApiContractTest {
             .build();
     }
 
-    private static String eventRequestBody(Consumer<ObjectNode> bodyMutation) {
+    private String eventRequestBody(Consumer<ObjectNode> bodyMutation) {
         ObjectNode body = validEventRequestBody();
         bodyMutation.accept(body);
         return body.toString();
     }
 
-    private static ObjectNode validEventRequestBody() {
+    private ObjectNode validEventRequestBody() {
         ObjectNode body = objectNode();
         body.put("message_id", "18422");
         body.put("type", "10100");
@@ -231,13 +229,13 @@ class EventOpenApiContractTest {
         return body;
     }
 
-    private static String courtLogsRequestBody(Consumer<ObjectNode> bodyMutation) {
+    private String courtLogsRequestBody(Consumer<ObjectNode> bodyMutation) {
         ObjectNode body = validCourtLogsRequestBody();
         bodyMutation.accept(body);
         return body.toString();
     }
 
-    private static ObjectNode validCourtLogsRequestBody() {
+    private ObjectNode validCourtLogsRequestBody() {
         ObjectNode body = objectNode();
         body.put("log_entry_date_time", "2023-05-23T09:15:25Z");
         body.put("courthouse", "CARDIFF");
@@ -249,25 +247,25 @@ class EventOpenApiContractTest {
         return body;
     }
 
-    private static ObjectNode retentionPolicy(String caseRetentionFixedPolicy, String caseTotalSentence) {
+    private ObjectNode retentionPolicy(String caseRetentionFixedPolicy, String caseTotalSentence) {
         ObjectNode retentionPolicy = objectNode();
         retentionPolicy.put("case_retention_fixed_policy", caseRetentionFixedPolicy);
         retentionPolicy.put("case_total_sentence", caseTotalSentence);
         return retentionPolicy;
     }
 
-    private static void addTooManyCaseNumbers(ObjectNode body) {
+    private void addTooManyCaseNumbers(ObjectNode body) {
         ArrayNode caseNumbers = body.putArray("case_numbers");
         for (int i = 0; i < 129; i++) {
             caseNumbers.add("T20190441");
         }
     }
 
-    private static ObjectNode objectNode() {
+    private ObjectNode objectNode() {
         return JsonNodeFactory.instance.objectNode();
     }
 
-    private static void assertHasMessageContaining(ValidationReport report, String expectedSubstring) {
+    private void assertHasMessageContaining(ValidationReport report, String expectedSubstring) {
         assertTrue(
             report.getMessages().stream()
                 .anyMatch(message -> message.getMessage().contains(expectedSubstring)),
