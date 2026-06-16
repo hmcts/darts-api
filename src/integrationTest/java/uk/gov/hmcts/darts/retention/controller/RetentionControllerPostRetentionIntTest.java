@@ -34,7 +34,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -70,17 +72,6 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-    }
-
-    private void createAndSaveRetentionConfidenceCategoryMappings() {
-        RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
-
-        TestRetentionConfidenceCategoryMapperEntity manualOverrideMappingEntity = testData.someMinimalBuilder()
-            .confidenceCategory(MANUAL_OVERRIDE.getId())
-            .confidenceReason(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE)
-            .confidenceScore(CASE_PERFECTLY_CLOSED)
-            .build();
-        dartsPersistence.save(manualOverrideMappingEntity.getEntity());
     }
 
     @Test
@@ -131,6 +122,8 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
         assertThat(actualCourtCase.getRetConfScore()).isEqualTo(CASE_PERFECTLY_CLOSED);
         assertThat(actualCourtCase.getRetConfReason()).isEqualTo(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE);
         assertThat(actualCourtCase.getRetConfUpdatedTs()).isEqualTo(CURRENT_DATE_TIME);
+        assertTrue(actualCourtCase.isRetentionUpdated());
+        assertEquals(0, actualCourtCase.getRetentionRetries());
     }
 
     @Test
@@ -185,6 +178,8 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
         assertNull(actualCourtCase.getRetConfScore());
         assertNull(actualCourtCase.getRetConfReason());
         assertThat(actualCourtCase.getRetConfUpdatedTs()).isEqualTo(CURRENT_DATE_TIME);
+        assertTrue(actualCourtCase.isRetentionUpdated());
+        assertEquals(0, actualCourtCase.getRetentionRetries());
     }
 
     @Test
@@ -201,6 +196,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
         );
         courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         courtCase.setClosed(true);
+        courtCase.setRetentionRetries(1);
         dartsDatabase.save(courtCase);
 
         OffsetDateTime retainUntilDate = OffsetDateTime.parse("2023-01-01T12:00Z");
@@ -232,6 +228,10 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
             }
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+        CourtCaseEntity actualCourtCase = dartsDatabase.getCaseRepository().findById(courtCase.getId()).get();
+        assertFalse(actualCourtCase.isRetentionUpdated());
+        assertEquals(1, actualCourtCase.getRetentionRetries());
     }
 
     @Test
@@ -278,6 +278,10 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
+        CourtCaseEntity actualCourtCase = dartsDatabase.getCaseRepository().findById(courtCase.getId()).get();
+        assertTrue(actualCourtCase.isRetentionUpdated());
+        assertEquals(0, actualCourtCase.getRetentionRetries());
+
     }
 
     @Test
@@ -290,6 +294,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
         );
         courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         courtCase.setClosed(true);
+        courtCase.setRetentionRetries(1);
         dartsDatabase.save(courtCase);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
@@ -323,6 +328,10 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                 "latest_automated_retention_date",
                 is("2024-01-01")
             ));
+
+        CourtCaseEntity actualCourtCase = dartsDatabase.getCaseRepository().findById(courtCase.getId()).get();
+        assertFalse(actualCourtCase.isRetentionUpdated());
+        assertEquals(1, actualCourtCase.getRetentionRetries());
     }
 
     @Test
@@ -334,6 +343,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
             SOME_CASE_NUMBER
         );
         courtCase.setClosed(true);
+        courtCase.setRetentionRetries(1);
         courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         dartsDatabase.save(courtCase);
 
@@ -368,6 +378,20 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                 "max_duration",
                 is("99Y0M0D")
             ));
+
+        CourtCaseEntity actualCourtCase = dartsDatabase.getCaseRepository().findById(courtCase.getId()).get();
+        assertFalse(actualCourtCase.isRetentionUpdated());
+        assertEquals(1, actualCourtCase.getRetentionRetries());
     }
 
+    private void createAndSaveRetentionConfidenceCategoryMappings() {
+        RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
+
+        TestRetentionConfidenceCategoryMapperEntity manualOverrideMappingEntity = testData.someMinimalBuilder()
+            .confidenceCategory(MANUAL_OVERRIDE.getId())
+            .confidenceReason(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE)
+            .confidenceScore(CASE_PERFECTLY_CLOSED)
+            .build();
+        dartsPersistence.save(manualOverrideMappingEntity.getEntity());
+    }
 }
