@@ -54,6 +54,11 @@ class EventOpenApiContractTest {
         Stream<Arguments> invalidCourtLogsPostRequests() {
             return Stream.of(
                 arguments(
+                    "log entry date time is not date-time",
+                    courtLogsRequestBody(body -> body.put("log_entry_date_time", "not-a-date")),
+                    "is invalid against requested date format"
+                ),
+                arguments(
                     "courthouse exceeds maxLength",
                     courtLogsRequestBody(body -> body.put("courthouse", "a".repeat(51))),
                     "maximum allowed: 50"
@@ -62,6 +67,16 @@ class EventOpenApiContractTest {
                     "courtroom exceeds maxLength",
                     courtLogsRequestBody(body -> body.put("courtroom", "a".repeat(26))),
                     "maximum allowed: 25"
+                ),
+                arguments(
+                    "case numbers exceeds minItems",
+                    courtLogsRequestBody(body -> body.putArray("case_numbers")),
+                    "must have at least 1 element"
+                ),
+                arguments(
+                    "case numbers exceeds maxItems",
+                    courtLogsRequestBody(EventOpenApiContractTest.this::addTooManyCaseNumbers),
+                    "must have at most 128 elements"
                 ),
                 arguments(
                     "case number exceeds maxLength",
@@ -75,16 +90,6 @@ class EventOpenApiContractTest {
                     "text exceeds maxLength",
                     courtLogsRequestBody(body -> body.put("text", "a".repeat(257))),
                     "maximum allowed: 256"
-                ),
-                arguments(
-                    "case numbers exceeds maxItems",
-                    courtLogsRequestBody(EventOpenApiContractTest.this::addTooManyCaseNumbers),
-                    "must have at most 128 elements"
-                ),
-                arguments(
-                    "log entry date time is not date-time",
-                    courtLogsRequestBody(body -> body.put("log_entry_date_time", "not-a-date")),
-                    "is invalid against requested date format"
                 ),
                 arguments(
                     "log entry date time is required",
@@ -137,6 +142,11 @@ class EventOpenApiContractTest {
         Stream<Arguments> invalidEventsPostRequests() {
             return Stream.of(
                 arguments(
+                    "request contains additional property",
+                    eventRequestBody(body -> body.put("unexpected", "value")),
+                    "properties which are not allowed"
+                ),
+                arguments(
                     "message id exceeds maxLength",
                     eventRequestBody(body -> body.put("message_id", STRING_EXCEEDING_512_CHARS)),
                     "maximum allowed: 512"
@@ -152,6 +162,54 @@ class EventOpenApiContractTest {
                     "maximum allowed: 512"
                 ),
                 arguments(
+                    "event id exceeds maxLength",
+                    eventRequestBody(body -> body.put("event_id", "a".repeat(129))),
+                    "maximum allowed: 128"
+                ),
+                arguments(
+                    "courthouse exceeds maxLength",
+                    eventRequestBody(body -> body.put("courthouse", "a".repeat(51))),
+                    "maximum allowed: 50"
+                ),
+                arguments(
+                    "courtroom exceeds maxLength",
+                    eventRequestBody(body -> body.put("courtroom", "a".repeat(26))),
+                    "maximum allowed: 25"
+                ),
+                arguments(
+                    "case numbers exceeds maxItems",
+                    eventRequestBody(EventOpenApiContractTest.this::addTooManyCaseNumbers),
+                    "must have at most 128 elements"
+                ),
+                arguments(
+                    "case number exceeds maxLength",
+                    eventRequestBody(body -> {
+                        ArrayNode caseNumbers = body.putArray("case_numbers");
+                        caseNumbers.add("a".repeat(26));
+                    }),
+                    "maximum allowed: 25"
+                ),
+                arguments(
+                    "event text exceeds maxLength",
+                    eventRequestBody(body -> body.put("event_text", "a".repeat(2049))),
+                    "maximum allowed: 2048"
+
+                ),
+                arguments(
+                    "date time is not date-time",
+                    eventRequestBody(body -> body.put("date_time", "not-a-date")),
+                    "is invalid against requested date format"
+                ),
+                arguments(
+                    "retention policy contains additional property",
+                    eventRequestBody(body -> {
+                        ObjectNode retentionPolicy = retentionPolicy("4", "26Y0M0D");
+                        retentionPolicy.put("unexpected", "value");
+                        body.set("retention_policy", retentionPolicy);
+                    }),
+                    "properties which are not allowed"
+                ),
+                arguments(
                     "case retention fixed policy exceeds maxLength",
                     eventRequestBody(body -> body.set("retention_policy", retentionPolicy("a".repeat(513), "26Y0M0D"))),
                     "maximum allowed: 512"
@@ -162,33 +220,19 @@ class EventOpenApiContractTest {
                     "maximum allowed: 512"
                 ),
                 arguments(
-                    "event text exceeds maxLength",
-                    eventRequestBody(body -> body.put("event_text", "a".repeat(2049))),
-                    "maximum allowed: 2048"
+                    "start time is not date-time",
+                    eventRequestBody(body -> body.put("start_time", "not-a-date")),
+                    "is invalid against requested date format"
                 ),
                 arguments(
-                    "case numbers exceeds maxItems",
-                    eventRequestBody(EventOpenApiContractTest.this::addTooManyCaseNumbers),
-                    "must have at most 128 elements"
+                    "end time is not date-time",
+                    eventRequestBody(body -> body.put("end_time", "not-a-date")),
+                    "is invalid against requested date format"
                 ),
                 arguments(
-                    "event id is not numeric",
-                    eventRequestBody(body -> body.put("event_id", "ABC123")),
-                    "does not match input string"
-                ),
-                arguments(
-                    "request contains additional property",
-                    eventRequestBody(body -> body.put("unexpected", "value")),
-                    "properties which are not allowed"
-                ),
-                arguments(
-                    "retention policy contains additional property",
-                    eventRequestBody(body -> {
-                        ObjectNode retentionPolicy = retentionPolicy("4", "26Y0M0D");
-                        retentionPolicy.put("unexpected", "value");
-                        body.set("retention_policy", retentionPolicy);
-                    }),
-                    "properties which are not allowed"
+                    "is mid tier is not boolean",
+                    eventRequestBody(body -> body.put("is_mid_tier", "not-a-boolean")),
+                    "Instance type (string) does not match any allowed primitive type"
                 )
             );
         }
