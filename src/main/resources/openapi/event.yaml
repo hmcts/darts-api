@@ -760,8 +760,7 @@ components:
           maxLength: 512
         event_id:
           type: string
-          maxLength: 10
-          pattern: '^[0-9]+$'
+          maxLength: 128
         courthouse:
           $ref: '#/components/schemas/Courthouse'
         courtroom:

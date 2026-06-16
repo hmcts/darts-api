@@ -16,7 +16,9 @@ class EventOpenApiContractTest {
                 .getResource("/openapi/event.yaml")
                 .toExternalForm()
         ).build();
+
     private static final String STRING_EXCEEDING_512_CHARS = "a".repeat(513);
+    private static final String STRING_EXCEEDING_128_CHARS = "a".repeat(129);
 
     @Test
     void openApi_ShouldReturnError_WhenMessageIdExceedsMaxLength() {
@@ -70,6 +72,44 @@ class EventOpenApiContractTest {
             """.formatted(STRING_EXCEEDING_512_CHARS)));
 
         assertHasMessageContaining(report, "maximum allowed: 512");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenEventIdExceedsMaxLength() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "event_id": "%s",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": ["A20230049"],
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }
+            """.formatted(STRING_EXCEEDING_128_CHARS)));
+
+        assertHasMessageContaining(report, "maximum allowed: 128");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenTooManyCaseNumbersProvided() {
+        String caseNumbers = "\"T20190441\",".repeat(128) + "\"T20190441\"";
+
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "event_id": "1",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": [%s],
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }
+            """.formatted(caseNumbers)));
+
+        assertHasMessageContaining(report, "must have at most 128 elements");
     }
 
     @Test
@@ -138,9 +178,7 @@ class EventOpenApiContractTest {
     }
 
     @Test
-    void openApi_ShouldReturnError_WhenTooManyCaseNumbersProvided() {
-        String caseNumbers = "\"T20190441\",".repeat(128) + "\"T20190441\"";
-
+    void openApi_ShouldReturnError_WhenDateTimeIsNotDateTime() {
         ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
             {
               "message_id": "18422",
@@ -149,30 +187,69 @@ class EventOpenApiContractTest {
               "event_id": "1",
               "courthouse": "SNARESBROOK",
               "courtroom": "1",
-              "case_numbers": [%s],
-              "date_time": "2023-06-14T08:37:30.945Z"
+              "case_numbers": ["A20230049"],
+              "date_time": "not-a-date"
             }
-            """.formatted(caseNumbers)));
+            """));
 
-        assertHasMessageContaining(report, "must have at most 128 elements");
+        assertHasMessageContaining(report, "is invalid against requested date format");
     }
 
     @Test
-    void openApi_ShouldReturnError_WhenEventIdIsNotNumeric() {
+    void openApi_ShouldReturnError_WhenStartTimeIsNotDateTime() {
         ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
             {
               "message_id": "18422",
               "type": "10100",
               "sub_type": "10100",
-              "event_id": "ABC123",
+              "event_id": "1",
               "courthouse": "SNARESBROOK",
               "courtroom": "1",
               "case_numbers": ["A20230049"],
-              "date_time": "2023-06-14T08:37:30.945Z"
+              "date_time": "2023-06-14T08:37:30.945Z",
+              "start_time": "not-a-date"
             }
             """));
 
-        assertHasMessageContaining(report, "does not match input string");
+        assertHasMessageContaining(report, "is invalid against requested date format");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenEndTimeIsNotDateTime() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "event_id": "1",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": ["A20230049"],
+              "date_time": "2023-06-14T08:37:30.945Z",
+              "end_time": "not-a-date"
+            }
+            """));
+
+        assertHasMessageContaining(report, "is invalid against requested date format");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenIsMidTierIsNotBoolean() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "event_id": "1",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": ["A20230049"],
+              "date_time": "2023-06-14T08:37:30.945Z",
+              "is_mid_tier": "not-a-boolean"
+            }
+            """));
+
+        assertHasMessageContaining(report, "Instance type (string) does not match any allowed primitive type");
     }
 
     @Test
