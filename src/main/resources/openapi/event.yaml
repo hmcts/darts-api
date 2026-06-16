@@ -713,6 +713,7 @@ components:
           items:
             $ref: '#/components/schemas/CaseNumber'
           minItems: 1
+          maxItems: 128
         text:
           type: string
           maxLength: 256
