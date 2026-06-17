@@ -281,7 +281,6 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
         CourtCaseEntity actualCourtCase = dartsDatabase.getCaseRepository().findById(courtCase.getId()).get();
         assertTrue(actualCourtCase.isRetentionUpdated());
         assertEquals(0, actualCourtCase.getRetentionRetries());
-
     }
 
     @Test
