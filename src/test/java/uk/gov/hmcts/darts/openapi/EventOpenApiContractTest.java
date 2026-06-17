@@ -6,19 +6,57 @@ import com.atlassian.oai.validator.model.SimpleRequest;
 import com.atlassian.oai.validator.report.ValidationReport;
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EventOpenApiContractTest {
 
     private static final OpenApiInteractionValidator VALIDATOR =
         OpenApiInteractionValidator.createForSpecificationUrl(
-            EventOpenApiContractTest.class
-                .getResource("/openapi/event.yaml")
+            Objects.requireNonNull(EventOpenApiContractTest.class
+                                       .getResource("/openapi/event.yaml"))
                 .toExternalForm()
         ).build();
 
     private static final String STRING_EXCEEDING_512_CHARS = "a".repeat(513);
-    private static final String STRING_EXCEEDING_128_CHARS = "a".repeat(129);
+
+    @Test
+    void openApi_ShouldReturnNoError_WhenValidEventRequestUsed() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "event_id": "1",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": ["A20230049"],
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }
+            """));
+
+        assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid event request");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenRequestContainsAdditionalProperty() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "event_id": "1",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": ["A20230049"],
+              "date_time": "2023-06-14T08:37:30.945Z",
+              "unexpected": "value"
+            }
+            """));
+
+        assertHasMessageContaining(report, "properties which are not allowed");
+    }
 
     @Test
     void openApi_ShouldReturnError_WhenMessageIdExceedsMaxLength() {
@@ -87,9 +125,45 @@ class EventOpenApiContractTest {
               "case_numbers": ["A20230049"],
               "date_time": "2023-06-14T08:37:30.945Z"
             }
-            """.formatted(STRING_EXCEEDING_128_CHARS)));
+            """.formatted("a".repeat(129))));
 
         assertHasMessageContaining(report, "maximum allowed: 128");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenCourthouseExceedsMaxLength() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "event_id": "1",
+              "courthouse": "%s",
+              "courtroom": "1",
+              "case_numbers": ["A20230049"],
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }
+            """.formatted("a".repeat(51))));
+
+        assertHasMessageContaining(report, "maximum allowed: 50");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenCourtroomExceedsMaxLength() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "event_id": "1",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "%s",
+              "case_numbers": ["A20230049"],
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }
+            """.formatted("a".repeat(26))));
+
+        assertHasMessageContaining(report, "maximum allowed: 25");
     }
 
     @Test
@@ -110,6 +184,85 @@ class EventOpenApiContractTest {
             """.formatted(caseNumbers)));
 
         assertHasMessageContaining(report, "must have at most 128 elements");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenCaseNumberExceedsMaxLength() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "event_id": "1",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": ["%s"],
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }
+            """.formatted("a".repeat(26))));
+
+        assertHasMessageContaining(report, "maximum allowed: 25");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenEventTextExceedsMaxLength() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "21300",
+              "sub_type": "21300",
+              "event_id": "2",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": ["T20190441"],
+              "event_text": "%s",
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }
+            """.formatted("a".repeat(2049))));
+
+        assertHasMessageContaining(report, "maximum allowed: 2048");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenDateTimeIsNotDateTime() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "event_id": "1",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": ["A20230049"],
+              "date_time": "not-a-date"
+            }
+            """));
+
+        assertHasMessageContaining(report, "is invalid against requested date format");
+    }
+
+    @Test
+    void openApi_ShouldReturnError_WhenRetentionPolicyContainsAdditionalProperty() {
+        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
+            {
+              "message_id": "18422",
+              "type": "40750",
+              "sub_type": "11504",
+              "event_id": "3",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": ["T20190441"],
+              "event_text": "[Defendant: DEFENDANT ONE]",
+              "date_time": "2023-06-14T08:37:30.945Z",
+              "retention_policy": {
+                "case_retention_fixed_policy": "4",
+                "case_total_sentence": "26Y0M0D",
+                "unexpected": "value"
+              }
+            }
+            """));
+
+        assertHasMessageContaining(report, "properties which are not allowed");
     }
 
     @Test
@@ -156,43 +309,6 @@ class EventOpenApiContractTest {
             """.formatted(STRING_EXCEEDING_512_CHARS)));
 
         assertHasMessageContaining(report, "maximum allowed: 512");
-    }
-
-    @Test
-    void openApi_ShouldReturnError_WhenEventTextExceedsMaxLength() {
-        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
-            {
-              "message_id": "18422",
-              "type": "21300",
-              "sub_type": "21300",
-              "event_id": "2",
-              "courthouse": "SNARESBROOK",
-              "courtroom": "1",
-              "case_numbers": ["T20190441"],
-              "event_text": "%s",
-              "date_time": "2023-06-14T08:37:30.945Z"
-            }
-            """.formatted("a".repeat(2049))));
-
-        assertHasMessageContaining(report, "maximum allowed: 2048");
-    }
-
-    @Test
-    void openApi_ShouldReturnError_WhenDateTimeIsNotDateTime() {
-        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
-            {
-              "message_id": "18422",
-              "type": "10100",
-              "sub_type": "10100",
-              "event_id": "1",
-              "courthouse": "SNARESBROOK",
-              "courtroom": "1",
-              "case_numbers": ["A20230049"],
-              "date_time": "not-a-date"
-            }
-            """));
-
-        assertHasMessageContaining(report, "is invalid against requested date format");
     }
 
     @Test
@@ -250,67 +366,6 @@ class EventOpenApiContractTest {
             """));
 
         assertHasMessageContaining(report, "Instance type (string) does not match any allowed primitive type");
-    }
-
-    @Test
-    void openApi_ShouldReturnError_WhenRequestContainsAdditionalProperty() {
-        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
-            {
-              "message_id": "18422",
-              "type": "10100",
-              "sub_type": "10100",
-              "event_id": "1",
-              "courthouse": "SNARESBROOK",
-              "courtroom": "1",
-              "case_numbers": ["A20230049"],
-              "date_time": "2023-06-14T08:37:30.945Z",
-              "unexpected": "value"
-            }
-            """));
-
-        assertHasMessageContaining(report, "properties which are not allowed");
-    }
-
-    @Test
-    void openApi_ShouldReturnError_WhenRetentionPolicyContainsAdditionalProperty() {
-        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
-            {
-              "message_id": "18422",
-              "type": "40750",
-              "sub_type": "11504",
-              "event_id": "3",
-              "courthouse": "SNARESBROOK",
-              "courtroom": "1",
-              "case_numbers": ["T20190441"],
-              "event_text": "[Defendant: DEFENDANT ONE]",
-              "date_time": "2023-06-14T08:37:30.945Z",
-              "retention_policy": {
-                "case_retention_fixed_policy": "4",
-                "case_total_sentence": "26Y0M0D",
-                "unexpected": "value"
-              }
-            }
-            """));
-
-        assertHasMessageContaining(report, "properties which are not allowed");
-    }
-
-    @Test
-    void openApi_ShouldReturnNoError_WhenValidEventRequestUsed() {
-        ValidationReport report = VALIDATOR.validateRequest(postEventRequest("""
-            {
-              "message_id": "18422",
-              "type": "10100",
-              "sub_type": "10100",
-              "event_id": "1",
-              "courthouse": "SNARESBROOK",
-              "courtroom": "1",
-              "case_numbers": ["A20230049"],
-              "date_time": "2023-06-14T08:37:30.945Z"
-            }
-            """));
-
-        assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid event request");
     }
 
     private static Request postEventRequest(String body) {
