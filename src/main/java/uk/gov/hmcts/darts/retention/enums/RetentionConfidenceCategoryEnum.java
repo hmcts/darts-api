@@ -20,7 +20,7 @@ public enum RetentionConfidenceCategoryEnum {
     AGED_CASE_CASE_CREATION_CLOSED(8),
     CASE_CLOSED_WITHIN(9),
     MAX_EVENT_OUTWITH(10),
-
+    
     UNKNOWN(999),
 
     CASE_CLOSED_EXACT_10111000(10111000),
