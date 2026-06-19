@@ -598,7 +598,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             } else {
                 log.warn("EOD {} already has a data ingestion timestamp set to {} - not updating to {}",
                          externalObjectDirectoryId, uploadFileFileRecordProcessTime, uploadNewFileRecordProcessTime);
-                if (!uploadFileFileRecordProcessTime.isEqual(externalObjectDirectory.getDataIngestionTs())) {
+                if (!uploadFileFileRecordProcessTime.isEqual(uploadNewFileRecordProcessTime)) {
                     deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(uploadFileRecordFilenameAndPath));
                 }
             }
@@ -627,7 +627,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             } else {
                 log.warn("EOD {} already has a create record processed timestamp set to {} - not updating to {}",
                          externalObjectDirectoryId, createRecordProcessedTs, createRecordProcessTime);
-                if (!createRecordProcessedTs.isEqual(externalObjectDirectory.getCreateRecordProcessedTs())) {
+                if (!createRecordProcessedTs.isEqual(createRecordProcessTime)) {
                     deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(createRecordFilenameAndPath));
                 }
             }

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.parallel.Isolated;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
@@ -383,6 +384,120 @@ class ArmBatchProcessResponseFilesImplTest {
         verify(externalObjectDirectoryEntity).setLastModifiedBy(userAccount);
         verify(externalObjectDirectoryEntity).setLastModifiedDateTime(currentTime);
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntity);
+    }
+
+    @Test
+    void setEodCreateRecordProcessTimestamp_shouldDeleteResponseBlob_WhenTimestampAlreadySetWithDifferentTime() {
+        // given
+        Long externalObjectDirectoryId = 123L;
+        String createRecordFilenameAndPath = "dropzone/DARTS/response/create-record.rsp";
+        OffsetDateTime existingCreateRecordProcessedTs = OffsetDateTime.parse("2023-06-10T14:08:28.316382+00:00");
+        OffsetDateTime newCreateRecordProcessTime = existingCreateRecordProcessedTs.plusMinutes(1);
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(externalObjectDirectoryId);
+        externalObjectDirectoryEntity.setCreateRecordProcessedTs(existingCreateRecordProcessedTs);
+
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(externalObjectDirectoryId);
+
+        // when
+        ReflectionTestUtils.invokeMethod(
+            armBatchProcessResponseFiles,
+            "setEodCreateRecordProcessTimestamp",
+            externalObjectDirectoryId,
+            newCreateRecordProcessTime,
+            createRecordFilenameAndPath
+        );
+
+        // then
+        assertEquals(existingCreateRecordProcessedTs, externalObjectDirectoryEntity.getCreateRecordProcessedTs());
+        verify(externalObjectDirectoryRepository, never()).save(externalObjectDirectoryEntity);
+        verify(deleteArmResponseFilesHelper).deleteResponseBlobs(List.of(createRecordFilenameAndPath));
+    }
+
+    @Test
+    void setEodCreateRecordProcessTimestamp_shouldNotDeleteResponseBlob_WhenTimestampAlreadySetWithSameTime() {
+        // given
+        Long externalObjectDirectoryId = 123L;
+        String createRecordFilenameAndPath = "dropzone/DARTS/response/create-record.rsp";
+        OffsetDateTime existingCreateRecordProcessedTs = OffsetDateTime.parse("2023-06-10T14:08:28.316382+00:00");
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(externalObjectDirectoryId);
+        externalObjectDirectoryEntity.setCreateRecordProcessedTs(existingCreateRecordProcessedTs);
+
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(externalObjectDirectoryId);
+
+        // when
+        ReflectionTestUtils.invokeMethod(
+            armBatchProcessResponseFiles,
+            "setEodCreateRecordProcessTimestamp",
+            externalObjectDirectoryId,
+            existingCreateRecordProcessedTs,
+            createRecordFilenameAndPath
+        );
+
+        // then
+        assertEquals(existingCreateRecordProcessedTs, externalObjectDirectoryEntity.getCreateRecordProcessedTs());
+        verify(externalObjectDirectoryRepository, never()).save(externalObjectDirectoryEntity);
+        verify(deleteArmResponseFilesHelper, never()).deleteResponseBlobs(anyList());
+    }
+
+    @Test
+    void setEodDataIngestionTimestamp_shouldDeleteResponseBlob_WhenTimestampAlreadySetWithDifferentTime() {
+        // given
+        Long externalObjectDirectoryId = 123L;
+        String uploadFileRecordFilenameAndPath = "dropzone/DARTS/response/upload-file.rsp";
+        OffsetDateTime existingDataIngestionTs = OffsetDateTime.parse("2023-06-10T14:08:28.316382+00:00");
+        OffsetDateTime newUploadFileRecordProcessTime = existingDataIngestionTs.plusMinutes(1);
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(externalObjectDirectoryId);
+        externalObjectDirectoryEntity.setDataIngestionTs(existingDataIngestionTs);
+
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(externalObjectDirectoryId);
+
+        // when
+        ReflectionTestUtils.invokeMethod(
+            armBatchProcessResponseFiles,
+            "setEodDataIngestionTimestamp",
+            externalObjectDirectoryId,
+            newUploadFileRecordProcessTime,
+            uploadFileRecordFilenameAndPath
+        );
+
+        // then
+        assertEquals(existingDataIngestionTs, externalObjectDirectoryEntity.getDataIngestionTs());
+        verify(externalObjectDirectoryRepository, never()).save(externalObjectDirectoryEntity);
+        verify(deleteArmResponseFilesHelper).deleteResponseBlobs(List.of(uploadFileRecordFilenameAndPath));
+    }
+
+    @Test
+    void setEodDataIngestionTimestamp_shouldNotDeleteResponseBlob_WhenTimestampAlreadySetWithSameTime() {
+        // given
+        Long externalObjectDirectoryId = 123L;
+        String uploadFileRecordFilenameAndPath = "dropzone/DARTS/response/upload-file.rsp";
+        OffsetDateTime existingDataIngestionTs = OffsetDateTime.parse("2023-06-10T14:08:28.316382+00:00");
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(externalObjectDirectoryId);
+        externalObjectDirectoryEntity.setDataIngestionTs(existingDataIngestionTs);
+
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(externalObjectDirectoryId);
+
+        // when
+        ReflectionTestUtils.invokeMethod(
+            armBatchProcessResponseFiles,
+            "setEodDataIngestionTimestamp",
+            externalObjectDirectoryId,
+            existingDataIngestionTs,
+            uploadFileRecordFilenameAndPath
+        );
+
+        // then
+        assertEquals(existingDataIngestionTs, externalObjectDirectoryEntity.getDataIngestionTs());
+        verify(externalObjectDirectoryRepository, never()).save(externalObjectDirectoryEntity);
+        verify(deleteArmResponseFilesHelper, never()).deleteResponseBlobs(anyList());
     }
 
     @Test
