@@ -137,6 +137,34 @@ class TranscriptionsOpenApiContractTest {
             .build();
     }
 
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    class TranscriptionsPost {
+
+        @Test
+        void openApi_ShouldReturnNoError_WhenValidTranscriptsRequestUsed() {
+            Request request = SimpleRequest.Builder
+                .post("/transcriptions")
+                .withContentType("application/json")
+                .withBody("""
+                              {
+                                "hearing_id": 1234,
+                                "case_id": 4567,
+                                "transcription_urgency_id": 2,
+                                "transcription_type_id": 3,
+                                "comment": "Please expedite my transcription request",
+                                "start_date_time": "2023-07-31T14:32:24.0Z",
+                                "end_date_time": "2023-07-31T14:32:24.0Z"
+                              }
+                              """).build();
+
+            ValidationReport report = VALIDATOR.validateRequest(request);
+
+            assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid transcription_id");
+
+        }
+    }
+
     private String patchRequestBody(Consumer<ObjectNode> bodyMutation) {
         ObjectNode body = validTranscriptionsPatchRequestBody();
         bodyMutation.accept(body);
