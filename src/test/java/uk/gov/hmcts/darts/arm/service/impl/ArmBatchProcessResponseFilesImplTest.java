@@ -16,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
+import uk.gov.hmcts.darts.arm.exception.ArmDuplicateResponseException;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmBatchResponses;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
@@ -24,6 +25,8 @@ import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileReco
 import uk.gov.hmcts.darts.arm.service.DeleteArmResponseFilesHelper;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
+import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
+import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -87,6 +90,9 @@ class ArmBatchProcessResponseFilesImplTest {
     private static final String DATETIMEKEY = "<datetimekey>";
     private static final String INPUT_UPLOAD_RESPONSE_DATETIME = "2021-08-01T10:08:28.316382+00:00";
     private static final String UPLOAD_RESPONSE_TIMESTAMP_FORAMT = "yyyy-MM-dd'T'HH:mm:ss[.SSSSSS][XXXX][XXXXX]";
+    private static final Long EXTERNAL_OBJECT_DIRECTORY_ID = 123L;
+    private static final String RESPONSE_PROCESS_TIME = "2023-06-10T14:09:28.316382+00:00";
+    private static final String UPLOAD_NEW_FILE_INPUT = "{\"operation\":\"upload_new_file\",\"relation_id\":\"123\"}";
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -401,13 +407,13 @@ class ArmBatchProcessResponseFilesImplTest {
         doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(externalObjectDirectoryId);
 
         // when
-        ReflectionTestUtils.invokeMethod(
+        assertThrows(ArmDuplicateResponseException.class, () -> ReflectionTestUtils.invokeMethod(
             armBatchProcessResponseFiles,
             "setEodCreateRecordProcessTimestamp",
             externalObjectDirectoryId,
             newCreateRecordProcessTime,
             createRecordFilenameAndPath
-        );
+        ));
 
         // then
         assertEquals(existingCreateRecordProcessedTs, externalObjectDirectoryEntity.getCreateRecordProcessedTs());
@@ -458,13 +464,13 @@ class ArmBatchProcessResponseFilesImplTest {
         doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(externalObjectDirectoryId);
 
         // when
-        ReflectionTestUtils.invokeMethod(
+        assertThrows(ArmDuplicateResponseException.class, () -> ReflectionTestUtils.invokeMethod(
             armBatchProcessResponseFiles,
             "setEodDataIngestionTimestamp",
             externalObjectDirectoryId,
             newUploadFileRecordProcessTime,
             uploadFileRecordFilenameAndPath
-        );
+        ));
 
         // then
         assertEquals(existingDataIngestionTs, externalObjectDirectoryEntity.getDataIngestionTs());
@@ -498,6 +504,68 @@ class ArmBatchProcessResponseFilesImplTest {
         assertEquals(existingDataIngestionTs, externalObjectDirectoryEntity.getDataIngestionTs());
         verify(externalObjectDirectoryRepository, never()).save(externalObjectDirectoryEntity);
         verify(deleteArmResponseFilesHelper, never()).deleteResponseBlobs(anyList());
+    }
+
+    @Test
+    void readCreateRecordFile_shouldCatchDuplicateResponseExceptionAndRemoveEodFromBatchResponses() {
+        // given
+        String createRecordFilenameAndPath = "dropzone/DARTS/response/6a374f19a9ce7dc9cc480ea8d4eca0fb_12374f19a9ce7dc9cc480ea8d4eca0fb_1_cr.rsp";
+        OffsetDateTime existingCreateRecordProcessedTs = OffsetDateTime.parse("2023-06-10T14:08:28.316382+00:00");
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(EXTERNAL_OBJECT_DIRECTORY_ID);
+        externalObjectDirectoryEntity.setCreateRecordProcessedTs(existingCreateRecordProcessedTs);
+
+        ArmBatchResponses armBatchResponses = new ArmBatchResponses();
+        CreateRecordFilenameProcessor createRecordFilenameProcessor = new CreateRecordFilenameProcessor(createRecordFilenameAndPath);
+
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(EXTERNAL_OBJECT_DIRECTORY_ID);
+
+        // when
+        ReflectionTestUtils.invokeMethod(
+            armBatchProcessResponseFiles,
+            "readCreateRecordFile",
+            BinaryData.fromString(createRecordResponse()),
+            createRecordFilenameProcessor,
+            armBatchResponses
+        );
+
+        // then
+        assertEquals(0, armBatchResponses.getArmBatchResponseMap().size());
+        assertEquals(existingCreateRecordProcessedTs, externalObjectDirectoryEntity.getCreateRecordProcessedTs());
+        verify(externalObjectDirectoryRepository, never()).save(externalObjectDirectoryEntity);
+        verify(deleteArmResponseFilesHelper).deleteResponseBlobs(List.of(createRecordFilenameAndPath));
+    }
+
+    @Test
+    void readUploadFile_shouldCatchDuplicateResponseExceptionAndRemoveEodFromBatchResponses() {
+        // given
+        String uploadFileFilenameAndPath = "dropzone/DARTS/response/6a374f19a9ce7dc9cc480ea8d4eca0fb_45674f19a9ce7dc9cc480ea8d4eca0fb_1_uf.rsp";
+        OffsetDateTime existingDataIngestionTs = OffsetDateTime.parse("2023-06-10T14:08:28.316382+00:00");
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(EXTERNAL_OBJECT_DIRECTORY_ID);
+        externalObjectDirectoryEntity.setDataIngestionTs(existingDataIngestionTs);
+
+        ArmBatchResponses armBatchResponses = new ArmBatchResponses();
+        UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(uploadFileFilenameAndPath);
+
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(EXTERNAL_OBJECT_DIRECTORY_ID);
+
+        // when
+        ReflectionTestUtils.invokeMethod(
+            armBatchProcessResponseFiles,
+            "readUploadFile",
+            BinaryData.fromString(uploadFileResponse()),
+            uploadFileFilenameProcessor,
+            armBatchResponses
+        );
+
+        // then
+        assertEquals(0, armBatchResponses.getArmBatchResponseMap().size());
+        assertEquals(existingDataIngestionTs, externalObjectDirectoryEntity.getDataIngestionTs());
+        verify(externalObjectDirectoryRepository, never()).save(externalObjectDirectoryEntity);
+        verify(deleteArmResponseFilesHelper).deleteResponseBlobs(List.of(uploadFileFilenameAndPath));
     }
 
     @Test
@@ -758,6 +826,32 @@ class ArmBatchProcessResponseFilesImplTest {
             deleteArmResponseFilesHelper,
             featureFlagLogApi
         );
+    }
+
+    private String createRecordResponse() {
+        return """
+            {
+                "relation_id": "123",
+                "a360_record_id": "a360-record-id",
+                "process_time": "%s",
+                "status": 1,
+                "input": "%s"
+            }
+            """.formatted(RESPONSE_PROCESS_TIME, UPLOAD_NEW_FILE_INPUT.replace("\"", "\\\""));
+    }
+
+    private String uploadFileResponse() {
+        return """
+            {
+                "relation_id": "123",
+                "a360_record_id": "a360-record-id",
+                "process_time": "%s",
+                "status": 1,
+                "input": "%s",
+                "a360_file_id": "a360-file-id",
+                "s_md5": "checksum"
+            }
+            """.formatted(RESPONSE_PROCESS_TIME, UPLOAD_NEW_FILE_INPUT.replace("\"", "\\\""));
     }
 
     class ArmBatchProcessResponseFilesImplProtectedMethodSupport extends ArmBatchProcessResponseFilesImpl {
