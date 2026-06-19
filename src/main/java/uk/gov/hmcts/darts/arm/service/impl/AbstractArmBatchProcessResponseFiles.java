@@ -7,6 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.exception.ArmDuplicateResponseException;
 import uk.gov.hmcts.darts.arm.model.ResponseFilenames;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmBatchResponses;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
@@ -549,6 +550,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                       ArmBatchResponses armBatchResponses) {
         String createRecordFilenameAndPath = createRecordFilenameProcessor.getCreateRecordFilenameAndPath();
         if (nonNull(createRecordBinary)) {
+            Long externalObjectDirectoryId = null;
             try {
                 log.info("Length of ARM CR response file {} is {}", createRecordFilenameAndPath, createRecordBinary.getLength());
                 log.info("Contents of ARM CR response file: {} - {}", createRecordFilenameAndPath, createRecordBinary);
@@ -556,7 +558,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
                 if (nonNull(uploadNewFileRecord)) {
                     if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
-                        Long externalObjectDirectoryId = Long.valueOf(uploadNewFileRecord.getRelationId());
+                        externalObjectDirectoryId = Long.valueOf(uploadNewFileRecord.getRelationId());
                         armBatchResponses.addResponseBatchData(externalObjectDirectoryId, armResponseCreateRecord, createRecordFilenameProcessor);
                         setProcessTimeForCreateRecordFileRecord(armResponseCreateRecord, externalObjectDirectoryId, createRecordFilenameAndPath);
                     } else {
@@ -566,7 +568,12 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 } else {
                     log.warn("Failed to obtain EOD id (relation id) from create record file  {}", createRecordFilenameAndPath);
                 }
-
+            } catch (ArmDuplicateResponseException e) {
+                log.warn("Duplicate response for create record file {}. Deleted the create record file from blob storage.",
+                         createRecordFilenameAndPath, e);
+                if (nonNull(externalObjectDirectoryId)) {
+                    armBatchResponses.getArmBatchResponseMap().remove(externalObjectDirectoryId);
+                }
             } catch (Exception e) {
                 log.error("Unable to process arm response create record file {}", createRecordFilenameAndPath, e);
             }
@@ -581,6 +588,10 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         try {
             OffsetDateTime uploadNewFileRecordProcessTime = getUploadFileRecordProcessTime(armResponseUploadFileRecord);
             setEodDataIngestionTimestamp(externalObjectDirectoryId, uploadNewFileRecordProcessTime, uploadFileRecordFilenameAndPath);
+        } catch (ArmDuplicateResponseException e) {
+            log.warn("Duplicate response for EOD {} - upload file {}. Deleted the upload file from blob storage.",
+                     externalObjectDirectoryId, uploadFileRecordFilenameAndPath, e);
+            throw e;
         } catch (Exception e) {
             log.error("Unable to set EOD data ingestion timestamp for EOD {} - upload file {}",
                       externalObjectDirectoryId, uploadFileRecordFilenameAndPath, e);
@@ -600,6 +611,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                          externalObjectDirectoryId, uploadFileFileRecordProcessTime, uploadNewFileRecordProcessTime);
                 if (!uploadFileFileRecordProcessTime.isEqual(uploadNewFileRecordProcessTime)) {
                     deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(uploadFileRecordFilenameAndPath));
+                    throw new ArmDuplicateResponseException(
+                        "Duplicate response for EOD " + externalObjectDirectoryId + " - upload file " + uploadFileRecordFilenameAndPath);
                 }
             }
         }
@@ -610,6 +623,10 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         try {
             OffsetDateTime createRecordProcessTime = getCreateRecordProcessTime(armResponseCreateRecord);
             setEodCreateRecordProcessTimestamp(externalObjectDirectoryId, createRecordProcessTime, createRecordFilenameAndPath);
+        } catch (ArmDuplicateResponseException e) {
+            log.warn("Duplicate response for EOD {} - create record file {}. Deleted the create record file from blob storage.",
+                     externalObjectDirectoryId, createRecordFilenameAndPath, e);
+            throw e;
         } catch (Exception e) {
             log.error("Unable to set EOD create record process timestamp for EOD {} - upload file {}",
                       externalObjectDirectoryId, createRecordFilenameAndPath, e);
@@ -629,6 +646,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                          externalObjectDirectoryId, createRecordProcessedTs, createRecordProcessTime);
                 if (!createRecordProcessedTs.isEqual(createRecordProcessTime)) {
                     deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(createRecordFilenameAndPath));
+                    throw new ArmDuplicateResponseException(
+                        "Duplicate response for EOD " + externalObjectDirectoryId + " - create record file " + createRecordFilenameAndPath);
                 }
             }
         }
@@ -661,6 +680,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
         String uploadFileFilenameAndPath = uploadFileFilenameProcessor.getUploadFileFilenameAndPath();
         if (nonNull(uploadFileBinary)) {
+            Long externalObjectDirectoryId = null;
             try {
                 log.info("Length of ARM UF response file {} is {}", uploadFileFilenameAndPath, uploadFileBinary.getLength());
                 log.info("Contents of ARM UF response file: {} - {}", uploadFileFilenameAndPath, uploadFileBinary);
@@ -668,7 +688,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseUploadFileRecord.getInput());
                 if (nonNull(uploadNewFileRecord)) {
                     if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
-                        Long externalObjectDirectoryId = Long.valueOf(uploadNewFileRecord.getRelationId());
+                        externalObjectDirectoryId = Long.valueOf(uploadNewFileRecord.getRelationId());
                         armBatchResponses.addResponseBatchData(externalObjectDirectoryId,
                                                                armResponseUploadFileRecord, uploadFileFilenameProcessor);
                         setDataIngestionForUploadFileRecord(armResponseUploadFileRecord, externalObjectDirectoryId, uploadFileFilenameAndPath);
@@ -679,6 +699,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
                 } else {
                     log.warn("Failed to obtain EOD id (relation id) from upload file  {}", uploadFileFilenameAndPath);
+                }
+            } catch (ArmDuplicateResponseException e) {
+                log.warn("Duplicate response for upload file {}. Deleted the upload file from blob storage.", uploadFileFilenameAndPath, e);
+                if (nonNull(externalObjectDirectoryId)) {
+                    armBatchResponses.getArmBatchResponseMap().remove(externalObjectDirectoryId);
                 }
             } catch (Exception e) {
                 log.error("Unable to process arm response upload file {}", uploadFileFilenameAndPath, e);
