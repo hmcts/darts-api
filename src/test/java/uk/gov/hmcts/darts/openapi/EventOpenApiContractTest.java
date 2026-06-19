@@ -36,7 +36,7 @@ class EventOpenApiContractTest {
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class CourtLogsPost {
 
-        @ParameterizedTest(name = "/courtlogs POST schema field: {0}")
+        @ParameterizedTest(name = "{0}")
         @MethodSource("invalidCourtLogsPostRequests")
         void openApi_ShouldReturnError_WhenCourtLogsRequestIsInvalid(String testName, String body, String expectedMessage) {
             ValidationReport report = validator.validateRequest(postCourtLogsRequest(body));
@@ -124,7 +124,7 @@ class EventOpenApiContractTest {
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class EventsPost {
 
-        @ParameterizedTest(name = "/events POST schema field: {0}")
+        @ParameterizedTest(name = "{0}")
         @MethodSource("invalidEventsPostRequests")
         void openApi_ShouldReturnError_WhenEventsRequestIsInvalid(String testName, String body, String expectedMessage) {
             ValidationReport report = validator.validateRequest(postEventRequest(body));
