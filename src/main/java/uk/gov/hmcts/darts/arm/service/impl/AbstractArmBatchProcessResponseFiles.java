@@ -580,18 +580,28 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                                      String uploadFileRecordFilenameAndPath) {
         try {
             OffsetDateTime uploadNewFileRecordProcessTime = getUploadFileRecordProcessTime(armResponseUploadFileRecord);
-            setEodDataIngestionTimestamp(externalObjectDirectoryId, uploadNewFileRecordProcessTime);
+            setEodDataIngestionTimestamp(externalObjectDirectoryId, uploadNewFileRecordProcessTime, uploadFileRecordFilenameAndPath);
         } catch (Exception e) {
             log.error("Unable to set EOD data ingestion timestamp for EOD {} - upload file {}",
                       externalObjectDirectoryId, uploadFileRecordFilenameAndPath, e);
         }
     }
 
-    private void setEodDataIngestionTimestamp(Long externalObjectDirectoryId, OffsetDateTime uploadNewFileRecordProcessTime) {
+    private void setEodDataIngestionTimestamp(Long externalObjectDirectoryId, OffsetDateTime uploadNewFileRecordProcessTime,
+                                              String uploadFileRecordFilenameAndPath) {
         ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
         if (nonNull(externalObjectDirectory)) {
-            externalObjectDirectory.setDataIngestionTs(uploadNewFileRecordProcessTime);
-            externalObjectDirectoryRepository.save(externalObjectDirectory);
+            OffsetDateTime uploadFileFileRecordProcessTime = externalObjectDirectory.getDataIngestionTs();
+            if (isNull(uploadFileFileRecordProcessTime)) {
+                externalObjectDirectory.setDataIngestionTs(uploadNewFileRecordProcessTime);
+                externalObjectDirectoryRepository.save(externalObjectDirectory);
+            } else {
+                log.warn("EOD {} already has a data ingestion timestamp set to {} - not updating to {}",
+                         externalObjectDirectoryId, uploadFileFileRecordProcessTime, uploadNewFileRecordProcessTime);
+                if (!uploadFileFileRecordProcessTime.isEqual(externalObjectDirectory.getDataIngestionTs())) {
+                    deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(uploadFileRecordFilenameAndPath));
+                }
+            }
         }
     }
 
@@ -599,18 +609,28 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                                          String createRecordFilenameAndPath) {
         try {
             OffsetDateTime createRecordProcessTime = getCreateRecordProcessTime(armResponseCreateRecord);
-            setEodCreateRecordProcessTimestamp(externalObjectDirectoryId, createRecordProcessTime);
+            setEodCreateRecordProcessTimestamp(externalObjectDirectoryId, createRecordProcessTime, createRecordFilenameAndPath);
         } catch (Exception e) {
             log.error("Unable to set EOD create record process timestamp for EOD {} - upload file {}",
                       externalObjectDirectoryId, createRecordFilenameAndPath, e);
         }
     }
 
-    private void setEodCreateRecordProcessTimestamp(Long externalObjectDirectoryId, OffsetDateTime createRecordProcessTime) {
+    private void setEodCreateRecordProcessTimestamp(Long externalObjectDirectoryId, OffsetDateTime createRecordProcessTime,
+                                                    String createRecordFilenameAndPath) {
         ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
         if (nonNull(externalObjectDirectory)) {
-            externalObjectDirectory.setCreateRecordProcessedTs(createRecordProcessTime);
-            externalObjectDirectoryRepository.save(externalObjectDirectory);
+            OffsetDateTime createRecordProcessedTs = externalObjectDirectory.getCreateRecordProcessedTs();
+            if (isNull(createRecordProcessedTs)) {
+                externalObjectDirectory.setCreateRecordProcessedTs(createRecordProcessTime);
+                externalObjectDirectoryRepository.save(externalObjectDirectory);
+            } else {
+                log.warn("EOD {} already has a create record processed timestamp set to {} - not updating to {}",
+                         externalObjectDirectoryId, createRecordProcessedTs, createRecordProcessTime);
+                if (!createRecordProcessedTs.isEqual(externalObjectDirectory.getCreateRecordProcessedTs())) {
+                    deleteArmResponseFilesHelper.deleteResponseBlobs(List.of(createRecordFilenameAndPath));
+                }
+            }
         }
     }
 
