@@ -1191,18 +1191,33 @@ components:
       required:
         - transcription_urgency_id
         - transcription_type_id
+      anyOf:
+        - required: [hearing_id]
+        - required: [case_id]
       properties:
         hearing_id:
           type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
           example: 1234
         case_id:
           type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
           example: 4567
         transcription_urgency_id:
           type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
           example: 2
         transcription_type_id:
           type: integer
+          format: int32
+          minimum: 1
+          maximum: 2147483647
           example: 3
         comment:
           type: string

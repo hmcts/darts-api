@@ -82,24 +82,22 @@ class TranscriptionsOpenApiContractTest {
     class TranscriptionsPost {
 
         @Test
-        void openApi_ShouldReturnNoError_WhenValidTranscriptsRequestUsed() {
+        void openApi_ShouldReturnNoError_WhenValidTranscriptionsRequestUsed() {
             Request request = postTranscriptionsRequest(validTranscriptionsRequestBody().toString());
 
             ValidationReport report = VALIDATOR.validateRequest(request);
 
             assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid transcription_id");
-
         }
         
         @ParameterizedTest(name = "{0}")
         @MethodSource("invalidTranscriptionsPostRequests")
-        void openApi_ShouldReturnError_WhenInvalidTranscriptsRequestUsed(String testName, String body, String expectedMessage) {
+        void openApi_ShouldReturnError_WhenInvalidTranscriptionsRequestUsed(String testName, String body, String expectedMessage) {
             Request request = postTranscriptionsRequest(body);
 
             ValidationReport report = VALIDATOR.validateRequest(request);
 
             assertHasMessageContaining(report, expectedMessage);
-
         }
 
         Stream<Arguments> invalidTranscriptionsPostRequests() {
@@ -110,9 +108,29 @@ class TranscriptionsOpenApiContractTest {
                     "Instance type (string) does not match any allowed primitive type"
                 ),
                 arguments(
+                    "hearing id is below minimum",
+                    transcriptionsRequestBody(body -> body.put("hearing_id", 0)),
+                    "minimum: 1, found: 0"
+                ),
+                arguments(
+                    "hearing id is above maximum",
+                    transcriptionsRequestBody(body -> body.put("hearing_id", 2_147_483_648L)),
+                    "maximum: 2147483647, found: 2147483648"
+                ),
+                arguments(
                     "case id is not integer",
                     transcriptionsRequestBody(body -> body.put("case_id", "not-a-number")),
                     "Instance type (string) does not match any allowed primitive type"
+                ),
+                arguments(
+                    "case id is below minimum",
+                    transcriptionsRequestBody(body -> body.put("case_id", 0)),
+                    "minimum: 1, found: 0"
+                ),
+                arguments(
+                    "case id is above maximum",
+                    transcriptionsRequestBody(body -> body.put("case_id", 2_147_483_648L)),
+                    "maximum: 2147483647, found: 2147483648"
                 ),
                 arguments(
                     "transcription urgency id is not integer",
@@ -120,9 +138,29 @@ class TranscriptionsOpenApiContractTest {
                     "Instance type (string) does not match any allowed primitive type"
                 ),
                 arguments(
+                    "transcription urgency id is below minimum",
+                    transcriptionsRequestBody(body -> body.put("transcription_urgency_id", 0)),
+                    "minimum: 1, found: 0"
+                ),
+                arguments(
+                    "transcription urgency id is above maximum",
+                    transcriptionsRequestBody(body -> body.put("transcription_urgency_id", 2_147_483_648L)),
+                    "maximum: 2147483647, found: 2147483648"
+                ),
+                arguments(
                     "transcription type id is not integer",
                     transcriptionsRequestBody(body -> body.put("transcription_type_id", "not-a-number")),
                     "Instance type (string) does not match any allowed primitive type"
+                ),
+                arguments(
+                    "transcription type id is below minimum",
+                    transcriptionsRequestBody(body -> body.put("transcription_type_id", 0)),
+                    "minimum: 1, found: 0"
+                ),
+                arguments(
+                    "transcription type id is above maximum",
+                    transcriptionsRequestBody(body -> body.put("transcription_type_id", 2_147_483_648L)),
+                    "maximum: 2147483647, found: 2147483648"
                 ),
                 arguments(
                     "comment exceeds maxLength",
