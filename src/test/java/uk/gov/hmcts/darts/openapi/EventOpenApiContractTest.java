@@ -34,7 +34,7 @@ class EventOpenApiContractTest {
 
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    class EventCourtLogsPost {
+    class CourtLogsPost {
 
         @ParameterizedTest(name = "/courtlogs POST schema field: {0}")
         @MethodSource("invalidCourtLogsPostRequests")
@@ -122,7 +122,7 @@ class EventOpenApiContractTest {
 
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    class EventEventsPost {
+    class EventsPost {
 
         @ParameterizedTest(name = "/events POST schema field: {0}")
         @MethodSource("invalidEventsPostRequests")
