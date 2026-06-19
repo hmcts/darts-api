@@ -66,7 +66,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @SuppressWarnings({
     "PMD.CyclomaticComplexity",
     "PMD.CouplingBetweenObjects",
-    "PMD.TooManyMethods"
+    "PMD.TooManyMethods",
+    "PMD.CognitiveComplexity"
 })
 public abstract class AbstractArmBatchProcessResponseFiles implements ArmResponseFilesProcessor {
 
