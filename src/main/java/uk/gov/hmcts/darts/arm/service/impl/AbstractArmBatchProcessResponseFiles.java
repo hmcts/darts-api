@@ -1019,7 +1019,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                                          UserAccountEntity userAccount) {
         externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
         externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
-        externalObjectDirectory.setDataIngestionTs(OffsetDateTime.now());
         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armRpoPendingStatus(), userAccount);
     }
 
