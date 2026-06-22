@@ -20,6 +20,9 @@ paths:
           name: user_id
           schema:
             type: integer
+            format: int32
+            minimum: 1
+            maximum: 2147483647
           description: The user_account primary key
           required: true
       responses:

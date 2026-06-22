@@ -4,16 +4,20 @@ import com.atlassian.oai.validator.OpenApiInteractionValidator;
 import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.SimpleRequest;
 import com.atlassian.oai.validator.report.ValidationReport;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import uk.gov.hmcts.darts.util.ValidationConstants;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class TranscriptionOpenApiContractTest {
+class TranscriptionsOpenApiContractTest {
 
     private static final OpenApiInteractionValidator VALIDATOR =
         OpenApiInteractionValidator.createForSpecificationUrl(
-            TranscriptionOpenApiContractTest.class
+            TranscriptionsOpenApiContractTest.class
                 .getResource("/openapi/transcriptions.yaml")
                 .toExternalForm()
         ).build();
@@ -58,5 +62,38 @@ class TranscriptionOpenApiContractTest {
         ValidationReport report = VALIDATOR.validateRequest(request);
 
         assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid transcription_id");
+    }
+
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    class TranscriptionsGet {
+
+        @Test
+        void openApi_ShouldReturnNoError_WhenValidUserIdUsed() {
+            Request request = SimpleRequest.Builder
+                .get("/transcriptions")
+                .withHeader("user_id", "2147483647")
+                .build();
+
+            ValidationReport report = VALIDATOR.validateRequest(request);
+
+            assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid user_id");
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "0, '(minimum: 1, found: 0)'",
+            "2147483648, '(maximum: 2147483647, found: 2147483648)'"
+        })
+        void openApi_ShouldReturnAnError_WhenAnInvalidUserIdUsed(String userId, String expectedError) {
+            Request request = SimpleRequest.Builder
+                .get("/transcriptions")
+                .withHeader("user_id", userId)
+                .build();
+
+            ValidationReport report = VALIDATOR.validateRequest(request);
+
+            assertTrue(report.getMessages().getFirst().toString().contains(expectedError));
+        }
     }
 }
