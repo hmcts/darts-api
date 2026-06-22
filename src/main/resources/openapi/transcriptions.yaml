@@ -202,6 +202,8 @@ paths:
           schema:
             type: integer
             format: int64
+            minimum: 1
+            maximum: 9223372036854775807
           description: "transcription_id is the internal id of the transcription."
           required: true
       operationId: getTranscription
