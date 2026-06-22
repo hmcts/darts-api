@@ -83,7 +83,8 @@ class TranscriptionsOpenApiContractTest {
         @ParameterizedTest
         @CsvSource({
             "0, '(minimum: 1, found: 0)'",
-            "2147483648, '(maximum: 2147483647, found: 2147483648)'"
+            "2147483648, '(maximum: 2147483647, found: 2147483648)'",
+            "not-a-number, 'Instance type (string) does not match any allowed primitive type'"
         })
         void openApi_ShouldReturnAnError_WhenAnInvalidUserIdUsed(String userId, String expectedError) {
             Request request = SimpleRequest.Builder
@@ -94,6 +95,17 @@ class TranscriptionsOpenApiContractTest {
             ValidationReport report = VALIDATOR.validateRequest(request);
 
             assertTrue(report.getMessages().getFirst().toString().contains(expectedError));
+        }
+
+        @Test
+        void openApi_ShouldReturnAnError_WhenUserIdIsMissing() {
+            Request request = SimpleRequest.Builder
+                .get("/transcriptions")
+                .build();
+
+            ValidationReport report = VALIDATOR.validateRequest(request);
+
+            assertTrue(report.getMessages().getFirst().toString().contains("Header parameter 'user_id' is required"));
         }
     }
 }
