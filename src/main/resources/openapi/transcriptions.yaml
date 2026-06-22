@@ -1191,9 +1191,6 @@ components:
       required:
         - transcription_urgency_id
         - transcription_type_id
-      anyOf:
-        - required: [hearing_id]
-        - required: [case_id]
       properties:
         hearing_id:
           type: integer
