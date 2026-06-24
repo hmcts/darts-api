@@ -425,7 +425,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
   implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.18'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.5.7'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.5.8'
 
   implementation group: 'commons-io', name: 'commons-io', version: '2.22.0'
   implementation 'org.apache.commons:commons-collections4:4.5.0'
@@ -469,15 +469,15 @@ dependencies {
 
   implementation 'uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE'
 
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.34'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.34'
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.35'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.35'
 
   implementation group: 'io.vavr', name: 'vavr', version: '1.0.1'
 
   implementation group: 'com.google.guava', name: 'guava', version: '33.6.0-jre'
 
   implementation 'org.mapstruct:mapstruct:1.6.3'
-  implementation group: 'org.apache.tika', name: 'tika-core', version: '3.3.0'
+  implementation group: 'org.apache.tika', name: 'tika-core', version: '3.3.1'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.5.11'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.53.Final'
   implementation 'org.hibernate:hibernate-spatial:6.6.53.Final'
@@ -505,7 +505,7 @@ dependencies {
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.3.4'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
   testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.8.6'
-  testImplementation 'org.springframework.security:spring-security-test:6.5.10'
+  testImplementation 'org.springframework.security:spring-security-test:6.5.11'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.3.0'
