@@ -23,12 +23,14 @@ public class ArmServiceStubImpl implements ArmService {
     @Override
     public String saveBlobData(String containerName, BinaryData binaryData, String blobPathAndName) {
         logStubUsageWarning();
-        log.warn("Returning filename to mimic successful upload: {}", blobPathAndName);
+        log.warn("Saving blob data: {}", blobPathAndName);
         return blobPathAndName;
     }
 
     @Override
     public List<String> listSubmissionBlobs(String containerName, String filename) {
+        logStubUsageWarning();
+        log.warn("Listing submission blobs: {}", filename);
         List<String> listedBlobs = new ArrayList<>();
         listedBlobs.add(filename);
         return listedBlobs;
@@ -36,6 +38,8 @@ public class ArmServiceStubImpl implements ArmService {
 
     @Override
     public List<String> listResponseBlobs(String containerName, String filename) {
+        logStubUsageWarning();
+        log.warn("Listing response blobs: {}", filename);
         List<String> listedBlobs = new ArrayList<>();
         listedBlobs.add(filename);
         return listedBlobs;
@@ -43,6 +47,8 @@ public class ArmServiceStubImpl implements ArmService {
 
     @Override
     public List<String> listSubmissionBlobsUsingBatch(String containerName, String filename, Integer batchSize) {
+        logStubUsageWarning();
+        log.warn("Listing submission blobs: {}", filename);
         List<String> listedBlobs = new ArrayList<>();
         listedBlobs.add(filename);
         return listedBlobs;
@@ -50,6 +56,8 @@ public class ArmServiceStubImpl implements ArmService {
 
     @Override
     public List<String> listResponseBlobsUsingBatch(String containerName, String filename, Integer batchSize) {
+        logStubUsageWarning();
+        log.warn("Listing response blobs: {}", filename);
         List<String> listedBlobs = new ArrayList<>();
         listedBlobs.add(filename);
         return listedBlobs;
@@ -57,22 +65,31 @@ public class ArmServiceStubImpl implements ArmService {
 
     @Override
     public ContinuationTokenBlobs listResponseBlobsWithMarker(String containerName, String filename, Integer batchSize, String continuationToken) {
-        return ContinuationTokenBlobs.builder().build();
+        logStubUsageWarning();
+        log.warn("Listing response blobs: {}", filename);
+        List<String> listedBlobs = new ArrayList<>();
+        listedBlobs.add(filename);
+        return ContinuationTokenBlobs.builder().blobNamesAndPaths(listedBlobs).build();
     }
 
     @Override
     public ContinuationTokenBlobs listSubmissionBlobsWithMarker(String containerName, String filename, Integer batchSize, String continuationToken) {
+        logStubUsageWarning();
+        log.warn("Listing submission blobs: {}", filename);
         return ContinuationTokenBlobs.builder().build();
     }
 
     @Override
     public BinaryData getBlobData(String containerName, String blobName) {
+        logStubUsageWarning();
+        log.warn("Getting stub blob data: {}", blobName);
         return BinaryData.fromBytes(new byte[1024]);
     }
 
     @Override
     public boolean deleteBlobData(String containerName, String blobPathAndName) {
         logStubUsageWarning();
+        log.warn("Deleting blob called with: {}", blobPathAndName);
         return true;
     }
 
