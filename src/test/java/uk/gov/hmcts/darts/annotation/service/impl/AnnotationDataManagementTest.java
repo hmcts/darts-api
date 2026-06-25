@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
+import static uk.gov.hmcts.darts.arm.enums.ArmApiError.ARM_DOWN_FOR_MAINTENANCE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 
@@ -45,8 +46,6 @@ class AnnotationDataManagementTest {
     private DataManagementApi dataManagementApi;
     @Mock
     private DataManagementFacade dataManagementFacade;
-    @Mock
-    private DownloadResponseMetaData downloadResponseMetaData;
 
     private AnnotationDataManagement annotationDataManagement;
 
@@ -56,7 +55,7 @@ class AnnotationDataManagementTest {
     }
 
     @Test
-    void throwsWhenSavingToInboundContainerFails() {
+    void upload_throwsWhenSavingToInboundContainerFails() {
         var binaryData = BinaryData.fromBytes("some-binary-data".getBytes());
         when(dataManagementApi.saveBlobDataToInboundContainer(binaryData)).thenThrow(new RuntimeException());
 
@@ -68,7 +67,7 @@ class AnnotationDataManagementTest {
     }
 
     @Test
-    void throwsAndAttemptsToDeleteFromInboundContainerWhenSavingToUnstructuredContainerFails() throws AzureDeleteBlobException {
+    void upload_throwsAndAttemptsToDeleteFromInboundContainerWhenSavingToUnstructuredContainerFails() throws AzureDeleteBlobException {
         var binaryData = BinaryData.fromBytes("some-binary-data".getBytes());
         var inboundLocationUuid = UUID.randomUUID().toString();
         when(dataManagementApi.saveBlobDataToInboundContainer(binaryData)).thenReturn(inboundLocationUuid);
@@ -83,7 +82,7 @@ class AnnotationDataManagementTest {
     }
 
     @Test
-    void returnsContainerLocationsWhenUploadSucceeds() {
+    void upload_returnsContainerLocationsWhenUploadSucceeds() {
         var binaryData = BinaryData.fromBytes("some-binary-data".getBytes());
         var inboundLocationUuid = UUID.randomUUID().toString();
         var unstructuredLocationUuid = UUID.randomUUID().toString();
@@ -97,7 +96,7 @@ class AnnotationDataManagementTest {
     }
 
     @Test
-    void deletesFromCorrectContainer() throws AzureDeleteBlobException {
+    void attemptToDeleteDocuments_deletesFromCorrectContainer() throws AzureDeleteBlobException {
         var inboundLocation = UUID.randomUUID().toString();
         var unstructuredLocation = UUID.randomUUID().toString();
         annotationDataManagement.attemptToDeleteDocuments(Map.of(
@@ -110,7 +109,7 @@ class AnnotationDataManagementTest {
     }
 
     @Test
-    void throwsWhenDeleteFails() throws AzureDeleteBlobException {
+    void retrieveFileFromStorage_throwsWhenDeleteFails() throws AzureDeleteBlobException {
         var externalLocationUuid = UUID.randomUUID().toString();
         doThrow(new AzureDeleteBlobException("some-message")).when(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocationUuid);
 
@@ -120,7 +119,7 @@ class AnnotationDataManagementTest {
     }
 
     @Test
-    void throwsIfDownloadAnnotationDocumentResponseFails() throws FileNotDownloadedException {
+    void retrieveFileFromStorage_throwsIfDownloadAnnotationDocumentResponseFails() throws FileNotDownloadedException, ArmDownForMaintenanceException {
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenThrow(new FileNotDownloadedException());
         assertThatThrownBy(() -> annotationDataManagement.download(Arrays.asList(someExternalObjectDirectoryEntity())))
             .isInstanceOf(DartsApiException.class)
@@ -129,7 +128,8 @@ class AnnotationDataManagementTest {
 
     @Test
     @SuppressWarnings("PMD.CloseResource")
-    void throwsIfDownloadAnnotationDocumentInputStreamFails() throws FileNotDownloadedException, IOException {
+    void retrieveFileFromStorage_throwsIfDownloadAnnotationDocumentInputStreamFails()
+        throws FileNotDownloadedException, IOException, ArmDownForMaintenanceException {
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(mockFileBasedDownloadResponseMetaData);
 
@@ -139,6 +139,19 @@ class AnnotationDataManagementTest {
         assertThatThrownBy(() -> annotationDataManagement.download(externalObjectDirectoryEntities))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
+    }
+
+    @Test
+    void retrieveFileFromStorage_throwsWhenArmDownForMaintenance() throws FileNotDownloadedException, ArmDownForMaintenanceException {
+        when(dataManagementFacade.retrieveFileFromStorage(anyList()))
+            .thenThrow(new ArmDownForMaintenanceException("ARM down"));
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = someExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.getAnnotationDocumentEntity().setId(12L);
+
+        assertThatThrownBy(() -> annotationDataManagement.download(List.of(externalObjectDirectoryEntity)))
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", ARM_DOWN_FOR_MAINTENANCE);
     }
 
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryEntity() {
