@@ -118,7 +118,7 @@ class ArmRpoBacklogCatchupServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
 
-        when(externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(any(), any()))
+        when(externalObjectDirectoryRepository.findOldestByCreateRecordProcessedTsAndStatusAndLocation(any(), any()))
             .thenReturn(null);
 
         // when
@@ -140,8 +140,8 @@ class ArmRpoBacklogCatchupServiceImplTest {
 
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
         eod.setCreatedDateTime(OffsetDateTime.now().minusHours(1)); // recent
-        eod.setInputUploadProcessedTs(OffsetDateTime.now().minusHours(1)); // recent
-        when(externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(any(), any()))
+        eod.setCreateRecordProcessedTs(OffsetDateTime.now().minusHours(1)); // recent
+        when(externalObjectDirectoryRepository.findOldestByCreateRecordProcessedTsAndStatusAndLocation(any(), any()))
             .thenReturn(eod);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
@@ -166,8 +166,8 @@ class ArmRpoBacklogCatchupServiceImplTest {
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
         OffsetDateTime earliest = OffsetDateTime.now().minusHours(100);
         eod.setCreatedDateTime(earliest);
-        eod.setInputUploadProcessedTs(earliest);
-        when(externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(any(), any()))
+        eod.setCreateRecordProcessedTs(earliest);
+        when(externalObjectDirectoryRepository.findOldestByCreateRecordProcessedTsAndStatusAndLocation(any(), any()))
             .thenReturn(eod);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
