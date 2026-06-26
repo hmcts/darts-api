@@ -101,6 +101,7 @@ public class EventMapper {
         adminGetEventResponseDetailsHearingsHearingsInner.setId(hearingEntity.getId());
         adminGetEventResponseDetailsHearingsHearingsInner.setCaseId(hearingEntity.getCourtCase().getId());
         adminGetEventResponseDetailsHearingsHearingsInner.setCaseNumber(hearingEntity.getCourtCase().getCaseNumber());
+        adminGetEventResponseDetailsHearingsHearingsInner.setIsDataAnonymised(hearingEntity.getCourtCase().isDataAnonymised());
         adminGetEventResponseDetailsHearingsHearingsInner.setHearingDate(hearingEntity.getHearingDate());
         adminGetEventResponseDetailsHearingsHearingsInner.setCourtroom(mapCourtRoom(hearingEntity.getCourtroom()));
         adminGetEventResponseDetailsHearingsHearingsInner.setCourthouse(

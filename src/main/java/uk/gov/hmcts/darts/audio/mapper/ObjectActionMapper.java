@@ -34,6 +34,7 @@ public interface ObjectActionMapper {
 
     @Mappings({
         @Mapping(target = "id", source = "id"),
+        @Mapping(target = "isDataAnonymised", source = "courtCase.dataAnonymised"),
         @Mapping(target = "hearingDate", source = "hearingDate"),
         @Mapping(target = "caseId", source = "courtCase.id"),
         @Mapping(target = "caseNumber", source = "courtCase.caseNumber"),
