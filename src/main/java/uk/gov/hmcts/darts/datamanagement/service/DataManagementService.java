@@ -26,7 +26,7 @@ public interface DataManagementService {
 
     BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata);
 
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")//TODO - refactor to use object for clearer API when this class is next edited
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     void copyBlobData(String sourceContainerName, String destinationContainerName, String sourceLocation, String destinationLocation);
 
     void addMetaData(BlobClient client, Map<String, String> metadata);
