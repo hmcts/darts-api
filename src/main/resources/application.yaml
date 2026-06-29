@@ -215,7 +215,7 @@ darts:
   retention:
     overridable-fixed-policy-keys: 3
     close-open-cases-older-than-period: ${CLOSE_OPEN_CASES_OLDER_THAN_PERIOD:P6Y}
-    close-events: "Case closed,Archive case"
+    close-events: ${RETENTION_CLOSE_EVENTS:79,218}
     max-retention-retries: 3
 
   storage:

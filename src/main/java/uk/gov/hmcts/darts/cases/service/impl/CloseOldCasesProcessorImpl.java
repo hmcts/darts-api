@@ -38,7 +38,6 @@ import static java.lang.Boolean.TRUE;
 
 @Service
 @Slf4j
-@SuppressWarnings({"PMD.CouplingBetweenObjects"})
 public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
     private final CloseOldCasesProcessorImpl.CloseCaseProcessor caseProcessor;
@@ -87,8 +86,8 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         private final RetentionDateHelper retentionDateHelper;
         private final FindCurrentEntitiesHelper findCurrentEntitiesHelper;
 
-        @Value("#{'${darts.retention.close-events}'.split(',')}")
-        private List<String> closeEvents;
+        @Value("#{'${darts.retention.close-events}'}")
+        private List<Integer> closeEvents;
 
         @Transactional
         public void closeCase(Integer courtCaseId, UserAccountEntity userAccount) {
@@ -100,7 +99,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                 eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
                 //find latest closed event
                 Optional<EventEntity> closedEvent =
-                    eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getEventName())).findFirst();
+                    eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getId())).findFirst();
 
                 if (closedEvent.isPresent()) {
                     closeCaseInDbAndAddRetention(courtCase, closedEvent.get().getCreatedDateTime(),
