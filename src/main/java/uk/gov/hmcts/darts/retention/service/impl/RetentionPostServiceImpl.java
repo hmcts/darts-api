@@ -94,6 +94,9 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                     .orElse(RetentionConfidenceCategoryEnum.UNKNOWN);
             }
             retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCase, confidenceCategoryEnum);
+            courtCase.setRetentionUpdated(true);
+            courtCase.setRetentionRetries(0);
+            caseRepository.save(courtCase);
         }
 
         PostRetentionResponse response = new PostRetentionResponse();
