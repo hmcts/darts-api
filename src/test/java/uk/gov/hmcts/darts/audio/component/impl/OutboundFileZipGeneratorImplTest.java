@@ -80,7 +80,7 @@ class OutboundFileZipGeneratorImplTest {
     }
 
     @Test
-    void generateAndWriteZipShouldProduceZipWithTheExpectedFileStructure() {
+    void generateAndWriteZip_ShouldProduceZipWithTheExpectedFileStructure_WhenNineDigitCaseNumber() {
         var audioWithSession1AndChannel1 = createDummyFileAndAudioFileInfo(1);
         var audioWithSession1AndChannel2 = createDummyFileAndAudioFileInfo(2);
         List<AudioFileInfo> session1 = List.of(
@@ -111,6 +111,46 @@ class OutboundFileZipGeneratorImplTest {
         assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0001/annotations.xml"));
         assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0002/0002.a00"));
         assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0002/annotations.xml"));
+    }
+
+    @Test
+    void generateAndWriteZip_ShouldProduceZip_WhenSingleCharacterCaseNumber() {
+        var audioWithSession1AndChannel1 = createDummyFileAndAudioFileInfo(1);
+
+        Path path = outboundFileZipGenerator.generateAndWriteZip(
+            List.of(List.of(audioWithSession1AndChannel1)),
+            createDummyMediaRequestEntity("b")
+        );
+
+        assertTrue(Files.exists(path));
+
+        List<String> paths = readZipStructure(path);
+
+        assertEquals(4, paths.size());
+        assertThat(paths, hasItem("readMe.txt"));
+        assertThat(paths, hasItem("playlist.xml"));
+        assertThat(paths, hasItem("daudio/localaudio/b/0001/0001.a00"));
+        assertThat(paths, hasItem("daudio/localaudio/b/0001/annotations.xml"));
+    }
+
+    @Test
+    void generateAndWriteZip_ShouldProduceZip_WhenFiveCharacterCaseNumber() {
+        var audioWithSession1AndChannel1 = createDummyFileAndAudioFileInfo(1);
+
+        Path path = outboundFileZipGenerator.generateAndWriteZip(
+            List.of(List.of(audioWithSession1AndChannel1)),
+            createDummyMediaRequestEntity("T2019")
+        );
+
+        assertTrue(Files.exists(path));
+
+        List<String> paths = readZipStructure(path);
+
+        assertEquals(4, paths.size());
+        assertThat(paths, hasItem("readMe.txt"));
+        assertThat(paths, hasItem("playlist.xml"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0001/0001.a00"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0001/annotations.xml"));
     }
 
     private MediaRequestEntity createDummyMediaRequestEntity(String caseNumber) {
