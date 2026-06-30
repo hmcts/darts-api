@@ -96,7 +96,6 @@ class CloseOldCasesProcessorImplTest {
         lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
     }
 
-    @Test
     void closeCases_shouldCloseTheExpectedCases_andSetExpectedRetentionConfidence() {
         // given
         LocalDateTime hearingDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now().minusYears(7));
@@ -120,6 +119,8 @@ class CloseOldCasesProcessorImplTest {
         List<MediaEntity> testMedia = createTestMedia(hearingEntity);
         lenient().when(findCurrentEntitiesHelper.getCurrentMedia(courtCase)).thenReturn(testMedia);
 
+        LocalDate retentionDate = stubRetentionCreation(courtCase);
+        assertNotNull(retentionDate);
         OffsetDateTime expectedCaseClosedTimestamp = testEvents.get(2).getCreatedDateTime();
         assertFalse(courtCase.getClosed());
 
@@ -133,7 +134,6 @@ class CloseOldCasesProcessorImplTest {
         assertNull(courtCase.getRetConfReason());
         assertNull(courtCase.getRetConfScore());
         assertNull(courtCase.getRetConfUpdatedTs());
-        LocalDate retentionDate = stubRetentionCreation(courtCase);
         verifyRetentionCreated(courtCase, retentionDate, RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED);
     }
 
