@@ -48,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true") // To override Clock bean
 class CloseOldCasesProcessorIntTest extends IntegrationBase {
+    
     @Autowired
     private CloseOldCasesProcessor closeOldCasesProcessor;
 
