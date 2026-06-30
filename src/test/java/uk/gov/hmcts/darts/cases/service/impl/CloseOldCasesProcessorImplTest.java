@@ -120,7 +120,6 @@ class CloseOldCasesProcessorImplTest {
         List<MediaEntity> testMedia = createTestMedia(hearingEntity);
         lenient().when(findCurrentEntitiesHelper.getCurrentMedia(courtCase)).thenReturn(testMedia);
 
-        LocalDate retentionDate = stubRetentionCreation(courtCase);
         OffsetDateTime expectedCaseClosedTimestamp = testEvents.get(2).getCreatedDateTime();
         assertFalse(courtCase.getClosed());
 
@@ -134,6 +133,7 @@ class CloseOldCasesProcessorImplTest {
         assertNull(courtCase.getRetConfReason());
         assertNull(courtCase.getRetConfScore());
         assertNull(courtCase.getRetConfUpdatedTs());
+        LocalDate retentionDate = stubRetentionCreation(courtCase);
         verifyRetentionCreated(courtCase, retentionDate, RetentionConfidenceCategoryEnum.AGED_CASE_MAX_EVENT_CLOSED);
     }
 
@@ -151,7 +151,8 @@ class CloseOldCasesProcessorImplTest {
         EventEntity olderCloseEvent = createEventWithHandlerType(1L, 2, "Case closed", hearingEntity, 218);
         EventEntity latestCloseEvent = createEventWithHandlerType(2L, 3, "Archive Case", hearingEntity, 79);
         EventEntity latestNonCloseEvent = createEventWithHandlerType(3L, 4, "Other event", hearingEntity, 50);
-        when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(new ArrayList<>(List.of(olderCloseEvent, latestNonCloseEvent, latestCloseEvent)));
+        when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(
+            new ArrayList<>(List.of(olderCloseEvent, latestNonCloseEvent, latestCloseEvent)));
 
         LocalDate retentionDate = stubRetentionCreation(courtCase);
 
