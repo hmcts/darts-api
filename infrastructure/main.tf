@@ -95,7 +95,7 @@ module "postgresql_flexible" {
   pgsql_server_configuration = [
     {
       name  = "azure.extensions"
-      value = "pg_stat_statements, pg_trgm"
+      value = "pg_stat_statements, pg_trgm, pgaudit"
     },
     {
       name  = "effective_cache_size"
