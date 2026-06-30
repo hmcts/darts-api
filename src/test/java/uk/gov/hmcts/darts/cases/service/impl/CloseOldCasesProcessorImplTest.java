@@ -96,6 +96,7 @@ class CloseOldCasesProcessorImplTest {
         lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
     }
 
+    @Test
     void closeCases_shouldCloseTheExpectedCases_andSetExpectedRetentionConfidence() {
         // given
         LocalDateTime hearingDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now().minusYears(7));
@@ -301,7 +302,6 @@ class CloseOldCasesProcessorImplTest {
      * Creates test media for the given hearing.
      */
     private List<MediaEntity> createTestMedia(HearingEntity hearingEntity) {
-        List<MediaEntity> mediaList = new ArrayList<>();
 
         // Create media with channel 1
         MediaEntity media1 = new MediaEntity();
@@ -314,6 +314,7 @@ class CloseOldCasesProcessorImplTest {
         media1.setId(1L);
         media1.setIsCurrent(true);
         media1.setCreatedDateTime(startTime.minusMinutes(30));
+        List<MediaEntity> mediaList = new ArrayList<>();
         mediaList.add(media1);
 
         // Create media with channel 2
