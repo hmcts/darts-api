@@ -145,7 +145,7 @@ class TranscriptionsOpenApiContractTest {
 
     private ObjectNode validTranscriptionsPatchRequestBody() {
         ObjectNode body = objectNode();
-        body.put("transcription_id", 9223372036854775807L);
+        body.put("transcription_id", 9_223_372_036_854_775_807L);
         body.put("hide_request_from_requestor", true);
         return body;
     }
