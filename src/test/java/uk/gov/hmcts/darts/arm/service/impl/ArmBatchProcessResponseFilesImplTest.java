@@ -138,7 +138,7 @@ class ArmBatchProcessResponseFilesImplTest {
             deleteArmResponseFilesHelper,
             featureFlagLogApi
         ));
-
+        
     }
 
     @BeforeAll
@@ -245,6 +245,7 @@ class ArmBatchProcessResponseFilesImplTest {
         when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(1);
         when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, 1, null)).thenReturn(continuationTokenBlobs);
         when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, 1, continuationToken)).thenReturn(continuationTokenBlobs2);
+
 
         List<ExternalObjectDirectoryEntity> inboundList1 = new ArrayList<>(Collections.singletonList(externalObjectDirectoryArmDropZone));
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = mock(ExternalObjectDirectoryEntity.class);
@@ -413,6 +414,7 @@ class ArmBatchProcessResponseFilesImplTest {
         when(externalObjectDirectoryEntity.getInputUploadProcessedTs()).thenReturn(currentTime.minus(armMissingResponseDuration).minusMinutes(1));
 
         doNothing().when(armBatchProcessResponseFiles).updateExternalObjectDirectoryStatus(any(), any(), any());
+
 
         armBatchProcessResponseFiles.processBatchResponseFiles(batchUploadFileFilenameProcessor,
                                                                armBatchResponses,

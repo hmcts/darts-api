@@ -193,7 +193,7 @@ class ArmRpoServiceImplTest {
         armRpoExecutionDetailEntity.setCreatedDateTime(OffsetDateTime.parse("2025-02-02T12:34:56Z"));
         when(armAutomatedTaskRepository.findByAutomatedTaskTaskName(any()))
             .thenReturn(Optional.of(createArmAutomatedTaskEntity()));
-        when(externalObjectDirectoryRepository.findByStatusAndCreateRecordProcessedTsWithPaging(any(), any(), any(), any()))
+        when(externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(any(), any(), any(), any()))
             .thenReturn(pagedEods);
 
         File file = TestUtils.getFile("Tests/arm/rpo/armRpoCsvData.csv");
@@ -205,7 +205,7 @@ class ArmRpoServiceImplTest {
         assertEquals(eodHelperMocks.getStoredStatus(), externalObjectDirectoryEntity1.getStatus());
         assertEquals(eodHelperMocks.getArmReplayStatus(), externalObjectDirectoryEntity2.getStatus());
 
-        verify(externalObjectDirectoryRepository).findByStatusAndCreateRecordProcessedTsWithPaging(
+        verify(externalObjectDirectoryRepository).findByStatusAndInputUploadProcessedTsWithPaging(
             eq(eodHelperMocks.getArmRpoPendingStatus()),
             eq(OffsetDateTime.parse("2025-01-31T11:34Z")),
             eq(OffsetDateTime.parse("2025-02-01T11:34Z")),

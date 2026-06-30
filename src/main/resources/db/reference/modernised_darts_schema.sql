@@ -1053,7 +1053,6 @@ CREATE TABLE external_object_directory
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-,create_record_processed_ts  TIMESTAMP WITH TIME ZONE
 ) TABLESPACE pg_default;
 
 COMMENT ON COLUMN external_object_directory.eod_id
