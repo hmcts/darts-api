@@ -503,7 +503,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.3.4'
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
+  testImplementation 'org.junit.jupiter:junit-jupiter:6.1.1'
   testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.8.6'
   testImplementation 'org.springframework.security:spring-security-test:6.5.11'
 
