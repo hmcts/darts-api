@@ -36,8 +36,8 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
     @Override
     public void performCatchup(Integer batchSize, Integer maxHoursEndingPoint, Integer totalCatchupHours, Duration threadSleepDuration) {
         var armRpoExecutionDetailEntity = armRpoService.getLatestArmRpoExecutionDetailEntity();
-        var earliestEodInRpo = externalObjectDirectoryRepository.findOldestByCreateRecordProcessedTsAndStatusAndLocation(EodHelper.armRpoPendingStatus(),
-                                                                                                                         EodHelper.armLocation());
+        var earliestEodInRpo = externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(EodHelper.armRpoPendingStatus(),
+                                                                                                                        EodHelper.armLocation());
 
         // Only perform backlog catchup if the last execution is in REMOVE_PRODUCTION state or FAILED status
         if (!validateTaskCanBeRun(maxHoursEndingPoint, totalCatchupHours, armRpoExecutionDetailEntity, earliestEodInRpo)) {
@@ -56,15 +56,12 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
             return;
         }
 
-        // Use createRecordProcessedTs if it's been set else use inputUploadProcessedTs
-        OffsetDateTime processedTs = isNull(earliestEodInRpo.getCreateRecordProcessedTs())
-            ? earliestEodInRpo.getInputUploadProcessedTs() : earliestEodInRpo.getCreateRecordProcessedTs();
-        // subtract 10 minutes to account for any potential delay in EOD being picked up for RPO search after
-        // the create record processed timestamp
-        OffsetDateTime adjustedOldestEodDateTime = processedTs.minus(PRE_AMBLE_MINUTES, ChronoUnit.MINUTES);
+        OffsetDateTime inputUploadProcessedTs = earliestEodInRpo.getInputUploadProcessedTs();
+        // subtract 10 minutes to account for any potential delay in EOD being picked up for RPO search after the input upload processed timestamp
+        OffsetDateTime adjustedOldestEodDateTime = inputUploadProcessedTs.minus(PRE_AMBLE_MINUTES, ChronoUnit.MINUTES);
         int hoursEnd = (int) calculateHoursFromStartToNow(adjustedOldestEodDateTime.toString());
 
-        Integer originalStartHour = armAutomatedTaskEntity.getRpoCsvStartHour();
+        Integer originalStaartHour = armAutomatedTaskEntity.getRpoCsvStartHour();
         Integer originalEndHour = armAutomatedTaskEntity.getRpoCsvEndHour();
         try {
             armAutomatedTaskEntity.setRpoCsvStartHour(hoursEnd - totalCatchupHours);
@@ -73,7 +70,7 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
             triggerArmRpoSearchService.triggerArmRpoSearch(threadSleepDuration);
         } catch (Exception e) {
             // reset the start and end hour to the original value if there are any failures
-            armAutomatedTaskEntity.setRpoCsvStartHour(originalStartHour);
+            armAutomatedTaskEntity.setRpoCsvStartHour(originalStaartHour);
             armAutomatedTaskEntity.setRpoCsvEndHour(originalEndHour);
             armAutomatedTaskRepository.save(armAutomatedTaskEntity);
         }
@@ -101,7 +98,7 @@ public class ArmRpoBacklogCatchupServiceImpl implements ArmRpoBacklogCatchupServ
         OffsetDateTime currentTime = currentTimeHelper.currentOffsetDateTime();
         int amountToSubtract = maxHoursEndingPoint + totalCatchupHours;
         OffsetDateTime lastRunTaskDateTime = currentTime.minus(amountToSubtract, ChronoUnit.HOURS);
-        if (isNull(earliestEodInRpo.getCreateRecordProcessedTs()) || earliestEodInRpo.getCreateRecordProcessedTs().isAfter(lastRunTaskDateTime)) {
+        if (earliestEodInRpo.getInputUploadProcessedTs().isAfter(lastRunTaskDateTime)) {
             log.info("Earliest EODs found in ARM RPO pending status is not suitable for backlog catchup.");
             return false;
         }

@@ -100,7 +100,7 @@ class ArmRpoBacklogCatchupServiceIntTest extends IntegrationBase {
             .status(dartsDatabase.getObjectRecordStatusEntity(ARM_RPO_PENDING))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID().toString()).build();
-        armEod1.setCreateRecordProcessedTs(lastModifiedDateTime);
+        armEod1.setInputUploadProcessedTs(lastModifiedDateTime);
         armEod1.setVerificationAttempts(1);
         dartsPersistence.save(armEod1);
 
@@ -154,7 +154,7 @@ class ArmRpoBacklogCatchupServiceIntTest extends IntegrationBase {
             .status(dartsDatabase.getObjectRecordStatusEntity(ARM_RPO_PENDING))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID().toString()).build();
-        armEod1.setCreateRecordProcessedTs(lastModifiedDateTime);
+        armEod1.setInputUploadProcessedTs(lastModifiedDateTime);
         armEod1.setVerificationAttempts(1);
         dartsPersistence.save(armEod1);
 

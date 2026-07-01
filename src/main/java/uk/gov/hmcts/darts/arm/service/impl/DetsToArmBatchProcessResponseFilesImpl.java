@@ -177,8 +177,8 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
     }
 
     @Override
-    protected void markEodAsMissingResponseFailure(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
-        super.markEodAsMissingResponseFailure(externalObjectDirectory, userAccount);
+    protected void markEodAsResponseProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
+        super.markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
 
         ObjectStateRecordEntity objectStateRecordEntity = externalObjectDirectory.getObjectStateRecordEntity();
 

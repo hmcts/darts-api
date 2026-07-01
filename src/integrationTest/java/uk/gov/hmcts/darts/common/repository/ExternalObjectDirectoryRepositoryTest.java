@@ -431,7 +431,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findByStatusAndCreateRecordProcessedTsWithPaging_ReturnsResults() throws Exception {
+    void findByStatusAndInputUploadProcessedTsWithPaging_ReturnsResults() throws Exception {
         // Given
         OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(2);
         OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusHours(20);
@@ -439,7 +439,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         List<ExternalObjectDirectoryEntity> matchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 11, Optional.of(pastCurrentDateTime1));
         matchingEods.forEach(eod -> {
-            eod.setCreateRecordProcessedTs(pastCurrentDateTime1);
+            eod.setInputUploadProcessedTs(pastCurrentDateTime1);
         });
         dartsPersistence.saveAll(matchingEods);
         assertEquals(11, matchingEods.size());
@@ -447,7 +447,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         List<ExternalObjectDirectoryEntity> nonMatchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 4, Optional.of(pastCurrentDateTime2));
         nonMatchingEods.forEach(eod -> {
-            eod.setCreateRecordProcessedTs(pastCurrentDateTime2);
+            eod.setInputUploadProcessedTs(pastCurrentDateTime2);
         });
         dartsPersistence.saveAll(nonMatchingEods);
         assertEquals(4, nonMatchingEods.size());
@@ -459,7 +459,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         ObjectRecordStatusEntity status = EodHelper.armRpoPendingStatus();
 
         // When
-        Page<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByStatusAndCreateRecordProcessedTsWithPaging(
+        Page<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(
             status, startDateTime, endDateTime, pageable
         );
 
@@ -469,7 +469,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         assertThat(result.getTotalElements()).isEqualTo(11);
         result.getContent().forEach(entity -> {
             assertThat(entity.getStatus().getId()).isEqualTo(status.getId());
-            assertThat(entity.getCreateRecordProcessedTs()).isBetween(startDateTime, endDateTime);
+            assertThat(entity.getInputUploadProcessedTs()).isBetween(startDateTime, endDateTime);
         });
     }
 
@@ -1258,7 +1258,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findOldestByCreateRecordProcessedTsAndStatusAndLocation() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    void findOldestByInputUploadProcessedTsAndStatusAndLocation() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // Given
         OffsetDateTime pastCurrentDateTime1 = OffsetDateTime.now().minusHours(200);
         OffsetDateTime pastCurrentDateTime2 = OffsetDateTime.now().minusHours(2);
@@ -1266,7 +1266,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         List<ExternalObjectDirectoryEntity> matchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 10, Optional.of(pastCurrentDateTime1));
         matchingEods.forEach(eod -> {
-            eod.setCreateRecordProcessedTs(pastCurrentDateTime1);
+            eod.setInputUploadProcessedTs(pastCurrentDateTime1);
         });
         dartsPersistence.saveAll(matchingEods);
         assertEquals(10, matchingEods.size());
@@ -1274,13 +1274,13 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         List<ExternalObjectDirectoryEntity> nonMatchingEods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
             ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 4, Optional.of(pastCurrentDateTime2));
         nonMatchingEods.forEach(eod -> {
-            eod.setCreateRecordProcessedTs(pastCurrentDateTime2);
+            eod.setInputUploadProcessedTs(pastCurrentDateTime2);
         });
         dartsPersistence.saveAll(nonMatchingEods);
         assertEquals(4, nonMatchingEods.size());
 
         // When
-        ExternalObjectDirectoryEntity result = externalObjectDirectoryRepository.findOldestByCreateRecordProcessedTsAndStatusAndLocation(
+        ExternalObjectDirectoryEntity result = externalObjectDirectoryRepository.findOldestByInputUploadProcessedTsAndStatusAndLocation(
             EodHelper.armRpoPendingStatus(), EodHelper.armLocation());
 
         // Then

@@ -239,16 +239,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    public OffsetDateTime getCreateRecordProcessTime(ArmResponseCreateRecord armResponseCreateRecord) {
-        try {
-            return OffsetDateTime.parse(armResponseCreateRecord.getProcessTime(), dateTimeFormatter);
-        } catch (Exception e) {
-            log.warn("Unable to parse timestamp {} from ARM create record (CR) record {}", armResponseCreateRecord.getProcessTime(),
-                     armResponseCreateRecord.getA360RecordId(), e);
-            throw new IllegalArgumentException(e);
-        }
-    }
-
     private ArmResponseInputUploadFileRecord getResponseInputUploadFileRecordOrDelete(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
                                                                                       String inputUploadFileRecordStr,
                                                                                       List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
@@ -313,16 +303,14 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
                     .findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestName);
 
-                OffsetDateTime minProcessedTime = timeHelper.currentOffsetDateTime().minus(
+                OffsetDateTime minInputUploadProcessedTime = timeHelper.currentOffsetDateTime().minus(
                     armDataManagementConfiguration.getArmMissingResponseDuration());
 
                 externalObjectDirectoryEntities.forEach(
                     externalObjectDirectoryEntity -> {
-                        // Use the latest date we have a process time for
-                        OffsetDateTime processedTime = getLatestProcessedTs(externalObjectDirectoryEntity);
-                        if (nonNull(processedTime)
-                            && processedTime.isBefore(minProcessedTime)) {
-                            markEodAsMissingResponseFailure(externalObjectDirectoryEntity, userAccount);
+                        if (externalObjectDirectoryEntity.getInputUploadProcessedTs() != null
+                            && externalObjectDirectoryEntity.getInputUploadProcessedTs().isBefore(minInputUploadProcessedTime)) {
+                            markEodAsResponseProcessingFailed(externalObjectDirectoryEntity, userAccount);
                         } else {
                             updateExternalObjectDirectoryStatus(externalObjectDirectoryEntity, EodHelper.armDropZoneStatus(), userAccount);
                         }
@@ -331,16 +319,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             }
         } catch (Exception e) {
             log.error("Unable to process responses for file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath(), e);
-        }
-    }
-
-    private OffsetDateTime getLatestProcessedTs(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        if (nonNull(externalObjectDirectoryEntity.getCreateRecordProcessedTs())) {
-            return externalObjectDirectoryEntity.getCreateRecordProcessedTs();
-        } else if (nonNull(externalObjectDirectoryEntity.getInputUploadProcessedTs())) {
-            return externalObjectDirectoryEntity.getInputUploadProcessedTs();
-        } else {
-            return externalObjectDirectoryEntity.getDataIngestionTs();
         }
     }
 
@@ -394,12 +372,9 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             OffsetDateTime minIngestionTime = timeHelper.currentOffsetDateTime().minus(
                 armDataManagementConfiguration.getArmMissingResponseDuration());
 
-            // Use the latest date we have a process time for
-            OffsetDateTime processedTime = getLatestProcessedTs(externalObjectDirectory);
-
-            if (nonNull(processedTime)
-                && processedTime.isBefore(minIngestionTime)) {
-                markEodAsMissingResponseFailure(externalObjectDirectory, userAccount);
+            if (externalObjectDirectory.getInputUploadProcessedTs() != null
+                && externalObjectDirectory.getInputUploadProcessedTs().isBefore(minIngestionTime)) {
+                markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
             } else {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus(), userAccount);
             }
@@ -408,7 +383,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    protected void markEodAsMissingResponseFailure(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
+    protected void markEodAsResponseProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armMissingResponseStatus(), userAccount);
     }
 
@@ -558,7 +533,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
                         Long externalObjectDirectoryId = Long.valueOf(uploadNewFileRecord.getRelationId());
                         armBatchResponses.addResponseBatchData(externalObjectDirectoryId, armResponseCreateRecord, createRecordFilenameProcessor);
-                        setProcessTimeForCreateRecordFileRecord(armResponseCreateRecord, externalObjectDirectoryId, createRecordFilenameAndPath);
                     } else {
                         log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} create record {}",
                                  armResponseCreateRecord.getInput(), createRecordFilenameAndPath);
@@ -591,25 +565,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
         if (nonNull(externalObjectDirectory)) {
             externalObjectDirectory.setDataIngestionTs(uploadNewFileRecordProcessTime);
-            externalObjectDirectoryRepository.save(externalObjectDirectory);
-        }
-    }
-
-    private void setProcessTimeForCreateRecordFileRecord(ArmResponseCreateRecord armResponseCreateRecord, Long externalObjectDirectoryId,
-                                                         String createRecordFilenameAndPath) {
-        try {
-            OffsetDateTime createRecordProcessTime = getCreateRecordProcessTime(armResponseCreateRecord);
-            setEodCreateRecordProcessTimestamp(externalObjectDirectoryId, createRecordProcessTime);
-        } catch (Exception e) {
-            log.error("Unable to set EOD create record process timestamp for EOD {} - upload file {}",
-                      externalObjectDirectoryId, createRecordFilenameAndPath, e);
-        }
-    }
-
-    private void setEodCreateRecordProcessTimestamp(Long externalObjectDirectoryId, OffsetDateTime createRecordProcessTime) {
-        ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
-        if (nonNull(externalObjectDirectory)) {
-            externalObjectDirectory.setCreateRecordProcessedTs(createRecordProcessTime);
             externalObjectDirectoryRepository.save(externalObjectDirectory);
         }
     }
