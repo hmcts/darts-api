@@ -69,7 +69,7 @@ There are few attributes which doesn't use Azure Keyvault secrets. Those environ
 |-------------------------------|------------------------------------------------------------------|
 | ACTIVE_DIRECTORY_B2C_BASE_URI | https://hmctsstgextid.b2clogin.com                               |
 | ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
-| ARM_URL                       |                                                                  |  
+| ARM_URL                       |                                                                  |
 | ARM_AUTH_URL                  |                                                                  |
 | ARM_API_URL                   |                                                                  |
 | SHEDLOCK_LOG_LEVEL            | INFO                                                             |
@@ -81,7 +81,7 @@ You may need to install Azure CLI, jq and postgres you can do this by running
 
 ```
 brew update
-brew install azure-cli 
+brew install azure-cli
 brew install jq
 brew install postgresql@16
 az login
@@ -242,7 +242,7 @@ Run the distribution (created in `build/install/darts-api` directory) by executi
 
 ```bash
   docker-compose -f docker-compose-local.yml up darts-api darts-db darts-redis
-  
+
 ```
 
 This will start the API container exposing the application's port
@@ -430,3 +430,4 @@ Documentation: https://stoplight.io/open-source/spectral
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
