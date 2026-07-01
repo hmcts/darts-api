@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+@SuppressWarnings({"PMD.TooManyMethods"})
 public interface ArmDataManagementApi extends BlobContainerDownloadable {
 
     String saveBlobDataToArm(String filename, BinaryData binaryData);
@@ -26,6 +27,10 @@ public interface ArmDataManagementApi extends BlobContainerDownloadable {
     BinaryData getBlobData(String blobPathAndName);
 
     boolean deleteBlobData(String blobPathAndName);
+
+    boolean deleteMultipleBlobsUsingBatching(List<String> blobPathAndNames);
+
+    boolean deleteMultipleBlobsIndividually(List<String> blobPathAndNames);
 
     UpdateMetadataResponse updateMetadata(String externalRecordId,
                                           OffsetDateTime eventTimestamp,
