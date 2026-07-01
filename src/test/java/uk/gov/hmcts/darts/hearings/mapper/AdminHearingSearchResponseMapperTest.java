@@ -19,7 +19,7 @@ class AdminHearingSearchResponseMapperTest {
     void mapSearchResponse() {
         List<HearingEntity> hearingEntityList = new ArrayList<>();
         hearingEntityList.add(setupHearing(1));
-        hearingEntityList.add(setupHearing(2));
+        hearingEntityList.add(setupHearing(2, true));
         hearingEntityList.add(setupHearing(3));
         List<HearingsSearchResponse> actualResponse = AdminHearingSearchResponseMapper.mapResponse(hearingEntityList);
 
@@ -32,15 +32,20 @@ class AdminHearingSearchResponseMapperTest {
             assertEquals(hearingEntityList.get(i).getCourtroom().getName(), actualResponse.get(i).getCourtroom().getName());
             assertEquals(hearingEntityList.get(i).getCourtCase().getId(), actualResponse.get(i).getCase().getId());
             assertEquals(hearingEntityList.get(i).getCourtCase().getCaseNumber(), actualResponse.get(i).getCase().getCaseNumber());
+            assertEquals(hearingEntityList.get(i).getCourtCase().isDataAnonymised(), actualResponse.get(i).getIsDataAnonymised());
         }
     }
 
 
-    public static  HearingEntity setupHearing(Integer id) {
-        return setupHearing(id, id, id, id);
+    public static HearingEntity setupHearing(Integer id) {
+        return setupHearing(id, false);
     }
 
-    public static HearingEntity setupHearing(Integer id, Integer courthouseId, Integer courtroomId, Integer courtcaseId) {
+    public static HearingEntity setupHearing(Integer id, boolean isDataAnonymised) {
+        return setupHearing(id, id, id, id, isDataAnonymised);
+    }
+
+    public static HearingEntity setupHearing(Integer id, Integer courthouseId, Integer courtroomId, Integer courtcaseId, boolean isDataAnonymised) {
 
         CourthouseEntity courthouseEntity = new CourthouseEntity();
         courthouseEntity.setId(courthouseId);
@@ -53,6 +58,7 @@ class AdminHearingSearchResponseMapperTest {
         CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
         courtCaseEntity.setId(courtcaseId);
         courtCaseEntity.setCaseNumber("Case number" + courtcaseId);
+        courtCaseEntity.setDataAnonymised(isDataAnonymised);
 
         HearingEntity hearingEntity = new HearingEntity();
         hearingEntity.setId(id);
