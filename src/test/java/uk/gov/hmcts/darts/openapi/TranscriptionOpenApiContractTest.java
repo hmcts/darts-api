@@ -4,7 +4,11 @@ import com.atlassian.oai.validator.OpenApiInteractionValidator;
 import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.SimpleRequest;
 import com.atlassian.oai.validator.report.ValidationReport;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import uk.gov.hmcts.darts.util.ValidationConstants;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -58,5 +62,37 @@ class TranscriptionOpenApiContractTest {
         ValidationReport report = VALIDATOR.validateRequest(request);
 
         assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid transcription_id");
+    }
+
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    class TranscriptionsTranscriptionIdGet {
+
+        @Test
+        void openApi_ShouldReturnNoError_WhenValidTranscriptionIdUsed() {
+            Request request = SimpleRequest.Builder
+                .get("/transcriptions/9223372036854775807")
+                .build();
+
+            ValidationReport report = VALIDATOR.validateRequest(request);
+
+            assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid transcription_id");
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "0, '(minimum: 1, found: 0)'",
+            "9223372036854775808, '(maximum: 9223372036854775807, found: 9223372036854775808)'",
+            "not-a-number, 'Instance type (string) does not match any allowed primitive type'"
+        })
+        void openApi_ShouldReturnAnError_WhenAnInvalidTranscriptionIdUsed(String transcriptionId, String expectedError) {
+            Request request = SimpleRequest.Builder
+                .get("/transcriptions/" + transcriptionId)
+                .build();
+
+            ValidationReport report = VALIDATOR.validateRequest(request);
+
+            assertTrue(report.getMessages().getFirst().toString().contains(expectedError));
+        }
     }
 }
