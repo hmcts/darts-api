@@ -19,6 +19,8 @@ public interface ArmDataManagementApi extends BlobContainerDownloadable {
 
     List<String> listResponseBlobs(String prefix);
 
+    List<String> listSubmissionBlobs(String prefix);
+
     List<String> listResponseBlobsUsingBatch(String prefix, int batchSize);
 
     ContinuationTokenBlobs listResponseBlobsUsingMarker(String prefix, int batchSize, String continuationToken);

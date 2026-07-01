@@ -94,7 +94,6 @@ public class EodHelperMocks implements Closeable {
     @Mock
     private ObjectRecordStatusEntity datastoreDeletionStatus;
 
-
     private MockedStatic<EodHelper> mockedEodHelper;
     private AutoCloseable closeable;
 
@@ -208,7 +207,9 @@ public class EodHelperMocks implements Closeable {
     @SneakyThrows
     @Override
     public void close() {
-        mockedEodHelper.close();
+        if (mockedEodHelper != null) {
+            mockedEodHelper.close();
+        }
         closeable.close();
     }
 
