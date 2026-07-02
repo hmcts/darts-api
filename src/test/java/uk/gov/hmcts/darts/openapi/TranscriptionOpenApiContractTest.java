@@ -81,6 +81,17 @@ class TranscriptionOpenApiContractTest {
         }
 
         @Test
+        void openApi_ShouldReturnError_WhenTranscriptionIdIsNotNumeric() {
+            Request request = SimpleRequest.Builder
+                .get("/transcriptions/not-a-number/document")
+                .build();
+
+            ValidationReport report = VALIDATOR.validateRequest(request);
+
+            assertHasMessageContaining(report, "Instance type (string) does not match any allowed primitive type");
+        }
+
+        @Test
         void openApi_ShouldReturnError_WhenUnsupportedContentTypeUsed() {
             Request request = SimpleRequest.Builder
                 .post("/transcriptions/1/document")
