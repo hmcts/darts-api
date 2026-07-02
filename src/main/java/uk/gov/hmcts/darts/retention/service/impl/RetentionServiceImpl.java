@@ -40,8 +40,8 @@ public class RetentionServiceImpl implements RetentionService {
     private final RetentionMapper retentionMapper;
     private final Clock clock;
     private final FindCurrentEntitiesHelper findCurrentEntitiesHelper;
-    @Value("#{'${darts.retention.close-events}'}")
-    private final List<Integer> closeEvents;
+    @Value("#{'${darts.retention.close-event-handler}'}")
+    private final String closeEventsHandler;
 
     @Override
     public List<GetCaseRetentionsResponse> getCaseRetentions(Integer caseId) {
@@ -77,13 +77,13 @@ public class RetentionServiceImpl implements RetentionService {
                                          CaseRetentionEntity caseRetention) {
         Integer confidenceCategory = null;
 
-        List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentEvents(courtCase);
+        List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase);
         if (CollectionUtils.isNotEmpty(eventList)) {
             eventList.sort(Comparator.comparing(EventEntity::getTimestamp).reversed());
             EventEntity latestEvent = eventList.get(0);
             //find latest closed event
             Optional<EventEntity> latestClosedEvent =
-                eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getId())).findFirst();
+                eventList.stream().filter(eventEntity -> closeEventsHandler.equalsIgnoreCase(eventEntity.getEventType().getHandler())).findFirst();
 
             if (latestClosedEvent.isPresent()) {
                 if (latestEvent.getId().equals(latestClosedEvent.get().getId())) {

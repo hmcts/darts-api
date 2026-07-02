@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
-@SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
+@SuppressWarnings("PMD.TooManyMethods")
 public interface EventRepository extends JpaRepository<EventEntity, Long> {
 
     @Query("""
@@ -38,6 +38,16 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
            AND ee.isCurrent = true
         """)
     List<EventEntity> findCurrentEventsByHearingId(Integer hearingId);
+
+    @Query("""
+           SELECT ee
+           FROM EventEntity ee
+           JOIN ee.hearingEntities he
+           WHERE he.id = :hearingId
+           AND ee.isCurrent = true
+           AND ee.isLogEntry = false
+        """)
+    List<EventEntity> findCurrentEventsByHearingIdAndIsLogEntryFalse(Integer hearingId);
 
     List<EventEntity> findAllByEventId(Integer eventId);
 

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.helper.FindCurrentEntitiesHelper;
 import uk.gov.hmcts.darts.cases.service.CaseService;
@@ -80,15 +79,15 @@ class CloseOldCasesProcessorImplTest {
     void setUp() {
         userAccountEntity = CommonTestDataUtil.createUserAccountWithId();
         when(authorisationApi.getCurrentUser()).thenReturn(userAccountEntity);
-
+        String closeEventHandler = "StopAndCloseHandler";
         CloseOldCasesProcessorImpl.CloseCaseProcessor closeCaseProcessor = new CloseOldCasesProcessorImpl.CloseCaseProcessor(
             caseService,
             caseRetentionRepository,
             retentionApi,
             retentionDateHelper,
-            findCurrentEntitiesHelper
+            findCurrentEntitiesHelper,
+            closeEventHandler
         );
-        ReflectionTestUtils.setField(closeCaseProcessor, "closeEvents", List.of(79, 218));
 
         Period closeOpenCasesPeriod = Period.ofYears(6);
         closeOldCasesProcessor = new CloseOldCasesProcessorImpl(closeCaseProcessor, caseRepository, authorisationApi, closeOpenCasesPeriod);
@@ -114,7 +113,7 @@ class CloseOldCasesProcessorImplTest {
 
         // Create test events excluding event handler types 79 and 218
         List<EventEntity> testEvents = createTestEventsExcludingCloseEventTypes(hearingEntity);
-        when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(testEvents);
+        when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(testEvents);
 
         // Create test media
         List<MediaEntity> testMedia = createTestMedia(hearingEntity);
@@ -149,10 +148,10 @@ class CloseOldCasesProcessorImplTest {
         courtCase.setId(1);
         stubCaseToClose(courtCase);
 
-        EventEntity olderCloseEvent = createEventWithHandlerType(1L, 2, "Case closed", hearingEntity, 218);
-        EventEntity latestCloseEvent = createEventWithHandlerType(2L, 3, "Archive Case", hearingEntity, 79);
-        EventEntity latestNonCloseEvent = createEventWithHandlerType(3L, 4, "Other event", hearingEntity, 50);
-        when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(
+        EventEntity olderCloseEvent = createEventWithHandlerType(1L, 2, "Case closed", hearingEntity, 218, "StopAndCloseHandler");
+        EventEntity latestCloseEvent = createEventWithHandlerType(2L, 3, "Archive Case", hearingEntity, 79, "StopAndCloseHandler");
+        EventEntity latestNonCloseEvent = createEventWithHandlerType(3L, 4, "Other event", hearingEntity, 50, "StandardEventHandler");
+        when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(
             new ArrayList<>(List.of(olderCloseEvent, latestNonCloseEvent, latestCloseEvent)));
 
         LocalDate retentionDate = stubRetentionCreation(courtCase);
@@ -176,7 +175,7 @@ class CloseOldCasesProcessorImplTest {
         courtCase.setCreatedDateTime(createdDate);
         stubCaseToClose(courtCase);
 
-        when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(List.of());
+        when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(List.of());
         LocalDate retentionDate = stubRetentionCreation(courtCase);
 
         // when
@@ -201,7 +200,7 @@ class CloseOldCasesProcessorImplTest {
         courtCase.setHearings(hearings);
         stubCaseToClose(courtCase);
 
-        when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(List.of());
+        when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(List.of());
         when(findCurrentEntitiesHelper.getCurrentMedia(courtCase)).thenReturn(List.of());
         LocalDate retentionDate = stubRetentionCreation(courtCase);
         OffsetDateTime expectedCaseClosedTimestamp = OffsetDateTime.of(LocalDate.of(2018, 6, 30).atStartOfDay(), ZoneOffset.UTC);
@@ -227,7 +226,7 @@ class CloseOldCasesProcessorImplTest {
         stubCaseToClose(courtCase);
 
         List<MediaEntity> testMedia = createTestMedia(hearingEntity);
-        when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(List.of());
+        when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(List.of());
         when(findCurrentEntitiesHelper.getCurrentMedia(courtCase)).thenReturn(testMedia);
         LocalDate retentionDate = stubRetentionCreation(courtCase);
         OffsetDateTime expectedCaseClosedTimestamp = testMedia.get(1).getCreatedDateTime();
@@ -278,21 +277,21 @@ class CloseOldCasesProcessorImplTest {
 
     /**
      * Creates test events for the given hearing, excluding event handler types 79 and 218
-     * (which are close events as defined in application.yaml: close-events: ${RETENTION_CLOSE_EVENTS:79,218}).
+     * (which are close events as defined in application.yaml: close-events: ${CLOSE_EVENT_HANDLER:StopAndCloseHandler}).
      */
     private List<EventEntity> createTestEventsExcludingCloseEventTypes(HearingEntity hearingEntity) {
         List<EventEntity> events = new ArrayList<>();
 
         // Create event with type 1 (not a close event)
-        EventEntity event1 = createEventWithHandlerType(1L, 1, "Event 1 text", hearingEntity, 1);
+        EventEntity event1 = createEventWithHandlerType(1L, 1, "Event 1 text", hearingEntity, 1, "StandardEventHandler");
         events.add(event1);
 
         // Create event with type 50 (not a close event)
-        EventEntity event2 = createEventWithHandlerType(2L, 2, "Event 2 text", hearingEntity, 50);
+        EventEntity event2 = createEventWithHandlerType(2L, 2, "Event 2 text", hearingEntity, 50, "StandardEventHandler");
         events.add(event2);
 
         // Create event with type 100 (not a close event)
-        EventEntity event3 = createEventWithHandlerType(3L, 3, "Event 3 text", hearingEntity, 100);
+        EventEntity event3 = createEventWithHandlerType(3L, 3, "Event 3 text", hearingEntity, 100, "StandardEventHandler");
         events.add(event3);
 
         return events;
@@ -336,7 +335,7 @@ class CloseOldCasesProcessorImplTest {
      * Helper method to create an EventEntity with a specific event handler type.
      */
     private EventEntity createEventWithHandlerType(Long eventId, Integer internalEventId, String eventText,
-                                                   HearingEntity hearingEntity, Integer eventHandlerTypeId) {
+                                                   HearingEntity hearingEntity, Integer eventHandlerTypeId, String eventHandlerClassName) {
         EventEntity event = new EventEntity();
         event.setId(eventId);
         event.setEventId(internalEventId);
@@ -352,6 +351,7 @@ class CloseOldCasesProcessorImplTest {
         eventHandler.setId(eventHandlerTypeId);
         eventHandler.setEventName("Event Type " + eventHandlerTypeId);
         eventHandler.setType(String.valueOf(eventHandlerTypeId));
+        eventHandler.setHandler(eventHandlerClassName);
         eventHandler.setActive(true);
 
         event.setEventType(eventHandler);
