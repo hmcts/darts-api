@@ -274,6 +274,40 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     }
 
     @Test
+    void processApplyRetentionToCaseAssociatedObjects_ForMediaUsesLatestAppliedRetentionEvenWhenOlderRetentionIsLonger() {
+        // given
+        var mediaA1 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().getFirst());
+        var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
+
+        var longerRetentionOlderApplied = createCaseRetention(
+            case1PerfectlyClosed, caseRetentionA1.getRetentionPolicyType(), DATETIME_2028, COMPLETE, testUser);
+        longerRetentionOlderApplied.setRetainUntilAppliedOn(DATETIME_2025);
+
+        var shorterRetentionLatestApplied = createCaseRetention(
+            case1PerfectlyClosed, caseRetentionA1.getRetentionPolicyType(), DATETIME_2026, COMPLETE, testUser);
+        shorterRetentionLatestApplied.setRetainUntilAppliedOn(DATETIME_2027);
+
+        case1PerfectlyClosed.setCaseRetentionEntities(List.of(longerRetentionOlderApplied, shorterRetentionLatestApplied));
+
+        when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
+        doReturn(List.of(mediaA1)).when(case1PerfectlyClosed).getAllAssociatedMedias();
+        when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed))
+            .thenReturn(Optional.of(shorterRetentionLatestApplied));
+
+        List<ExternalLocationTypeEntity> externalLocationTypes = List.of(eodHelperMocks.getArmLocation(), eodHelperMocks.getDetsLocation());
+        when(eodRepository.findByMediaIdAndExternalLocationTypes(mediaA1.getId(), externalLocationTypes)).thenReturn(List.of(eodA1));
+
+        // when
+        caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
+
+        // then
+        assertEquals(DATETIME_2026, mediaA1.getRetainUntilTs());
+        assertEquals(CASE_PERFECTLY_CLOSED, mediaA1.getRetConfScore());
+        assertNull(mediaA1.getRetConfReason());
+        assertTrue(eodA1.isUpdateRetention());
+    }
+
+    @Test
     void processApplyRetentionToCaseAssociatedObjects_ForDetsMediaWhereMultipleCasesIsPerfectlyClosed() {
         // given
         var mediaA1 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().getFirst());
