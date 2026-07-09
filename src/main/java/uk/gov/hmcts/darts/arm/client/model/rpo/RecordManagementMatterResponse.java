@@ -29,7 +29,7 @@ public class RecordManagementMatterResponse extends BaseRpoResponse {
         private String name;
         private boolean isQuickSearch;
         @JsonProperty("isUsedForRM")
-        private boolean isUsedForRm;
+        private boolean usedForRm;
         private String description;
         private OffsetDateTime createdDate;
         private Integer type;
