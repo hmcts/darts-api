@@ -46,6 +46,58 @@ paths:
         '404':
           $ref: '#/components/responses/AutomatedTaskNotFound'
 
+  /admin/automated-tasks/{task_id}/edit-cron-expression:
+    patch:
+      tags:
+        - Tasks
+      operationId: patchTaskCronExpression
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        $ref: '#/components/requestBodies/CronExpressionRequest'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+
+    post:
+      tags:
+        - Tasks
+      operationId: postTaskCronExpression
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        $ref: '#/components/requestBodies/CronExpressionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    execution_number:
+                      type: string
+                      minimum: 1
+                      maximum: 256
+                      pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
+                    scheduled_at:
+                      type: string
+                      format: date-time
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found'
+        '500':
+          description: Internal Server Error
+
 
   /admin/automated-tasks/{task_id}/run:
     post:
@@ -67,6 +119,13 @@ paths:
 ########################################################################################################################
 
 components:
+  parameters:
+    TaskId:
+      in: path
+      name: task_id
+      required: true
+      schema:
+        type: integer
 
   requestBodies:
     AutomatedTaskPatchRequest:
@@ -75,6 +134,19 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AutomatedTaskPatch'
+    CronExpressionRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              cron_expression:
+                type: string
+                minimum: 1
+                maximum: 256
+                pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
+
   responses:
     AutomatedTasksResponse:
       description: 'Success'
@@ -119,7 +191,6 @@ components:
           $ref: '#/components/schemas/IsActive'
         batch_size:
           type: integer
-
         rpo_csv_start_hour:
           type: integer
         rpo_csv_end_hour:
@@ -130,8 +201,6 @@ components:
         arm_replay_end_ts:
           type: string
           format: date-time
-
-
     AutomatedTaskSummary:
       type: object
       properties:
@@ -174,7 +243,6 @@ components:
           type: string
       allOf:
         - $ref: '#/components/schemas/AutomatedTaskSummary'
-
     AutomatedTaskId:
       type: integer
     AutomatedTaskName:
@@ -205,7 +273,6 @@ components:
       format: date-time
     LastModifiedBy:
       type: integer
-
     AutomatedTaskErrorCode:
       type: string
       enum:
@@ -214,7 +281,6 @@ components:
         - "AUTOMATED_TASK_102"
         - "AUTOMATED_TASK_103"
       x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED, INCORRECT_AUTOMATED_TASK_TYPE ]
-
     AutomatedTaskTitleErrors:
       type: string
       enum:
@@ -223,10 +289,3 @@ components:
         - "The automated task has not been initialized correctly on application start up and can not be run manually."
         - "The automated task type is incorrect"
       x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED, INCORRECT_AUTOMATED_TASK_TYPE ]
-  parameters:
-    TaskId:
-      in: path
-      name: task_id
-      required: true
-      schema:
-        type: integer
