@@ -111,7 +111,6 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
-
   /admin/automated-tasks/{task_id}/run:
     post:
       tags:
