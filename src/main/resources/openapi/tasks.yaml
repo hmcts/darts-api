@@ -54,16 +54,32 @@ paths:
       parameters:
         - $ref: '#/components/parameters/TaskId'
       requestBody:
-        $ref: '#/components/requestBodies/CronExpressionRequest'
+        $ref: '#/components/requestBodies/EditCronExpressionRequest'
       responses:
         '200':
           description: Success
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '400':
           description: Bad Request
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '404':
           description: Not Found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
     post:
       tags:
@@ -72,31 +88,28 @@ paths:
       parameters:
         - $ref: '#/components/parameters/TaskId'
       requestBody:
-        $ref: '#/components/requestBodies/CronExpressionRequest'
+        $ref: '#/components/requestBodies/EditCronExpressionRequest'
       responses:
         '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    execution_number:
-                      type: string
-                      minimum: 1
-                      maximum: 256
-                      pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
-                    scheduled_at:
-                      type: string
-                      format: date-time
+          $ref: '#/components/responses/EditCronExpressionResponse'
         '400':
           description: Bad Request
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '404':
-          description: Not Found'
+          description: Not Found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
 
   /admin/automated-tasks/{task_id}/run:
@@ -134,7 +147,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AutomatedTaskPatch'
-    CronExpressionRequest:
+    EditCronExpressionRequest:
       required: true
       content:
         application/json:
@@ -182,6 +195,23 @@ components:
             type: "AUTOMATED_TASK_101"
             title: "Automated task is already running"
             status: 409
+    EditCronExpressionResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                execution_number:
+                  type: string
+                  minimum: 1
+                  maximum: 256
+                  pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
+                scheduled_at:
+                  type: string
+                  format: date-time
 
   schemas:
     AutomatedTaskPatch:
