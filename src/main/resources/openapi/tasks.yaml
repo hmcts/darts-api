@@ -57,11 +57,7 @@ paths:
         $ref: '#/components/requestBodies/EditCronExpressionRequest'
       responses:
         '200':
-          description: Success
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
+          $ref: '#/components/responses/EditCronExpressionResponse'
         '400':
           description: Bad Request
           content:
@@ -151,13 +147,7 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              cron_expression:
-                type: string
-                minimum: 1
-                maximum: 256
-                pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
+            $ref: '#/components/schemas/EditCronExpressionRequest'
 
   responses:
     AutomatedTasksResponse:
@@ -201,18 +191,25 @@ components:
           schema:
             type: array
             items:
-              type: object
-              properties:
-                execution_number:
-                  type: string
-                  minimum: 1
-                  maximum: 256
-                  pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
-                scheduled_at:
-                  type: string
-                  format: date-time
+              $ref: '#/components/schemas/EditCronExpressionSchedule'
 
   schemas:
+    EditCronExpressionRequest:
+      type: object
+      properties:
+        cron_expression:
+          $ref: '#/components/schemas/CronExpression'
+    EditCronExpressionSchedule:
+      type: object
+      properties:
+        execution_number:
+          type: string
+          minLength: 1
+          maxLength: 256
+          pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
+        scheduled_at:
+          type: string
+          format: date-time
     AutomatedTaskPatch:
       type: object
       properties:
@@ -286,6 +283,7 @@ components:
       type: string
       minLength: 1
       maxLength: 256
+      pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
     IsActive:
       type: boolean
     BatchSize:
