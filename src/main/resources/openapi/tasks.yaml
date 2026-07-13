@@ -50,14 +50,14 @@ paths:
     patch:
       tags:
         - Tasks
-      operationId: patchTaskCronExpression
+      operationId: patchAutomatedTaskCronExpression
       parameters:
         - $ref: '#/components/parameters/TaskId'
       requestBody:
         $ref: '#/components/requestBodies/EditCronExpressionRequest'
       responses:
         '200':
-          $ref: '#/components/responses/EditCronExpressionResponse'
+          description: OK
         '400':
           description: Bad Request
           content:
@@ -80,7 +80,7 @@ paths:
     post:
       tags:
         - Tasks
-      operationId: postTaskCronExpression
+      operationId: postAutomatedTaskCronExpression
       parameters:
         - $ref: '#/components/parameters/TaskId'
       requestBody:
