@@ -56,4 +56,3 @@ public class AutomatedTasksController implements TasksApi {
         return new ResponseEntity<>(automatedTask, HttpStatus.OK);
     }
 }
-
