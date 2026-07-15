@@ -612,7 +612,11 @@ darts:
       dets-to-arm-batch-processor:
         max-arm-manifest-items: 100
         manifest-file-prefix: DETS
-
+      reset-retention-after-document-change:
+        system-user-email: systemResetRetentionAfterDocumentChangeAutomatedTask@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT60M
   annotations:
     allowed-extensions:
       - "docx"
