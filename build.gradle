@@ -665,6 +665,12 @@ tasks.register('updateOpenSpecificationsWithVersion') {
   }
 }
 
+tasks.register('printVersionInit') {
+  doLast {
+    println "Version: ${version}"
+  }
+}
+
 task runAllStyleChecks {
   dependsOn 'checkstyleMain'
   dependsOn 'checkstyleTest'
