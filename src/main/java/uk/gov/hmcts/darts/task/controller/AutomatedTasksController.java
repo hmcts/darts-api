@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
 import uk.gov.hmcts.darts.tasks.http.api.TasksApi;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPatch;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPost;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionSchedule;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
@@ -53,6 +56,24 @@ public class AutomatedTasksController implements TasksApi {
     @Override
     public ResponseEntity<DetailedAutomatedTask> patchAutomatedTask(Integer taskId, AutomatedTaskPatch automatedTaskPatch) {
         var automatedTask = adminAutomatedTaskService.updateAutomatedTask(taskId, automatedTaskPatch);
+        return new ResponseEntity<>(automatedTask, HttpStatus.OK);
+    }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, securityRoles = {SUPER_ADMIN}, globalAccessSecurityRoles = {SUPER_ADMIN})
+    @Override
+    public ResponseEntity<Void> patchAutomatedTaskCronExpression(Integer taskId, AutomatedTaskCronExpressionPatch automatedTaskCronExpressionPatch) {
+        adminAutomatedTaskService.updateAutomatedTaskCronExpressionSchedule(taskId, automatedTaskCronExpressionPatch);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, securityRoles = {SUPER_ADMIN}, globalAccessSecurityRoles = {SUPER_ADMIN})
+    @Override
+    public ResponseEntity<List<AutomatedTaskCronExpressionSchedule>> postAutomatedTaskCronExpression(
+        Integer taskId,
+        AutomatedTaskCronExpressionPost automatedTaskCronExpressionPost) {
+        var automatedTask = adminAutomatedTaskService.getAutomatedTaskCronExpressionSchedule(taskId, automatedTaskCronExpressionPost);
         return new ResponseEntity<>(automatedTask, HttpStatus.OK);
     }
 }
