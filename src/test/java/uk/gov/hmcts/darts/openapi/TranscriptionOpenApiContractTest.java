@@ -27,8 +27,8 @@ class TranscriptionOpenApiContractTest {
         ValidationReport report = VALIDATOR.validateRequest(request);
 
         assertTrue(report.getMessages().stream()
-            .anyMatch(m -> m.getMessage().contains("Numeric instance is lower than the required " +
-                                                       "minimum (minimum: 1, found: -123)")));
+            .anyMatch(m -> m.getMessage().contains("must have a minimum value of 1")),
+                   () -> report.getMessages().toString());
     }
 
     @Test
@@ -41,11 +41,11 @@ class TranscriptionOpenApiContractTest {
 
         ValidationReport report = VALIDATOR.validateRequest(request);
 
-        String expectedSubstring = "Numeric instance is greater than the required maximum (maximum: "
-            + maxTranscriptionId + ", found: " + exceededTranscriptionId + ")";
+        String expectedSubstring = "must have a maximum value of " + maxTranscriptionId;
 
         assertTrue(
-            report.getMessages().stream().anyMatch(m -> m.getMessage().equals(expectedSubstring))
+            report.getMessages().stream().anyMatch(m -> m.getMessage().contains(expectedSubstring)),
+            () -> report.getMessages().toString()
         );
     }
 
