@@ -54,7 +54,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/TaskId'
       requestBody:
-        $ref: '#/components/requestBodies/EditCronExpressionRequest'
+        $ref: '#/components/requestBodies/AutomatedTaskCronExpressionPatchRequest'
       responses:
         '200':
           description: OK
@@ -84,10 +84,10 @@ paths:
       parameters:
         - $ref: '#/components/parameters/TaskId'
       requestBody:
-        $ref: '#/components/requestBodies/EditCronExpressionRequest'
+        $ref: '#/components/requestBodies/AutomatedTaskCronExpressionPostRequest'
       responses:
         '200':
-          $ref: '#/components/responses/EditCronExpressionResponse'
+          $ref: '#/components/responses/AutomatedTaskCronExpressionResponse'
         '400':
           description: Bad Request
           content:
@@ -142,12 +142,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AutomatedTaskPatch'
-    EditCronExpressionRequest:
+    AutomatedTaskCronExpressionPatchRequest:
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/EditCronExpressionRequest'
+            $ref: '#/components/schemas/AutomatedTaskCronExpressionPatch'
+    AutomatedTaskCronExpressionPostRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AutomatedTaskCronExpressionPost'
 
   responses:
     AutomatedTasksResponse:
@@ -184,22 +190,27 @@ components:
             type: "AUTOMATED_TASK_101"
             title: "Automated task is already running"
             status: 409
-    EditCronExpressionResponse:
+    AutomatedTaskCronExpressionResponse:
       description: Success
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/EditCronExpressionSchedule'
+              $ref: '#/components/schemas/AutomatedTaskCronExpressionSchedule'
 
   schemas:
-    EditCronExpressionRequest:
+    AutomatedTaskCronExpressionPatch:
       type: object
       properties:
         cron_expression:
           $ref: '#/components/schemas/CronExpression'
-    EditCronExpressionSchedule:
+    AutomatedTaskCronExpressionPost:
+      type: object
+      properties:
+        cron_expression:
+          $ref: '#/components/schemas/CronExpression'
+    AutomatedTaskCronExpressionSchedule:
       type: object
       properties:
         execution_number:
