@@ -19,8 +19,12 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
+import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskCronExpressionService;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
 import uk.gov.hmcts.darts.task.service.LockService;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPatch;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPost;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionSchedule;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
@@ -33,6 +37,7 @@ import java.util.function.Consumer;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_ALREADY_RUNNING;
+import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_BAD_REQUEST;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.INCORRECT_AUTOMATED_TASK_TYPE;
 
@@ -42,6 +47,7 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.INCORRECT_
 @Getter
 public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService {
 
+    private final AdminAutomatedTaskCronExpressionService adminAutomatedTaskCronExpressionService;
     private final AutomatedTaskRepository automatedTaskRepository;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final AutomatedTasksMapper mapper;
@@ -67,12 +73,10 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         return automatedTasks;
     }
 
-
     @Override
     public DetailedAutomatedTask getAutomatedTaskById(Integer taskId) {
         return mapper.mapEntityToDetailedAutomatedTask(getAutomatedTaskEntityById(taskId));
     }
-
 
     @Override
     public void runAutomatedTask(Integer taskId) {
@@ -96,6 +100,41 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         automatedTaskRunner.run(automatedTask.get(), true);
 
         auditApi.record(RUN_JOB_MANUALLY, automatedTaskEntity.getTaskName());
+    }
+
+    @Override
+    public List<AutomatedTaskCronExpressionSchedule> getAutomatedTaskCronExpressionSchedule(
+        Integer taskId, AutomatedTaskCronExpressionPost automatedTaskCronExpressionPost) {
+        getAutomatedTaskEntityById(taskId);
+
+        // Add new error code enum with generated error types if necessary
+        if (automatedTaskCronExpressionPost.getCronExpression() == null) {
+            throw new DartsApiException(AUTOMATED_TASK_CRON_EXPRESSION_BAD_REQUEST);
+        }
+
+        return adminAutomatedTaskCronExpressionService.getCronExpressionSchedulePreview(
+            automatedTaskCronExpressionPost.getCronExpression());
+    }
+
+    @Override
+    @Transactional
+    public void updateAutomatedTaskCronExpressionSchedule(
+        Integer taskId, AutomatedTaskCronExpressionPatch automatedTaskCronExpressionPatch) {
+        var automatedTask = getAutomatedTaskEntityById(taskId);
+
+        if (automatedTaskCronExpressionPatch == null || automatedTaskCronExpressionPatch.getCronExpression() == null) {
+            throw new DartsApiException(AUTOMATED_TASK_CRON_EXPRESSION_BAD_REQUEST);
+        }
+
+        String cronExpression = automatedTaskCronExpressionPatch.getCronExpression();
+
+        adminAutomatedTaskCronExpressionService.validateCronExpression(cronExpression);
+
+        automatedTask.setCronExpression(cronExpression);
+        registerConfiguredAutomatedTaskAudit(automatedTask, "Cron Expression updated");
+        log.info("Cron Expression for {} updated to {}", automatedTask.getTaskName(), cronExpression);
+
+        automatedTaskRepository.save(automatedTask);
     }
 
     @Override
