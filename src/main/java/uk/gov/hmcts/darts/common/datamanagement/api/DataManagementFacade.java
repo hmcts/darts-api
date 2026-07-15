@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.datamanagement.api;
 
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -17,11 +18,14 @@ import java.util.List;
  */
 public interface DataManagementFacade {
 
-    DownloadResponseMetaData retrieveFileFromStorage(MediaEntity mediaEntity) throws FileNotDownloadedException;
+    DownloadResponseMetaData retrieveFileFromStorage(MediaEntity mediaEntity) throws FileNotDownloadedException, ArmDownForMaintenanceException;
 
-    DownloadResponseMetaData retrieveFileFromStorage(TranscriptionDocumentEntity transcriptionDocumentEntity) throws FileNotDownloadedException;
+    DownloadResponseMetaData retrieveFileFromStorage(
+        TranscriptionDocumentEntity transcriptionDocumentEntity) throws FileNotDownloadedException, ArmDownForMaintenanceException;
 
-    DownloadResponseMetaData retrieveFileFromStorage(AnnotationDocumentEntity annotationDocumentEntity) throws FileNotDownloadedException;
+    DownloadResponseMetaData retrieveFileFromStorage(
+        AnnotationDocumentEntity annotationDocumentEntity) throws FileNotDownloadedException, ArmDownForMaintenanceException;
 
-    DownloadResponseMetaData retrieveFileFromStorage(List<ExternalObjectDirectoryEntity> eodEntities) throws FileNotDownloadedException;
+    DownloadResponseMetaData retrieveFileFromStorage(
+        List<ExternalObjectDirectoryEntity> eodEntities) throws FileNotDownloadedException, ArmDownForMaintenanceException;
 }
