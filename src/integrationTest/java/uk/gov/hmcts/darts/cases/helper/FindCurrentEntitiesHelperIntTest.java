@@ -1,10 +1,7 @@
 package uk.gov.hmcts.darts.cases.helper;
 
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -18,23 +15,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@Transactional
-class FindCurrentEntitiesHelperTest extends IntegrationBase {
+class FindCurrentEntitiesHelperIntTest extends IntegrationBase {
 
     @Autowired
     private DartsPersistence dartsPersistence;
     @Autowired
     private FindCurrentEntitiesHelper findCurrentEntitiesHelper;
-    @Autowired
-    private CaseService caseService;
 
     @Test
-    void getCurrentEvents_shouldReturnCurrentEvents_whenCurrentandNonCurrentEventsExist() {
+    void getCurrentEvents_shouldReturnCurrentEvents_whenCurrentAndNonCurrentEventsExist() {
 
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsPersistence.save(hearing);
@@ -66,17 +57,16 @@ class FindCurrentEntitiesHelperTest extends IntegrationBase {
             .hearings(List.of(hearing))
             .build()
             .getEntity();
-        dartsPersistence.getCaseRepository().save(courtCaseEntity);
 
         List<EventEntity> currentEvents = findCurrentEntitiesHelper.getCurrentEvents(courtCaseEntity);
-        assertEquals(2, currentEvents.size());
-        assertTrue(currentEvents.contains(eventEntity1));
-        assertTrue(currentEvents.contains(eventEntity2));
-        assertFalse(currentEvents.contains(eventEntity3));
+        assertThat(currentEvents)
+            .extracting(EventEntity::getId)
+            .containsExactlyInAnyOrder(eventEntity1.getId(), eventEntity2.getId())
+            .doesNotContain(eventEntity3.getId());
     }
 
     @Test
-    void getCurrentMedia_shouldReturnCurrentMedia_whenCurrentandNonCurrentMediaExists() {
+    void getCurrentMedia_shouldReturnCurrentMedia_whenCurrentAndNonCurrentMediaExists() {
 
         CourtroomEntity existingCourtroom = PersistableFactory.getCourtroomTestData().someMinimalBuilderHolder().getBuilder()
             .courthouse(PersistableFactory.getCourthouseTestData().someMinimal())
@@ -136,12 +126,72 @@ class FindCurrentEntitiesHelperTest extends IntegrationBase {
             .hearings(List.of(hearing))
             .build()
             .getEntity();
-        dartsPersistence.getCaseRepository().save(courtCaseEntity);
 
         List<MediaEntity> currentMedia = findCurrentEntitiesHelper.getCurrentMedia(courtCaseEntity);
-        assertEquals(2, currentMedia.size());
-        assertTrue(currentMedia.contains(mediaEntity1));
-        assertTrue(currentMedia.contains(mediaEntity2));
-        assertFalse(currentMedia.contains(mediaEntity3));
+        assertThat(currentMedia)
+            .extracting(MediaEntity::getId)
+            .containsExactlyInAnyOrder(mediaEntity1.getId(), mediaEntity2.getId())
+            .doesNotContain(mediaEntity3.getId());
+    }
+
+    @Test
+    void getCurrentNonLogEvents_shouldReturnCurrentNonLogEvents_whenCurrentLogAndNonCurrentEventsExist() {
+
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
+        dartsPersistence.save(hearing);
+
+        EventEntity currentNonLogEvent1 = createEventForHearing(hearing, true, false);
+        EventEntity currentNonLogEvent2 = createEventForHearing(hearing, true, false);
+        EventEntity currentLogEvent = createEventForHearing(hearing, true, true);
+        EventEntity nonCurrentNonLogEvent = createEventForHearing(hearing, false, false);
+        dartsPersistence.saveAll(currentNonLogEvent1, currentNonLogEvent2, currentLogEvent, nonCurrentNonLogEvent);
+
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .hearings(List.of(hearing))
+            .build()
+            .getEntity();
+
+        List<EventEntity> currentNonLogEvents = findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCaseEntity);
+        assertThat(currentNonLogEvents)
+            .extracting(EventEntity::getId)
+            .containsExactlyInAnyOrder(currentNonLogEvent1.getId(), currentNonLogEvent2.getId())
+            .doesNotContain(currentLogEvent.getId(), nonCurrentNonLogEvent.getId());
+    }
+
+    @Test
+    void getCurrentNonLogEvents_shouldReturnCurrentNonLogEventsAcrossAllCaseHearings() {
+
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
+        dartsPersistence.save(hearing1);
+        dartsPersistence.save(hearing2);
+
+        EventEntity currentNonLogEventForHearing1 = createEventForHearing(hearing1, true, false);
+        EventEntity currentNonLogEventForHearing2 = createEventForHearing(hearing2, true, false);
+        dartsPersistence.saveAll(currentNonLogEventForHearing1, currentNonLogEventForHearing2);
+
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .hearings(List.of(hearing1, hearing2))
+            .build()
+            .getEntity();
+
+        List<EventEntity> currentNonLogEvents = findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCaseEntity);
+        assertThat(currentNonLogEvents)
+            .extracting(EventEntity::getId)
+            .containsExactlyInAnyOrder(currentNonLogEventForHearing1.getId(), currentNonLogEventForHearing2.getId());
+    }
+
+    private EventEntity createEventForHearing(HearingEntity hearing, boolean isCurrent, boolean isLogEntry) {
+        EventEntity eventEntity = PersistableFactory.getEventTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .hearingEntities(Set.of(hearing))
+            .isCurrent(isCurrent)
+            .isLogEntry(isLogEntry)
+            .build()
+            .getEntity();
+        eventEntity.setCourtroom(hearing.getCourtroom());
+        return eventEntity;
     }
 }

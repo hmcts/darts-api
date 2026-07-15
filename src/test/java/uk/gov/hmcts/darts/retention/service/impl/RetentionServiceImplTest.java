@@ -69,19 +69,19 @@ class RetentionServiceImplTest {
     private RetentionService retentionService;
 
     private static final String FIXED_DATE_TIME = "2024-01-01T00:00:00Z";
+    private static final String CLOSE_EVENT_HANDLER = "StopAndCloseHandler";
 
     @BeforeEach
     void setUp() {
         Clock clock = Clock.fixed(Instant.parse(FIXED_DATE_TIME),
                                   ZoneId.of("UTC"));
-        List<String> closeEvents = List.of("Case closed", "Archive case");
         retentionService = new RetentionServiceImpl(caseRetentionRepository,
                                                     retentionConfidenceCategoryMapperRepository,
                                                     caseRepository,
                                                     retentionMapper,
                                                     clock,
                                                     findCurrentEntitiesHelper,
-                                                    closeEvents);
+                                                     CLOSE_EVENT_HANDLER);
     }
 
     @Nested
@@ -198,9 +198,9 @@ class RetentionServiceImplTest {
             caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
             caseRetention.setConfidenceCategory(CASE_CLOSED.getId());
 
-            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", false);
+            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", 79, false);
             List<EventEntity> events = new ArrayList<>(List.of(closedEvent));
-            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+            when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(events);
 
             var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10), caseRetention);
             assertEquals(CASE_CLOSED.getId(), result);
@@ -214,12 +214,12 @@ class RetentionServiceImplTest {
             CaseRetentionEntity caseRetention = createCaseRetention(courtCase, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
             caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
             caseRetention.setConfidenceCategory(CASE_CLOSED_WITHIN.getId());
-            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", false);
+            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", 79, false);
 
-            EventEntity otherEvent = getEvent(2L, "2024-01-05T10:00:00Z", "Other event", false);
+            EventEntity otherEvent = getEvent(2L, "2024-01-05T10:00:00Z", "Other event", 2, false);
 
             List<EventEntity> events = new ArrayList<>(List.of(closedEvent, otherEvent));
-            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+            when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(events);
 
             var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10), caseRetention);
             assertEquals(CASE_CLOSED_WITHIN.getId(), result);
@@ -233,12 +233,12 @@ class RetentionServiceImplTest {
             CaseRetentionEntity caseRetention = createCaseRetention(courtCase, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
             caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
             caseRetention.setConfidenceCategory(CASE_CLOSED.getId());
-            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", false);
+            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", 79, false);
 
-            EventEntity otherEvent = getEvent(2L, "2024-01-20T10:00:00Z", "Other event", false);
+            EventEntity otherEvent = getEvent(2L, "2024-01-20T10:00:00Z", "Other event", 2, false);
 
             List<EventEntity> events = new ArrayList<>(List.of(closedEvent, otherEvent));
-            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+            when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(events);
 
             var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10), caseRetention);
             assertEquals(MAX_EVENT_OUTWITH.getId(), result);
@@ -252,11 +252,10 @@ class RetentionServiceImplTest {
             CaseRetentionEntity caseRetention = createCaseRetention(courtCase, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
             caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
             caseRetention.setConfidenceCategory(CASE_CLOSED.getId());
-            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", false);
-            EventEntity logEvent = getEvent(2L, "2024-01-05T10:00:00Z", "Log event", true);
-            EventEntity nonLogEvent = getEvent(3L, "2024-01-04T10:00:00Z", "Other event", false);
-            List<EventEntity> events = new ArrayList<>(List.of(closedEvent, logEvent, nonLogEvent));
-            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", 79, false);
+            EventEntity nonLogEvent = getEvent(3L, "2024-01-04T10:00:00Z", "Other event", 2, false);
+            List<EventEntity> events = new ArrayList<>(List.of(closedEvent, nonLogEvent));
+            when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(events);
 
             var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10), caseRetention);
             assertEquals(CASE_CLOSED_WITHIN.getId(), result);
@@ -270,11 +269,10 @@ class RetentionServiceImplTest {
             CaseRetentionEntity caseRetention = createCaseRetention(courtCase, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
             caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
             caseRetention.setConfidenceCategory(CASE_CLOSED.getId());
-            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", false);
-            EventEntity logEvent = getEvent(2L, "2024-01-20T10:00:00Z", "Log event", true);
-            EventEntity nonLogEvent = getEvent(3L, "2024-01-15T10:00:00Z", "Other event", false);
-            List<EventEntity> events = new ArrayList<>(List.of(closedEvent, logEvent, nonLogEvent));
-            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+            EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", 79, false);
+            EventEntity nonLogEvent = getEvent(3L, "2024-01-15T10:00:00Z", "Other event", 2, false);
+            List<EventEntity> events = new ArrayList<>(List.of(closedEvent, nonLogEvent));
+            when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(events);
 
             var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10), caseRetention);
             assertEquals(MAX_EVENT_OUTWITH.getId(), result);
@@ -288,7 +286,7 @@ class RetentionServiceImplTest {
             CaseRetentionEntity caseRetention = createCaseRetention(courtCase, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
             caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
             caseRetention.setConfidenceCategory(CASE_CLOSED.getId());
-            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(new ArrayList<>());
+            when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(new ArrayList<>());
             var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10), caseRetention);
             assertNull(result);
         }
@@ -302,9 +300,9 @@ class RetentionServiceImplTest {
             caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
             caseRetention.setConfidenceCategory(MANUAL_OVERRIDE.getId());
             courtCase.setRetConfReason(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE);
-            EventEntity event = getEvent(1L, "2024-01-01T10:00:00Z", "Other event", false);
+            EventEntity event = getEvent(1L, "2024-01-01T10:00:00Z", "Other event", 2, false);
             List<EventEntity> events = new ArrayList<>(List.of(event));
-            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+            when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(events);
 
             var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10), caseRetention);
             assertEquals(MANUAL_OVERRIDE.getId(), result);
@@ -319,9 +317,9 @@ class RetentionServiceImplTest {
             caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
             caseRetention.setConfidenceCategory(CASE_CLOSED.getId());
             courtCase.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
-            EventEntity event = getEvent(1L, "2024-01-01T10:00:00Z", "Other event", false);
+            EventEntity event = getEvent(1L, "2024-01-01T10:00:00Z", "Other event", 2, false);
             List<EventEntity> events = new ArrayList<>(List.of(event));
-            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+            when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(events);
 
             var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10), caseRetention);
             assertEquals(CASE_CLOSED.getId(), result);
@@ -336,21 +334,26 @@ class RetentionServiceImplTest {
             caseRetention.setRetainUntilAppliedOn(DATETIME_2025);
             caseRetention.setConfidenceCategory(CASE_CLOSED.getId());
             courtCase.setRetConfReason(null);
-            EventEntity event = getEvent(1L, "2024-01-01T10:00:00Z", "Other event", false);
+            EventEntity event = getEvent(1L, "2024-01-01T10:00:00Z", "Other event", 2, false);
             List<EventEntity> events = new ArrayList<>(List.of(event));
-            when(findCurrentEntitiesHelper.getCurrentEvents(courtCase)).thenReturn(events);
+            when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(events);
 
             var result = retentionService.getConfidenceCategory(courtCase, Duration.ofDays(10), caseRetention);
             assertEquals(CASE_CLOSED.getId(), result);
         }
 
-        private static @NotNull EventEntity getEvent(long id, String eventTimestamp, String eventName, boolean isLogEvent) {
+        private static @NotNull EventEntity getEvent(long id, String eventTimestamp, String eventName, Integer eventHandlerId,
+                                                     boolean isLogEvent) {
             EventEntity eventEntity = new EventEntity();
             eventEntity.setId(id);
             eventEntity.setCreatedDateTime(OffsetDateTime.parse(eventTimestamp));
             eventEntity.setTimestamp(OffsetDateTime.parse(eventTimestamp)); // Ensure timestamp is set
             EventHandlerEntity eventHandler = new EventHandlerEntity();
+            eventHandler.setId(eventHandlerId);
             eventHandler.setEventName(eventName);
+            if (List.of(79, 218).contains(eventHandlerId)) {
+                eventHandler.setHandler(CLOSE_EVENT_HANDLER);
+            }
             if (isLogEvent) {
                 eventHandler.setType("LOG");
             }
