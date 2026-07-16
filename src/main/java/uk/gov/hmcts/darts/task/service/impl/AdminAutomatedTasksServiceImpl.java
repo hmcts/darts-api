@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
-import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskCronExpressionService;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPatch;
@@ -47,7 +46,7 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.INCORRECT_
 @Getter
 public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService {
 
-    private final AdminAutomatedTaskCronExpressionService adminAutomatedTaskCronExpressionService;
+    private final AdminAutomatedTasksCronExpressionService adminAutomatedTasksCronExpressionService;
     private final AutomatedTaskRepository automatedTaskRepository;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final AutomatedTasksMapper mapper;
@@ -112,7 +111,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
 
-        return adminAutomatedTaskCronExpressionService.getCronExpressionSchedulePreview(
+        return adminAutomatedTasksCronExpressionService.getCronExpressionSchedulePreview(
             automatedTaskCronExpressionPost.getCronExpression());
     }
 
@@ -128,7 +127,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
         String cronExpression = automatedTaskCronExpressionPatch.getCronExpression();
 
-        adminAutomatedTaskCronExpressionService.validateCronExpression(cronExpression);
+        adminAutomatedTasksCronExpressionService.validateAndParseCronExpression(cronExpression);
 
         automatedTask.setCronExpression(cronExpression);
         registerConfiguredAutomatedTaskAudit(automatedTask, "Cron Expression updated");
