@@ -110,7 +110,6 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
 
-        // Add new error code enum with generated error types if necessary
         if (automatedTaskCronExpressionPost == null || automatedTaskCronExpressionPost.getCronExpression() == null) {
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
