@@ -35,7 +35,6 @@ import java.util.function.Consumer;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
-import static uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity_.automatedTask;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_ALREADY_RUNNING;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND;
@@ -138,9 +137,10 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
         adminAutomatedTasksServiceHelper.validateAndParseCronExpression(cronExpression);
 
+        String previousCronExpression = automatedTask.getCronExpression();
         automatedTask.setCronExpression(cronExpression);
-        registerConfiguredAutomatedTaskAudit(automatedTask, "Cron Expression updated");
-        log.info("Cron Expression for {} updated to {}", automatedTask.getTaskName(), cronExpression);
+        registerConfiguredAutomatedTaskAudit(automatedTask, "Cron Expression updated from " + previousCronExpression + " to " + cronExpression);
+        log.info("Cron Expression for {} updated from {} to {}", automatedTask.getTaskName(), previousCronExpression, cronExpression);
 
         automatedTaskRepository.save(automatedTask);
     }
