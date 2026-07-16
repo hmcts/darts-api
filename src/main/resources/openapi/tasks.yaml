@@ -318,7 +318,14 @@ components:
         - "AUTOMATED_TASK_101"
         - "AUTOMATED_TASK_102"
         - "AUTOMATED_TASK_103"
-      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED, INCORRECT_AUTOMATED_TASK_TYPE ]
+        - "AUTOMATED_TASK_104"
+      x-enum-varnames: [
+        AUTOMATED_TASK_NOT_FOUND,
+        AUTOMATED_TASK_ALREADY_RUNNING,
+        AUTOMATED_TASK_NOT_CONFIGURED,
+        INCORRECT_AUTOMATED_TASK_TYPE,
+        AUTOMATED_TASK_BAD_REQUEST
+      ]
     AutomatedTaskTitleErrors:
       type: string
       enum:
@@ -326,4 +333,11 @@ components:
         - "The automated task is already running"
         - "The automated task has not been initialized correctly on application start up and can not be run manually."
         - "The automated task type is incorrect"
-      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED, INCORRECT_AUTOMATED_TASK_TYPE ]
+        - "The automated task request is incorrect"
+      x-enum-varnames: [
+        AUTOMATED_TASK_NOT_FOUND,
+        AUTOMATED_TASK_ALREADY_RUNNING,
+        AUTOMATED_TASK_NOT_CONFIGURED,
+        INCORRECT_AUTOMATED_TASK_TYPE,
+        AUTOMATED_TASK_BAD_REQUEST
+      ]
