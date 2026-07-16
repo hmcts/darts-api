@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_ALREADY_RUNNING;
-import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_BAD_REQUEST;
+import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.INCORRECT_AUTOMATED_TASK_TYPE;
 
@@ -108,8 +108,8 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         getAutomatedTaskEntityById(taskId);
 
         // Add new error code enum with generated error types if necessary
-        if (automatedTaskCronExpressionPost.getCronExpression() == null) {
-            throw new DartsApiException(AUTOMATED_TASK_CRON_EXPRESSION_BAD_REQUEST);
+        if (automatedTaskCronExpressionPost == null || automatedTaskCronExpressionPost.getCronExpression() == null) {
+            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
 
         return adminAutomatedTaskCronExpressionService.getCronExpressionSchedulePreview(
@@ -123,7 +123,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         var automatedTask = getAutomatedTaskEntityById(taskId);
 
         if (automatedTaskCronExpressionPatch == null || automatedTaskCronExpressionPatch.getCronExpression() == null) {
-            throw new DartsApiException(AUTOMATED_TASK_CRON_EXPRESSION_BAD_REQUEST);
+            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
 
         String cronExpression = automatedTaskCronExpressionPatch.getCronExpression();
