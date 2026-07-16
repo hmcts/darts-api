@@ -7,10 +7,13 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.task.config.AdminAutomatedTaskCronExpressionConfig;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionSchedule;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.darts.common.util.DateConverterUtil.EUROPE_LONDON_ZONE;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST;
 
 @Service
@@ -18,18 +21,19 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_
 public class AdminAutomatedTasksServiceHelper {
 
     private final AdminAutomatedTaskCronExpressionConfig adminAutomatedTaskCronExpressionConfig;
+    private final Clock clock;
 
     public List<AutomatedTaskCronExpressionSchedule> getCronExpressionSchedulePreview(String cronExpression) {
         List<AutomatedTaskCronExpressionSchedule> scheduledRunTimes = new ArrayList<>();
 
         CronExpression cron = validateAndParseCronExpression(cronExpression);
-        OffsetDateTime next = OffsetDateTime.now();
+        ZonedDateTime next = ZonedDateTime.ofInstant(clock.instant(), EUROPE_LONDON_ZONE);
         int maxExecutionCount = adminAutomatedTaskCronExpressionConfig.getExecutionCount();
 
         for (int executionNumber = 1; executionNumber <= maxExecutionCount; executionNumber++) {
-            assert next != null;
             next = cron.next(next);
-            scheduledRunTimes.add(createScheduledRun(executionNumber, next));
+            assert next != null;
+            scheduledRunTimes.add(createScheduledRun(executionNumber, next.toOffsetDateTime()));
         }
 
         return scheduledRunTimes;
