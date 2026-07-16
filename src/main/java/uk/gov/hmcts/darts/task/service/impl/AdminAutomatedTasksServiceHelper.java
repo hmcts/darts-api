@@ -15,7 +15,7 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_
 
 @Service
 @RequiredArgsConstructor
-public class AdminAutomatedTasksCronExpressionService {
+public class AdminAutomatedTasksServiceHelper {
 
     private final AdminAutomatedTaskCronExpressionConfig adminAutomatedTaskCronExpressionConfig;
 
