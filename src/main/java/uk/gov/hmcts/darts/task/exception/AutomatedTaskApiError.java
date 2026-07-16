@@ -32,10 +32,10 @@ public enum AutomatedTaskApiError implements DartsApiError {
         HttpStatus.UNPROCESSABLE_ENTITY,
         AutomatedTaskTitleErrors.INCORRECT_AUTOMATED_TASK_TYPE.toString()
     ),
-    AUTOMATED_TASK_CRON_EXPRESSION_BAD_REQUEST(
-        AutomatedTaskErrorCode.INCORRECT_AUTOMATED_TASK_TYPE.getValue(),
+    AUTOMATED_TASK_BAD_REQUEST(
+        AutomatedTaskErrorCode.AUTOMATED_TASK_BAD_REQUEST.getValue(),
         HttpStatus.BAD_REQUEST,
-        AutomatedTaskTitleErrors.INCORRECT_AUTOMATED_TASK_TYPE.toString()
+        AutomatedTaskTitleErrors.AUTOMATED_TASK_BAD_REQUEST.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTOMATED_TASK";

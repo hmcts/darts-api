@@ -11,7 +11,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_BAD_REQUEST;
+import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +50,7 @@ public class AdminAutomatedTaskCronExpressionService {
         try {
             return CronExpression.parse(cronExpression);
         } catch (IllegalArgumentException e) {
-            throw new DartsApiException(AUTOMATED_TASK_CRON_EXPRESSION_BAD_REQUEST, e);
+            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST, e);
         }
     }
 }
