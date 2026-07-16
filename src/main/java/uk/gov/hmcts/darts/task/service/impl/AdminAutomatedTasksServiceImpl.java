@@ -46,7 +46,7 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.INCORRECT_
 @Getter
 public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService {
 
-    private final AdminAutomatedTasksCronExpressionService adminAutomatedTasksCronExpressionService;
+    private final AdminAutomatedTasksServiceHelper adminAutomatedTasksServiceHelper;
     private final AutomatedTaskRepository automatedTaskRepository;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final AutomatedTasksMapper mapper;
@@ -111,7 +111,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
 
-        return adminAutomatedTasksCronExpressionService.getCronExpressionSchedulePreview(
+        return adminAutomatedTasksServiceHelper.getCronExpressionSchedulePreview(
             automatedTaskCronExpressionPost.getCronExpression());
     }
 
@@ -127,7 +127,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
         String cronExpression = automatedTaskCronExpressionPatch.getCronExpression();
 
-        adminAutomatedTasksCronExpressionService.validateAndParseCronExpression(cronExpression);
+        adminAutomatedTasksServiceHelper.validateAndParseCronExpression(cronExpression);
 
         automatedTask.setCronExpression(cronExpression);
         registerConfiguredAutomatedTaskAudit(automatedTask, "Cron Expression updated");
