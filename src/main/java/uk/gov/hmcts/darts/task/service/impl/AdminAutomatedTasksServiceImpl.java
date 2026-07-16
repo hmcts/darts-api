@@ -35,6 +35,7 @@ import java.util.function.Consumer;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
+import static uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity_.automatedTask;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_ALREADY_RUNNING;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND;
@@ -104,7 +105,11 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     @Override
     public List<AutomatedTaskCronExpressionSchedule> getAutomatedTaskCronExpressionSchedule(
         Integer taskId, AutomatedTaskCronExpressionPost automatedTaskCronExpressionPost) {
-        getAutomatedTaskEntityById(taskId);
+        var automatedTask = getAutomatedTaskEntityById(taskId);
+
+        if (!Boolean.TRUE.equals(automatedTask.getCronEditable())) {
+            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
+        }
 
         // Add new error code enum with generated error types if necessary
         if (automatedTaskCronExpressionPost == null || automatedTaskCronExpressionPost.getCronExpression() == null) {
@@ -120,6 +125,10 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     public void updateAutomatedTaskCronExpressionSchedule(
         Integer taskId, AutomatedTaskCronExpressionPatch automatedTaskCronExpressionPatch) {
         var automatedTask = getAutomatedTaskEntityById(taskId);
+
+        if (!Boolean.TRUE.equals(automatedTask.getCronEditable())) {
+            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
+        }
 
         if (automatedTaskCronExpressionPatch == null || automatedTaskCronExpressionPatch.getCronExpression() == null) {
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
