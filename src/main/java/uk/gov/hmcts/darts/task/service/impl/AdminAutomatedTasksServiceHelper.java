@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.task.service;
+package uk.gov.hmcts.darts.task.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.support.CronExpression;
@@ -15,14 +15,14 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_
 
 @Service
 @RequiredArgsConstructor
-public class AdminAutomatedTaskCronExpressionService {
+public class AdminAutomatedTasksCronExpressionService {
 
     private final AdminAutomatedTaskCronExpressionConfig adminAutomatedTaskCronExpressionConfig;
 
     public List<AutomatedTaskCronExpressionSchedule> getCronExpressionSchedulePreview(String cronExpression) {
         List<AutomatedTaskCronExpressionSchedule> scheduledRunTimes = new ArrayList<>();
 
-        CronExpression cron = parseCronExpression(cronExpression);
+        CronExpression cron = validateAndParseCronExpression(cronExpression);
         OffsetDateTime next = OffsetDateTime.now();
         int maxExecutionCount = adminAutomatedTaskCronExpressionConfig.getExecutionCount();
 
@@ -35,10 +35,6 @@ public class AdminAutomatedTaskCronExpressionService {
         return scheduledRunTimes;
     }
 
-    public void validateCronExpression(String cronExpression) {
-        parseCronExpression(cronExpression);
-    }
-
     private static AutomatedTaskCronExpressionSchedule createScheduledRun(int executionNumber, OffsetDateTime scheduledAt) {
         AutomatedTaskCronExpressionSchedule scheduledRun = new AutomatedTaskCronExpressionSchedule();
         scheduledRun.setExecutionNumber(String.valueOf(executionNumber));
@@ -46,7 +42,7 @@ public class AdminAutomatedTaskCronExpressionService {
         return scheduledRun;
     }
 
-    private static CronExpression parseCronExpression(String cronExpression) {
+    public CronExpression validateAndParseCronExpression(String cronExpression) {
         try {
             return CronExpression.parse(cronExpression);
         } catch (IllegalArgumentException e) {
