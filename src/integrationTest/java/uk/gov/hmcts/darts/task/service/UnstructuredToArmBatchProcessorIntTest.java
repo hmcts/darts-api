@@ -384,7 +384,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), ARM_INGESTION, ARM, eod -> eod.setTransferAttempts(1));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_RAW_DATA_PUSHED, ARM, eod -> eod.setTransferAttempts(1));
+        var armEod5 = externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_RAW_DATA_PUSHED, ARM, eod -> eod.setTransferAttempts(1));
+
+        when(armDataManagementApi.listSubmissionBlobs(armEod5.getId() + "_"))
+            .thenReturn(List.of(format("%d_%d_1", armEod5.getId(), medias.get(5).getId())));
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm(10);
@@ -403,7 +406,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         var armDropzoneEodsMedia4 = eodRepository.findByMediaStatusAndType(medias.get(4), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
         assertThat(armDropzoneEodsMedia4).hasSize(1);
         var armDropzoneEodsMedia5 = eodRepository.findByMediaStatusAndType(medias.get(5), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
-        assertThat(armDropzoneEodsMedia5).hasSize(0);
+        assertThat(armDropzoneEodsMedia5).hasSize(1);
 
         verify(archiveRecordFileGenerator).generateArchiveRecords(manifestFileNameCaptor.capture(), any());
         String manifestFileName = manifestFileNameCaptor.getValue();
@@ -415,7 +418,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
         verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
         String manifestFileContent = manifestFileContentCaptor.getValue();
-        assertThat(manifestFileContent.lines().count()).isEqualTo(6);
+        assertThat(manifestFileContent.lines().count()).isEqualTo(8);
         assertThat(manifestFileContent).contains(
             format("_%d_", medias.getFirst().getId()),
             format("_%d_", medias.get(1).getId())
