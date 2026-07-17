@@ -251,14 +251,14 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
         when(mockTranscription.getTranscriptionDocumentEntities()).thenReturn(new ArrayList<>());
         List<Integer> caseIds = List.of(456, 789);
-        when(mockCaseRepository.findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(transcriptionId)).thenReturn(caseIds);
+        when(mockCaseRepository.findCaseIdsLinkedToTranscription(transcriptionId)).thenReturn(caseIds);
         var transcript = new MockMultipartFile("transcript", "transcript.doc", "application/msword", "content".getBytes());
 
         // when
         transcriptionService.attachTranscript(transcriptionId, transcript);
 
         // then
-        verify(mockCaseRepository).findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(transcriptionId);
+        verify(mockCaseRepository).findCaseIdsLinkedToTranscription(transcriptionId);
         verify(mockCaseRepository).resetRetentionProcessingForCases(caseIds);
     }
 
@@ -281,14 +281,14 @@ class TranscriptionServiceImplTest {
         when(mockTranscriptionRepository.getReferenceById(transcriptionId)).thenReturn(mockTranscription);
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
         when(mockTranscription.getTranscriptionDocumentEntities()).thenReturn(new ArrayList<>());
-        when(mockCaseRepository.findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(transcriptionId)).thenReturn(Collections.emptyList());
+        when(mockCaseRepository.findCaseIdsLinkedToTranscription(transcriptionId)).thenReturn(Collections.emptyList());
         var transcript = new MockMultipartFile("transcript", "transcript.doc", "application/msword", "content".getBytes());
 
         // when
         transcriptionService.attachTranscript(transcriptionId, transcript);
 
         // then
-        verify(mockCaseRepository).findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(transcriptionId);
+        verify(mockCaseRepository).findCaseIdsLinkedToTranscription(transcriptionId);
         verify(mockCaseRepository, times(0)).resetRetentionProcessingForCases(any());
     }
 

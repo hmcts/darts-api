@@ -74,7 +74,7 @@ class AnnotationPersistenceServiceTest {
         // given
         List<Integer> caseIds = List.of(789, 790);
         setupAnnotationPersistence();
-        when(caseRepository.findCaseIdsLinkedToAnnotationForRetentionProcessingReset(ANNOTATION_ID)).thenReturn(caseIds);
+        when(caseRepository.findCaseIdsLinkedToAnnotation(ANNOTATION_ID)).thenReturn(caseIds);
 
         // when
         annotationPersistenceService.persistAnnotation(
@@ -87,7 +87,7 @@ class AnnotationPersistenceServiceTest {
 
         // then
         verify(auditApi).record(IMPORT_ANNOTATION, userAccount, courtCase);
-        verify(caseRepository).findCaseIdsLinkedToAnnotationForRetentionProcessingReset(ANNOTATION_ID);
+        verify(caseRepository).findCaseIdsLinkedToAnnotation(ANNOTATION_ID);
         verify(caseRepository).resetRetentionProcessingForCases(caseIds);
     }
 
@@ -95,7 +95,7 @@ class AnnotationPersistenceServiceTest {
     void persistAnnotation_doesNotResetRetentionProcessing_annotationUploadedAndNoLinkedCasesFound() {
         // given
         setupAnnotationPersistence();
-        when(caseRepository.findCaseIdsLinkedToAnnotationForRetentionProcessingReset(ANNOTATION_ID)).thenReturn(Collections.emptyList());
+        when(caseRepository.findCaseIdsLinkedToAnnotation(ANNOTATION_ID)).thenReturn(Collections.emptyList());
 
         // when
         annotationPersistenceService.persistAnnotation(
@@ -107,7 +107,7 @@ class AnnotationPersistenceServiceTest {
         );
 
         // then
-        verify(caseRepository).findCaseIdsLinkedToAnnotationForRetentionProcessingReset(ANNOTATION_ID);
+        verify(caseRepository).findCaseIdsLinkedToAnnotation(ANNOTATION_ID);
         verify(caseRepository, times(0)).resetRetentionProcessingForCases(any());
     }
 

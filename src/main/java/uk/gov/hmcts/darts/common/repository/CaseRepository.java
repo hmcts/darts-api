@@ -147,7 +147,7 @@ public interface CaseRepository
             )
         )
         """)
-    List<Integer> findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(Long transcriptionId);
+    List<Integer> findCaseIdsLinkedToTranscription(Long transcriptionId);
 
     @Query("""
         SELECT DISTINCT cc.id
@@ -173,7 +173,7 @@ public interface CaseRepository
             AND hearing.courtCase.id = cc.id
         )
         """)
-    List<Integer> findCaseIdsLinkedToAnnotationForRetentionProcessingReset(Integer annotationId);
+    List<Integer> findCaseIdsLinkedToAnnotation(Integer annotationId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
