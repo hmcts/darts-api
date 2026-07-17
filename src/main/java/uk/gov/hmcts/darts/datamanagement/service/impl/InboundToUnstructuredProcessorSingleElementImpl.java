@@ -101,7 +101,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         firstLinkedCase.setRetentionUpdated(true);
         firstLinkedCase.setRetentionRetries(0);
         caseRepository.save(firstLinkedCase);
-        log.debug("Reset retention processing for first linked case {} for media {}", firstLinkedCase.getId(), mediaEntity.getId());
+        log.info("Reset retention processing for first linked case {} for media {}", firstLinkedCase.getId(), mediaEntity.getId());
     }
 
     private boolean isCaseEligibleForRetentionReset(CourtCaseEntity courtCase) {
