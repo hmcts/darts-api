@@ -59,7 +59,7 @@ public interface CaseRepository
     @Query("""
         SELECT distinct cc.id
         FROM CourtCaseEntity cc
-        JOIN cc.caseRetentionEntities cr                
+        JOIN cc.caseRetentionEntities cr
         WHERE cr is not null
         AND cc.isRetentionUpdated = true
         AND cc.retentionRetries < :maxRetentionRetries

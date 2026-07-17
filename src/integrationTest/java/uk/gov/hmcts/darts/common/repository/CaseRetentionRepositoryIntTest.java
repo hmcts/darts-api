@@ -1,10 +1,9 @@
-package uk.gov.hmcts.darts.retention.repository;
+package uk.gov.hmcts.darts.common.repository;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
-import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CaseRetentionStub;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
@@ -27,13 +26,13 @@ class CaseRetentionRepositoryIntTest extends IntegrationBase {
     private static final OffsetDateTime DT_2026 = OffsetDateTime.of(2026, 1, 1, 1, 0, 0, 0, UTC);
 
     @Autowired
-    CourtCaseStub caseStub;
+    private CourtCaseStub caseStub;
     @Autowired
-    CaseRetentionStub caseRetentionStub;
+    private CaseRetentionStub caseRetentionStub;
     @Autowired
-    CaseRetentionRepository caseRetentionRepository;
+    private CaseRetentionRepository caseRetentionRepository;
     @Autowired
-    EntityGraphPersistence entityGraphPersistence;
+    private EntityGraphPersistence entityGraphPersistence;
 
     @Test
     void testFindTopByCourtCaseOrderByRetainUntilAppliedOnDesc() {
