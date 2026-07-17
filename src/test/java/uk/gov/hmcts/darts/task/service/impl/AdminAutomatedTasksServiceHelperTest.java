@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.scheduling.support.CronExpression;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionSchedule;
@@ -22,7 +23,9 @@ class AdminAutomatedTasksServiceHelperTest {
     void getCronExpressionSchedulePreviewReturnsTenFutureRunTimes() {
         AdminAutomatedTasksServiceHelper helper = createHelper("2026-07-16T08:30:00Z");
 
-        List<AutomatedTaskCronExpressionSchedule> schedule = helper.getCronExpressionSchedulePreview("0 0 10 * * *");
+        CronExpression cronExpression = helper.validateAndParseCronExpression("0 0 10 * * *");
+
+        List<AutomatedTaskCronExpressionSchedule> schedule = helper.getCronExpressionSchedulePreview(cronExpression);
 
         assertEquals(10, schedule.size());
         assertScheduledRun(schedule.get(0), "1", "2026-07-16T10:00:00+01:00");
@@ -34,7 +37,9 @@ class AdminAutomatedTasksServiceHelperTest {
     void getCronExpressionSchedulePreviewUsesEuropeLondonDaylightSavingsRules() {
         AdminAutomatedTasksServiceHelper helper = createHelper("2026-10-24T12:00:00Z");
 
-        List<AutomatedTaskCronExpressionSchedule> schedule = helper.getCronExpressionSchedulePreview("0 0 0 * * *");
+        CronExpression cronExpression = helper.validateAndParseCronExpression("0 0 0 * * *");
+
+        List<AutomatedTaskCronExpressionSchedule> schedule = helper.getCronExpressionSchedulePreview(cronExpression);
 
         assertEquals(10, schedule.size());
         assertScheduledRun(schedule.get(0), "1", "2026-10-25T00:00:00+01:00");

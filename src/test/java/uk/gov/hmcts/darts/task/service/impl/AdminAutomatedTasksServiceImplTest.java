@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.support.CronExpression;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
@@ -346,13 +347,17 @@ class AdminAutomatedTasksServiceImplTest {
         automatedTaskCronExpressionSchedule.setExecutionNumber("1");
         automatedTaskCronExpressionSchedule.setScheduledAt(OffsetDateTime.parse("2026-07-16T10:00:00+01:00"));
 
-        when(adminAutomatedTasksServiceHelper.getCronExpressionSchedulePreview("0 0 10 * * *"))
+        CronExpression parsedCronExpression = CronExpression.parse("0 0 10 * * *");
+        when(adminAutomatedTasksServiceHelper.validateAndParseCronExpression("0 0 10 * * *"))
+            .thenReturn(parsedCronExpression);
+        when(adminAutomatedTasksServiceHelper.getCronExpressionSchedulePreview(parsedCronExpression))
             .thenReturn(List.of(automatedTaskCronExpressionSchedule));
 
         List<AutomatedTaskCronExpressionSchedule> schedule = adminAutomatedTaskService.getAutomatedTaskCronExpressionSchedule(1, request);
 
         assertEquals(List.of(automatedTaskCronExpressionSchedule), schedule);
-        verify(adminAutomatedTasksServiceHelper).getCronExpressionSchedulePreview("0 0 10 * * *");
+        verify(adminAutomatedTasksServiceHelper).validateAndParseCronExpression("0 0 10 * * *");
+        verify(adminAutomatedTasksServiceHelper).getCronExpressionSchedulePreview(parsedCronExpression);
         verifyNoInteractions(auditApi);
     }
 
@@ -371,14 +376,12 @@ class AdminAutomatedTasksServiceImplTest {
         );
 
         assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST, exception.getError());
-        verifyNoInteractions(adminAutomatedTasksServiceHelper, auditApi);
+        verify(adminAutomatedTasksServiceHelper).validateAndParseCronExpression("0 0 10 * * *");
+        verifyNoInteractions(auditApi);
     }
 
     @Test
     void getAutomatedTaskCronExpressionScheduleThrowsBadRequestWhenCronExpressionIsMissing() {
-        AutomatedTaskEntity automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", null);
-        when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
-
         AutomatedTaskCronExpressionPost request = new AutomatedTaskCronExpressionPost();
 
         DartsApiException exception = assertThrows(
@@ -387,7 +390,7 @@ class AdminAutomatedTasksServiceImplTest {
         );
 
         assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST, exception.getError());
-        verifyNoInteractions(adminAutomatedTasksServiceHelper, auditApi);
+        verifyNoInteractions(adminAutomatedTasksServiceHelper, automatedTaskRepository, auditApi);
     }
 
     @Test
@@ -427,17 +430,14 @@ class AdminAutomatedTasksServiceImplTest {
 
         assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST, exception.getError());
         assertEquals("0 0 9 * * *", automatedTaskEntity.getCronExpression());
-        verifyNoInteractions(adminAutomatedTasksServiceHelper, auditApi);
+        verify(adminAutomatedTasksServiceHelper).validateAndParseCronExpression("0 0 10 * * *");
+        verifyNoInteractions(auditApi);
         verify(automatedTaskRepository).findById(1);
         verifyNoMoreInteractions(automatedTaskRepository);
     }
 
     @Test
     void updateAutomatedTaskCronExpressionScheduleThrowsBadRequestWhenCronExpressionIsMissing() {
-        AutomatedTaskEntity automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", null);
-        automatedTaskEntity.setCronExpression("0 0 9 * * *");
-        when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
-
         AutomatedTaskCronExpressionPatch request = new AutomatedTaskCronExpressionPatch();
 
         DartsApiException exception = assertThrows(
@@ -446,18 +446,11 @@ class AdminAutomatedTasksServiceImplTest {
         );
 
         assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST, exception.getError());
-        assertEquals("0 0 9 * * *", automatedTaskEntity.getCronExpression());
-        verifyNoInteractions(adminAutomatedTasksServiceHelper, auditApi);
-        verify(automatedTaskRepository).findById(1);
-        verifyNoMoreInteractions(automatedTaskRepository);
+        verifyNoInteractions(adminAutomatedTasksServiceHelper, automatedTaskRepository, auditApi);
     }
 
     @Test
     void updateAutomatedTaskCronExpressionScheduleDoesNotSaveWhenCronExpressionIsInvalid() {
-        AutomatedTaskEntity automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", null);
-        automatedTaskEntity.setCronExpression("0 0 9 * * *");
-        when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
-
         AutomatedTaskCronExpressionPatch request = new AutomatedTaskCronExpressionPatch();
         request.setCronExpression("not a cron expression");
 
@@ -472,11 +465,8 @@ class AdminAutomatedTasksServiceImplTest {
         );
 
         assertEquals(expectedException, exception);
-        assertEquals("0 0 9 * * *", automatedTaskEntity.getCronExpression());
         verify(adminAutomatedTasksServiceHelper).validateAndParseCronExpression("not a cron expression");
-        verifyNoInteractions(auditApi);
-        verify(automatedTaskRepository).findById(1);
-        verifyNoMoreInteractions(automatedTaskRepository);
+        verifyNoInteractions(automatedTaskRepository, auditApi);
     }
 
 

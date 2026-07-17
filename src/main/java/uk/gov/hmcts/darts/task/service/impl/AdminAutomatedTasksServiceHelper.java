@@ -23,10 +23,9 @@ public class AdminAutomatedTasksServiceHelper {
 
     private final Clock clock;
 
-    public List<AutomatedTaskCronExpressionSchedule> getCronExpressionSchedulePreview(String cronExpression) {
+    public List<AutomatedTaskCronExpressionSchedule> getCronExpressionSchedulePreview(CronExpression cron) {
         List<AutomatedTaskCronExpressionSchedule> scheduledRunTimes = new ArrayList<>();
 
-        CronExpression cron = validateAndParseCronExpression(cronExpression);
         ZonedDateTime next = ZonedDateTime.ofInstant(clock.instant(), EUROPE_LONDON_ZONE);
 
         for (int executionNumber = 1; executionNumber <= CRON_SCHEDULE_PREVIEW_COUNT; executionNumber++) {
