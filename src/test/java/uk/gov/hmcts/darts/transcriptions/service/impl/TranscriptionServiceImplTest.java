@@ -48,8 +48,8 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.common.util.TranscriptionUrgencyEnum;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -235,9 +235,7 @@ class TranscriptionServiceImplTest {
     void attachTranscript_resetRetentionProcessingForCases_transcriptUploadedAndLinkedCasesFound() {
         // given
         long transcriptionId = 123L;
-        List<Integer> caseIds = List.of(456, 789);
         String checksum = "checksum";
-        var transcript = new MockMultipartFile("transcript", "transcript.doc", "application/msword", "content".getBytes());
         var updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(456);
         transcriptionService = spy(transcriptionService);
@@ -252,7 +250,9 @@ class TranscriptionServiceImplTest {
         when(mockTranscriptionRepository.getReferenceById(transcriptionId)).thenReturn(mockTranscription);
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
         when(mockTranscription.getTranscriptionDocumentEntities()).thenReturn(new ArrayList<>());
+        List<Integer> caseIds = List.of(456, 789);
         when(mockCaseRepository.findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(transcriptionId)).thenReturn(caseIds);
+        var transcript = new MockMultipartFile("transcript", "transcript.doc", "application/msword", "content".getBytes());
 
         // when
         transcriptionService.attachTranscript(transcriptionId, transcript);
@@ -267,7 +267,6 @@ class TranscriptionServiceImplTest {
         // given
         long transcriptionId = 123L;
         String checksum = "checksum";
-        var transcript = new MockMultipartFile("transcript", "transcript.doc", "application/msword", "content".getBytes());
         var updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(456);
         transcriptionService = spy(transcriptionService);
@@ -283,6 +282,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
         when(mockTranscription.getTranscriptionDocumentEntities()).thenReturn(new ArrayList<>());
         when(mockCaseRepository.findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(transcriptionId)).thenReturn(Collections.emptyList());
+        var transcript = new MockMultipartFile("transcript", "transcript.doc", "application/msword", "content".getBytes());
 
         // when
         transcriptionService.attachTranscript(transcriptionId, transcript);

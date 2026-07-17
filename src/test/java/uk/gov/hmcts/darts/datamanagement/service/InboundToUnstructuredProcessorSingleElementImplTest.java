@@ -12,14 +12,14 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
-import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -33,7 +33,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.lenient;
@@ -94,8 +96,8 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
                                                                                              userAccountRepository,
                                                                                              externalObjectDirectoryRepository,
                                                                                              caseRepository,
-                                                                                              caseRetentionRepository,
-                                                                                              mediaLinkedCaseRepository);
+                                                                                             caseRetentionRepository,
+                                                                                             mediaLinkedCaseRepository);
         lenient().when(externalObjectDirectoryRepository.findById(INBOUND_ID)).thenReturn(Optional.of(externalObjectDirectoryEntityInbound));
         lenient().when(dataManagementConfiguration.getInboundContainerName()).thenReturn(INBOUND_CONTAINER_NAME);
         lenient().when(dataManagementConfiguration.getUnstructuredContainerName()).thenReturn(UNSTRUCTURED_CONTAINER_NAME);
@@ -136,18 +138,20 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
         when(mediaEntity.getId()).thenReturn(44L);
-        when(mediaLinkedCaseRepository.findByMediaOrderByCourtCaseIdAsc(mediaEntity)).thenReturn(List.of(
+        when(mediaLinkedCaseRepository.findByMedia(mediaEntity)).thenReturn(List.of(
             createMediaLinkedCase(firstLinkedCase),
             createMediaLinkedCase(secondLinkedCase)
         ));
-        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(firstLinkedCase)).thenReturn(Optional.of(createCaseRetention(COMPLETE.name())));
-        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(secondLinkedCase)).thenReturn(Optional.of(createCaseRetention(COMPLETE.name())));
+        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(firstLinkedCase)).thenReturn(
+            Optional.of(createCaseRetention(COMPLETE.name())));
+        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(secondLinkedCase)).thenReturn(
+            Optional.of(createCaseRetention(COMPLETE.name())));
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
-        assertEquals(true, firstLinkedCase.isRetentionUpdated());
+        assertTrue(firstLinkedCase.isRetentionUpdated());
         assertEquals(0, firstLinkedCase.getRetentionRetries());
-        assertEquals(false, secondLinkedCase.isRetentionUpdated());
+        assertFalse(secondLinkedCase.isRetentionUpdated());
         verify(caseRepository).save(firstLinkedCase);
     }
 
@@ -158,11 +162,12 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
         when(mediaEntity.getId()).thenReturn(44L);
-        when(mediaLinkedCaseRepository.findByMediaOrderByCourtCaseIdAsc(mediaEntity)).thenReturn(List.of(
+        when(mediaLinkedCaseRepository.findByMedia(mediaEntity)).thenReturn(List.of(
             createMediaLinkedCase(firstLinkedCase),
             createMediaLinkedCase(openLinkedCase)
         ));
-        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(firstLinkedCase)).thenReturn(Optional.of(createCaseRetention(COMPLETE.name())));
+        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(firstLinkedCase)).thenReturn(
+            Optional.of(createCaseRetention(COMPLETE.name())));
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
@@ -176,12 +181,14 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
         when(mediaEntity.getId()).thenReturn(44L);
-        when(mediaLinkedCaseRepository.findByMediaOrderByCourtCaseIdAsc(mediaEntity)).thenReturn(List.of(
+        when(mediaLinkedCaseRepository.findByMedia(mediaEntity)).thenReturn(List.of(
             createMediaLinkedCase(firstLinkedCase),
             createMediaLinkedCase(pendingRetentionCase)
         ));
-        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(firstLinkedCase)).thenReturn(Optional.of(createCaseRetention(COMPLETE.name())));
-        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(pendingRetentionCase)).thenReturn(Optional.of(createCaseRetention(PENDING.name())));
+        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(firstLinkedCase)).thenReturn(
+            Optional.of(createCaseRetention(COMPLETE.name())));
+        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(pendingRetentionCase)).thenReturn(
+            Optional.of(createCaseRetention(PENDING.name())));
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 

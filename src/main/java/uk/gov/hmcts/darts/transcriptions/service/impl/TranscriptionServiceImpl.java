@@ -118,7 +118,8 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @SuppressWarnings({
     "PMD.GodClass",
     "PMD.CouplingBetweenObjects",
-    "PMD.TooManyMethods"//TODO - refactor to reduce methods when this class is next edited
+    "PMD.TooManyMethods",
+    "PMD.CyclomaticComplexity"
 })
 public class TranscriptionServiceImpl implements TranscriptionService {
 

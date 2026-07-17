@@ -5,16 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
-import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -85,7 +85,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
             return;
         }
 
-        var linkedCases = mediaLinkedCaseRepository.findByMediaOrderByCourtCaseIdAsc(mediaEntity);
+        var linkedCases = mediaLinkedCaseRepository.findByMedia(mediaEntity);
         if (linkedCases.isEmpty()) {
             log.debug("No linked cases found for media {}", mediaEntity.getId());
             return;
@@ -104,11 +104,9 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     }
 
     private boolean isCaseEligibleForRetentionReset(CourtCaseEntity courtCase) {
-        if (!Boolean.TRUE.equals(courtCase.getClosed())) {
-            return false;
-        }
 
-        return caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(courtCase)
+        return Boolean.TRUE.equals(courtCase.getClosed())
+            && caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(courtCase)
             .map(CaseRetentionEntity::getCurrentState)
             .filter(COMPLETE.name()::equals)
             .isPresent();
