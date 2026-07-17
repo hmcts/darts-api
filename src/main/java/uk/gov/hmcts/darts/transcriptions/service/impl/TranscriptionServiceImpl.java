@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.exception.PartialFailureException;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -134,6 +135,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final UserAccountRepository userAccountRepository;
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
+    private final CaseRepository caseRepository;
 
     private final TranscriptionNotifications transcriptionNotifications;
     private final DataManagementApi dataManagementApi;
@@ -472,12 +474,24 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
 
         auditApi.record(IMPORT_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
+        resetRetentionProcessingForCasesLinkedToTranscription(transcriptionId);
 
         var attachTranscriptResponse = new AttachTranscriptResponse();
         attachTranscriptResponse.setTranscriptionDocumentId(transcriptionDocumentEntity.getId());
         attachTranscriptResponse.setTranscriptionWorkflowId(updateTranscription.getTranscriptionWorkflowId());
 
         return attachTranscriptResponse;
+    }
+
+    private void resetRetentionProcessingForCasesLinkedToTranscription(Long transcriptionId) {
+        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(transcriptionId);
+        if (caseIds.isEmpty()) {
+            log.info("No cases found to reset retention processing for transcription id {}", transcriptionId);
+            return;
+        }
+
+        log.info("Resetting retention processing for case ids {} linked to transcription id {}", caseIds, transcriptionId);
+        caseRepository.resetRetentionProcessingForCases(caseIds);
     }
 
     @Override
