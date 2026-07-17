@@ -485,7 +485,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private void resetRetentionProcessingForCasesLinkedToTranscription(Long transcriptionId) {
-        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(transcriptionId);
+        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToTranscription(transcriptionId);
         if (caseIds.isEmpty()) {
             log.info("No cases found to reset retention processing for transcription id {}", transcriptionId);
             return;

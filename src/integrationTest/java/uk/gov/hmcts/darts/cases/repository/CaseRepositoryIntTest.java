@@ -393,7 +393,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         createTranscriptionLinkedCase(pendingRetention, transcriptionId);
 
         // when
-        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(transcriptionId);
+        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToTranscription(transcriptionId);
         int updatedCases = caseRepository.resetRetentionProcessingForCases(caseIds);
 
         // then
@@ -436,7 +436,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         createHearingAnnotation(pendingRetention, annotationId);
 
         // when
-        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToAnnotationForRetentionProcessingReset(annotationId);
+        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToAnnotation(annotationId);
         int updatedCases = caseRepository.resetRetentionProcessingForCases(caseIds);
 
         // then

@@ -36,11 +36,11 @@ public class AnnotationPersistenceService {
 
     @Transactional
     public void persistAnnotation(
-            ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
-            ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
-            Integer hearingId,
-            AnnotationEntity annotationEntity,
-            AnnotationDocumentEntity annotationDocumentEntity) {
+        ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
+        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
+        Integer hearingId,
+        AnnotationEntity annotationEntity,
+        AnnotationDocumentEntity annotationDocumentEntity) {
 
         annotationRepository.saveAndFlush(annotationEntity);
 
@@ -61,7 +61,7 @@ public class AnnotationPersistenceService {
     }
 
     private void resetRetentionProcessingForCasesLinkedToAnnotation(Integer annotationId) {
-        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToAnnotationForRetentionProcessingReset(annotationId);
+        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToAnnotation(annotationId);
         if (caseIds.isEmpty()) {
             log.info("No cases found to reset retention processing for annotation id {}", annotationId);
             return;
