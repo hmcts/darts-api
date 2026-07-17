@@ -203,22 +203,22 @@ components:
     AutomatedTaskCronExpressionPatch:
       type: object
       properties:
-        cron_expression:
+        cronExpression:
           $ref: '#/components/schemas/CronExpression'
     AutomatedTaskCronExpressionPost:
       type: object
       properties:
-        cron_expression:
+        cronExpression:
           $ref: '#/components/schemas/CronExpression'
     AutomatedTaskCronExpressionSchedule:
       type: object
       properties:
-        execution_number:
+        executionNumber:
           type: string
           minLength: 1
           maxLength: 256
           pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
-        scheduled_at:
+        scheduledAt:
           type: string
           format: date-time
     AutomatedTaskPatch:
