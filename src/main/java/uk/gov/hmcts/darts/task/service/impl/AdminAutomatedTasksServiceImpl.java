@@ -105,30 +105,28 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     @Override
     public List<AutomatedTaskCronExpressionSchedule> getAutomatedTaskCronExpressionSchedule(
         Integer taskId, AutomatedTaskCronExpressionPost automatedTaskCronExpressionPost) {
+        if (isNull(automatedTaskCronExpressionPost) || isNull(automatedTaskCronExpressionPost.getCronExpression())) {
+            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
+        }
+
+        String cronExpression = automatedTaskCronExpressionPost.getCronExpression();
+
+        var parsedCronExpression = adminAutomatedTasksServiceHelper
+            .validateAndParseCronExpression(cronExpression);
+
         var automatedTask = getAutomatedTaskEntityById(taskId);
 
         if (!Boolean.TRUE.equals(automatedTask.getCronEditable())) {
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
 
-        if (isNull(automatedTaskCronExpressionPost) || isNull(automatedTaskCronExpressionPost.getCronExpression())) {
-            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
-        }
-
-        return adminAutomatedTasksServiceHelper.getCronExpressionSchedulePreview(
-            automatedTaskCronExpressionPost.getCronExpression());
+        return adminAutomatedTasksServiceHelper.getCronExpressionSchedulePreview(parsedCronExpression);
     }
 
     @Override
     @Transactional
     public void updateAutomatedTaskCronExpressionSchedule(
         Integer taskId, AutomatedTaskCronExpressionPatch automatedTaskCronExpressionPatch) {
-        var automatedTask = getAutomatedTaskEntityById(taskId);
-
-        if (!Boolean.TRUE.equals(automatedTask.getCronEditable())) {
-            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
-        }
-
         if (isNull(automatedTaskCronExpressionPatch) || isNull(automatedTaskCronExpressionPatch.getCronExpression())) {
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
@@ -136,6 +134,12 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         String cronExpression = automatedTaskCronExpressionPatch.getCronExpression();
 
         adminAutomatedTasksServiceHelper.validateAndParseCronExpression(cronExpression);
+
+        var automatedTask = getAutomatedTaskEntityById(taskId);
+
+        if (!Boolean.TRUE.equals(automatedTask.getCronEditable())) {
+            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
+        }
 
         String previousCronExpression = automatedTask.getCronExpression();
         automatedTask.setCronExpression(cronExpression);
