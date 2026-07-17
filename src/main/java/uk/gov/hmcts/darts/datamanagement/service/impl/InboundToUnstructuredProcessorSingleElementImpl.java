@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorS
 
 import java.util.UUID;
 
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl.FAILURE_STATES_LIST;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
 
@@ -81,7 +82,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     }
 
     private void resetRetentionProcessingForLinkedCases(MediaEntity mediaEntity) {
-        if (mediaEntity == null) {
+        if (isNull(mediaEntity)) {
             return;
         }
 
