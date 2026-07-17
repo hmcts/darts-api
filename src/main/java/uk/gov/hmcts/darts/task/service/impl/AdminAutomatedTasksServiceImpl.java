@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_ALREADY_RUNNING;
@@ -110,7 +111,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
 
-        if (automatedTaskCronExpressionPost == null || automatedTaskCronExpressionPost.getCronExpression() == null) {
+        if (isNull(automatedTaskCronExpressionPost) || isNull(automatedTaskCronExpressionPost.getCronExpression())) {
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
 
@@ -128,7 +129,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
 
-        if (automatedTaskCronExpressionPatch == null || automatedTaskCronExpressionPatch.getCronExpression() == null) {
+        if (isNull(automatedTaskCronExpressionPatch) || isNull(automatedTaskCronExpressionPatch.getCronExpression())) {
             throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
         }
 

@@ -1,9 +1,7 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.task.config.AdminAutomatedTaskCronExpressionConfig;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionSchedule;
 
@@ -20,20 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AdminAutomatedTasksServiceHelperTest {
 
-    private final AdminAutomatedTaskCronExpressionConfig config = new AdminAutomatedTaskCronExpressionConfig();
-
-    @BeforeEach
-    void setUp() {
-        config.setExecutionCount(3);
-    }
-
     @Test
-    void getCronExpressionSchedulePreviewReturnsConfiguredNumberOfFutureRunTimes() {
+    void getCronExpressionSchedulePreviewReturnsTenFutureRunTimes() {
         AdminAutomatedTasksServiceHelper helper = createHelper("2026-07-16T08:30:00Z");
 
         List<AutomatedTaskCronExpressionSchedule> schedule = helper.getCronExpressionSchedulePreview("0 0 10 * * *");
 
-        assertEquals(3, schedule.size());
+        assertEquals(10, schedule.size());
         assertScheduledRun(schedule.get(0), "1", "2026-07-16T10:00:00+01:00");
         assertScheduledRun(schedule.get(1), "2", "2026-07-17T10:00:00+01:00");
         assertScheduledRun(schedule.get(2), "3", "2026-07-18T10:00:00+01:00");
@@ -41,12 +32,11 @@ class AdminAutomatedTasksServiceHelperTest {
 
     @Test
     void getCronExpressionSchedulePreviewUsesEuropeLondonDaylightSavingsRules() {
-        config.setExecutionCount(2);
         AdminAutomatedTasksServiceHelper helper = createHelper("2026-10-24T12:00:00Z");
 
         List<AutomatedTaskCronExpressionSchedule> schedule = helper.getCronExpressionSchedulePreview("0 0 0 * * *");
 
-        assertEquals(2, schedule.size());
+        assertEquals(10, schedule.size());
         assertScheduledRun(schedule.get(0), "1", "2026-10-25T00:00:00+01:00");
         assertScheduledRun(schedule.get(1), "2", "2026-10-26T00:00:00Z");
     }
@@ -73,7 +63,7 @@ class AdminAutomatedTasksServiceHelperTest {
 
     private AdminAutomatedTasksServiceHelper createHelper(String instant) {
         Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
-        return new AdminAutomatedTasksServiceHelper(config, clock);
+        return new AdminAutomatedTasksServiceHelper(clock);
     }
 
     private static void assertScheduledRun(
