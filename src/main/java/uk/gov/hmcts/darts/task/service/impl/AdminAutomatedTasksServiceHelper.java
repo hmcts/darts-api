@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.task.config.AdminAutomatedTaskCronExpressionConfig;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionSchedule;
 
 import java.time.Clock;
@@ -20,7 +19,8 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_
 @RequiredArgsConstructor
 public class AdminAutomatedTasksServiceHelper {
 
-    private final AdminAutomatedTaskCronExpressionConfig adminAutomatedTaskCronExpressionConfig;
+    private static final int CRON_SCHEDULE_PREVIEW_COUNT = 10;
+
     private final Clock clock;
 
     public List<AutomatedTaskCronExpressionSchedule> getCronExpressionSchedulePreview(String cronExpression) {
@@ -28,9 +28,8 @@ public class AdminAutomatedTasksServiceHelper {
 
         CronExpression cron = validateAndParseCronExpression(cronExpression);
         ZonedDateTime next = ZonedDateTime.ofInstant(clock.instant(), EUROPE_LONDON_ZONE);
-        int maxExecutionCount = adminAutomatedTaskCronExpressionConfig.getExecutionCount();
 
-        for (int executionNumber = 1; executionNumber <= maxExecutionCount; executionNumber++) {
+        for (int executionNumber = 1; executionNumber <= CRON_SCHEDULE_PREVIEW_COUNT; executionNumber++) {
             next = cron.next(next);
             assert next != null;
             scheduledRunTimes.add(createScheduledRun(executionNumber, next.toOffsetDateTime()));
