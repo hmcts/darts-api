@@ -4,12 +4,15 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -36,6 +39,12 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
     @Autowired
     private CaseRepository caseRepository;
+
+    @Autowired
+    private TranscriptionRepository transcriptionRepository;
+
+    @Autowired
+    private AnnotationRepository annotationRepository;
 
     @Test
     void findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan_ReturnsResults() {
@@ -104,32 +113,6 @@ class CaseRepositoryIntTest extends IntegrationBase {
         assertThat(result).hasSize(1);
         assertThat(result.getFirst()).isEqualTo(matchingCase.getId());
     }
-
-    @Test
-    void resetRetentionProcessingForCases_setRetentionUpdatedAndResetRetentionRetries_selectedCases() {
-        // given
-        CourtCaseEntity caseToUpdate1 = createCaseWithRetentionProcessingValues("CASE-TO-UPDATE-1", false, 3);
-        CourtCaseEntity caseToUpdate2 = createCaseWithRetentionProcessingValues("CASE-TO-UPDATE-2", false, 5);
-        CourtCaseEntity caseToLeaveUnchanged = createCaseWithRetentionProcessingValues("CASE-UNCHANGED", false, 7);
-
-        // when
-        int updatedCases = caseRepository.resetRetentionProcessingForCases(List.of(caseToUpdate1.getId(), caseToUpdate2.getId()));
-
-        // then
-        assertThat(updatedCases).isEqualTo(2);
-
-        CourtCaseEntity actualCaseToUpdate1 = caseRepository.findById(caseToUpdate1.getId()).orElseThrow();
-        CourtCaseEntity actualCaseToUpdate2 = caseRepository.findById(caseToUpdate2.getId()).orElseThrow();
-        CourtCaseEntity actualCaseToLeaveUnchanged = caseRepository.findById(caseToLeaveUnchanged.getId()).orElseThrow();
-
-        assertThat(actualCaseToUpdate1.isRetentionUpdated()).isTrue();
-        assertThat(actualCaseToUpdate1.getRetentionRetries()).isZero();
-        assertThat(actualCaseToUpdate2.isRetentionUpdated()).isTrue();
-        assertThat(actualCaseToUpdate2.getRetentionRetries()).isZero();
-        assertThat(actualCaseToLeaveUnchanged.isRetentionUpdated()).isFalse();
-        assertThat(actualCaseToLeaveUnchanged.getRetentionRetries()).isEqualTo(7);
-    }
-
 
     @Test
     void findCasesIdsNeedingCaseDocumentGenerated_ReturnsMatchingCases() {
@@ -380,52 +363,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    void findCaseIdsWithMediaUploadedAfterRetentionAppliedAndRetentionNotPending_returnOnlyMatchingCases_casesWithRetentions() {
-        // given
-        OffsetDateTime retainUntilAppliedOn = OffsetDateTime.now().minusDays(5);
-        CourtCaseEntity matchingCase = createCaseWithRetention(
-            "MATCHING-CASE",
-            CaseRetentionStatus.COMPLETE,
-            retainUntilAppliedOn,
-            retainUntilAppliedOn.minusMinutes(1)
-        );
-        createLinkedMedia(matchingCase, retainUntilAppliedOn.plusDays(1), 1);
-        createLinkedMedia(matchingCase, retainUntilAppliedOn.plusDays(2), 2);
-
-        CourtCaseEntity mediaUploadedBeforeRetentionApplied = createCaseWithRetention(
-            "MEDIA-BEFORE-RETENTION",
-            CaseRetentionStatus.COMPLETE,
-            retainUntilAppliedOn,
-            retainUntilAppliedOn.minusMinutes(1)
-        );
-        createLinkedMedia(mediaUploadedBeforeRetentionApplied, retainUntilAppliedOn.minusSeconds(1), 1);
-
-        CourtCaseEntity pendingRetention = createCaseWithRetention(
-            "PENDING-RETENTION",
-            CaseRetentionStatus.PENDING,
-            retainUntilAppliedOn,
-            retainUntilAppliedOn.minusMinutes(1)
-        );
-        createLinkedMedia(pendingRetention, retainUntilAppliedOn.plusDays(1), 1);
-
-        CourtCaseEntity latestRetentionPending = createCaseWithRetention(
-            "LATEST-RETENTION-PENDING",
-            CaseRetentionStatus.COMPLETE,
-            retainUntilAppliedOn,
-            retainUntilAppliedOn.minusMinutes(2)
-        );
-        createCaseRetention(latestRetentionPending, CaseRetentionStatus.PENDING, retainUntilAppliedOn, retainUntilAppliedOn.minusMinutes(1));
-        createLinkedMedia(latestRetentionPending, retainUntilAppliedOn.plusDays(1), 1);
-
-        // when
-        List<Integer> result = caseRepository.findCaseIdsWithMediaUploadedAfterRetentionAppliedAndRetentionNotPending(Limit.of(10));
-
-        // then
-        assertThat(result).containsExactly(matchingCase.getId());
-    }
-
-    @Test
-    void findCaseIdsWithTranscriptionsUploadedAfterRetentionAppliedAndRetentionNotPending_returnOnlyMatchingCases_casesWithRetentions() {
+    void resetRetentionProcessingForCasesLinkedToTranscription_setRetentionUpdatedAndResetRetentionRetries_eligibleLinkedCases() {
         // given
         OffsetDateTime retainUntilAppliedOn = OffsetDateTime.now().minusDays(5);
         CourtCaseEntity matchingCase = createCaseWithRetention(
@@ -434,16 +372,17 @@ class CaseRepositoryIntTest extends IntegrationBase {
             retainUntilAppliedOn,
             retainUntilAppliedOn.minusMinutes(1)
         );
-        createLinkedTranscriptionDocument(matchingCase, retainUntilAppliedOn.plusDays(1));
-        createLinkedTranscriptionDocument(matchingCase, retainUntilAppliedOn.plusDays(2));
+        Long transcriptionId = createLinkedTranscriptionDocument(matchingCase, retainUntilAppliedOn.plusDays(1));
 
-        CourtCaseEntity transcriptionUploadedBeforeRetentionApplied = createCaseWithRetention(
-            "TRANSCRIPTION-BEFORE-RETENTION",
+        CourtCaseEntity openCase = createCaseWithRetention(
+            "OPEN-TRANSCRIPTION-RETENTION",
             CaseRetentionStatus.COMPLETE,
             retainUntilAppliedOn,
             retainUntilAppliedOn.minusMinutes(1)
         );
-        createLinkedTranscriptionDocument(transcriptionUploadedBeforeRetentionApplied, retainUntilAppliedOn.minusSeconds(1));
+        openCase.setClosed(false);
+        dartsDatabase.save(openCase);
+        createTranscriptionLinkedCase(openCase, transcriptionId);
 
         CourtCaseEntity pendingRetention = createCaseWithRetention(
             "PENDING-TRANSCRIPTION-RETENTION",
@@ -451,26 +390,23 @@ class CaseRepositoryIntTest extends IntegrationBase {
             retainUntilAppliedOn,
             retainUntilAppliedOn.minusMinutes(1)
         );
-        createLinkedTranscriptionDocument(pendingRetention, retainUntilAppliedOn.plusDays(1));
-
-        CourtCaseEntity latestRetentionPending = createCaseWithRetention(
-            "LATEST-TRANSCRIPTION-RETENTION-PENDING",
-            CaseRetentionStatus.COMPLETE,
-            retainUntilAppliedOn,
-            retainUntilAppliedOn.minusMinutes(2)
-        );
-        createCaseRetention(latestRetentionPending, CaseRetentionStatus.PENDING, retainUntilAppliedOn, retainUntilAppliedOn.minusMinutes(1));
-        createLinkedTranscriptionDocument(latestRetentionPending, retainUntilAppliedOn.plusDays(1));
+        createTranscriptionLinkedCase(pendingRetention, transcriptionId);
 
         // when
-        List<Integer> result = caseRepository.findCaseIdsWithTranscriptionsUploadedAfterRetentionAppliedAndRetentionNotPending(Limit.of(10));
+        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(transcriptionId);
+        int updatedCases = caseRepository.resetRetentionProcessingForCases(caseIds);
 
         // then
-        assertThat(result).containsExactly(matchingCase.getId());
+        assertThat(caseIds).containsExactly(matchingCase.getId());
+        assertThat(updatedCases).isEqualTo(1);
+        assertCaseRetentionProcessingReset(matchingCase.getId());
+        assertCaseRetentionProcessingUnchanged(openCase.getId(), 0);
+        assertCaseRetentionProcessingUnchanged(pendingRetention.getId(), 0);
     }
 
     @Test
-    void findCaseIdsWithAnnotationsUploadedAfterRetentionAppliedAndRetentionNotPending_returnOnlyMatchingCases_casesWithRetentions() {
+    @Transactional
+    void resetRetentionProcessingForCasesLinkedToAnnotation_setRetentionUpdatedAndResetRetentionRetries_eligibleLinkedCases() {
         // given
         OffsetDateTime retainUntilAppliedOn = OffsetDateTime.now().minusDays(5);
         CourtCaseEntity matchingCase = createCaseWithRetention(
@@ -479,16 +415,17 @@ class CaseRepositoryIntTest extends IntegrationBase {
             retainUntilAppliedOn,
             retainUntilAppliedOn.minusMinutes(1)
         );
-        createLinkedAnnotationDocument(matchingCase, retainUntilAppliedOn.plusDays(1));
-        createLinkedAnnotationDocument(matchingCase, retainUntilAppliedOn.plusDays(2));
+        Integer annotationId = createLinkedAnnotationDocument(matchingCase, retainUntilAppliedOn.plusDays(1));
 
-        CourtCaseEntity annotationUploadedBeforeRetentionApplied = createCaseWithRetention(
-            "ANNOTATION-BEFORE-RETENTION",
+        CourtCaseEntity openCase = createCaseWithRetention(
+            "OPEN-ANNOTATION-RETENTION",
             CaseRetentionStatus.COMPLETE,
             retainUntilAppliedOn,
             retainUntilAppliedOn.minusMinutes(1)
         );
-        createLinkedAnnotationDocument(annotationUploadedBeforeRetentionApplied, retainUntilAppliedOn.minusSeconds(1));
+        openCase.setClosed(false);
+        dartsDatabase.save(openCase);
+        createHearingAnnotation(openCase, annotationId);
 
         CourtCaseEntity pendingRetention = createCaseWithRetention(
             "PENDING-ANNOTATION-RETENTION",
@@ -496,67 +433,18 @@ class CaseRepositoryIntTest extends IntegrationBase {
             retainUntilAppliedOn,
             retainUntilAppliedOn.minusMinutes(1)
         );
-        createLinkedAnnotationDocument(pendingRetention, retainUntilAppliedOn.plusDays(1));
-
-        CourtCaseEntity latestRetentionPending = createCaseWithRetention(
-            "LATEST-ANNOTATION-RETENTION-PENDING",
-            CaseRetentionStatus.COMPLETE,
-            retainUntilAppliedOn,
-            retainUntilAppliedOn.minusMinutes(2)
-        );
-        createCaseRetention(latestRetentionPending, CaseRetentionStatus.PENDING, retainUntilAppliedOn, retainUntilAppliedOn.minusMinutes(1));
-        createLinkedAnnotationDocument(latestRetentionPending, retainUntilAppliedOn.plusDays(1));
+        createHearingAnnotation(pendingRetention, annotationId);
 
         // when
-        List<Integer> result = caseRepository.findCaseIdsWithAnnotationsUploadedAfterRetentionAppliedAndRetentionNotPending(Limit.of(10));
+        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToAnnotationForRetentionProcessingReset(annotationId);
+        int updatedCases = caseRepository.resetRetentionProcessingForCases(caseIds);
 
         // then
-        assertThat(result).containsExactly(matchingCase.getId());
-    }
-
-    @Test
-    void findCaseIdsWithCaseDocumentsUploadedAfterRetentionAppliedAndRetentionNotPending_returnOnlyMatchingCases_casesWithRetentions() {
-        // given
-        OffsetDateTime retainUntilAppliedOn = OffsetDateTime.now().minusDays(5);
-        CourtCaseEntity matchingCase = createCaseWithRetention(
-            "MATCHING-CASE-DOCUMENT-CASE",
-            CaseRetentionStatus.COMPLETE,
-            retainUntilAppliedOn,
-            retainUntilAppliedOn.minusMinutes(1)
-        );
-        createLinkedCaseDocument(matchingCase, retainUntilAppliedOn.plusDays(1));
-        createLinkedCaseDocument(matchingCase, retainUntilAppliedOn.plusDays(2));
-
-        CourtCaseEntity caseDocumentUploadedBeforeRetentionApplied = createCaseWithRetention(
-            "CASE-DOCUMENT-BEFORE-RETENTION",
-            CaseRetentionStatus.COMPLETE,
-            retainUntilAppliedOn,
-            retainUntilAppliedOn.minusMinutes(1)
-        );
-        createLinkedCaseDocument(caseDocumentUploadedBeforeRetentionApplied, retainUntilAppliedOn.minusSeconds(1));
-
-        CourtCaseEntity pendingRetention = createCaseWithRetention(
-            "PENDING-CASE-DOCUMENT-RETENTION",
-            CaseRetentionStatus.PENDING,
-            retainUntilAppliedOn,
-            retainUntilAppliedOn.minusMinutes(1)
-        );
-        createLinkedCaseDocument(pendingRetention, retainUntilAppliedOn.plusDays(1));
-
-        CourtCaseEntity latestRetentionPending = createCaseWithRetention(
-            "LATEST-CASE-DOCUMENT-RETENTION-PENDING",
-            CaseRetentionStatus.COMPLETE,
-            retainUntilAppliedOn,
-            retainUntilAppliedOn.minusMinutes(2)
-        );
-        createCaseRetention(latestRetentionPending, CaseRetentionStatus.PENDING, retainUntilAppliedOn, retainUntilAppliedOn.minusMinutes(1));
-        createLinkedCaseDocument(latestRetentionPending, retainUntilAppliedOn.plusDays(1));
-
-        // when
-        List<Integer> result = caseRepository.findCaseIdsWithCaseDocumentsUploadedAfterRetentionAppliedAndRetentionNotPending(Limit.of(10));
-
-        // then
-        assertThat(result).containsExactly(matchingCase.getId());
+        assertThat(caseIds).containsExactly(matchingCase.getId());
+        assertThat(updatedCases).isEqualTo(1);
+        assertCaseRetentionProcessingReset(matchingCase.getId());
+        assertCaseRetentionProcessingUnchanged(openCase.getId(), 0);
+        assertCaseRetentionProcessingUnchanged(pendingRetention.getId(), 0);
     }
 
     @Test
@@ -587,6 +475,10 @@ class CaseRepositoryIntTest extends IntegrationBase {
                                                     OffsetDateTime retainUntilAppliedOn,
                                                     OffsetDateTime createdDateTime) {
         CourtCaseEntity courtCase = dartsDatabase.createCase(SOME_COURTHOUSE, caseNumber);
+        courtCase.setClosed(true);
+        courtCase.setRetentionUpdated(false);
+        courtCase.setRetentionRetries(0);
+        courtCase = dartsDatabase.save(courtCase);
         createCaseRetention(courtCase, retentionStatus, retainUntilAppliedOn, createdDateTime);
         return courtCase;
     }
@@ -606,25 +498,23 @@ class CaseRepositoryIntTest extends IntegrationBase {
         dartsDatabase.save(caseRetention);
     }
 
-    private void createLinkedMedia(CourtCaseEntity courtCase, OffsetDateTime uploadedAt, int channel) {
-        var media = dartsDatabase.createMediaEntity(SOME_COURTHOUSE, SOME_ROOM, uploadedAt.minusHours(1), uploadedAt, channel);
-        media.setCreatedDateTime(uploadedAt);
-        media = dartsDatabase.save(media);
-
-        MediaLinkedCaseEntity mediaLinkedCase = new MediaLinkedCaseEntity();
-        mediaLinkedCase.setCourtCase(courtCase);
-        mediaLinkedCase.setMedia(media);
-        dartsDatabase.save(mediaLinkedCase);
-    }
-
-    private void createLinkedTranscriptionDocument(CourtCaseEntity courtCase, OffsetDateTime uploadedAt) {
+    private Long createLinkedTranscriptionDocument(CourtCaseEntity courtCase, OffsetDateTime uploadedAt) {
         var transcription = dartsDatabase.getTranscriptionStub().createTranscription(courtCase);
         var transcriptionDocument = dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(transcription);
         transcriptionDocument.setUploadedDateTime(uploadedAt);
         dartsDatabase.save(transcriptionDocument);
+        return transcription.getId();
     }
 
-    private void createLinkedAnnotationDocument(CourtCaseEntity courtCase, OffsetDateTime uploadedAt) {
+    private void createTranscriptionLinkedCase(CourtCaseEntity courtCase, Long transcriptionId) {
+        var transcriptionLinkedCase = TranscriptionLinkedCaseEntity.builder()
+            .transcription(transcriptionRepository.getReferenceById(transcriptionId))
+            .courtCase(courtCase)
+            .build();
+        dartsDatabase.save(transcriptionLinkedCase);
+    }
+
+    private Integer createLinkedAnnotationDocument(CourtCaseEntity courtCase, OffsetDateTime uploadedAt) {
         var hearing = dartsDatabase.getHearingStub().createHearing(
             SOME_COURTHOUSE,
             SOME_ROOM,
@@ -644,18 +534,30 @@ class CaseRepositoryIntTest extends IntegrationBase {
         );
         annotationDocument.setUploadedDateTime(uploadedAt);
         dartsDatabase.save(annotationDocument);
+        return annotation.getId();
     }
 
-    private void createLinkedCaseDocument(CourtCaseEntity courtCase, OffsetDateTime uploadedAt) {
-        var caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCase);
-        caseDocument.setCreatedDateTime(uploadedAt);
-        dartsDatabase.save(caseDocument);
+    private void createHearingAnnotation(CourtCaseEntity courtCase, Integer annotationId) {
+        var hearing = dartsDatabase.getHearingStub().createHearing(
+            SOME_COURTHOUSE,
+            SOME_ROOM,
+            courtCase.getCaseNumber(),
+            DateConverterUtil.toLocalDateTime(testTime)
+        );
+        var annotation = annotationRepository.findById(annotationId).orElseThrow();
+        annotation.addHearing(hearing);
+        annotationRepository.save(annotation);
     }
 
-    private CourtCaseEntity createCaseWithRetentionProcessingValues(String caseNumber, boolean retentionUpdated, int retentionRetries) {
-        CourtCaseEntity courtCase = dartsDatabase.createCase(SOME_COURTHOUSE, caseNumber);
-        courtCase.setRetentionUpdated(retentionUpdated);
-        courtCase.setRetentionRetries(retentionRetries);
-        return dartsDatabase.save(courtCase);
+    private void assertCaseRetentionProcessingReset(Integer caseId) {
+        CourtCaseEntity courtCase = caseRepository.findById(caseId).orElseThrow();
+        assertThat(courtCase.isRetentionUpdated()).isTrue();
+        assertThat(courtCase.getRetentionRetries()).isZero();
+    }
+
+    private void assertCaseRetentionProcessingUnchanged(Integer caseId, int expectedRetentionRetries) {
+        CourtCaseEntity courtCase = caseRepository.findById(caseId).orElseThrow();
+        assertThat(courtCase.isRetentionUpdated()).isFalse();
+        assertThat(courtCase.getRetentionRetries()).isEqualTo(expectedRetentionRetries);
     }
 }

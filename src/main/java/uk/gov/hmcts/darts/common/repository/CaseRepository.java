@@ -111,104 +111,69 @@ public interface CaseRepository
     @Query("""
         SELECT DISTINCT cc.id
         FROM CourtCaseEntity cc
-        JOIN CaseRetentionEntity cr
-        ON cr.courtCase.id = cc.id
-        JOIN MediaLinkedCaseEntity mlc
-        ON mlc.courtCase.id = cc.id
-        JOIN MediaEntity med
-        ON med.id = mlc.media.id
-        WHERE cr.currentState <> 'PENDING'
-        AND cr.retainUntilAppliedOn IS NOT NULL
-        AND med.createdDateTime > cr.retainUntilAppliedOn
-        AND cr.createdDateTime = (
-            SELECT MAX(subCr.createdDateTime)
-            FROM CaseRetentionEntity subCr
-            WHERE subCr.courtCase.id = cc.id
+        WHERE cc.closed = true
+        AND EXISTS (
+            SELECT caseRetention.id
+            FROM CaseRetentionEntity caseRetention
+            WHERE caseRetention.courtCase.id = cc.id
+            AND caseRetention.retainUntilAppliedOn IS NOT NULL
         )
-        ORDER BY cc.id ASC
-        """)
-    List<Integer> findCaseIdsWithMediaUploadedAfterRetentionAppliedAndRetentionNotPending(Limit limit);
-
-    @Query("""
-        SELECT DISTINCT cc.id
-        FROM CaseRetentionEntity cr
-        JOIN cr.courtCase cc,
-        TranscriptionDocumentEntity trd
-        WHERE cr.currentState <> 'PENDING'
-        AND cr.retainUntilAppliedOn IS NOT NULL
-        AND trd.uploadedDateTime > cr.retainUntilAppliedOn
-        AND cr.createdDateTime = (
-            SELECT MAX(subCr.createdDateTime)
-            FROM CaseRetentionEntity subCr
-            WHERE subCr.courtCase.id = cc.id
+        AND NOT EXISTS (
+            SELECT pendingRetention.id
+            FROM CaseRetentionEntity pendingRetention
+            WHERE pendingRetention.courtCase.id = cc.id
+            AND pendingRetention.currentState = 'PENDING'
         )
         AND (
             EXISTS (
-                SELECT directCase.id
-                FROM TranscriptionEntity directTranscription
-                JOIN directTranscription.courtCases directCase
-                WHERE directTranscription.id = trd.transcription.id
-                AND directCase.id = cc.id
+                SELECT directCourtCase.id
+                FROM TranscriptionEntity transcription
+                JOIN transcription.courtCases directCourtCase
+                WHERE transcription.id = :transcriptionId
+                AND directCourtCase.id = cc.id
             )
             OR EXISTS (
                 SELECT hearing.id
-                FROM TranscriptionEntity hearingTranscription
-                JOIN hearingTranscription.hearings hearing
-                WHERE hearingTranscription.id = trd.transcription.id
+                FROM TranscriptionEntity transcription
+                JOIN transcription.hearings hearing
+                WHERE transcription.id = :transcriptionId
                 AND hearing.courtCase.id = cc.id
             )
             OR EXISTS (
                 SELECT linkedCase.id
                 FROM TranscriptionLinkedCaseEntity linkedCase
-                WHERE linkedCase.transcription.id = trd.transcription.id
+                WHERE linkedCase.transcription.id = :transcriptionId
                 AND linkedCase.courtCase.id = cc.id
             )
         )
-        ORDER BY cc.id ASC
         """)
-    List<Integer> findCaseIdsWithTranscriptionsUploadedAfterRetentionAppliedAndRetentionNotPending(Limit limit);
+    List<Integer> findCaseIdsLinkedToTranscriptionForRetentionProcessingReset(Long transcriptionId);
 
     @Query("""
         SELECT DISTINCT cc.id
-        FROM CaseRetentionEntity cr
-        JOIN cr.courtCase cc,
-        AnnotationDocumentEntity ado
-        WHERE cr.currentState <> 'PENDING'
-        AND cr.retainUntilAppliedOn IS NOT NULL
-        AND ado.uploadedDateTime > cr.retainUntilAppliedOn
-        AND cr.createdDateTime = (
-            SELECT MAX(subCr.createdDateTime)
-            FROM CaseRetentionEntity subCr
-            WHERE subCr.courtCase.id = cc.id
+        FROM CourtCaseEntity cc
+        WHERE cc.closed = true
+        AND EXISTS (
+            SELECT caseRetention.id
+            FROM CaseRetentionEntity caseRetention
+            WHERE caseRetention.courtCase.id = cc.id
+            AND caseRetention.retainUntilAppliedOn IS NOT NULL
+        )
+        AND NOT EXISTS (
+            SELECT pendingRetention.id
+            FROM CaseRetentionEntity pendingRetention
+            WHERE pendingRetention.courtCase.id = cc.id
+            AND pendingRetention.currentState = 'PENDING'
         )
         AND EXISTS (
             SELECT hearing.id
             FROM AnnotationEntity annotation
             JOIN annotation.hearings hearing
-            WHERE annotation.id = ado.annotation.id
+            WHERE annotation.id = :annotationId
             AND hearing.courtCase.id = cc.id
         )
-        ORDER BY cc.id ASC
         """)
-    List<Integer> findCaseIdsWithAnnotationsUploadedAfterRetentionAppliedAndRetentionNotPending(Limit limit);
-
-    @Query("""
-        SELECT DISTINCT cc.id
-        FROM CaseRetentionEntity cr
-        JOIN cr.courtCase cc,
-        CaseDocumentEntity cad
-        WHERE cr.currentState <> 'PENDING'
-        AND cr.retainUntilAppliedOn IS NOT NULL
-        AND cad.createdDateTime > cr.retainUntilAppliedOn
-        AND cad.courtCase.id = cc.id
-        AND cr.createdDateTime = (
-            SELECT MAX(subCr.createdDateTime)
-            FROM CaseRetentionEntity subCr
-            WHERE subCr.courtCase.id = cc.id
-        )
-        ORDER BY cc.id ASC
-        """)
-    List<Integer> findCaseIdsWithCaseDocumentsUploadedAfterRetentionAppliedAndRetentionNotPending(Limit limit);
+    List<Integer> findCaseIdsLinkedToAnnotationForRetentionProcessingReset(Integer annotationId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional

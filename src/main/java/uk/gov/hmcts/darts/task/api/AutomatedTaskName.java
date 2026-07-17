@@ -45,8 +45,7 @@ public enum AutomatedTaskName {
     MEDIA_REQUEST_CLEANUP("MediaRequestCleanUp"),
     REMOVE_OLD_ARM_RPO_PRODUCTIONS("RemoveOldArmRpoProductions"),
     ARM_RPO_BACKLOG_CATCHUP("ArmRpoBacklogCatchup", Constants.AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE),
-    CLEAN_UP_DETS_DATA("CleanUpDetsData"),
-    RESET_RETENTION_AFTER_DOCUMENT_CHANGE("ResetRetentionAfterDocumentChange");
+    CLEAN_UP_DETS_DATA("CleanUpDetsData");
 
     private final String taskName;
     private final String conditionalOnSpEL;
