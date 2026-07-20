@@ -23,9 +23,11 @@ import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
 
+import java.util.List;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl.FAILURE_STATES_LIST;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
 
@@ -92,16 +94,27 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
             return;
         }
 
-        if (linkedCases.stream().map(MediaLinkedCaseEntity::getCourtCase).anyMatch(courtCase -> !isCaseEligibleForRetentionReset(courtCase))) {
+        List<CourtCaseEntity> courtCases = linkedCases.stream()
+            .map(MediaLinkedCaseEntity::getCourtCase)
+            .filter(courtCase -> nonNull(courtCase) && nonNull(courtCase.getId()))
+            .toList();
+
+        if (courtCases.isEmpty()) {
+            log.debug("No court cases found for media {}", mediaEntity.getId());
+            return;
+        }
+
+        if (courtCases.stream().anyMatch(courtCase -> !isCaseEligibleForRetentionReset(courtCase))) {
             log.debug("Media {} has at least one linked case that is not eligible for retention reset", mediaEntity.getId());
             return;
         }
 
-        CourtCaseEntity firstLinkedCase = linkedCases.getFirst().getCourtCase();
-        firstLinkedCase.setRetentionUpdated(true);
-        firstLinkedCase.setRetentionRetries(0);
-        caseRepository.save(firstLinkedCase);
-        log.info("Reset retention processing for first linked case {} for media {}", firstLinkedCase.getId(), mediaEntity.getId());
+        List<Integer> caseIds = courtCases.stream()
+            .map(CourtCaseEntity::getId)
+            .distinct()
+            .toList();
+        caseRepository.resetRetentionProcessingForCases(caseIds);
+        log.info("Reset retention processing for linked case ids {} for media {}", caseIds, mediaEntity.getId());
     }
 
     private boolean isCaseEligibleForRetentionReset(CourtCaseEntity courtCase) {
