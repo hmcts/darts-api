@@ -32,10 +32,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.lenient;
@@ -132,7 +130,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     }
 
     @Test
-    void processSingleElement_resetRetentionProcessingForFirstLinkedCase_allLinkedCasesClosedAndLatestRetentionComplete() {
+    void processSingleElement_resetRetentionProcessingForLinkedCases_allLinkedCasesClosedAndLatestRetentionComplete() {
         CourtCaseEntity firstLinkedCase = createCourtCase(1, true);
         CourtCaseEntity secondLinkedCase = createCourtCase(2, true);
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
@@ -149,10 +147,25 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
-        assertTrue(firstLinkedCase.isRetentionUpdated());
-        assertEquals(0, firstLinkedCase.getRetentionRetries());
-        assertFalse(secondLinkedCase.isRetentionUpdated());
-        verify(caseRepository).save(firstLinkedCase);
+        verify(caseRepository).resetRetentionProcessingForCases(List.of(firstLinkedCase.getId(), secondLinkedCase.getId()));
+    }
+
+    @Test
+    void processSingleElement_resetRetentionProcessingForLinkedCases_ignoresNullLinkedCase() {
+        CourtCaseEntity firstLinkedCase = createCourtCase(1, true);
+        when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
+        when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
+        when(mediaEntity.getId()).thenReturn(44L);
+        when(mediaLinkedCaseRepository.findByMedia(mediaEntity)).thenReturn(List.of(
+            createMediaLinkedCase(firstLinkedCase),
+            createMediaLinkedCase(null)
+        ));
+        when(caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(firstLinkedCase)).thenReturn(
+            Optional.of(createCaseRetention(COMPLETE.name())));
+
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
+
+        verify(caseRepository).resetRetentionProcessingForCases(List.of(firstLinkedCase.getId()));
     }
 
     @Test
@@ -171,7 +184,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
-        verify(caseRepository, never()).save(firstLinkedCase);
+        verify(caseRepository, never()).resetRetentionProcessingForCases(any());
     }
 
     @Test
@@ -192,7 +205,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
-        verify(caseRepository, never()).save(firstLinkedCase);
+        verify(caseRepository, never()).resetRetentionProcessingForCases(any());
     }
 
     @Test
