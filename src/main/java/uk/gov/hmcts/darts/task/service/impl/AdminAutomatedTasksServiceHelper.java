@@ -6,6 +6,7 @@ import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionScheduleResponse;
+import uk.gov.hmcts.darts.util.DateTimeHelper;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -13,7 +14,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.darts.common.util.DateConverterUtil.EUROPE_LONDON_ZONE;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_INVALID;
 
 @Service
@@ -28,7 +28,7 @@ public class AdminAutomatedTasksServiceHelper {
     public List<AutomatedTaskCronExpressionScheduleResponse> getCronExpressionSchedulePreview(CronExpression cron) {
         List<AutomatedTaskCronExpressionScheduleResponse> scheduleResponseObject = new ArrayList<>();
 
-        ZonedDateTime next = ZonedDateTime.ofInstant(clock.instant(), EUROPE_LONDON_ZONE);
+        ZonedDateTime next = DateTimeHelper.getCurrentTimeInEuropeLondon(clock);
 
         for (int executionNumber = 1; executionNumber <= cronExpressionPreviewCount; executionNumber++) {
             next = cron.next(next);
