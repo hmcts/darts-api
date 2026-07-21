@@ -14,6 +14,8 @@ public interface MediaLinkedCaseRepository extends JpaRepository<MediaLinkedCase
 
     List<MediaLinkedCaseEntity> findByMedia(MediaEntity media);
 
+    List<MediaLinkedCaseEntity> findByMediaId(Long mediaId);
+
     boolean existsByMediaAndCourtCase(MediaEntity media, CourtCaseEntity courtCase);
 
     @Query("""

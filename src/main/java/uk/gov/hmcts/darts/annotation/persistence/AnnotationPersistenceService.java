@@ -12,8 +12,11 @@ import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+
+import java.util.List;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_ANNOTATION;
 
@@ -29,14 +32,15 @@ public class AnnotationPersistenceService {
     private final AuditApi auditApi;
     private final UserIdentity userIdentity;
     private final AnnotationDocumentRepository annotationDocumentRepository;
+    private final CaseRepository caseRepository;
 
     @Transactional
     public void persistAnnotation(
-            ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
-            ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
-            Integer hearingId,
-            AnnotationEntity annotationEntity,
-            AnnotationDocumentEntity annotationDocumentEntity) {
+        ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
+        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
+        Integer hearingId,
+        AnnotationEntity annotationEntity,
+        AnnotationDocumentEntity annotationDocumentEntity) {
 
         annotationRepository.saveAndFlush(annotationEntity);
 
@@ -53,6 +57,18 @@ public class AnnotationPersistenceService {
         externalObjectDirectoryRepository.save(unstructuredExternalObjectDirectory);
 
         auditApi.record(IMPORT_ANNOTATION, userIdentity.getUserAccount(), hearing.getCourtCase());
+        resetRetentionProcessingForCasesLinkedToAnnotation(annotationEntity.getId());
+    }
+
+    private void resetRetentionProcessingForCasesLinkedToAnnotation(Integer annotationId) {
+        List<Integer> caseIds = caseRepository.findCaseIdsLinkedToAnnotation(annotationId);
+        if (caseIds.isEmpty()) {
+            log.info("No cases found to reset retention processing for annotation id {}", annotationId);
+            return;
+        }
+
+        log.info("Resetting retention processing for case ids {} linked to annotation id {}", caseIds, annotationId);
+        caseRepository.resetRetentionProcessingForCases(caseIds);
     }
 
     @Transactional

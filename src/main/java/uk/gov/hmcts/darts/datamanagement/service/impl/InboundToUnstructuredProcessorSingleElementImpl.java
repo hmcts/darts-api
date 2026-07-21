@@ -6,20 +6,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
 
+import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl.FAILURE_STATES_LIST;
+import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
 
 
 @Service
@@ -34,6 +44,9 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final DataManagementConfiguration dataManagementConfiguration;
     private final UserAccountRepository userAccountRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final CaseRepository caseRepository;
+    private final CaseRetentionRepository caseRetentionRepository;
+    private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
 
     @SuppressWarnings({"java:S4790", "PMD.AvoidInstanceofChecksInCatchClause"})
     @Override
@@ -54,6 +67,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
             unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
             log.debug("Saved unstructured stored EOD with Id: {}", unstructuredExternalObjectDirectoryEntity.getId());
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+            resetRetentionProcessingForLinkedCases(inboundEodEntity.getMedia());
             log.debug("Transfer complete for EOD ID: {}", inboundEodEntity.getId());
 
         } catch (Exception e) {
@@ -67,6 +81,49 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         } finally {
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
         }
+    }
+
+    private void resetRetentionProcessingForLinkedCases(MediaEntity mediaEntity) {
+        if (isNull(mediaEntity)) {
+            return;
+        }
+
+        var linkedCases = mediaLinkedCaseRepository.findByMedia(mediaEntity);
+        if (linkedCases.isEmpty()) {
+            log.debug("No linked cases found for media {}", mediaEntity.getId());
+            return;
+        }
+
+        List<CourtCaseEntity> courtCases = linkedCases.stream()
+            .map(MediaLinkedCaseEntity::getCourtCase)
+            .filter(courtCase -> nonNull(courtCase) && nonNull(courtCase.getId()))
+            .toList();
+
+        if (courtCases.isEmpty()) {
+            log.debug("No court cases found for media {}", mediaEntity.getId());
+            return;
+        }
+
+        if (courtCases.stream().anyMatch(courtCase -> !isCaseEligibleForRetentionReset(courtCase))) {
+            log.debug("Media {} has at least one linked case that is not eligible for retention reset", mediaEntity.getId());
+            return;
+        }
+
+        List<Integer> caseIds = courtCases.stream()
+            .map(CourtCaseEntity::getId)
+            .distinct()
+            .toList();
+        caseRepository.resetRetentionProcessingForCases(caseIds);
+        log.info("Reset retention processing for linked case ids {} for media {}", caseIds, mediaEntity.getId());
+    }
+
+    private boolean isCaseEligibleForRetentionReset(CourtCaseEntity courtCase) {
+
+        return Boolean.TRUE.equals(courtCase.getClosed())
+            && caseRetentionRepository.findTopByCourtCaseOrderByCreatedDateTimeDesc(courtCase)
+            .map(CaseRetentionEntity::getCurrentState)
+            .filter(COMPLETE.name()::equals)
+            .isPresent();
     }
 
 

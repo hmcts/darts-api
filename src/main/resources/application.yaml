@@ -612,7 +612,6 @@ darts:
       dets-to-arm-batch-processor:
         max-arm-manifest-items: 100
         manifest-file-prefix: DETS
-
   annotations:
     allowed-extensions:
       - "docx"
