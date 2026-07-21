@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.scheduling.support.CronExpression;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
-import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionSchedule;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionScheduleResponse;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -25,7 +25,7 @@ class AdminAutomatedTasksServiceHelperTest {
 
         CronExpression cronExpression = helper.validateAndParseCronExpression("0 0 10 * * *");
 
-        List<AutomatedTaskCronExpressionSchedule> schedule = helper.getCronExpressionSchedulePreview(cronExpression);
+        List<AutomatedTaskCronExpressionScheduleResponse> schedule = helper.getCronExpressionSchedulePreview(cronExpression);
 
         assertEquals(10, schedule.size());
         assertScheduledRun(schedule.get(0), "1", "2026-07-16T10:00:00+01:00");
@@ -39,7 +39,7 @@ class AdminAutomatedTasksServiceHelperTest {
 
         CronExpression cronExpression = helper.validateAndParseCronExpression("0 0 0 * * *");
 
-        List<AutomatedTaskCronExpressionSchedule> schedule = helper.getCronExpressionSchedulePreview(cronExpression);
+        List<AutomatedTaskCronExpressionScheduleResponse> schedule = helper.getCronExpressionSchedulePreview(cronExpression);
 
         assertEquals(10, schedule.size());
         assertScheduledRun(schedule.get(0), "1", "2026-10-25T00:00:00+01:00");
@@ -62,17 +62,17 @@ class AdminAutomatedTasksServiceHelperTest {
             () -> helper.validateAndParseCronExpression("not a cron expression")
         );
 
-        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST, exception.getError());
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_INVALID, exception.getError());
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
     }
 
     private AdminAutomatedTasksServiceHelper createHelper(String instant) {
         Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
-        return new AdminAutomatedTasksServiceHelper(clock);
+        return new AdminAutomatedTasksServiceHelper(10, clock);
     }
 
     private static void assertScheduledRun(
-        AutomatedTaskCronExpressionSchedule scheduledRun,
+        AutomatedTaskCronExpressionScheduleResponse scheduledRun,
         String executionNumber,
         String scheduledAt) {
         assertEquals(executionNumber, scheduledRun.getExecutionNumber());

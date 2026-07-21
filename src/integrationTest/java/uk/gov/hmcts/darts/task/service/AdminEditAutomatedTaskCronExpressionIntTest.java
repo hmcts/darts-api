@@ -26,7 +26,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @AutoConfigureMockMvc
-class AdminEditAutomatedTaskCronExpressionTest extends IntegrationBase {
+class AdminEditAutomatedTaskCronExpressionIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/admin/automated-tasks/");
     private static final Instant FIXED_INSTANT = Instant.parse("2026-07-16T08:30:00Z");
@@ -63,7 +63,7 @@ class AdminEditAutomatedTaskCronExpressionTest extends IntegrationBase {
                     patch(ENDPOINT + "/1/edit-cron-expression")
                         .contentType(APPLICATION_JSON_VALUE)
                         .content("""
-                                     { "cronExpression": "0 0 10 * * *" }
+                                     { "cron_expression": "0 0 10 * * *" }
                                      """))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -91,16 +91,16 @@ class AdminEditAutomatedTaskCronExpressionTest extends IntegrationBase {
                     post(ENDPOINT + "/1/edit-cron-expression")
                         .contentType(APPLICATION_JSON_VALUE)
                         .content("""
-                                     { "cronExpression": "0 0 10 * * *" }
+                                     { "cron_expression": "0 0 10 * * *" }
                                      """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(10)))
-                .andExpect(jsonPath("$[0].executionNumber").value("1"))
-                .andExpect(jsonPath("$[0].scheduledAt").value("2026-07-16T10:00:00+01:00"))
-                .andExpect(jsonPath("$[1].executionNumber").value("2"))
-                .andExpect(jsonPath("$[1].scheduledAt").value("2026-07-17T10:00:00+01:00"))
-                .andExpect(jsonPath("$[9].executionNumber").value("10"))
-                .andExpect(jsonPath("$[9].scheduledAt").value("2026-07-25T10:00:00+01:00"))
+                .andExpect(jsonPath("$[0].execution_number").value("1"))
+                .andExpect(jsonPath("$[0].scheduled_at").value("2026-07-16T10:00:00+01:00"))
+                .andExpect(jsonPath("$[1].execution_number").value("2"))
+                .andExpect(jsonPath("$[1].scheduled_at").value("2026-07-17T10:00:00+01:00"))
+                .andExpect(jsonPath("$[9].execution_number").value("10"))
+                .andExpect(jsonPath("$[9].scheduled_at").value("2026-07-25T10:00:00+01:00"))
                 .andReturn();
         } finally {
             automatedTaskEntity = automatedTaskRepository.findById(1).orElseThrow();
@@ -124,11 +124,11 @@ class AdminEditAutomatedTaskCronExpressionTest extends IntegrationBase {
                     patch(ENDPOINT + "/1/edit-cron-expression")
                         .contentType(APPLICATION_JSON_VALUE)
                         .content("""
-                                     { "cronExpression": "0 0 10 * * *" }
+                                     { "cron_expression": "0 0 10 * * *" }
                                      """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.type").value("AUTOMATED_TASK_104"))
-                .andExpect(jsonPath("$.title").value("The automated task request is incorrect"))
+                .andExpect(jsonPath("$.type").value("AUTOMATED_TASK_105"))
+                .andExpect(jsonPath("$.title").value("The automated task cron expression is not editable"))
                 .andReturn();
 
             automatedTaskEntity = automatedTaskRepository.findById(1).orElseThrow();
