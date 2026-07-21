@@ -96,6 +96,16 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
+    public boolean deleteMultipleBlobsUsingBatching(List<String> blobPathAndNames) {
+        return armService.deleteMultipleBlobsUsingBatching(armDataManagementConfiguration.getContainerName(), blobPathAndNames);
+    }
+
+    @Override
+    public boolean deleteMultipleBlobsIndividually(List<String> blobPathAndNames) {
+        return armService.deleteMultipleBlobsIndividually(armDataManagementConfiguration.getContainerName(), blobPathAndNames);
+    }
+
+    @Override
     public UpdateMetadataResponse updateMetadata(String externalRecordId,
                                                  OffsetDateTime eventTimestamp,
                                                  RetentionConfidenceScoreEnum retConfScore,

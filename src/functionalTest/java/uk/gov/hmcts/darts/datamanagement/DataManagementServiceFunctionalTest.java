@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.FunctionalTest;
-import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
@@ -43,14 +42,12 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
     private static final String TEST_BLOB_ID = "b0f23c62-8dd3-4e4e-ae6a-321ff6eb61d8";
 
     @Value("${darts.storage.blob.container-name.unstructured}")
-    String unstructuredStorageContainerName;
+    private String unstructuredStorageContainerName;
 
     @Autowired
-    DataManagementService dataManagementService;
+    private DataManagementService dataManagementService;
     @Autowired
-    DataManagementConfiguration dataManagementConfiguration;
-    @Autowired
-    ArmDataManagementConfiguration armDataManagementConfiguration;
+    private DataManagementConfiguration dataManagementConfiguration;
 
     @Test
     void saveBinaryDataToBlobStorage() {
