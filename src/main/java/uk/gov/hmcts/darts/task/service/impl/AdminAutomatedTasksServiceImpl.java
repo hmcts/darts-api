@@ -21,9 +21,9 @@ import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
 import uk.gov.hmcts.darts.task.service.LockService;
-import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPatch;
-import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPost;
-import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionSchedule;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPatchRequest;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPostRequest;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionScheduleResponse;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
@@ -37,7 +37,8 @@ import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_ALREADY_RUNNING;
-import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST;
+import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_INVALID;
+import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_NOT_EDITABLE;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.INCORRECT_AUTOMATED_TASK_TYPE;
 
@@ -103,13 +104,13 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     }
 
     @Override
-    public List<AutomatedTaskCronExpressionSchedule> getAutomatedTaskCronExpressionSchedule(
-        Integer taskId, AutomatedTaskCronExpressionPost automatedTaskCronExpressionPost) {
-        if (isNull(automatedTaskCronExpressionPost) || isNull(automatedTaskCronExpressionPost.getCronExpression())) {
-            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
+    public List<AutomatedTaskCronExpressionScheduleResponse> getAutomatedTaskCronExpressionSchedule(
+        Integer taskId, AutomatedTaskCronExpressionPostRequest automatedTaskCronExpressionPostRequest) {
+        if (isNull(automatedTaskCronExpressionPostRequest) || isNull(automatedTaskCronExpressionPostRequest.getCronExpression())) {
+            throw new DartsApiException(AUTOMATED_TASK_CRON_EXPRESSION_INVALID);
         }
 
-        String cronExpression = automatedTaskCronExpressionPost.getCronExpression();
+        String cronExpression = automatedTaskCronExpressionPostRequest.getCronExpression();
 
         var parsedCronExpression = adminAutomatedTasksServiceHelper
             .validateAndParseCronExpression(cronExpression);
@@ -117,7 +118,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         var automatedTask = getAutomatedTaskEntityById(taskId);
 
         if (!Boolean.TRUE.equals(automatedTask.getCronEditable())) {
-            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
+            throw new DartsApiException(AUTOMATED_TASK_CRON_EXPRESSION_NOT_EDITABLE);
         }
 
         return adminAutomatedTasksServiceHelper.getCronExpressionSchedulePreview(parsedCronExpression);
@@ -126,19 +127,19 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     @Override
     @Transactional
     public void updateAutomatedTaskCronExpressionSchedule(
-        Integer taskId, AutomatedTaskCronExpressionPatch automatedTaskCronExpressionPatch) {
-        if (isNull(automatedTaskCronExpressionPatch) || isNull(automatedTaskCronExpressionPatch.getCronExpression())) {
-            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
+        Integer taskId, AutomatedTaskCronExpressionPatchRequest automatedTaskCronExpressionPatchRequest) {
+        if (isNull(automatedTaskCronExpressionPatchRequest) || isNull(automatedTaskCronExpressionPatchRequest.getCronExpression())) {
+            throw new DartsApiException(AUTOMATED_TASK_CRON_EXPRESSION_INVALID);
         }
 
-        String cronExpression = automatedTaskCronExpressionPatch.getCronExpression();
+        String cronExpression = automatedTaskCronExpressionPatchRequest.getCronExpression();
 
         adminAutomatedTasksServiceHelper.validateAndParseCronExpression(cronExpression);
 
         var automatedTask = getAutomatedTaskEntityById(taskId);
 
         if (!Boolean.TRUE.equals(automatedTask.getCronEditable())) {
-            throw new DartsApiException(AUTOMATED_TASK_BAD_REQUEST);
+            throw new DartsApiException(AUTOMATED_TASK_CRON_EXPRESSION_NOT_EDITABLE);
         }
 
         String previousCronExpression = automatedTask.getCronExpression();
