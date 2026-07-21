@@ -64,7 +64,7 @@ class TasksOpenApiContractTest {
         return new SimpleRequest.Builder(method, EDIT_CRON_EXPRESSION_PATH)
             .withContentType(APPLICATION_JSON)
             .withBody("""
-                          { "cronExpression": "%s" }
+                          { "cron_expression": "%s" }
                           """.formatted(cronExpression))
             .build();
     }

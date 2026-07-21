@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.task.service;
 
-import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPatch;
-import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPost;
-import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionSchedule;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPatchRequest;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPostRequest;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionScheduleResponse;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
@@ -19,9 +19,9 @@ public interface AdminAutomatedTaskService {
 
     DetailedAutomatedTask updateAutomatedTask(Integer taskId, AutomatedTaskPatch automatedTaskPatch);
 
-    List<AutomatedTaskCronExpressionSchedule> getAutomatedTaskCronExpressionSchedule(
-        Integer taskId, AutomatedTaskCronExpressionPost automatedTaskCronExpressionPost);
+    List<AutomatedTaskCronExpressionScheduleResponse> getAutomatedTaskCronExpressionSchedule(
+        Integer taskId, AutomatedTaskCronExpressionPostRequest automatedTaskCronExpressionPostRequest);
 
     void updateAutomatedTaskCronExpressionSchedule(
-        Integer taskId, AutomatedTaskCronExpressionPatch automatedTaskCronExpressionPatch);
+        Integer taskId, AutomatedTaskCronExpressionPatchRequest automatedTaskCronExpressionPatchRequest);
 }

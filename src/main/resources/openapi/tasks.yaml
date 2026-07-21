@@ -54,7 +54,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/TaskId'
       requestBody:
-        $ref: '#/components/requestBodies/AutomatedTaskCronExpressionPatchRequest'
+        $ref: '#/components/requestBodies/AutomatedTaskCronExpressionPatch'
       responses:
         '200':
           description: OK
@@ -84,10 +84,10 @@ paths:
       parameters:
         - $ref: '#/components/parameters/TaskId'
       requestBody:
-        $ref: '#/components/requestBodies/AutomatedTaskCronExpressionPostRequest'
+        $ref: '#/components/requestBodies/AutomatedTaskCronExpressionPost'
       responses:
         '200':
-          $ref: '#/components/responses/AutomatedTaskCronExpressionResponse'
+          $ref: '#/components/responses/AutomatedTaskCronExpression'
         '400':
           description: Bad Request
           content:
@@ -142,18 +142,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AutomatedTaskPatch'
-    AutomatedTaskCronExpressionPatchRequest:
+    AutomatedTaskCronExpressionPatch:
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/AutomatedTaskCronExpressionPatch'
-    AutomatedTaskCronExpressionPostRequest:
+            $ref: '#/components/schemas/AutomatedTaskCronExpressionPatchRequest'
+    AutomatedTaskCronExpressionPost:
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/AutomatedTaskCronExpressionPost'
+            $ref: '#/components/schemas/AutomatedTaskCronExpressionPostRequest'
 
   responses:
     AutomatedTasksResponse:
@@ -190,35 +190,35 @@ components:
             type: "AUTOMATED_TASK_101"
             title: "Automated task is already running"
             status: 409
-    AutomatedTaskCronExpressionResponse:
+    AutomatedTaskCronExpression:
       description: Success
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/AutomatedTaskCronExpressionSchedule'
+              $ref: '#/components/schemas/AutomatedTaskCronExpressionScheduleResponse'
 
   schemas:
-    AutomatedTaskCronExpressionPatch:
+    AutomatedTaskCronExpressionPatchRequest:
       type: object
       properties:
-        cronExpression:
+        cron_expression:
           $ref: '#/components/schemas/CronExpression'
-    AutomatedTaskCronExpressionPost:
+    AutomatedTaskCronExpressionPostRequest:
       type: object
       properties:
-        cronExpression:
+        cron_expression:
           $ref: '#/components/schemas/CronExpression'
-    AutomatedTaskCronExpressionSchedule:
+    AutomatedTaskCronExpressionScheduleResponse:
       type: object
       properties:
-        executionNumber:
+        execution_number:
           type: string
           minLength: 1
           maxLength: 256
           pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
-        scheduledAt:
+        scheduled_at:
           type: string
           format: date-time
     AutomatedTaskPatch:
@@ -319,12 +319,14 @@ components:
         - "AUTOMATED_TASK_102"
         - "AUTOMATED_TASK_103"
         - "AUTOMATED_TASK_104"
+        - "AUTOMATED_TASK_105"
       x-enum-varnames: [
         AUTOMATED_TASK_NOT_FOUND,
         AUTOMATED_TASK_ALREADY_RUNNING,
         AUTOMATED_TASK_NOT_CONFIGURED,
         INCORRECT_AUTOMATED_TASK_TYPE,
-        AUTOMATED_TASK_BAD_REQUEST
+        AUTOMATED_TASK_CRON_EXPRESSION_INVALID,
+        AUTOMATED_TASK_CRON_EXPRESSION_NOT_EDITABLE
       ]
     AutomatedTaskTitleErrors:
       type: string
@@ -333,11 +335,13 @@ components:
         - "The automated task is already running"
         - "The automated task has not been initialized correctly on application start up and can not be run manually."
         - "The automated task type is incorrect"
-        - "The automated task request is incorrect"
+        - "The automated task cron expression is invalid"
+        - "The automated task cron expression is not editable"
       x-enum-varnames: [
         AUTOMATED_TASK_NOT_FOUND,
         AUTOMATED_TASK_ALREADY_RUNNING,
         AUTOMATED_TASK_NOT_CONFIGURED,
         INCORRECT_AUTOMATED_TASK_TYPE,
-        AUTOMATED_TASK_BAD_REQUEST
+        AUTOMATED_TASK_CRON_EXPRESSION_INVALID,
+        AUTOMATED_TASK_CRON_EXPRESSION_NOT_EDITABLE
       ]

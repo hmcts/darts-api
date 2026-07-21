@@ -21,9 +21,9 @@ import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.service.LockService;
-import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPatch;
-import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPost;
-import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionSchedule;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPatchRequest;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPostRequest;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionScheduleResponse;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
 
@@ -340,22 +340,22 @@ class AdminAutomatedTasksServiceImplTest {
         AutomatedTaskEntity automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", null);
         when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
 
-        AutomatedTaskCronExpressionPost request = new AutomatedTaskCronExpressionPost();
+        AutomatedTaskCronExpressionPostRequest request = new AutomatedTaskCronExpressionPostRequest();
         request.setCronExpression("0 0 10 * * *");
 
-        AutomatedTaskCronExpressionSchedule automatedTaskCronExpressionSchedule = new AutomatedTaskCronExpressionSchedule();
-        automatedTaskCronExpressionSchedule.setExecutionNumber("1");
-        automatedTaskCronExpressionSchedule.setScheduledAt(OffsetDateTime.parse("2026-07-16T10:00:00+01:00"));
+        AutomatedTaskCronExpressionScheduleResponse automatedTaskCronExpressionScheduleResponse = new AutomatedTaskCronExpressionScheduleResponse();
+        automatedTaskCronExpressionScheduleResponse.setExecutionNumber("1");
+        automatedTaskCronExpressionScheduleResponse.setScheduledAt(OffsetDateTime.parse("2026-07-16T10:00:00+01:00"));
 
         CronExpression parsedCronExpression = CronExpression.parse("0 0 10 * * *");
         when(adminAutomatedTasksServiceHelper.validateAndParseCronExpression("0 0 10 * * *"))
             .thenReturn(parsedCronExpression);
         when(adminAutomatedTasksServiceHelper.getCronExpressionSchedulePreview(parsedCronExpression))
-            .thenReturn(List.of(automatedTaskCronExpressionSchedule));
+            .thenReturn(List.of(automatedTaskCronExpressionScheduleResponse));
 
-        List<AutomatedTaskCronExpressionSchedule> schedule = adminAutomatedTaskService.getAutomatedTaskCronExpressionSchedule(1, request);
+        List<AutomatedTaskCronExpressionScheduleResponse> schedule = adminAutomatedTaskService.getAutomatedTaskCronExpressionSchedule(1, request);
 
-        assertEquals(List.of(automatedTaskCronExpressionSchedule), schedule);
+        assertEquals(List.of(automatedTaskCronExpressionScheduleResponse), schedule);
         verify(adminAutomatedTasksServiceHelper).validateAndParseCronExpression("0 0 10 * * *");
         verify(adminAutomatedTasksServiceHelper).getCronExpressionSchedulePreview(parsedCronExpression);
         verifyNoInteractions(auditApi);
@@ -367,7 +367,7 @@ class AdminAutomatedTasksServiceImplTest {
         automatedTaskEntity.setCronEditable(false);
         when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
 
-        AutomatedTaskCronExpressionPost request = new AutomatedTaskCronExpressionPost();
+        AutomatedTaskCronExpressionPostRequest request = new AutomatedTaskCronExpressionPostRequest();
         request.setCronExpression("0 0 10 * * *");
 
         DartsApiException exception = assertThrows(
@@ -375,21 +375,21 @@ class AdminAutomatedTasksServiceImplTest {
             () -> adminAutomatedTaskService.getAutomatedTaskCronExpressionSchedule(1, request)
         );
 
-        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST, exception.getError());
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_NOT_EDITABLE, exception.getError());
         verify(adminAutomatedTasksServiceHelper).validateAndParseCronExpression("0 0 10 * * *");
         verifyNoInteractions(auditApi);
     }
 
     @Test
     void getAutomatedTaskCronExpressionScheduleThrowsBadRequestWhenCronExpressionIsMissing() {
-        AutomatedTaskCronExpressionPost request = new AutomatedTaskCronExpressionPost();
+        AutomatedTaskCronExpressionPostRequest request = new AutomatedTaskCronExpressionPostRequest();
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
             () -> adminAutomatedTaskService.getAutomatedTaskCronExpressionSchedule(1, request)
         );
 
-        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST, exception.getError());
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_INVALID, exception.getError());
         verifyNoInteractions(adminAutomatedTasksServiceHelper, automatedTaskRepository, auditApi);
     }
 
@@ -399,7 +399,7 @@ class AdminAutomatedTasksServiceImplTest {
         automatedTaskEntity.setCronExpression("0 0 9 * * *");
         when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
 
-        AutomatedTaskCronExpressionPatch request = new AutomatedTaskCronExpressionPatch();
+        AutomatedTaskCronExpressionPatchRequest request = new AutomatedTaskCronExpressionPatchRequest();
         request.setCronExpression("0 0 10 * * *");
 
         adminAutomatedTaskService.updateAutomatedTaskCronExpressionSchedule(1, request);
@@ -420,7 +420,7 @@ class AdminAutomatedTasksServiceImplTest {
         automatedTaskEntity.setCronExpression("0 0 9 * * *");
         when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
 
-        AutomatedTaskCronExpressionPatch request = new AutomatedTaskCronExpressionPatch();
+        AutomatedTaskCronExpressionPatchRequest request = new AutomatedTaskCronExpressionPatchRequest();
         request.setCronExpression("0 0 10 * * *");
 
         DartsApiException exception = assertThrows(
@@ -428,7 +428,7 @@ class AdminAutomatedTasksServiceImplTest {
             () -> adminAutomatedTaskService.updateAutomatedTaskCronExpressionSchedule(1, request)
         );
 
-        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST, exception.getError());
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_NOT_EDITABLE, exception.getError());
         assertEquals("0 0 9 * * *", automatedTaskEntity.getCronExpression());
         verify(adminAutomatedTasksServiceHelper).validateAndParseCronExpression("0 0 10 * * *");
         verifyNoInteractions(auditApi);
@@ -438,23 +438,23 @@ class AdminAutomatedTasksServiceImplTest {
 
     @Test
     void updateAutomatedTaskCronExpressionScheduleThrowsBadRequestWhenCronExpressionIsMissing() {
-        AutomatedTaskCronExpressionPatch request = new AutomatedTaskCronExpressionPatch();
+        AutomatedTaskCronExpressionPatchRequest request = new AutomatedTaskCronExpressionPatchRequest();
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
             () -> adminAutomatedTaskService.updateAutomatedTaskCronExpressionSchedule(1, request)
         );
 
-        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST, exception.getError());
+        assertEquals(AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_INVALID, exception.getError());
         verifyNoInteractions(adminAutomatedTasksServiceHelper, automatedTaskRepository, auditApi);
     }
 
     @Test
     void updateAutomatedTaskCronExpressionScheduleDoesNotSaveWhenCronExpressionIsInvalid() {
-        AutomatedTaskCronExpressionPatch request = new AutomatedTaskCronExpressionPatch();
+        AutomatedTaskCronExpressionPatchRequest request = new AutomatedTaskCronExpressionPatchRequest();
         request.setCronExpression("not a cron expression");
 
-        DartsApiException expectedException = new DartsApiException(AutomatedTaskApiError.AUTOMATED_TASK_BAD_REQUEST);
+        DartsApiException expectedException = new DartsApiException(AutomatedTaskApiError.AUTOMATED_TASK_CRON_EXPRESSION_INVALID);
         doThrow(expectedException)
             .when(adminAutomatedTasksServiceHelper)
             .validateAndParseCronExpression("not a cron expression");
