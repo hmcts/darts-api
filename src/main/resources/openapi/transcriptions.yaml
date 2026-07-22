@@ -1174,7 +1174,6 @@ components:
         approved_at:
           type: string
           format: date-time
-
     TranscriptionStatus:
       type: object
       properties:
@@ -1250,12 +1249,14 @@ components:
     UpdateTranscriptionsItem:
       type: object
       required:
-        - transcriptionId
+        - transcription_id
       properties:
         transcription_id:
           type: integer
-          example: "1001"
           format: int64
+          minimum: 1
+          maximum: 9223372036854775807
+          example: 1001
         hide_request_from_requestor:
           type: boolean
           example: true
