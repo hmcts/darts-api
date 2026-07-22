@@ -6,6 +6,7 @@ import com.atlassian.oai.validator.model.SimpleRequest;
 import com.atlassian.oai.validator.report.ValidationReport;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -73,6 +74,7 @@ class TranscriptionsOpenApiContractTest {
 
 
     @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class TranscriptionsPatch {
 
         @Test
@@ -96,7 +98,7 @@ class TranscriptionsOpenApiContractTest {
             assertHasMessageContaining(report, expectedMessage);
         }
 
-        private static Stream<Arguments> invalidTranscriptionsPatchRequestFields() {
+        private Stream<Arguments> invalidTranscriptionsPatchRequestFields() {
             return Stream.of(
                 arguments(
                     "transcription id is required",
@@ -135,20 +137,20 @@ class TranscriptionsOpenApiContractTest {
             .build();
     }
 
-    private static String patchRequestBody(Consumer<ObjectNode> bodyMutation) {
+    private String patchRequestBody(Consumer<ObjectNode> bodyMutation) {
         ObjectNode body = validTranscriptionsPatchRequestBody();
         bodyMutation.accept(body);
         return JsonNodeFactory.instance.arrayNode().add(body).toString();
     }
 
-    private static ObjectNode validTranscriptionsPatchRequestBody() {
+    private ObjectNode validTranscriptionsPatchRequestBody() {
         ObjectNode body = objectNode();
-        body.put("transcription_id", 9_223_372_036_854_775_807L);
+        body.put("transcription_id", 9223372036854775807L);
         body.put("hide_request_from_requestor", true);
         return body;
     }
 
-    private static ObjectNode objectNode() {
+    private ObjectNode objectNode() {
         return JsonNodeFactory.instance.objectNode();
     }
 
