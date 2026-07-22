@@ -4,7 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,6 +39,15 @@ class DateTimeHelperTest {
     @Test
     void floorToMinutes_ReturnsNullDateTimeIsHandled() {
         assertNull(DateTimeHelper.floorToMinutes(null));
+    }
+
+    @Test
+    void getCurrentTimeInEuropeLondon_ReturnsCurrentTimeUsingEuropeLondonTimezone() {
+        Clock clock = Clock.fixed(Instant.parse("2026-07-16T08:30:00Z"), ZoneOffset.UTC);
+
+        OffsetDateTime result = DateTimeHelper.getCurrentTimeInEuropeLondon(clock).toOffsetDateTime();
+
+        assertEquals(OffsetDateTime.parse("2026-07-16T09:30:00+01:00"), result);
     }
     
 }
