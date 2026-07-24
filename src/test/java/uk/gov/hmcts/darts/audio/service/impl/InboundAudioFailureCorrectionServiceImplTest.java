@@ -35,6 +35,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
 
     private static final String INBOUND_CONTAINER_NAME = "darts-inbound-container";
     private static final int BATCH_SIZE = 25;
+    private static final int USER_ID = 987;
 
     private ExternalLocationTypeEntity inboundLocation;
     private ObjectRecordStatusEntity failureStatus;
@@ -64,7 +65,9 @@ class InboundAudioFailureCorrectionServiceImplTest {
         ReflectionTestUtils.setField(EodHelper.class, "inboundLocation", inboundLocation);
         ReflectionTestUtils.setField(EodHelper.class, "failureStatus", failureStatus);
 
-        when(userIdentity.getUserAccount()).thenReturn(new UserAccountEntity());
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(USER_ID);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
     }
 
     @Test
@@ -84,7 +87,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
         verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereIdIn(
             failureStatus,
             0,
-            0,
+            USER_ID,
             List.of(123L)
         );
     }
@@ -105,7 +108,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
         verify(externalObjectDirectoryRepository, never()).updateEodStatusAndTransferAttemptsWhereIdIn(
             failureStatus,
             0,
-            0,
+            USER_ID,
             List.of(123L)
         );
     }
@@ -129,13 +132,13 @@ class InboundAudioFailureCorrectionServiceImplTest {
         verify(externalObjectDirectoryRepository, never()).updateEodStatusAndTransferAttemptsWhereIdIn(
             failureStatus,
             0,
-            0,
+            USER_ID,
             List.of(123L)
         );
         verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereIdIn(
             failureStatus,
             0,
-            0,
+            USER_ID,
             List.of(456L)
         );
     }
