@@ -135,4 +135,8 @@ public class DataManagementApiImpl implements DataManagementApi {
     public StorageConfiguration getConfiguration() {
         return dataManagementConfiguration;
     }
+
+    public void restoreBlobVersion(DatastoreContainerType datastoreContainerType, String guid) {
+        dataManagementService.restoreBlobVersion(getContainerNameRequired(datastoreContainerType), guid);
+    }
 }

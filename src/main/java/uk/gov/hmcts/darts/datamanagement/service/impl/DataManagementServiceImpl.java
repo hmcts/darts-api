@@ -5,8 +5,11 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobListDetails;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
+import com.azure.storage.blob.models.ListBlobsOptions;
 import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +41,13 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.util.Collections.reverseOrder;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.valueOf;
 
@@ -54,7 +61,8 @@ import static org.springframework.http.HttpStatus.valueOf;
 })
 public class DataManagementServiceImpl implements DataManagementService {
 
-    public static final String BLOB_DOES_NOT_EXIST_IN_CONTAINER = "Blob {} does not exist in {} container";
+    private static final String BLOB_DOES_NOT_EXIST_IN_CONTAINER = "Blob {} does not exist in {} container";
+    private static final long TIMEOUT = 60;
     private final DataManagementConfiguration dataManagementConfiguration;
 
     private final DataManagementAzureClientFactory blobServiceFactory;
@@ -226,7 +234,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")//TODO - refactor to avoid deeply nested if statements when this class is next edited
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public String getChecksum(String containerName, String blobId) {
         log.info("Getting checksum for blob '{}' in container '{}'", blobId, containerName);
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
@@ -285,6 +293,40 @@ public class DataManagementServiceImpl implements DataManagementService {
                 "Could not delete from storage container=" + containerName + ", blobId=" + blobId, e
             );
         }
+    }
+
+    @Override
+    public void restoreBlobVersion(String containerName, String blobId) {
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+        BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
+
+        restoreBlobVersion(containerClient, blobClient, blobId);
+    }
+
+    private void restoreBlobVersion(BlobContainerClient containerClient, BlobClient blobClient, String blobId) {
+        Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
+        ListBlobsOptions options = new ListBlobsOptions()
+            .setPrefix(blobClient.getBlobName())
+            .setDetails(new BlobListDetails()
+                            .setRetrieveVersions(true));
+        Iterator<BlobItem> blobItem = containerClient.listBlobs(options, timeout).iterator();
+        List<String> blobVersions = new ArrayList<>();
+        while (blobItem.hasNext()) {
+            blobVersions.add(blobItem.next().getVersionId());
+        }
+
+        // Sort the list of blob versions and get the most recent version ID
+        blobVersions.sort(reverseOrder());
+        String latestVersion = blobVersions.getFirst();
+
+        // Get a client object with the name of the deleted blob and the specified version
+        BlobClient blob = containerClient.getBlobVersionClient(blobId, latestVersion);
+
+        // Restore the most recent version by copying it to the base blob, max size 256MB
+        blobClient.copyFromUrl(blob.getBlobUrl());
+
+        log.info("Restored blob version {} for blobId {} in container {}", latestVersion, blobId, containerClient.getBlobContainerName());
     }
 
     private String buildBlobSasUrl(String containerName, String containerSasUrl, String location) {

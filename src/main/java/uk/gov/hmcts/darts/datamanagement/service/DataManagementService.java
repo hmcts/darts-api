@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public interface DataManagementService {
+
     BinaryData getBlobData(String containerName, String blobId);
 
     Path downloadBlobToFile(String containerName, String blobId, String inboundWorkspace);
@@ -26,7 +27,7 @@ public interface DataManagementService {
 
     BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata);
 
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")//TODO - refactor to use object for clearer API when this class is next edited
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     void copyBlobData(String sourceContainerName, String destinationContainerName, String sourceLocation, String destinationLocation);
 
     void addMetaData(BlobClient client, Map<String, String> metadata);
@@ -36,4 +37,7 @@ public interface DataManagementService {
     Response<Boolean> deleteBlobData(String containerName, String blobId) throws AzureDeleteBlobException;
 
     DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, String blobId) throws FileNotDownloadedException;
+
+    void restoreBlobVersion(String containerName, String blobId);
+
 }

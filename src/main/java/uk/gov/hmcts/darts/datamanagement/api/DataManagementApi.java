@@ -33,4 +33,6 @@ public interface DataManagementApi extends BlobContainerDownloadable {
     String saveBlobDataToUnstructuredContainer(BinaryData binaryData);
 
     String getChecksum(DatastoreContainerType datastoreContainerType, String guid);
+
+    void restoreBlobVersion(DatastoreContainerType datastoreContainerType, String guid);
 }
