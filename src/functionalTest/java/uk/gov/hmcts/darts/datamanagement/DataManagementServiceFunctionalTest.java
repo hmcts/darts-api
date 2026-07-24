@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,14 +44,14 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
     private static final String TEST_BLOB_ID = "b0f23c62-8dd3-4e4e-ae6a-321ff6eb61d8";
 
     @Value("${darts.storage.blob.container-name.unstructured}")
-    String unstructuredStorageContainerName;
+    private String unstructuredStorageContainerName;
 
     @Autowired
-    DataManagementService dataManagementService;
+    private DataManagementService dataManagementService;
     @Autowired
-    DataManagementConfiguration dataManagementConfiguration;
+    private DataManagementConfiguration dataManagementConfiguration;
     @Autowired
-    ArmDataManagementConfiguration armDataManagementConfiguration;
+    private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Test
     void saveBinaryDataToBlobStorage() {
@@ -123,6 +124,22 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
 
         assertNotNull(blobClientUploadResponse.getBlobName());
         assertNotNull(blobClientUploadResponse.getBlobSize());
+    }
+
+    @Test
+    void restoreBlobData() throws AzureDeleteBlobException {
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        String inboundContainerName = dataManagementConfiguration.getInboundContainerName();
+        var uniqueBlobName = dataManagementService.saveBlobData(inboundContainerName, data);
+        dataManagementService.deleteBlobData(inboundContainerName, uniqueBlobName);
+
+        dataManagementService.restoreBlobVersion(inboundContainerName, uniqueBlobName);
+
+        dataManagementService.deleteBlobData(inboundContainerName, uniqueBlobName);
+        assertFalse(true);
     }
 
     @Disabled // Disabled as this test is currently giving a false negative
