@@ -160,6 +160,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
         return fileBasedDownloadResponseMetaData;
     }
 
+    @Override
     public void restoreBlobVersion(String containerName, String blobId) {
         logStubUsageWarning();
 
