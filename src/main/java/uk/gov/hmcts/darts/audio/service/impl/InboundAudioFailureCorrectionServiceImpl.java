@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.service.InboundAudioFailureCorrectionService;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -24,6 +25,7 @@ public class InboundAudioFailureCorrectionServiceImpl implements InboundAudioFai
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final DataManagementService dataManagementService;
     private final DataManagementConfiguration dataManagementConfiguration;
+    private final UserIdentity userIdentity;
 
     @Override
     public void correctAudioFailure(int batchSize) {
@@ -37,6 +39,8 @@ public class InboundAudioFailureCorrectionServiceImpl implements InboundAudioFai
         );
 
         log.info("Total number of inbound audio files with failure {} out of a batch size {}", failedEods.size(), batchSize);
+
+        var userAccount = userIdentity.getUserAccount();
 
         for (ExternalObjectDirectoryEntity eod : failedEods) {
             try {
@@ -52,6 +56,10 @@ public class InboundAudioFailureCorrectionServiceImpl implements InboundAudioFai
             log.info("Restoring audio file with EOD ID: {} to original location: {}", eod.getId(), eod.getExternalLocation());
             String inboundExternalLocation = eod.getExternalLocation();
             dataManagementService.restoreBlobVersion(dataManagementConfiguration.getInboundContainerName(), inboundExternalLocation);
+            externalObjectDirectoryRepository.updateEodStatusAndTransferAttemptsWhereIdIn(
+                EodHelper.failureStatus(), 0, 0, List.of(eod.getId())
+            );
+            log.info("Restored audio file with EOD ID: {} to original location: {}", eod.getId(), eod.getExternalLocation());
         } else {
             log.warn("EOD ID: {} has no external location to restore.", eod.getId());
         }
