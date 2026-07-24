@@ -126,6 +126,7 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
         assertNotNull(blobClientUploadResponse.getBlobSize());
     }
 
+    @SuppressWarnings("PMD.UnnecessaryBooleanAssertion")
     @Test
     void restoreBlobData() throws AzureDeleteBlobException {
 
@@ -139,6 +140,7 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
         dataManagementService.restoreBlobVersion(inboundContainerName, uniqueBlobName);
 
         dataManagementService.deleteBlobData(inboundContainerName, uniqueBlobName);
+        //TODO remove the assertFalse and suppression once the restoreBlobVersion method is implemented and tested
         assertFalse(true);
     }
 

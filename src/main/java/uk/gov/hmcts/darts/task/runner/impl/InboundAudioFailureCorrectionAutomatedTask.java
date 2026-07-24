@@ -16,7 +16,7 @@ import uk.gov.hmcts.darts.task.service.LockService;
 public class InboundAudioFailureCorrectionAutomatedTask extends AbstractLockableAutomatedTask<InboundAudioFailureCorrectionAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
-    private InboundAudioFailureCorrectionService inboundAudioFailureCorrectionService;
+    private final InboundAudioFailureCorrectionService inboundAudioFailureCorrectionService;
 
     @Autowired
     public InboundAudioFailureCorrectionAutomatedTask(AutomatedTaskRepository automatedTaskRepository,

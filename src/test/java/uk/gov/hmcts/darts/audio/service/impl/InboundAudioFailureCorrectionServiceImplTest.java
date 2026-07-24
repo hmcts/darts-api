@@ -37,7 +37,6 @@ class InboundAudioFailureCorrectionServiceImplTest {
     private static final int BATCH_SIZE = 25;
     private static final int USER_ID = 987;
 
-    private ExternalLocationTypeEntity inboundLocation;
     private ObjectRecordStatusEntity failureStatus;
 
     @Mock
@@ -54,7 +53,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
 
     @BeforeEach
     void beforeEach() {
-        inboundLocation = new ExternalLocationTypeEntity();
+        ExternalLocationTypeEntity inboundLocation = new ExternalLocationTypeEntity();
         inboundLocation.setId(ExternalLocationTypeEnum.INBOUND.getId());
         inboundLocation.setDescription(ExternalLocationTypeEnum.INBOUND.name());
 
