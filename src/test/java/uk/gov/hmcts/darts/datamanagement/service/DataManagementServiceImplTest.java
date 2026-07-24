@@ -1,11 +1,14 @@
 package uk.gov.hmcts.darts.datamanagement.service;
 
+import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
+import com.azure.storage.blob.models.ListBlobsOptions;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -45,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -189,6 +194,62 @@ class DataManagementServiceImplTest {
         when(blobClient.deleteIfExistsWithResponse(any(), any(), any(), any())).thenThrow(new RuntimeException("timeout"));
 
         assertThrows(AzureDeleteBlobException.class, () -> dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void restoreBlobVersion_copiesMostRecentExactBlobVersionToBaseBlob_whenBlobVersionsExist() {
+        Duration timeout = Duration.ofMinutes(1);
+        PagedIterable<BlobItem> pagedIterable = mock(PagedIterable.class);
+        ArgumentCaptor<ListBlobsOptions> optionsCaptor = ArgumentCaptor.forClass(ListBlobsOptions.class);
+
+        when(dataManagementConfiguration.getBlobClientTimeout()).thenReturn(timeout);
+        when(dataManagementConfiguration.getContainerSasUrl(BLOB_CONTAINER_NAME))
+            .thenReturn("https://storageaccount.blob.core.windows.net/dummy_container?sp=rwdl&sig=signature");
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(blobContainerClient, BLOB_ID)).thenReturn(blobClient);
+        when(blobClient.getBlobName()).thenReturn(BLOB_ID);
+        when(blobContainerClient.listBlobs(optionsCaptor.capture(), eq(timeout))).thenReturn(pagedIterable);
+        when(pagedIterable.iterator()).thenReturn(List.of(
+            createBlobItem(BLOB_ID, "2024-01-01T00:00:00.0000000Z"),
+            createBlobItem(BLOB_ID + "-similar-prefix", "2026-01-01T00:00:00.0000000Z"),
+            createBlobItem(BLOB_ID, "2025-01-01T00:00:00.0000000Z"),
+            createBlobItem(BLOB_ID, null)
+        ).iterator());
+
+        dataManagementService.restoreBlobVersion(BLOB_CONTAINER_NAME, BLOB_ID);
+
+        assertThat(optionsCaptor.getValue().getPrefix()).isEqualTo(BLOB_ID);
+        verify(azureCopyUtil).copy(
+            "https://storageaccount.blob.core.windows.net/dummy_container/" + BLOB_ID
+                + "?versionid=2025-01-01T00%3A00%3A00.0000000Z&sp=rwdl&sig=signature",
+            "https://storageaccount.blob.core.windows.net/dummy_container/" + BLOB_ID + "?sp=rwdl&sig=signature"
+        );
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void restoreBlobVersion_throwsDartsException_whenNoExactBlobVersionsExist() {
+        Duration timeout = Duration.ofMinutes(1);
+        PagedIterable<BlobItem> pagedIterable = mock(PagedIterable.class);
+
+        when(dataManagementConfiguration.getBlobClientTimeout()).thenReturn(timeout);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(blobContainerClient, BLOB_ID)).thenReturn(blobClient);
+        when(blobClient.getBlobName()).thenReturn(BLOB_ID);
+        when(blobContainerClient.getBlobContainerName()).thenReturn(BLOB_CONTAINER_NAME);
+        when(blobContainerClient.listBlobs(any(ListBlobsOptions.class), eq(timeout))).thenReturn(pagedIterable);
+        when(pagedIterable.iterator()).thenReturn(List.of(
+            createBlobItem(BLOB_ID + "-similar-prefix", "2026-01-01T00:00:00.0000000Z"),
+            createBlobItem(BLOB_ID, null)
+        ).iterator());
+
+        Assertions.assertThatThrownBy(() -> dataManagementService.restoreBlobVersion(BLOB_CONTAINER_NAME, BLOB_ID))
+            .isInstanceOf(DartsException.class)
+            .hasMessage("No blob versions found for storage container=dummy_container, blobId=" + BLOB_ID);
+
+        verify(blobClient, never()).copyFromUrl(anyString());
+        verifyNoInteractions(azureCopyUtil);
     }
 
     @Test
@@ -502,5 +563,11 @@ class DataManagementServiceImplTest {
         verify(dataManagementFactory, times(1)).getBlobClient(blobContainerClient, blobId);
         verify(blobClient, times(exists == null ? 1 : 2)).exists();
         verifyNoInteractions(fileContentChecksum);
+    }
+
+    private BlobItem createBlobItem(String name, String versionId) {
+        return new BlobItem()
+            .setName(name)
+            .setVersionId(versionId);
     }
 }

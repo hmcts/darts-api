@@ -36,18 +36,17 @@ import uk.gov.hmcts.darts.util.AzureCopyUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Collections.reverseOrder;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.valueOf;
 
@@ -62,7 +61,6 @@ import static org.springframework.http.HttpStatus.valueOf;
 public class DataManagementServiceImpl implements DataManagementService {
 
     private static final String BLOB_DOES_NOT_EXIST_IN_CONTAINER = "Blob {} does not exist in {} container";
-    private static final long TIMEOUT = 60;
     private final DataManagementConfiguration dataManagementConfiguration;
 
     private final DataManagementAzureClientFactory blobServiceFactory;
@@ -301,32 +299,46 @@ public class DataManagementServiceImpl implements DataManagementService {
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
 
-        restoreBlobVersion(containerClient, blobClient, blobId);
+        restoreBlobVersion(containerName, containerClient, blobClient);
     }
 
-    private void restoreBlobVersion(BlobContainerClient containerClient, BlobClient blobClient, String blobId) {
-        Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
+    private void restoreBlobVersion(String containerName, BlobContainerClient containerClient, BlobClient blobClient) {
+        String blobName = blobClient.getBlobName();
         ListBlobsOptions options = new ListBlobsOptions()
-            .setPrefix(blobClient.getBlobName())
+            .setPrefix(blobName)
             .setDetails(new BlobListDetails()
                             .setRetrieveVersions(true));
-        Iterator<BlobItem> blobItem = containerClient.listBlobs(options, timeout).iterator();
-        List<String> blobVersions = new ArrayList<>();
-        while (blobItem.hasNext()) {
-            blobVersions.add(blobItem.next().getVersionId());
+        Iterator<BlobItem> blobItems = containerClient.listBlobs(options, dataManagementConfiguration.getBlobClientTimeout()).iterator();
+        String latestVersion = null;
+        while (blobItems.hasNext()) {
+            BlobItem blobItem = blobItems.next();
+            String versionId = blobItem.getVersionId();
+            if (blobName.equals(blobItem.getName()) && versionId != null && (latestVersion == null || versionId.compareTo(latestVersion) > 0)) {
+                latestVersion = versionId;
+            }
         }
 
-        // Sort the list of blob versions and get the most recent version ID
-        blobVersions.sort(reverseOrder());
-        String latestVersion = blobVersions.getFirst();
+        if (latestVersion == null) {
+            throw new DartsException(String.format("No blob versions found for storage container=%s, blobId=%s",
+                                                   containerClient.getBlobContainerName(), blobName));
+        }
 
-        // Get a client object with the name of the deleted blob and the specified version
-        BlobClient blob = containerClient.getBlobVersionClient(blobId, latestVersion);
+        String containerSasUrl = dataManagementConfiguration.getContainerSasUrl(containerName);
+        String destinationBlobSasUrl = buildBlobSasUrl(containerName, containerSasUrl, blobName);
+        String sourceBlobSasUrl = buildVersionedBlobSasUrl(destinationBlobSasUrl, latestVersion);
 
-        // Restore the most recent version by copying it to the base blob, max size 256MB
-        blobClient.copyFromUrl(blob.getBlobUrl());
+        azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
 
-        log.info("Restored blob version {} for blobId {} in container {}", latestVersion, blobId, containerClient.getBlobContainerName());
+        log.info("Restored blob version {} for blobId {} in container {}", latestVersion, blobName, containerClient.getBlobContainerName());
+    }
+
+    private String buildVersionedBlobSasUrl(String blobSasUrl, String versionId) {
+        String encodedVersionId = URLEncoder.encode(versionId, StandardCharsets.UTF_8);
+        int queryStartIndex = blobSasUrl.indexOf('?');
+        if (queryStartIndex == -1) {
+            return blobSasUrl + "?versionid=" + encodedVersionId;
+        }
+        return blobSasUrl.substring(0, queryStartIndex) + "?versionid=" + encodedVersionId + "&" + blobSasUrl.substring(queryStartIndex + 1);
     }
 
     private String buildBlobSasUrl(String containerName, String containerSasUrl, String location) {
