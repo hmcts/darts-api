@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.service.InboundAudioFailureCorrectionService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
@@ -44,20 +45,20 @@ public class InboundAudioFailureCorrectionServiceImpl implements InboundAudioFai
 
         for (ExternalObjectDirectoryEntity eod : failedEods) {
             try {
-                restoreAudioLocation(eod);
+                restoreAudioLocation(eod, userAccount);
             } catch (Exception ex) {
                 log.error("Failed to correct inbound audio file with EOD ID: {}. Error: {}", eod.getId(), ex.getMessage());
             }
         }
     }
 
-    private void restoreAudioLocation(ExternalObjectDirectoryEntity eod) {
+    private void restoreAudioLocation(ExternalObjectDirectoryEntity eod, UserAccountEntity userAccount) {
         if (nonNull(eod.getExternalLocation())) {
             log.info("Restoring audio file with EOD ID: {} to original location: {}", eod.getId(), eod.getExternalLocation());
             String inboundExternalLocation = eod.getExternalLocation();
             dataManagementService.restoreBlobVersion(dataManagementConfiguration.getInboundContainerName(), inboundExternalLocation);
             externalObjectDirectoryRepository.updateEodStatusAndTransferAttemptsWhereIdIn(
-                EodHelper.failureStatus(), 0, 0, List.of(eod.getId())
+                EodHelper.failureStatus(), 0, userAccount.getId(), List.of(eod.getId())
             );
             log.info("Restored audio file with EOD ID: {} to original location: {}", eod.getId(), eod.getExternalLocation());
         } else {
