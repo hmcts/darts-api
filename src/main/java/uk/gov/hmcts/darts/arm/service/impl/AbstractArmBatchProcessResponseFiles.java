@@ -335,6 +335,9 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     private OffsetDateTime getLatestProcessedTs(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        if (externalObjectDirectoryEntity == null) {
+            return null;
+        }
         if (nonNull(externalObjectDirectoryEntity.getCreateRecordProcessedTs())) {
             return externalObjectDirectoryEntity.getCreateRecordProcessedTs();
         } else if (nonNull(externalObjectDirectoryEntity.getInputUploadProcessedTs())) {
