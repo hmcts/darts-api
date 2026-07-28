@@ -645,13 +645,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             eod.lastModifiedById = :currentUser,
             eod.lastModifiedDateTime = current_timestamp
         where eod.status = :currentStatus
-        and eod.inputUploadProcessedTs <= :maxInputUploadProcessedTs
+        and eod.createRecordProcessedTs <= :maxCreateRecordProcessedTs
         """)
     @Transactional
-    void updateByStatusEqualsAndInputUploadProcessedTsBefore(ObjectRecordStatusEntity currentStatus, OffsetDateTime maxInputUploadProcessedTs,
-                                                             ObjectRecordStatusEntity newStatus,
-                                                             Integer currentUser,
-                                                             Limit limit);
+    void updateByStatusEqualsAndCreateRecordProcessedTsBefore(ObjectRecordStatusEntity currentStatus, OffsetDateTime maxCreateRecordProcessedTs,
+                                                              ObjectRecordStatusEntity newStatus,
+                                                              Integer currentUser,
+                                                              Limit limit);
 
     @Modifying(clearAutomatically = true)
     @Query(
@@ -673,13 +673,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status = :status
-            AND eod.inputUploadProcessedTs between :rpoCsvStartTime AND :rpoCsvEndTime
+            AND eod.createRecordProcessedTs between :rpoCsvStartTime AND :rpoCsvEndTime
             """
     )
-    Page<ExternalObjectDirectoryEntity> findByStatusAndInputUploadProcessedTsWithPaging(ObjectRecordStatusEntity status,
-                                                                                        OffsetDateTime rpoCsvStartTime,
-                                                                                        OffsetDateTime rpoCsvEndTime,
-                                                                                        Pageable pageable);
+    Page<ExternalObjectDirectoryEntity> findByStatusAndCreateRecordProcessedTsWithPaging(ObjectRecordStatusEntity status,
+                                                                                         OffsetDateTime rpoCsvStartTime,
+                                                                                         OffsetDateTime rpoCsvEndTime,
+                                                                                         Pageable pageable);
 
     @Query(
         """
@@ -731,9 +731,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         SELECT eod FROM ExternalObjectDirectoryEntity eod
         WHERE eod.status = :status
         AND eod.externalLocationType = :locationType
-        ORDER BY eod.inputUploadProcessedTs ASC
+        ORDER BY eod.createRecordProcessedTs ASC
         LIMIT 1
         """)
-    ExternalObjectDirectoryEntity findOldestByInputUploadProcessedTsAndStatusAndLocation(ObjectRecordStatusEntity status,
-                                                                                         ExternalLocationTypeEntity locationType);
+    ExternalObjectDirectoryEntity findOldestByCreateRecordProcessedTsAndStatusAndLocation(ObjectRecordStatusEntity status,
+                                                                                          ExternalLocationTypeEntity locationType);
 }
