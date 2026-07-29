@@ -107,7 +107,22 @@ public class AudioLinkingAutomatedTask
                 eventService.saveEvent(event);
             } catch (Exception e) {
                 log.error("Error attempting to link media for event with eveId {}", eveId, e);
+                if (causedByInterruptedException(e)) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException("Audio linking task interrupted", e);
+                }
             }
+        }
+
+        private static boolean causedByInterruptedException(Throwable exception) {
+            Throwable cause = exception;
+            while (cause != null) {
+                if (cause instanceof InterruptedException) {
+                    return true;
+                }
+                cause = cause.getCause();
+            }
+            return false;
         }
     }
 }
