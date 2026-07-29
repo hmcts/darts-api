@@ -31,12 +31,16 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -97,6 +101,25 @@ class AudioLinkingAutomatedTaskTest {
         verify(eventProcessor).processEvent(1L);
         verify(eventProcessor).processEvent(2L);
         verify(eventProcessor).processEvent(3L);
+    }
+
+    @Test
+    void runTask_ShouldStopProcessing_WhenEventProcessorThrowsInterruptedExceptionSignal() {
+        List<Long> eventIds = List.of(1L, 2L, 3L);
+
+        doReturn(eventIds).when(eventRepository).findAllByEventStatusAndNotCourtrooms(anyInt(), any(), any());
+        doReturn(5).when(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
+        doThrow(new IllegalStateException("Audio linking task interrupted", new InterruptedException("Simulated interruption")))
+            .when(eventProcessor).processEvent(2L);
+
+        assertThatThrownBy(() -> audioLinkingAutomatedTask.runTask())
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Audio linking task interrupted")
+            .hasCauseInstanceOf(InterruptedException.class);
+
+        verify(eventProcessor).processEvent(1L);
+        verify(eventProcessor).processEvent(2L);
+        verify(eventProcessor, never()).processEvent(3L);
     }
 
     @Nested
@@ -185,6 +208,32 @@ class AudioLinkingAutomatedTaskTest {
             verify(mediaRepository).findAllByCurrentMediaTimeContains(123, timestamp.plus(Duration.ofSeconds(10)), timestamp.minus(Duration.ofSeconds(20)));
             verify(event).setEventStatus(3);
             verify(eventService).getEventByEveId(2L);
+        }
+
+        @Test
+        void processEvent_ShouldRethrowAndPreserveInterrupt_WhenInterruptedExceptionOccurs() {
+            EventEntity event = mock(EventEntity.class);
+            CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
+            OffsetDateTime timestamp = OffsetDateTime.now();
+
+            when(eventService.getEventByEveId(3L)).thenReturn(event);
+            when(event.getCourtroom()).thenReturn(courtroomEntity);
+            when(courtroomEntity.getId()).thenReturn(123);
+            when(event.getTimestamp()).thenReturn(timestamp);
+            doAnswer(invocation -> {
+                throw new InterruptedException("Simulated interruption");
+            }).when(mediaRepository).findAllByCurrentMediaTimeContains(any(), any(), any());
+
+            try {
+                assertThatThrownBy(() -> eventProcessor.processEvent(3L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("Audio linking task interrupted")
+                    .hasCauseInstanceOf(InterruptedException.class);
+
+                assertThat(Thread.currentThread().isInterrupted()).isTrue();
+            } finally {
+                Thread.interrupted();
+            }
         }
 
     }
