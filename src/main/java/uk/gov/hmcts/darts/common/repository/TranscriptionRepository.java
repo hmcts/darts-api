@@ -125,7 +125,12 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              t.createdDateTime,
              ts.id,
              t.isManualTranscription,
-             (SELECT MAX(w.workflowTimestamp) FROM TranscriptionWorkflowEntity w WHERE w.transcription = t AND w.transcriptionStatus = :transcriptionStatus))
+             (
+                     SELECT MAX(w.workflowTimestamp) 
+                     FROM TranscriptionWorkflowEntity w 
+                     WHERE w.transcription = t AND w.transcriptionStatus = :transcriptionStatus
+             )
+         )
          FROM TranscriptionEntity t
          JOIN t.transcriptionStatus ts
          JOIN UserAccountEntity ua on ua.id = t.createdById
@@ -146,7 +151,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
              AND t.isCurrent = true 
          ORDER BY t.id DESC               
         """)
-    @SuppressWarnings("java:S107")// Suppressing "Methods should not have too many parameters" as this is a search method as such requires many parameters
+    @SuppressWarnings("java:S107")
     List<TranscriptionSearchResult> searchTranscriptionsFilteringOn(
         List<Long> ids,
         String caseNumber,

@@ -337,6 +337,9 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     private OffsetDateTime getLatestProcessedTs(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        if (externalObjectDirectoryEntity == null) {
+            return null;
+        }
         if (nonNull(externalObjectDirectoryEntity.getCreateRecordProcessedTs())) {
             return externalObjectDirectoryEntity.getCreateRecordProcessedTs();
         } else if (nonNull(externalObjectDirectoryEntity.getInputUploadProcessedTs())) {
@@ -651,6 +654,25 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                         "Duplicate response for EOD " + externalObjectDirectoryId + " - create record file " + createRecordFilenameAndPath);
                 }
             }
+        }
+    }
+
+    private void setProcessTimeForCreateRecordFileRecord(ArmResponseCreateRecord armResponseCreateRecord, Long externalObjectDirectoryId,
+                                                         String createRecordFilenameAndPath) {
+        try {
+            OffsetDateTime createRecordProcessTime = getCreateRecordProcessTime(armResponseCreateRecord);
+            setEodCreateRecordProcessTimestamp(externalObjectDirectoryId, createRecordProcessTime);
+        } catch (Exception e) {
+            log.error("Unable to set EOD create record process timestamp for EOD {} - upload file {}",
+                      externalObjectDirectoryId, createRecordFilenameAndPath, e);
+        }
+    }
+
+    private void setEodCreateRecordProcessTimestamp(Long externalObjectDirectoryId, OffsetDateTime createRecordProcessTime) {
+        ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
+        if (nonNull(externalObjectDirectory)) {
+            externalObjectDirectory.setCreateRecordProcessedTs(createRecordProcessTime);
+            externalObjectDirectoryRepository.save(externalObjectDirectory);
         }
     }
 

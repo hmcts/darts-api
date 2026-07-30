@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.model;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 public record TranscriptionDocumentResult(
     Long transcriptionDocumentId,
@@ -14,6 +15,7 @@ public record TranscriptionDocumentResult(
     String hearingCourthouseDisplayName,
     LocalDate hearingDate,
     boolean isManualTranscription,
-    boolean isHidden
+    boolean isHidden,
+    OffsetDateTime uploadedAt
 ) {
 }

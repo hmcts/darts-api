@@ -134,7 +134,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         OffsetDateTime createdDateTime = DateTimeHelper.floorToMinutes(armRpoExecutionDetailEntity.getCreatedDateTime());
         do {
             pages
-                = externalObjectDirectoryRepository.findByStatusAndInputUploadProcessedTsWithPaging(
+                = externalObjectDirectoryRepository.findByStatusAndCreateRecordProcessedTsWithPaging(
                 armRpoPending,
                 createdDateTime.minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()),
                 createdDateTime.minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()),

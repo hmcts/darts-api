@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullSource;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -49,6 +51,19 @@ class ObjectActionMapperTest {
         var adminActionResponse = adminMediaMapper.toApiModel(objectAdminActionEntities);
 
         assertNull(adminActionResponse);
+    }
+
+    @Test
+    void toApiModel_shouldMapIsDataAnonymisedFromHearingCourtCase() {
+        CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setDataAnonymised(true);
+
+        HearingEntity hearingEntity = new HearingEntity();
+        hearingEntity.setCourtCase(courtCaseEntity);
+
+        var hearingResponse = adminMediaMapper.toApiModel(hearingEntity);
+
+        assertEquals(courtCaseEntity.isDataAnonymised(), hearingResponse.getIsDataAnonymised());
     }
 
 

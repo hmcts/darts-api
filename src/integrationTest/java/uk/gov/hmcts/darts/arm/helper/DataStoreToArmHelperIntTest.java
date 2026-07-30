@@ -119,7 +119,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_DROP_ZONE, ARM);
 
         List<Long> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
-                                                                                              EodHelper.armLocation(), 5);
+                                                                                           EodHelper.armLocation(), 5);
         assertEquals(1, eodEntitiesToSendToArm.size());
 
     }
@@ -139,7 +139,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         dartsDatabase.save(failedTooManyTimesEod);
 
         List<Long> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
-                                                                                              EodHelper.armLocation(), 5);
+                                                                                           EodHelper.armLocation(), 5);
         assertEquals(3, eodEntitiesToSendToArm.size());
 
     }
@@ -262,8 +262,10 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         ArmBatchItem batchItem = new ArmBatchItem();
         ObjectRecordStatusEntity status = externalObjectDirectoryStub.getStatus(ARM_INGESTION);
         batchItem.setPreviousStatus(status);
+        String rawFilename = dataStoreToArmHelper.generateRawFilename(externalObjectDirectory);
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
-        boolean result = dataStoreToArmHelper.shouldPushRawDataToArm(batchItem);
+        boolean result = dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, rawFilename, userAccount);
 
         assertTrue(result);
     }

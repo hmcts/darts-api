@@ -57,7 +57,7 @@ public class ProcessArmRpoPendingAutomatedTask
     protected void runTask() {
         Integer batchSize = this.getAutomatedTaskBatchSize();
         log.info("Processing {} arm rpo pending records", batchSize);
-        this.externalObjectDirectoryRepository.updateByStatusEqualsAndInputUploadProcessedTsBefore(
+        this.externalObjectDirectoryRepository.updateByStatusEqualsAndCreateRecordProcessedTsBefore(
             EodHelper.armRpoPendingStatus(),
             this.currentTimeHelper.currentOffsetDateTime().minus(this.armRpoDuration),
             EodHelper.storedStatus(),

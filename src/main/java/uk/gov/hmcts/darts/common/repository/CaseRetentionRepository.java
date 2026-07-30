@@ -40,7 +40,7 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
         SELECT c
         FROM CaseRetentionEntity c
         WHERE c.courtCase = :courtCase
-        and c.retentionPolicyType.fixedPolicyKey in ('PERM', 'MANUAL')
+        and c.retentionPolicyType.fixedPolicyKey in ('PERM', 'MANUAL', '-1')
         AND c.currentState='COMPLETE'
         ORDER BY c.createdDateTime desc
         limit 1

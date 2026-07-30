@@ -5,14 +5,17 @@ import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItem;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItems;
+import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -31,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
@@ -39,15 +43,18 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidInstanceofChecksInCatchClause"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidInstanceofChecksInCatchClause", "PMD.GodClass"})
 public class DataStoreToArmHelper {
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
+    private static final String SUBMISSION_FILE_SEPARATOR = "_";
+
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final LogApi logApi;
     private final ArmDataManagementApi armDataManagementApi;
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
+    private final ArchiveRecordService archiveRecordService;
 
     public List<Long> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                 ExternalLocationTypeEntity armLocation, int maxResultSize) {
@@ -76,7 +83,6 @@ public class DataStoreToArmHelper {
 
         return returnList;
     }
-
 
     public Optional<ExternalObjectDirectoryEntity> getExternalObjectDirectoryEntity(
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity, ExternalLocationTypeEntity eodSourceLocation, ObjectRecordStatusEntity status) {
@@ -164,7 +170,7 @@ public class DataStoreToArmHelper {
             documentId = externalObjectDirectoryEntity.getCaseDocument().getId();
         }
 
-        return String.format("%s_%s_%s", entityId, documentId, transferAttempts);
+        return format("%s_%s_%s", entityId, documentId, transferAttempts);
     }
 
     @SneakyThrows
@@ -215,10 +221,10 @@ public class DataStoreToArmHelper {
 
     public String getArchiveRecordsFileName(String manifestFilePrefix) {
         String fileNameFormat = "%s_%s.%s";
-        return String.format(fileNameFormat,
-                             manifestFilePrefix,
-                             UUID.randomUUID().toString(),
-                             armDataManagementConfiguration.getFileExtension()
+        return format(fileNameFormat,
+                      manifestFilePrefix,
+                      UUID.randomUUID(),
+                      armDataManagementConfiguration.getFileExtension()
         );
     }
 
@@ -256,10 +262,36 @@ public class DataStoreToArmHelper {
         return savedArmEod;
     }
 
-    public boolean shouldPushRawDataToArm(ArmBatchItem batchItem) {
-        return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus(), EodHelper.failedArmRawDataStatus());
-    }
+    public boolean shouldPushRawDataToArm(ArmBatchItem batchItem, String rawFilename, UserAccountEntity userAccount) {
 
+        if (equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus(), EodHelper.failedArmRawDataStatus())) {
+            return true;
+        } else {
+            ExternalObjectDirectoryEntity armEod = batchItem.getArmEod();
+            String prefix = format("%d_", armEod.getId());
+            List<String> submissionBlobs = armDataManagementApi.listSubmissionBlobs(prefix);
+
+            if (CollectionUtils.isNotEmpty(submissionBlobs)) {
+                batchItem.setRawFilePushSuccessful(true);
+
+                ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename);
+                batchItem.setArchiveRecord(archiveRecord);
+                updateExternalObjectDirectoryStatus(armEod, EodHelper.armRawDataPushedStatus(), userAccount);
+                int index = submissionBlobs.getFirst().lastIndexOf(SUBMISSION_FILE_SEPARATOR);
+                if (index != -1 && index + 1 < submissionBlobs.getFirst().length()) {
+                    Integer attempts = Integer.parseInt(submissionBlobs.getFirst().substring(index + 1));
+                    armEod.setTransferAttempts(attempts);
+                    externalObjectDirectoryRepository.saveAndFlush(armEod);
+                }
+                return false;
+            } else {
+                updateExternalObjectDirectoryStatusToFailed(armEod, EodHelper.failedArmRawDataStatus(), userAccount);
+                batchItem.setRawFilePushSuccessful(false);
+                batchItem.undoManifestFileChange();
+                return true;
+            }
+        }
+    }
 
     public boolean shouldAddEntryToManifestFile(ArmBatchItem batchItem) {
         return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.failedArmManifestFileStatus(), EodHelper.armResponseManifestFailedStatus());

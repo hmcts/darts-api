@@ -524,9 +524,42 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
         });
     }
 
+    @Test
+    void findCurrentEventsByHearingIdWhereNonLogEvents_shouldFindOnlyCurrentNonLogEventEntitiesForHearingByHearingIdAndIsLogEntryFalse() {
+        HearingEntity hearingEntity = PersistableFactory.getHearingTestData().someMinimal();
+        HearingEntity otherHearingEntity = PersistableFactory.getHearingTestData().someMinimal();
+        dartsPersistence.saveAll(hearingEntity, otherHearingEntity);
+
+        EventEntity currentNonLogEvent = createEventForHearing(hearingEntity, true, false);
+        EventEntity currentLogEvent = createEventForHearing(hearingEntity, true, true);
+        EventEntity nonCurrentNonLogEvent = createEventForHearing(hearingEntity, false, false);
+        EventEntity currentNonLogEventForOtherHearing = createEventForHearing(otherHearingEntity, true, false);
+        dartsPersistence.saveAll(currentNonLogEvent, currentLogEvent, nonCurrentNonLogEvent, currentNonLogEventForOtherHearing);
+
+        // when
+        List<EventEntity> resultEvents = eventRepository.findCurrentEventsByHearingIdAndIsLogEntryFalse(hearingEntity.getId());
+
+        // then
+        assertThat(resultEvents)
+            .extracting(EventEntity::getId)
+            .containsExactly(currentNonLogEvent.getId());
+    }
+
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {
         event.setCreatedDateTime(offsetDateTime);
         dartsDatabase.save(event);
+    }
+
+    private EventEntity createEventForHearing(HearingEntity hearingEntity, boolean isCurrent, boolean isLogEntry) {
+        EventEntity eventEntity = PersistableFactory.getEventTestData().someMinimalBuilderHolder()
+            .getBuilder()
+            .hearingEntities(Set.of(hearingEntity))
+            .isCurrent(isCurrent)
+            .isLogEntry(isLogEntry)
+            .build()
+            .getEntity();
+        eventEntity.setCourtroom(hearingEntity.getCourtroom());
+        return eventEntity;
     }
 
     private void makeEventsDuplicate(EventEntity event1, EventEntity event2) {

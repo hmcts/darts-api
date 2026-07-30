@@ -848,6 +848,8 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/HearingId'
+        is_data_anonymised:
+          type: boolean
         case_id:
           $ref: '#/components/schemas/CaseId'
         case_number:
