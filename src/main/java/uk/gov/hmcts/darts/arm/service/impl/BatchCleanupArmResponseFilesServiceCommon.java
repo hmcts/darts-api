@@ -66,7 +66,6 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
              manifestFilePrefix, manifestFilePrefix);
     }
 
-
     @Override
     public void cleanupResponseFiles(int batchsize) {
         if (batchsize == 0) {
@@ -155,7 +154,8 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
 
     @SuppressWarnings({
         "PMD.CognitiveComplexity",//TODO - refactor to reduce complexity when this is next edited
-        "PMD.CyclomaticComplexity"//TODO - refactor to reduce complexity when this is next edited
+        "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
+        "PMD.AvoidInstanceofChecksInCatchClause"//Required to handle interrupted exceptions
     })
     private void deleteResponseFiles(UserAccountEntity userAccount, InputUploadAndAssociatedFilenames inputUploadAndAssociates,
                                      List<ExternalObjectDirectoryEntity> eodEntriesWithManifestFilename) {
@@ -180,6 +180,10 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
                     }
                 } catch (Exception e) {
                     log.error("{}: Failure to delete response file {} for EOD {} - {}", loggingPrefix, associatedFile, eodId, e.getMessage(), e);
+                    if (e instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                        throw new IllegalStateException("Batch cleanup ARM response files task interrupted", e);
+                    }
                     successfullyDeletedAssociatedFiles = false;
                 }
                 if (!successfullyDeletedAssociatedFiles) {
