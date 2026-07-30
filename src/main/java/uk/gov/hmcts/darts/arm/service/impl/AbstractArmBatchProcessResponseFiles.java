@@ -657,25 +657,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    private void setProcessTimeForCreateRecordFileRecord(ArmResponseCreateRecord armResponseCreateRecord, Long externalObjectDirectoryId,
-                                                         String createRecordFilenameAndPath) {
-        try {
-            OffsetDateTime createRecordProcessTime = getCreateRecordProcessTime(armResponseCreateRecord);
-            setEodCreateRecordProcessTimestamp(externalObjectDirectoryId, createRecordProcessTime);
-        } catch (Exception e) {
-            log.error("Unable to set EOD create record process timestamp for EOD {} - upload file {}",
-                      externalObjectDirectoryId, createRecordFilenameAndPath, e);
-        }
-    }
-
-    private void setEodCreateRecordProcessTimestamp(Long externalObjectDirectoryId, OffsetDateTime createRecordProcessTime) {
-        ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
-        if (nonNull(externalObjectDirectory)) {
-            externalObjectDirectory.setCreateRecordProcessedTs(createRecordProcessTime);
-            externalObjectDirectoryRepository.save(externalObjectDirectory);
-        }
-    }
-
     private ArmResponseCreateRecord getResponseCreateRecordOrDelete(String createRecordFilenameAndPath,
                                                                     BinaryData createRecordBinary) throws IOException {
         try {
