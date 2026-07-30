@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
+import com.azure.storage.blob.BlobClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,9 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -30,6 +33,10 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
@@ -40,7 +47,9 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.common.util.TranscriptionUrgencyEnum;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -49,6 +58,8 @@ import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.validator.TranscriptFileValidator;
 import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
 import java.time.OffsetDateTime;
@@ -69,6 +80,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -95,6 +107,20 @@ class TranscriptionServiceImplTest {
     private TranscriptionRepository mockTranscriptionRepository;
     @Mock
     private TranscriptionDocumentRepository mockTranscriptionDocumentRepository;
+    @Mock
+    private CaseRepository mockCaseRepository;
+    @Mock
+    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    @Mock
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
+    @Mock
+    private ExternalLocationTypeRepository externalLocationTypeRepository;
+    @Mock
+    private DataManagementApi dataManagementApi;
+    @Mock
+    private TranscriptFileValidator transcriptFileValidator;
+    @Mock
+    private FileContentChecksum fileContentChecksum;
     @Mock
     private TranscriptionStatusRepository mockTranscriptionStatusRepository;
     @Mock
@@ -142,6 +168,10 @@ class TranscriptionServiceImplTest {
     private TranscriptionEntity mockTranscription;
     @Mock
     private TranscriptionEntity mockTranscription2;
+    @Mock
+    private BlobClient inboundBlobClient;
+    @Mock
+    private BlobClient unstructuredBlobClient;
 
     @Mock
     private DuplicateRequestDetector duplicateRequestDetector;
@@ -201,6 +231,66 @@ class TranscriptionServiceImplTest {
         when(transcriptionService.isManualDeletionEnabled()).thenReturn(manualDeletionEnabled);
     }
 
+    @Test
+    void attachTranscript_resetRetentionProcessingForCases_transcriptUploadedAndLinkedCasesFound() {
+        // given
+        long transcriptionId = 123L;
+        String checksum = "checksum";
+        var updateTranscriptionResponse = new UpdateTranscriptionResponse();
+        updateTranscriptionResponse.setTranscriptionWorkflowId(456);
+        transcriptionService = spy(transcriptionService);
+
+        doReturn(updateTranscriptionResponse).when(transcriptionService).updateTranscription(
+            eq(transcriptionId), any(UpdateTranscriptionRequest.class), eq(false));
+        when(fileContentChecksum.calculate(any(byte[].class))).thenReturn(checksum);
+        when(dataManagementApi.saveBlobDataToContainer(any(), eq(DatastoreContainerType.INBOUND), any())).thenReturn(inboundBlobClient);
+        when(dataManagementApi.saveBlobDataToContainer(any(), eq(DatastoreContainerType.UNSTRUCTURED), any())).thenReturn(unstructuredBlobClient);
+        when(inboundBlobClient.getBlobName()).thenReturn("inbound-location");
+        when(unstructuredBlobClient.getBlobName()).thenReturn("unstructured-location");
+        when(mockTranscriptionRepository.getReferenceById(transcriptionId)).thenReturn(mockTranscription);
+        when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
+        when(mockTranscription.getTranscriptionDocumentEntities()).thenReturn(new ArrayList<>());
+        List<Integer> caseIds = List.of(456, 789);
+        when(mockCaseRepository.findCaseIdsLinkedToTranscription(transcriptionId)).thenReturn(caseIds);
+        var transcript = new MockMultipartFile("transcript", "transcript.doc", "application/msword", "content".getBytes());
+
+        // when
+        transcriptionService.attachTranscript(transcriptionId, transcript);
+
+        // then
+        verify(mockCaseRepository).findCaseIdsLinkedToTranscription(transcriptionId);
+        verify(mockCaseRepository).resetRetentionProcessingForCases(caseIds);
+    }
+
+    @Test
+    void attachTranscript_doesNotResetRetentionProcessing_transcriptUploadedAndNoLinkedCasesFound() {
+        // given
+        long transcriptionId = 123L;
+        String checksum = "checksum";
+        var updateTranscriptionResponse = new UpdateTranscriptionResponse();
+        updateTranscriptionResponse.setTranscriptionWorkflowId(456);
+        transcriptionService = spy(transcriptionService);
+
+        doReturn(updateTranscriptionResponse).when(transcriptionService).updateTranscription(
+            eq(transcriptionId), any(UpdateTranscriptionRequest.class), eq(false));
+        when(fileContentChecksum.calculate(any(byte[].class))).thenReturn(checksum);
+        when(dataManagementApi.saveBlobDataToContainer(any(), eq(DatastoreContainerType.INBOUND), any())).thenReturn(inboundBlobClient);
+        when(dataManagementApi.saveBlobDataToContainer(any(), eq(DatastoreContainerType.UNSTRUCTURED), any())).thenReturn(unstructuredBlobClient);
+        when(inboundBlobClient.getBlobName()).thenReturn("inbound-location");
+        when(unstructuredBlobClient.getBlobName()).thenReturn("unstructured-location");
+        when(mockTranscriptionRepository.getReferenceById(transcriptionId)).thenReturn(mockTranscription);
+        when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
+        when(mockTranscription.getTranscriptionDocumentEntities()).thenReturn(new ArrayList<>());
+        when(mockCaseRepository.findCaseIdsLinkedToTranscription(transcriptionId)).thenReturn(Collections.emptyList());
+        var transcript = new MockMultipartFile("transcript", "transcript.doc", "application/msword", "content".getBytes());
+
+        // when
+        transcriptionService.attachTranscript(transcriptionId, transcript);
+
+        // then
+        verify(mockCaseRepository).findCaseIdsLinkedToTranscription(transcriptionId);
+        verify(mockCaseRepository, times(0)).resetRetentionProcessingForCases(any());
+    }
 
     @Test
     void saveTranscriptionRequestWithValidValuesAndCourtLogTypeReturnSuccess() {

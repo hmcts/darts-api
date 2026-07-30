@@ -3,8 +3,10 @@ package uk.gov.hmcts.darts.common.repository;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
@@ -57,7 +59,7 @@ public interface CaseRepository
     @Query("""
         SELECT distinct cc.id
         FROM CourtCaseEntity cc
-        JOIN cc.caseRetentionEntities cr                
+        JOIN cc.caseRetentionEntities cr
         WHERE cr is not null
         AND cc.isRetentionUpdated = true
         AND cc.retentionRetries < :maxRetentionRetries
@@ -105,6 +107,83 @@ public interface CaseRepository
     List<Integer> findCasesNeedingCaseDocumentForRetentionDateGeneration(OffsetDateTime retainUntilTimestamp,
                                                                          OffsetDateTime caseDocumentCreatedAfterTimestamp,
                                                                          Limit limit);
+
+    @Query("""
+        SELECT DISTINCT cc.id
+        FROM CourtCaseEntity cc
+        WHERE cc.closed = true
+        AND EXISTS (
+            SELECT caseRetention.id
+            FROM CaseRetentionEntity caseRetention
+            WHERE caseRetention.courtCase.id = cc.id
+            AND caseRetention.retainUntilAppliedOn IS NOT NULL
+        )
+        AND NOT EXISTS (
+            SELECT pendingRetention.id
+            FROM CaseRetentionEntity pendingRetention
+            WHERE pendingRetention.courtCase.id = cc.id
+            AND pendingRetention.currentState = 'PENDING'
+        )
+        AND (
+            EXISTS (
+                SELECT directCourtCase.id
+                FROM TranscriptionEntity transcription
+                JOIN transcription.courtCases directCourtCase
+                WHERE transcription.id = :transcriptionId
+                AND directCourtCase.id = cc.id
+            )
+            OR EXISTS (
+                SELECT hearing.id
+                FROM TranscriptionEntity transcription
+                JOIN transcription.hearings hearing
+                WHERE transcription.id = :transcriptionId
+                AND hearing.courtCase.id = cc.id
+            )
+            OR EXISTS (
+                SELECT linkedCase.id
+                FROM TranscriptionLinkedCaseEntity linkedCase
+                WHERE linkedCase.transcription.id = :transcriptionId
+                AND linkedCase.courtCase.id = cc.id
+            )
+        )
+        """)
+    List<Integer> findCaseIdsLinkedToTranscription(Long transcriptionId);
+
+    @Query("""
+        SELECT DISTINCT cc.id
+        FROM CourtCaseEntity cc
+        WHERE cc.closed = true
+        AND EXISTS (
+            SELECT caseRetention.id
+            FROM CaseRetentionEntity caseRetention
+            WHERE caseRetention.courtCase.id = cc.id
+            AND caseRetention.retainUntilAppliedOn IS NOT NULL
+        )
+        AND NOT EXISTS (
+            SELECT pendingRetention.id
+            FROM CaseRetentionEntity pendingRetention
+            WHERE pendingRetention.courtCase.id = cc.id
+            AND pendingRetention.currentState = 'PENDING'
+        )
+        AND EXISTS (
+            SELECT hearing.id
+            FROM AnnotationEntity annotation
+            JOIN annotation.hearings hearing
+            WHERE annotation.id = :annotationId
+            AND hearing.courtCase.id = cc.id
+        )
+        """)
+    List<Integer> findCaseIdsLinkedToAnnotation(Integer annotationId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("""
+        UPDATE CourtCaseEntity cc
+        SET cc.isRetentionUpdated = true,
+            cc.retentionRetries = 0
+        WHERE cc.id IN :caseIds
+        """)
+    int resetRetentionProcessingForCases(List<Integer> caseIds);
 
     @Query("""
         select cc.id from CourtCaseEntity cc

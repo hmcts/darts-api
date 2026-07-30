@@ -61,9 +61,9 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
 
     @Query("""
         SELECT c
-        FROM CaseRetentionEntity c, CourtCaseEntity case
-        WHERE case.id = :caseId
-        AND c.courtCase = case
+        FROM CaseRetentionEntity c, CourtCaseEntity courtCase
+        WHERE courtCase.id = :caseId
+        AND c.courtCase = courtCase
         ORDER BY c.lastModifiedDateTime desc
         """
     )
@@ -97,6 +97,8 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
     List<Integer> findPendingRetention(OffsetDateTime pendingCutoff, Limit limit);
 
     Optional<CaseRetentionEntity> findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(CourtCaseEntity courtCase);
+
+    Optional<CaseRetentionEntity> findTopByCourtCaseOrderByCreatedDateTimeDesc(CourtCaseEntity courtCase);
 
     @Modifying
     @Transactional
