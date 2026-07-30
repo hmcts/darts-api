@@ -37,11 +37,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -238,5 +242,71 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
 
         verify(externalObjectDirectoryRepository, times(0)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
         eodHelperMockedStatic.verify(() -> EodHelper.armLocation(), times(2));
+    }
+
+    @Test
+    void cleanupResponseFilesShouldStopProcessingAndPreserveInterruptWhenInterruptedExceptionOccurs() throws UnableToReadArmFileException {
+        String manifestFilename = "DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360";
+        String nextManifestFilename = "DARTS_7a374f19a9ce7dc9cc480ea8d4eca0fb.a360";
+        String inputUploadBlobFilename = "123_456_1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+        String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        List<ObjectRecordStatusEntity> statusToSearch = List.of(objectRecordStatusStored,
+                                                                objectRecordStatusArmRpoPending,
+                                                                objectRecordStatusArmResponseManifestFailed,
+                                                                objectRecordStatusArmResponseProcessingFailed,
+                                                                objectRecordStatusArmResponseChecksumFailed);
+
+        eodHelperMockedStatic.when(() -> EodHelper.armLocation()).thenReturn(externalLocationTypeArm);
+        when(externalObjectDirectoryRepository.findBatchCleanupManifestFilenames(
+            eq(statusToSearch),
+            eq(externalLocationTypeArm),
+            eq(false),
+            any(OffsetDateTime.class),
+            anyString(),
+            any()
+        )).thenReturn(List.of(manifestFilename, nextManifestFilename));
+
+        ExternalObjectDirectoryEntity eodEntityGroup1 = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
+            media,
+            ExternalLocationTypeEnum.ARM,
+            ObjectRecordStatusEnum.STORED,
+            UUID.randomUUID().toString());
+        eodEntityGroup1.setManifestFile(manifestFilename);
+
+        when(externalObjectDirectoryRepository.findBatchCleanupEntriesByManifestFilename(
+            eq(externalLocationTypeArm),
+            eq(false),
+            eq(manifestFilename)
+        )).thenReturn(List.of(eodEntityGroup1));
+
+        InputUploadAndAssociatedFilenames inputUploadAndAssociatedFilenames = new InputUploadAndAssociatedFilenames();
+        inputUploadAndAssociatedFilenames.setInputUploadFilename(inputUploadBlobFilename);
+        inputUploadAndAssociatedFilenames.addAssociatedFile(1L, createRecordFilename);
+        inputUploadAndAssociatedFilenames.addAssociatedFile(1L, uploadFileFilename);
+        when(armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(anyString(), eq(manifestFilename)))
+            .thenReturn(List.of(inputUploadAndAssociatedFilenames));
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+        doAnswer(invocation -> {
+            throw new InterruptedException("Simulated interruption");
+        }).when(armDataManagementApi).deleteBlobData(createRecordFilename);
+
+        try {
+            assertThatThrownBy(() -> cleanupArmResponseFilesService.cleanupResponseFiles(100))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Batch cleanup ARM response files task interrupted")
+                .hasCauseInstanceOf(InterruptedException.class);
+
+            assertThat(Thread.currentThread().isInterrupted()).isTrue();
+        } finally {
+            Thread.interrupted();
+        }
+
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi, never()).deleteBlobData(uploadFileFilename);
+        verify(externalObjectDirectoryRepository, never()).findBatchCleanupEntriesByManifestFilename(
+            externalLocationTypeArm,
+            false,
+            nextManifestFilename);
     }
 }
