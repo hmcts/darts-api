@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Limit;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -75,7 +76,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
         when(externalObjectDirectoryRepository.findFailedAudiosWithMaxAttempts(any(ExternalLocationTypeEntity.class),
                                                                                any(ObjectRecordStatusEntity.class),
                                                                                eq(InboundAudioFailureCorrectionServiceImpl.MAX_ATTEMPTS),
-                                                                               eq(BATCH_SIZE)))
+                                                                               eq(Limit.of(BATCH_SIZE))))
             .thenReturn(List.of(failedEod));
         when(dataManagementConfiguration.getInboundContainerName()).thenReturn(INBOUND_CONTAINER_NAME);
 
@@ -97,7 +98,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
         when(externalObjectDirectoryRepository.findFailedAudiosWithMaxAttempts(any(ExternalLocationTypeEntity.class),
                                                                                any(ObjectRecordStatusEntity.class),
                                                                                eq(InboundAudioFailureCorrectionServiceImpl.MAX_ATTEMPTS),
-                                                                               eq(BATCH_SIZE)))
+                                                                               eq(Limit.of(BATCH_SIZE))))
             .thenReturn(List.of(failedEod));
 
         service.correctAudioFailure(BATCH_SIZE);
@@ -119,7 +120,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
         when(externalObjectDirectoryRepository.findFailedAudiosWithMaxAttempts(any(ExternalLocationTypeEntity.class),
                                                                                any(ObjectRecordStatusEntity.class),
                                                                                eq(InboundAudioFailureCorrectionServiceImpl.MAX_ATTEMPTS),
-                                                                               eq(BATCH_SIZE)))
+                                                                               eq(Limit.of(BATCH_SIZE))))
             .thenReturn(List.of(failedEod, recoverableEod));
         when(dataManagementConfiguration.getInboundContainerName()).thenReturn(INBOUND_CONTAINER_NAME);
         doThrow(new DartsException("Restore failed")).when(dataManagementService).restoreBlobVersion(INBOUND_CONTAINER_NAME, "audio-blob-id");

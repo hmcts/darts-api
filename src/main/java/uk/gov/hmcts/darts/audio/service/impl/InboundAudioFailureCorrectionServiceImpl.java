@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.service.InboundAudioFailureCorrectionService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -36,7 +37,7 @@ public class InboundAudioFailureCorrectionServiceImpl implements InboundAudioFai
             EodHelper.inboundLocation(),
             EodHelper.failureStatus(),
             MAX_ATTEMPTS,
-            batchSize
+            Limit.of(batchSize)
         );
 
         log.info("Total number of inbound audio files with failure {} out of a batch size {}", failedEods.size(), batchSize);

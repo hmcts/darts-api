@@ -745,5 +745,5 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         AND eod.media is not null
         """)
     List<ExternalObjectDirectoryEntity> findFailedAudiosWithMaxAttempts(ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                        ObjectRecordStatusEntity status, int maxAttempts, int batchSize);
+                                                                        ObjectRecordStatusEntity status, int maxAttempts, Limit limit);
 }

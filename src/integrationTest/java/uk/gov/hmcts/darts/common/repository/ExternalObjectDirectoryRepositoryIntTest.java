@@ -1134,7 +1134,7 @@ class ExternalObjectDirectoryRepositoryIntTest extends PostgresIntegrationBase {
             EodHelper.inboundLocation(),
             EodHelper.failureStatus(),
             3,
-            numberOfObjectDirectory
+            Limit.of(numberOfObjectDirectory)
         );
 
         assertEquals(2, failedAudiosWithMaxAttempts.size());
