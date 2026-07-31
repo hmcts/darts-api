@@ -167,6 +167,8 @@ configurations.configureEach {
 }
 
 configurations {
+  mockitoAgent
+
   testCommonImplementation.extendsFrom testImplementation
 
   functionalTestImplementation.extendsFrom testImplementation
@@ -196,6 +198,10 @@ tasks.withType(JavaExec).configureEach {
 
 tasks.withType(Test).configureEach {
   useJUnitPlatform()
+
+  doFirst {
+    jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
+  }
 
   maxHeapSize = '1G'
 
@@ -498,6 +504,9 @@ dependencies {
   testImplementation 'com.h2database:h2:2.4.240'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.13'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
+  mockitoAgent('org.mockito:mockito-core:5.17.0') {
+    transitive = false
+  }
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
