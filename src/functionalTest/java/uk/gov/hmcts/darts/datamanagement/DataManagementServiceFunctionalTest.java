@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -126,7 +125,6 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
         assertNotNull(blobClientUploadResponse.getBlobSize());
     }
 
-    @SuppressWarnings("PMD.UnnecessaryBooleanAssertion")
     @Test
     void restoreBlobData() throws AzureDeleteBlobException {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
@@ -143,7 +141,7 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
                 TEST_BINARY_STRING,
                 dataManagementService.getBlobData(inboundContainerName, uniqueBlobName).toString()
             );
-            assertFalse(true);
+            
         } finally {
             dataManagementService.deleteBlobData(inboundContainerName, uniqueBlobName);
         }
