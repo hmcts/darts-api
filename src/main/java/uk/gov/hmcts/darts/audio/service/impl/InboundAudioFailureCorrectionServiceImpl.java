@@ -31,7 +31,7 @@ public class InboundAudioFailureCorrectionServiceImpl implements InboundAudioFai
 
     @Override
     public void correctAudioFailure(int batchSize) {
-        log.info("Correcting {} inbound audio files with failure out of a batch size {}", batchSize, batchSize);
+        log.info("Correcting inbound audio files with failure using batch size {}", batchSize);
 
         List<ExternalObjectDirectoryEntity> failedEods = externalObjectDirectoryRepository.findFailedAudiosWithMaxAttempts(
             EodHelper.inboundLocation(),
