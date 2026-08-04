@@ -119,12 +119,13 @@ paths:
               schema:
                 $ref: './problem.yaml'
               example:
-                violations:
-                  - field: emailAddress
-                    message: size must be between 1 and 256
-                type: https://zalando.github.io/problem/constraint-violation
-                status: 400
+                type: about:blank
                 title: Constraint Violation
+                status: 400
+                detail: ""
+                instance: /admin/users/search
+                properties:
+                  emailAddress: size must be between 1 and 256
         '401':
           description: Unauthorised Error
         '403':
@@ -437,16 +438,14 @@ components:
           schema:
             $ref: './problem.yaml'
           example:
-            violations:
-              - field: "emailAddress"
-                message: "must not be null"
-              - field: "state"
-                message: "must not be null"
-              - field: "fullName"
-                message: "must not be null"
-            type: "https://zalando.github.io/problem/constraint-violation"
+            type: "about:blank"
             title: "Constraint Violation"
             status: 400
+            detail: ""
+            properties:
+              emailAddress: "must not be null"
+              state: "must not be null"
+              fullName: "must not be null"
     BadUserPatchRequest:
       description: Bad Request
       content:
@@ -454,12 +453,12 @@ components:
           schema:
             $ref: './problem.yaml'
           example:
-            violations:
-              - field: "fullName"
-                message: "size must be between 1 and 256"
-            type: "https://zalando.github.io/problem/constraint-violation"
+            type: "about:blank"
             title: "Constraint Violation"
             status: 400
+            detail: ""
+            properties:
+              fullName: "size must be between 1 and 256"
     UserNotFound:
       description: User not found
       content:
@@ -477,14 +476,13 @@ components:
           schema:
             $ref: './problem.yaml'
           example:
-            violations:
-              - field: "name"
-                message: "must not be null"
-              - field: "display_name"
-                message: "must not be null"
-            type: "https://zalando.github.io/problem/constraint-violation"
+            type: "about:blank"
             title: "Constraint Violation"
             status: 400
+            detail: ""
+            properties:
+              name: "must not be null"
+              display_name: "must not be null"
     SecurityGroupPatchSuccess:
       description: 'Success'
       content:
