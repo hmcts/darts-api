@@ -689,10 +689,9 @@ class CourthouseApiTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             // Then
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("https://zalando.github.io/problem/constraint-violation"))
+            .andExpect(jsonPath("$.type").value("about:blank"))
             .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations.*.field").value("courthouseName"))
-            .andExpect(jsonPath("$.violations.*.message").value("must not be null"));
+            .andExpect(jsonPath("$.properties.courthouseName").value("must not be null"));
     }
 
     @Test
@@ -715,10 +714,9 @@ class CourthouseApiTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             // Then
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("https://zalando.github.io/problem/constraint-violation"))
+            .andExpect(jsonPath("$.type").value("about:blank"))
             .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations.*.field").value("displayName"))
-            .andExpect(jsonPath("$.violations.*.message").value("must not be null"));
+            .andExpect(jsonPath("$.properties.displayName").value("must not be null"));
     }
 
     @Test

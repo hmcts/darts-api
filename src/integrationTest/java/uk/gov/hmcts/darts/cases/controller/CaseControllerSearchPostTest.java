@@ -554,9 +554,11 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
         String expectedResponse = """
             {
+              "type": "about:blank",
               "status": 400,
               "title": "Bad Request",
-              "detail": "JSON parse error"
+              "detail": "JSON parse error",
+              "instance": "/cases/search"
             }
             """;
 
@@ -592,15 +594,14 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
         String expectedResponse = """
             {
-              "violations": [
-                {
-                  "field": "eventTextContains",
-                  "message": "size must be between 3 and 2000"
-                }
-              ],
-              "type": "https://zalando.github.io/problem/constraint-violation",
+              "type": "about:blank",
+              "title": "Constraint Violation",
               "status": 400,
-              "title": "Constraint Violation"
+              "detail": "",
+              "instance": "/cases/search",
+              "properties": {
+                "eventTextContains": "size must be between 3 and 2000"
+              }
             }
             """;
         String actualResponse = response.getResponse().getContentAsString();

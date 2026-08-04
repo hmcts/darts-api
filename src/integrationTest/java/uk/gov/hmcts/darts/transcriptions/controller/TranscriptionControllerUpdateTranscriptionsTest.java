@@ -283,7 +283,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         // assert the failure response
         Assertions.assertNotNull(failureResponse);
         String partialFailure = JsonPath.parse(mvcResult.getResponse().getContentAsString())
-            .read("$.partial_failure");
+            .read("$.properties.partial_failure");
         List<UpdateTranscriptionsItem> partialFailureResponse = objectMapper.readValue(
             partialFailure,
             new TypeReference<>() {
@@ -339,7 +339,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         // assert the failure response
         Assertions.assertNotNull(failureResponse);
         String partialFailure = JsonPath.parse(mvcResult.getResponse().getContentAsString())
-            .read("$.partial_failure");
+            .read("$.properties.partial_failure");
         List<UpdateTranscriptionsItem> partialFailureResponse = objectMapper.readValue(
             partialFailure,
             new TypeReference<>() {
