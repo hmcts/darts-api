@@ -68,7 +68,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andReturn();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
+            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403,"instance":"/admin/users/search"}
             """;
         JSONAssert.assertEquals(
             expectedResponse,
@@ -96,15 +96,14 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
         String expectedResponse = """
             {
-              "violations": [
-                {
-                  "field": "emailAddress",
-                  "message": "size must be between 1 and 256"
-                }
-              ],
-              "type": "https://zalando.github.io/problem/constraint-violation",
+              "type": "about:blank",
+              "title": "Constraint Violation",
               "status": 400,
-              "title": "Constraint Violation"
+              "detail": "",
+              "instance": "/admin/users/search",
+              "properties": {
+                "emailAddress": "size must be between 1 and 256"
+              }
             }
             """;
         JSONAssert.assertEquals(
