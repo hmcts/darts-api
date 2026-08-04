@@ -232,7 +232,7 @@ class PatchUserIntTest extends IntegrationBase {
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations[*].field", hasItems("fullName")));
+            .andExpect(jsonPath("$.properties.fullName").value("size must be between 1 and 256"));
     }
 
     @Test
