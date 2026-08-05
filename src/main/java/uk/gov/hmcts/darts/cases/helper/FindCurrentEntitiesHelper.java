@@ -37,6 +37,12 @@ public class FindCurrentEntitiesHelper {
         return mediaList;
     }
 
-
+    public List<EventEntity> getCurrentNonLogEvents(CourtCaseEntity courtCase) {
+        List<EventEntity> eventList = new ArrayList<>();
+        for (HearingEntity hearingEntity : courtCase.getHearings()) {
+            eventList.addAll(eventRepository.findCurrentEventsByHearingIdAndIsLogEntryFalse(hearingEntity.getId()));
+        }
+        return eventList;
+    }
 
 }

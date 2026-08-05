@@ -34,6 +34,7 @@ public class AdminHearingSearchResponseMapper {
 
             response.setId(e.getId());
             response.setHearingDate(e.getHearingDate());
+            response.setIsDataAnonymised(e.getCourtCase().isDataAnonymised());
 
             hearingsSearchResponses.add(response);
         });

@@ -38,7 +38,6 @@ import static java.lang.Boolean.TRUE;
 
 @Service
 @Slf4j
-@SuppressWarnings({"PMD.CouplingBetweenObjects"})
 public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
     private final CloseOldCasesProcessorImpl.CloseCaseProcessor caseProcessor;
@@ -87,20 +86,20 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         private final RetentionDateHelper retentionDateHelper;
         private final FindCurrentEntitiesHelper findCurrentEntitiesHelper;
 
-        @Value("#{'${darts.retention.close-events}'.split(',')}")
-        private List<String> closeEvents;
+        @Value("#{'${darts.retention.close-event-handler}'}")
+        private final String closeEventsHandler;
 
         @Transactional
         public void closeCase(Integer courtCaseId, UserAccountEntity userAccount) {
             CourtCaseEntity courtCase = caseService.getCourtCaseById(courtCaseId);
 
             log.info("About to close court case id {}", courtCase.getId());
-            List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentEvents(courtCase);
+            List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase);
             if (CollectionUtils.isNotEmpty(eventList)) {
                 eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
                 //find latest closed event
                 Optional<EventEntity> closedEvent =
-                    eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getEventName())).findFirst();
+                    eventList.stream().filter(eventEntity -> closeEventsHandler.equalsIgnoreCase(eventEntity.getEventType().getHandler())).findFirst();
 
                 if (closedEvent.isPresent()) {
                     closeCaseInDbAndAddRetention(courtCase, closedEvent.get().getCreatedDateTime(),

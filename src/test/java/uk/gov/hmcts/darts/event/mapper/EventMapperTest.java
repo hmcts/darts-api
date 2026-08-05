@@ -312,6 +312,7 @@ class EventMapperTest {
         CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
         courtCaseEntity.setId(123);
         courtCaseEntity.setCaseNumber("caseNumber");
+        courtCaseEntity.setDataAnonymised(true);
 
         HearingEntity hearingEntity = new HearingEntity();
         hearingEntity.setId(1);
@@ -326,6 +327,7 @@ class EventMapperTest {
         assertThat(result.getId()).isEqualTo(1);
         assertThat(result.getCaseId()).isEqualTo(123);
         assertThat(result.getCaseNumber()).isEqualTo("caseNumber");
+        assertThat(result.getIsDataAnonymised()).isEqualTo(courtCaseEntity.isDataAnonymised());
         assertThat(result.getHearingDate()).isEqualTo(hearingDate);
         assertThat(result.getCourtroom()).isEqualTo(courtroomResponseDetails);
         assertThat(result.getCourthouse()).isEqualTo(courthouseResponseDetails);

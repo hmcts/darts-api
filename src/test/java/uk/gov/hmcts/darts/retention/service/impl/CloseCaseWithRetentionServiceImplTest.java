@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.event.service.CaseManagementRetentionService;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -289,6 +290,36 @@ class CloseCaseWithRetentionServiceImplTest {
         verify(caseRepository).saveAndFlush(courtCase);
 
         // but should not attempt to create/update retention when manual retention exists
+        verify(caseRetentionRepository, never()).findLatestPendingRetention(any());
+        verify(caseRetentionRepository, never()).save(any(CaseRetentionEntity.class));
+        verify(retentionApi, never()).applyPolicyStringToDate(any(), any(), any());
+    }
+
+    @Test
+    void closeCaseAndSetRetention_shouldReturnEarly_whenCompletedLegacyPermanentRetentionExists() {
+        OffsetDateTime eventTime = OffsetDateTime.of(2024, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+
+        DartsEventRetentionPolicy retentionPolicy = new DartsEventRetentionPolicy();
+        retentionPolicy.setCaseRetentionFixedPolicy("OVERRIDABLE_POLICY");
+        retentionPolicy.setCaseTotalSentence("P1Y");
+
+        dartsEvent.setDateTime(eventTime);
+        dartsEvent.setRetentionPolicy(retentionPolicy);
+
+        RetentionPolicyTypeEntity legacyPermanentPolicyType = new RetentionPolicyTypeEntity();
+        legacyPermanentPolicyType.setFixedPolicyKey(RetentionPolicyEnum.LEGACY_PERMANENT.getPolicyKey());
+
+        CaseRetentionEntity existingCompletedRetention = new CaseRetentionEntity();
+        existingCompletedRetention.setRetentionPolicyType(legacyPermanentPolicyType);
+        existingCompletedRetention.setCurrentState(CaseRetentionStatus.COMPLETE.name());
+
+        when(caseRetentionRepository.findLatestCompletedManualRetention(courtCase))
+            .thenReturn(Optional.of(existingCompletedRetention));
+
+        service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
+
+        assertTrue(courtCase.getClosed());
+        verify(caseRepository).saveAndFlush(courtCase);
         verify(caseRetentionRepository, never()).findLatestPendingRetention(any());
         verify(caseRetentionRepository, never()).save(any(CaseRetentionEntity.class));
         verify(retentionApi, never()).applyPolicyStringToDate(any(), any(), any());

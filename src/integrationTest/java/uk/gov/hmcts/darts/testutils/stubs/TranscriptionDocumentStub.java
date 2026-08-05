@@ -140,7 +140,6 @@ public class TranscriptionDocumentStub {
         List<CourtCaseEntity> caseEntityList = new ArrayList<>();
         CourtCaseEntity caseEntity;
 
-
         if (useSameCase) {
             courtroomEntity = courtroomStub.createCourtroomUnlessExists(
                 TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString("1"),
@@ -196,7 +195,7 @@ public class TranscriptionDocumentStub {
 
             transcriptionDocumentEntity.setUploadedBy(requestedBy);
             transcriptionDocumentEntity.setLastModifiedBy(requestedBy);
-
+            transcriptionDocumentEntity.setUploadedDateTime(requestedDate);
 
             List<TranscriptionWorkflowEntity> workflowEntities = new ArrayList<>();
             TranscriptionWorkflowEntity workflowEntity;
@@ -219,10 +218,8 @@ public class TranscriptionDocumentStub {
                                                                                             noCourtHouse ? null : courtroomEntity,
                                                                                             requestedBy, workflowEntities, isManualTranscription);
 
-
             transcriptionDocumentEntity.setTranscription(transcriptionEntity);
             transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntity);
-
 
             fileSize = fileSize + 1;
             hoursBefore = hoursBefore.minusHours(1);

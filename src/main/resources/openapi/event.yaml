@@ -886,7 +886,7 @@ components:
         text:
           type: string
         is_data_anonymised:
-          type: boolean
+          $ref: '#/components/schemas/is_data_anonymised'
         courthouse:
           type: object
           properties:
@@ -974,6 +974,8 @@ components:
                 $ref: '#/components/schemas/CourthouseResponseDetails'
               courtroom:
                 $ref: '#/components/schemas/CourtroomResponseDetails'
+              is_data_anonymised:
+                $ref: '#/components/schemas/is_data_anonymised'
     AdminGetEventResponseDetails:
       type: object
       properties:
@@ -1003,7 +1005,7 @@ components:
         antecedent_id:
           type: string
         is_data_anonymised:
-          type: boolean
+          $ref: '#/components/schemas/is_data_anonymised'
         event_status:
           type: integer
         event_ts:
@@ -1038,6 +1040,10 @@ components:
         - "GET_COURTLOG_101"
         - "GET_COURTLOG_102"
       x-enum-varnames: [ COURTLOG_COURT_HOUSE_NOT_FOUND ]
+
+    is_data_anonymised:
+      type: boolean
+      example: false
 
     PostCourtLogsErrorCode:
       type: string

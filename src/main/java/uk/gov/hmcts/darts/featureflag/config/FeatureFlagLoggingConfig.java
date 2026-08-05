@@ -17,5 +17,5 @@ public class FeatureFlagLoggingConfig {
     private boolean armRpoFeatureFlagLogsEnabled;
     private boolean detsToArmPushFeatureFlagLogsEnabled;
     private boolean armPullFeatureFlagLogsEnabled;
-
+    private boolean cleanUpDetsDataFeatureFlagLogsEnabled;
 }

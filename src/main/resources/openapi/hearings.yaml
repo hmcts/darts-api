@@ -310,6 +310,10 @@ paths:
 
 components:
   schemas:
+    is_data_anonymised:
+      type: boolean
+      example: false
+
     get_hearing_response:
       type: object
       properties:
@@ -372,8 +376,7 @@ components:
           type: string
           example: Record:New Case
         is_data_anonymised:
-          type: boolean
-          example: false
+          $ref: '#/components/schemas/is_data_anonymised'
 
     HearingsSearchRequest:
       type: object
@@ -544,6 +547,8 @@ components:
             name:
               type: string
               description: 'The courtroom display name'
+        is_data_anonymised:
+          $ref: '#/components/schemas/is_data_anonymised'
     HearingAuthorisation403ErrorCode:
       type: string
       enum:

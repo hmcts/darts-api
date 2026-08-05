@@ -134,8 +134,8 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/testCaseOpen/expectedResponse.json");
-        expectedResponse = expectedResponse.replace("<CREATED_AT>", formatAsUtc(courtCase.getCreatedDateTime()));
-        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", formatAsUtc(courtCase.getLastModifiedDateTime()));
+        expectedResponse = expectedResponse.replace("<CREATED_AT>", formatUtc(courtCase.getCreatedDateTime()));
+        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", formatUtc(courtCase.getLastModifiedDateTime()));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
@@ -176,8 +176,8 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/testCaseClosed/expectedResponse.json");
-        expectedResponse = expectedResponse.replace("<CREATED_AT>", formatAsUtc(courtCase.getCreatedDateTime()));
-        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", formatAsUtc(courtCase.getLastModifiedDateTime()));
+        expectedResponse = expectedResponse.replace("<CREATED_AT>", formatUtc(courtCase.getCreatedDateTime()));
+        expectedResponse = expectedResponse.replace("<LAST_MODIFIED_AT>", formatUtc(courtCase.getLastModifiedDateTime()));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
@@ -213,8 +213,8 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/testIsAnonymised/expectedResponse.json");
         expectedResponse = expectedResponse
-            .replace("<CREATED_AT>", formatAsUtc(courtCase.getCreatedDateTime()))
-            .replace("<LAST_MODIFIED_AT>", formatAsUtc(courtCase.getLastModifiedDateTime()))
+            .replace("<CREATED_AT>", formatUtc(courtCase.getCreatedDateTime()))
+            .replace("<LAST_MODIFIED_AT>", formatUtc(courtCase.getLastModifiedDateTime()))
             .replace("<DATA_ANONYMISED_BY>", String.valueOf(anonymisedBy.getId()));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -248,8 +248,8 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/expectedResponse_isDeleted.json");
         expectedResponse = expectedResponse
-            .replace("<CREATED_AT>", formatAsUtc(courtCase.getCreatedDateTime()))
-            .replace("<LAST_MODIFIED_AT>", formatAsUtc(courtCase.getLastModifiedDateTime()))
+            .replace("<CREATED_AT>", formatUtc(courtCase.getCreatedDateTime()))
+            .replace("<LAST_MODIFIED_AT>", formatUtc(courtCase.getLastModifiedDateTime()))
             .replace("<CASE_DELETED_BY>", String.valueOf(deletedBy.getId()));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -299,8 +299,8 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerAdminGetCaseByIdTest/expectedResponse_withRetentionAndAdditionalCaseDetails.json");
         expectedResponse = expectedResponse
-            .replace("<CREATED_AT>", formatAsUtc(courtCase.getCreatedDateTime()))
-            .replace("<LAST_MODIFIED_AT>", formatAsUtc(courtCase.getLastModifiedDateTime()));
+            .replace("<CREATED_AT>", formatUtc(courtCase.getCreatedDateTime()))
+            .replace("<LAST_MODIFIED_AT>", formatUtc(courtCase.getLastModifiedDateTime()));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -329,7 +329,7 @@ class CaseControllerAdminGetCaseByIdIntTest extends IntegrationBase {
             }).toList();
     }
 
-    private static String formatAsUtc(OffsetDateTime dateTime) {
-        return dateTime.withOffsetSameInstant(UTC).format(DateTimeFormatter.ISO_DATE_TIME);
+    private String formatUtc(OffsetDateTime offsetDateTime) {
+        return offsetDateTime.withOffsetSameInstant(UTC).format(DateTimeFormatter.ISO_DATE_TIME);
     }
 }

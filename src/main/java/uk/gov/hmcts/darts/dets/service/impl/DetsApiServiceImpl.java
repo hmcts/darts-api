@@ -86,6 +86,7 @@ public class DetsApiServiceImpl implements DetsApiService {
         return client.getBlobName();
     }
 
+
     @Override
     public boolean deleteBlobDataFromContainer(String blobId) throws AzureDeleteBlobException {
         try {
@@ -107,7 +108,6 @@ public class DetsApiServiceImpl implements DetsApiService {
                                                configuration.getContainerName(), blobId, httpStatus);
                 throw new AzureDeleteBlobException(message);
             }
-
         } catch (RuntimeException e) {
             throw new AzureDeleteBlobException(
                 "Could not delete from storage container=" + configuration.getContainerName() + ", blobId=" + blobId, e

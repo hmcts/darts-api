@@ -26,6 +26,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     private final ArmService armService;
@@ -59,6 +60,12 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     public List<String> listResponseBlobs(String prefix) {
         return armService.listResponseBlobs(armDataManagementConfiguration.getContainerName(), prefix);
     }
+
+    @Override
+    public List<String> listSubmissionBlobs(String prefix) {
+        return armService.listSubmissionBlobs(armDataManagementConfiguration.getContainerName(), prefix);
+    }
+
 
     @Override
     public List<String> listResponseBlobsUsingBatch(String prefix, int batchSize) {

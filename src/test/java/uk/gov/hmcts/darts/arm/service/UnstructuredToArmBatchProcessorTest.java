@@ -109,7 +109,7 @@ class UnstructuredToArmBatchProcessorTest {
     }
 
     @Test
-    void testDartsArmClientConfigInBatchQuery() {
+    void processUnstructuredToArm_withArmClientConfigInBatchQuery() {
 
         ExternalObjectDirectoryEntity eod10 = new ExternalObjectDirectoryEntity();
         eod10.setId(10L);
