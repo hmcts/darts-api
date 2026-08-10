@@ -122,6 +122,15 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
+                LEFT JOIN (
+                    SELECT DISTINCT trd.tra_id
+                    FROM darts.transcription_document trd
+                    WHERE trd.is_hidden = false
+                ) visible_trd ON visible_trd.tra_id = tra.tra_id
+                LEFT JOIN (
+                    SELECT DISTINCT trd.tra_id
+                    FROM darts.transcription_document trd
+                ) any_trd ON any_trd.tra_id = tra.tra_id
                 JOIN darts.transcription_workflow requested_trw ON tra.tra_id = requested_trw.tra_id
                     AND requested_trw.trs_id = 1
                 -- Only the latest "WITH_TRANSCRIBER" transcription_workflow for a given transcription
@@ -134,20 +143,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 ) with_transcriber_trw ON with_transcriber_trw.tra_id = tra.tra_id
                 WHERE tra.trs_id = 5
                 -- exclude ones with hidden docs - just in case there are any
-                AND (
-                    EXISTS (
-                        SELECT 1
-                        FROM darts.transcription_document trd
-                        WHERE trd.tra_id = tra.tra_id
-                        AND trd.is_hidden = false
-                    )
-                    OR
-                    NOT EXISTS (
-                        SELECT 1
-                        FROM darts.transcription_document trd
-                        WHERE trd.tra_id = tra.tra_id
-                    )
-                )
+                AND (visible_trd.tra_id IS NOT NULL OR any_trd.tra_id IS NULL)
                 AND tra.is_current = true
                 
                 UNION
@@ -188,6 +184,15 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
+                LEFT JOIN (
+                    SELECT DISTINCT trd.tra_id
+                    FROM darts.transcription_document trd
+                    WHERE trd.is_hidden = false
+                ) visible_trd ON visible_trd.tra_id = tra.tra_id
+                LEFT JOIN (
+                    SELECT DISTINCT trd.tra_id
+                    FROM darts.transcription_document trd
+                ) any_trd ON any_trd.tra_id = tra.tra_id
                 JOIN darts.transcription_workflow requested_trw ON tra.tra_id = requested_trw.tra_id
                     AND requested_trw.trs_id = 1
                 JOIN darts.transcription_workflow complete_trw ON tra.tra_id = complete_trw.tra_id
@@ -195,20 +200,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     AND complete_trw.workflow_actor = :usr_id
                 WHERE tra.trs_id = 6
                 AND complete_trw.workflow_ts >= CURRENT_DATE
-                AND (
-                    EXISTS (
-                        SELECT 1
-                        FROM darts.transcription_document trd
-                        WHERE trd.tra_id = tra.tra_id
-                        AND trd.is_hidden = false
-                    )
-                    OR
-                    NOT EXISTS (
-                        SELECT 1
-                        FROM darts.transcription_document trd
-                        WHERE trd.tra_id = tra.tra_id
-                    )
-                )
+                AND (visible_trd.tra_id IS NOT NULL OR any_trd.tra_id IS NULL)
                 AND tra.is_current = true
                 ORDER BY case_number desc
                 LIMIT :max_result_size
