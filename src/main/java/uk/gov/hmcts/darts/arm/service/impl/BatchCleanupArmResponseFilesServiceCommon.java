@@ -155,7 +155,8 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
     @SuppressWarnings({
         "PMD.CognitiveComplexity",//TODO - refactor to reduce complexity when this is next edited
         "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
-        "PMD.AvoidInstanceofChecksInCatchClause"//Required to handle interrupted exceptions
+        "PMD.AvoidInstanceofChecksInCatchClause",//Required to handle interrupted exceptions
+        "PMD.DoNotUseThreads"//Required to preserve interrupted status when handling InterruptedException
     })
     private void deleteResponseFiles(UserAccountEntity userAccount, InputUploadAndAssociatedFilenames inputUploadAndAssociates,
                                      List<ExternalObjectDirectoryEntity> eodEntriesWithManifestFilename) {
