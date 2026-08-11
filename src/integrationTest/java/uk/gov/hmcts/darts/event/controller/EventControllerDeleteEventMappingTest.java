@@ -74,9 +74,10 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
             {
               "type": "AUTHORISATION_109",
               "title": "User is not authorised for this endpoint",
-              "status": 403
+              "status": 403,
+              "instance": "/admin/event-mappings/%d"
             }
-            """;
+            """.formatted(entity.getId());
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -99,9 +100,10 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
                "type": "EVENT_105",
                "title": "The mapping is inactive, so cannot be deleted",
                "status": 409,
-               "detail": "Event handler mapping %d cannot be deleted because it is inactive."
+               "detail": "Event handler mapping %d cannot be deleted because it is inactive.",
+               "instance": "/admin/event-mappings/%d"
             }
-            """.formatted(entity.getId());
+            """.formatted(entity.getId(), entity.getId());
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
@@ -126,7 +128,8 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
               "type": "EVENT_106",
               "title": "The mapping has already processed events, so cannot be deleted",
               "status": 409,
-              "detail": "Event handler mapping 10 already has processed events, so cannot be deleted."
+              "detail": "Event handler mapping 10 already has processed events, so cannot be deleted.",
+              "instance": "/admin/event-mappings/10"
             }
             """;
 
@@ -150,7 +153,8 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
               "type":"EVENT_101",
               "title": "No event handler mapping found in database",
               "status": 404,
-              "detail": "No event handler could be found in the database for event handler id: -1."
+              "detail": "No event handler could be found in the database for event handler id: -1.",
+              "instance": "/admin/event-mappings/-1"
             }
             """;
 
