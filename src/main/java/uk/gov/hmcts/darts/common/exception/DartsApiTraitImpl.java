@@ -32,7 +32,6 @@ import java.util.Locale;
 @EnableAutoConfiguration(exclude = ErrorMvcAutoConfiguration.class)
 public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements DartsApiTrait {
 
-    private static final String CONSTRAINT_VIOLATION_TITLE = "Constraint Violation";
     private static final String JSON_PARSE_ERROR_DETAIL = "JSON parse error";
 
     @Override
@@ -120,8 +119,9 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
     }
 
     private static ProblemDetail createConstraintViolationProblemDetail(WebRequest request) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "");
-        problemDetail.setTitle(CONSTRAINT_VIOLATION_TITLE);
+        ProblemDetail problemDetail = ProblemDetail.forStatus(CommonApiError.BAD_REQUEST.getHttpStatus());
+        problemDetail.setType(URI.create(CommonApiError.BAD_REQUEST.getType()));
+        problemDetail.setTitle(CommonApiError.BAD_REQUEST.getTitle());
         problemDetail.setInstance(getRequestUri(request));
         problemDetail.setProperties(new HashMap<>());
         return problemDetail;
