@@ -480,7 +480,8 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
                                     {
                                       "type": "AUTHORISATION_114",
                                       "title": "User is not active",
-                                      "status": 403
+                                       "status": 403,
+                                       "instance": "/userstate"
                                     }""",
                                 mvcResult.getResponse().getContentAsString(),
                                 JSONCompareMode.NON_EXTENSIBLE
@@ -504,7 +505,8 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
                                     {
                                       "type": "AUTHORISATION_106",
                                       "title": "Could not obtain user details",
-                                      "status": 401
+                                       "status": 401,
+                                       "instance": "/userstate"
                                     }""",
                                 mvcResult.getResponse().getContentAsString(),
                                 JSONCompareMode.NON_EXTENSIBLE
