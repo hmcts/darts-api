@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.task.helper.AutomatedTaskExceptionHelper;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -155,7 +156,6 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
     @SuppressWarnings({
         "PMD.CognitiveComplexity",//TODO - refactor to reduce complexity when this is next edited
         "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
-        "PMD.AvoidInstanceofChecksInCatchClause",//Required to handle interrupted exceptions
         "PMD.DoNotUseThreads"//Required to preserve interrupted status when handling InterruptedException
     })
     private void deleteResponseFiles(UserAccountEntity userAccount, InputUploadAndAssociatedFilenames inputUploadAndAssociates,
@@ -181,7 +181,7 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
                     }
                 } catch (Exception e) {
                     log.error("{}: Failure to delete response file {} for EOD {} - {}", loggingPrefix, associatedFile, eodId, e.getMessage(), e);
-                    if (e instanceof InterruptedException) {
+                    if (AutomatedTaskExceptionHelper.causedByInterruptedException(e)) {
                         Thread.currentThread().interrupt();
                         throw new IllegalStateException("Batch cleanup ARM response files task interrupted", e);
                     }

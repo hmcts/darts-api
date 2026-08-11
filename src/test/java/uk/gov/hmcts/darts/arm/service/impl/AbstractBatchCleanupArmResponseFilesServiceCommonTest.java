@@ -289,14 +289,14 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
             .thenReturn(List.of(inputUploadAndAssociatedFilenames));
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         doAnswer(invocation -> {
-            throw new InterruptedException("Simulated interruption");
+            throw new IllegalStateException("Wrapped interruption", new InterruptedException("Simulated interruption"));
         }).when(armDataManagementApi).deleteBlobData(createRecordFilename);
 
         try {
             assertThatThrownBy(() -> cleanupArmResponseFilesService.cleanupResponseFiles(100))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Batch cleanup ARM response files task interrupted")
-                .hasCauseInstanceOf(InterruptedException.class);
+                .hasCauseInstanceOf(IllegalStateException.class);
 
             assertThat(Thread.currentThread().isInterrupted()).isTrue();
         } finally {
