@@ -156,8 +156,8 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401}
-            """;
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401,"instance":"/transcriptions/%s/document"}
+            """.formatted(transcriptionId);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
@@ -178,8 +178,8 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
-            """;
+            {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404,"instance":"/transcriptions/%s/document"}
+            """.formatted(transcriptionId);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
