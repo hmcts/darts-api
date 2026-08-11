@@ -85,8 +85,9 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
             {
               "type":"AUDIO_REQUESTS_101",
               "title":"The audio request is not valid for this user",
-              "status":403
-            }""";
+              "status":403,
+              "instance":"/audio-requests/transformed_media/%s"
+            }""".formatted(transformedMediaId);
 
         assertEquals(expectedJson, actualJson, NON_EXTENSIBLE);
     }

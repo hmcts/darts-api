@@ -1,3 +1,10 @@
 {
-  "case_number": "case number"
+  "type": "about:blank",
+  "title": "Constraint Violation",
+  "status": 400,
+  "detail": "Courthouse must not be null",
+  "instance": "/cases/addDocument",
+  "properties": {
+    "courthouse": "must not be null"
+  }
 }

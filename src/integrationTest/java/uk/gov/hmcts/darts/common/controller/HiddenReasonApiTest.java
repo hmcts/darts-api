@@ -98,7 +98,8 @@ class HiddenReasonApiTest extends IntegrationBase {
                                     {
                                       "type": "AUTHORISATION_109",
                                       "title": "User is not authorised for this endpoint",
-                                      "status": 403
+                                      "status": 403,
+                                      "instance": "/admin/hidden-reasons"
                                     }
                                     """, jsonString, JSONCompareMode.STRICT);
     }
