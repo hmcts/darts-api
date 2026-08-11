@@ -245,12 +245,13 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.DoNotUseThreads")//Required to verify interrupted status is preserved
     void cleanupResponseFilesShouldStopProcessingAndPreserveInterruptWhenInterruptedExceptionOccurs() throws UnableToReadArmFileException {
         String manifestFilename = "DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360";
         String nextManifestFilename = "DARTS_7a374f19a9ce7dc9cc480ea8d4eca0fb.a360";
         String inputUploadBlobFilename = "123_456_1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
-        String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        final String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         List<ObjectRecordStatusEntity> statusToSearch = List.of(objectRecordStatusStored,
                                                                 objectRecordStatusArmRpoPending,
                                                                 objectRecordStatusArmResponseManifestFailed,
