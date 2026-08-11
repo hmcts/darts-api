@@ -119,7 +119,8 @@ class EventControllerGetEventMappingByIdTest extends IntegrationBase {
               "type":"EVENT_101",
               "title": "No event handler mapping found in database",
               "status": 404,
-              "detail": "No event handler could be found in the database for event handler id: 1000099."
+              "detail": "No event handler could be found in the database for event handler id: 1000099.",
+              "instance": "/admin/event-mappings/1000099"
             }
             """;
 

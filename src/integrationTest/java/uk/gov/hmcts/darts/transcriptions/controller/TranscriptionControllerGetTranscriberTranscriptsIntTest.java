@@ -73,7 +73,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             {
               "title": "Bad Request",
               "status": 400,
-              "detail": "Required request header 'user_id' for method parameter type Integer is not present"
+              "detail": "Required request header 'user_id' for method parameter type Integer is not present",
+              "instance": "/transcriptions/transcriber-view"
             }
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -96,7 +97,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             {
               "title": "Bad Request",
               "status": 400,
-              "detail": "Required request parameter 'assigned' for method parameter type Boolean is not present"
+              "detail": "Required request parameter 'assigned' for method parameter type Boolean is not present",
+              "instance": "/transcriptions/transcriber-view"
             }
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
