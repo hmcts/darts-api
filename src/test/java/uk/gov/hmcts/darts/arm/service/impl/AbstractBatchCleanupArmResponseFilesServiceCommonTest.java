@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -245,8 +244,7 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.DoNotUseThreads")//Required to verify interrupted status is preserved
-    void cleanupResponseFilesShouldStopProcessingAndPreserveInterruptWhenInterruptedExceptionOccurs() throws UnableToReadArmFileException {
+    void cleanupResponseFilesShouldStopProcessingWhenInterruptedExceptionOccurs() throws UnableToReadArmFileException {
         String manifestFilename = "DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360";
         String nextManifestFilename = "DARTS_7a374f19a9ce7dc9cc480ea8d4eca0fb.a360";
         String inputUploadBlobFilename = "123_456_1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -289,19 +287,12 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
             .thenReturn(List.of(inputUploadAndAssociatedFilenames));
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         doAnswer(invocation -> {
-            throw new IllegalStateException("Wrapped interruption", new InterruptedException("Simulated interruption"));
+            throw new InterruptedException("Simulated interruption");
         }).when(armDataManagementApi).deleteBlobData(createRecordFilename);
 
-        try {
-            assertThatThrownBy(() -> cleanupArmResponseFilesService.cleanupResponseFiles(100))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Batch cleanup ARM response files task interrupted")
-                .hasCauseInstanceOf(IllegalStateException.class);
-
-            assertThat(Thread.currentThread().isInterrupted()).isTrue();
-        } finally {
-            Thread.interrupted();
-        }
+        assertThatThrownBy(() -> cleanupArmResponseFilesService.cleanupResponseFiles(100))
+            .isInstanceOf(InterruptedException.class)
+            .hasMessage("Simulated interruption");
 
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
         verify(armDataManagementApi, never()).deleteBlobData(uploadFileFilename);

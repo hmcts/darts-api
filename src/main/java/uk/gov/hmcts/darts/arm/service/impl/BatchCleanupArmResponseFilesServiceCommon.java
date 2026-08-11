@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.domain.Limit;
@@ -22,7 +23,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.task.helper.AutomatedTaskExceptionHelper;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -156,8 +156,9 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
     @SuppressWarnings({
         "PMD.CognitiveComplexity",//TODO - refactor to reduce complexity when this is next edited
         "PMD.CyclomaticComplexity",//TODO - refactor to reduce complexity when this is next edited
-        "PMD.DoNotUseThreads"//Required to preserve interrupted status when handling InterruptedException
+        "PMD.AvoidInstanceofChecksInCatchClause"//Required to handle interrupted exceptions
     })
+    @SneakyThrows
     private void deleteResponseFiles(UserAccountEntity userAccount, InputUploadAndAssociatedFilenames inputUploadAndAssociates,
                                      List<ExternalObjectDirectoryEntity> eodEntriesWithManifestFilename) {
         List<EodIdAndAssociatedFilenames> eodIdAndAssociatedFilenamesList = inputUploadAndAssociates.getEodIdAndAssociatedFilenamesList();
@@ -181,9 +182,8 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
                     }
                 } catch (Exception e) {
                     log.error("{}: Failure to delete response file {} for EOD {} - {}", loggingPrefix, associatedFile, eodId, e.getMessage(), e);
-                    if (AutomatedTaskExceptionHelper.causedByInterruptedException(e)) {
-                        Thread.currentThread().interrupt();
-                        throw new IllegalStateException("Batch cleanup ARM response files task interrupted", e);
+                    if (e instanceof InterruptedException) {
+                        throw e;
                     }
                     successfullyDeletedAssociatedFiles = false;
                 }
