@@ -121,7 +121,7 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
+            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403,"instance":"/admin/node-register-management"}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }

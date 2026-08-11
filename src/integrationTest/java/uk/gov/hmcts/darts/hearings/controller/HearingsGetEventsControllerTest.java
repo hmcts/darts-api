@@ -134,7 +134,8 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
             {
               "type": "HEARING_100",
               "title": "The requested hearing cannot be found",
-              "status": 404
+              "status": 404,
+              "instance": "/hearings/-1/events"
             }
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
@@ -155,8 +156,8 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401}
-            """;
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401,"instance":"/hearings/%s/events"}
+            """.formatted(hearingEntity.getId());
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }

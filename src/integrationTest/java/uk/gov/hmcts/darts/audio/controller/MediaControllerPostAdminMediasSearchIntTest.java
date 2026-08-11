@@ -292,7 +292,8 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
                "type": "COMMON_104",
                "title": "Invalid request",
                "status": 422,
-               "detail": "The time between the start and end date cannot be more than 12 months"
+               "detail": "The time between the start and end date cannot be more than 12 months",
+               "instance": "/admin/medias/search"
              }
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -317,7 +318,8 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/medias/search"
             }""";
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -342,7 +344,8 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
                         {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/medias/search"
             }""";
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -436,7 +439,8 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
             {
               "type": "AUDIO_116",
               "title": "Too many results",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/medias/search"
             }""";
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -460,7 +464,8 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
             {
               "type": "AUTHORISATION_109",
               "title": "User is not authorised for this endpoint",
-              "status": 403
+              "status": 403,
+              "instance": "/admin/medias/search"
             }""";
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
