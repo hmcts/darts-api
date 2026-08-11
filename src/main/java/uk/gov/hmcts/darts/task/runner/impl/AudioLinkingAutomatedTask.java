@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +25,6 @@ import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AudioLinkingAutomatedTaskConfig;
-import uk.gov.hmcts.darts.task.helper.AutomatedTaskExceptionHelper;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -91,7 +91,8 @@ public class AudioLinkingAutomatedTask
         private final UserIdentity userIdentity;
 
         @Transactional
-        @SuppressWarnings("PMD.DoNotUseThreads")//Required to preserve interrupted status when handling InterruptedException
+        @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")//Required to handle interrupted exceptions
+        @SneakyThrows
         public void processEvent(Long eveId) {
             log.info("Attempting to link media for event with eveId {}", eveId);
             try {
@@ -109,9 +110,8 @@ public class AudioLinkingAutomatedTask
                 eventService.saveEvent(event);
             } catch (Exception e) {
                 log.error("Error attempting to link media for event with eveId {}", eveId, e);
-                if (AutomatedTaskExceptionHelper.causedByInterruptedException(e)) {
-                    Thread.currentThread().interrupt();
-                    throw new IllegalStateException("Audio linking task interrupted", e);
+                if (e instanceof InterruptedException) {
+                    throw e;
                 }
             }
         }

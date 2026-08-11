@@ -37,7 +37,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -110,13 +109,13 @@ class AudioLinkingAutomatedTaskTest {
         doReturn(eventIds).when(eventRepository).findAllByEventStatusAndNotCourtrooms(anyInt(), any(), any());
         doReturn(5).when(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
         doNothing().when(eventProcessor).processEvent(1L);
-        doThrow(new IllegalStateException("Audio linking task interrupted", new InterruptedException("Simulated interruption")))
-            .when(eventProcessor).processEvent(2L);
+        doAnswer(invocation -> {
+            throw new InterruptedException("Simulated interruption");
+        }).when(eventProcessor).processEvent(2L);
 
         assertThatThrownBy(() -> audioLinkingAutomatedTask.runTask())
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Audio linking task interrupted")
-            .hasCauseInstanceOf(InterruptedException.class);
+            .isInstanceOf(InterruptedException.class)
+            .hasMessage("Simulated interruption");
 
         verify(eventProcessor).processEvent(1L);
         verify(eventProcessor).processEvent(2L);
@@ -212,8 +211,7 @@ class AudioLinkingAutomatedTaskTest {
         }
 
         @Test
-        @SuppressWarnings("PMD.DoNotUseThreads")//Required to verify interrupted status is preserved
-        void processEvent_ShouldRethrowAndPreserveInterrupt_WhenInterruptedExceptionOccurs() {
+        void processEvent_ShouldRethrow_WhenInterruptedExceptionOccurs() {
             EventEntity event = mock(EventEntity.class);
             CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
             OffsetDateTime timestamp = OffsetDateTime.now();
@@ -226,16 +224,9 @@ class AudioLinkingAutomatedTaskTest {
                 throw new InterruptedException("Simulated interruption");
             }).when(mediaRepository).findAllByCurrentMediaTimeContains(any(), any(), any());
 
-            try {
-                assertThatThrownBy(() -> eventProcessor.processEvent(3L))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("Audio linking task interrupted")
-                    .hasCauseInstanceOf(InterruptedException.class);
-
-                assertThat(Thread.currentThread().isInterrupted()).isTrue();
-            } finally {
-                Thread.interrupted();
-            }
+            assertThatThrownBy(() -> eventProcessor.processEvent(3L))
+                .isInstanceOf(InterruptedException.class)
+                .hasMessage("Simulated interruption");
         }
 
     }
