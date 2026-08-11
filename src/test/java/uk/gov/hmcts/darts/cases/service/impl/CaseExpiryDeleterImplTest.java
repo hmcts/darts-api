@@ -18,8 +18,11 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -135,6 +138,32 @@ class CaseExpiryDeleterImplTest {
     }
 
     @Test
+    void delete_shouldStopProcessingWhenInterruptedExceptionOccurs() {
+        Duration duration = Duration.ofDays(1);
+        when(config.getBufferDuration()).thenReturn(duration);
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+        OffsetDateTime now = OffsetDateTime.now();
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(now);
+
+        when(caseRepository.findCaseIdsToBeAnonymised(any(), any()))
+            .thenReturn(List.of(10, 20, 30));
+        doAnswer(invocation -> {
+            throw new InterruptedException("Simulated interruption");
+        }).when(dataAnonymisationService).anonymiseCourtCaseById(userAccount, 10, false);
+
+        assertThatThrownBy(() -> caseExpiryDeleter.delete(3))
+            .isInstanceOf(InterruptedException.class)
+            .hasMessage("Simulated interruption");
+
+        verify(dataAnonymisationService).anonymiseCourtCaseById(userAccount, 10, false);
+        verify(hearingsService, never()).removeMediaLinkToHearing(10);
+        verify(dataAnonymisationService, never()).anonymiseCourtCaseById(userAccount, 20, false);
+        verify(dataAnonymisationService, never()).anonymiseCourtCaseById(userAccount, 30, false);
+        verify(caseRepository).findCaseIdsToBeAnonymised(now.minus(duration), Limit.of(3));
+    }
+
+    @Test
     void delete_shouldUseProvidedBatchSizeInLimit() {
         Duration duration = Duration.ofHours(6);
         when(config.getBufferDuration()).thenReturn(duration);
@@ -172,4 +201,3 @@ class CaseExpiryDeleterImplTest {
         verify(caseRepository).findCaseIdsToBeAnonymised(expectedMaxRetentionDate, Limit.of(1));
     }
 }
-
