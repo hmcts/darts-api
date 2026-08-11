@@ -4,12 +4,13 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class AutomatedTaskExceptionHelper {
-    public boolean causedByInterruptedException(Throwable exception) {
-        while (exception != null) {
-            if (exception instanceof InterruptedException) {
+    public boolean causedByInterruptedException(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause != null) {
+            if (cause instanceof InterruptedException) {
                 return true;
             }
-            exception = exception.getCause();
+            cause = cause.getCause();
         }
         return false;
     }

@@ -212,6 +212,7 @@ class AudioLinkingAutomatedTaskTest {
         }
 
         @Test
+        @SuppressWarnings("PMD.DoNotUseThreads")//Required to verify interrupted status is preserved
         void processEvent_ShouldRethrowAndPreserveInterrupt_WhenInterruptedExceptionOccurs() {
             EventEntity event = mock(EventEntity.class);
             CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
