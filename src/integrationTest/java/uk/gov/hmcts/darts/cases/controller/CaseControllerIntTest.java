@@ -176,7 +176,7 @@ class CaseControllerIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"XHIBIT"}, mode = EXCLUDE)
-    void casesPost_shouldThrowError_whenNotAuthenticatied(SecurityRoleEnum securityRoleEnum) throws Exception {
+    void casesPost_shouldThrowError_whenNotAuthenticated(SecurityRoleEnum securityRoleEnum) throws Exception {
         setupExternalUserForCourhouse(null, securityRoleEnum);
 
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + "/addDocument")
@@ -308,7 +308,6 @@ class CaseControllerIntTest extends IntegrationBase {
             String caseType = savedCase.get().getCaseType();
             Assertions.assertEquals("1", caseType);
         }
-
 
         @Test
         void casesPostUpdateExistingCase() throws Exception {
