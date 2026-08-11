@@ -152,7 +152,8 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
                                     {
                                       "type": "AUDIO_102",
                                       "title": "The requested media cannot be found",
-                                      "status": 404
+                                       "status": 404,
+                                       "instance": "/admin/medias/123456789"
                                     }
                                     """, jsonString, JSONCompareMode.STRICT);
     }
@@ -181,9 +182,10 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
                                     {
                                       "type": "AUDIO_102",
                                       "title": "The requested media cannot be found",
-                                      "status": 404
+                                       "status": 404,
+                                       "instance": "/admin/medias/%s"
                                     }
-                                    """, jsonString, JSONCompareMode.STRICT);
+                                     """.formatted(mediaEntity.getId()), jsonString, JSONCompareMode.STRICT);
 
     }
 
@@ -206,7 +208,8 @@ class AudioControllerPatchAdminMediasByIdIntTest extends IntegrationBase {
                                     {
                                       "type": "AUTHORISATION_109",
                                       "title": "User is not authorised for this endpoint",
-                                      "status": 403
+                                       "status": 403,
+                                       "instance": "/admin/medias/123456789"
                                     }
                                     """, jsonString, JSONCompareMode.STRICT);
     }
