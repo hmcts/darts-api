@@ -52,7 +52,7 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
             .andReturn();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}""";
+            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403,"instance":"/admin/security-groups"}""";
 
         assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString());
     }

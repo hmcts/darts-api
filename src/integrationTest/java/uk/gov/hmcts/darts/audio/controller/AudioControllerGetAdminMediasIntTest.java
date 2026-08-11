@@ -374,7 +374,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
         // then
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
+            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403,"instance":"/admin/medias"}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
