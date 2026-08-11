@@ -91,6 +91,7 @@ public class AudioLinkingAutomatedTask
         private final UserIdentity userIdentity;
 
         @Transactional
+        @SuppressWarnings("PMD.DoNotUseThreads")//Required to preserve interrupted status when handling InterruptedException
         public void processEvent(Long eveId) {
             log.info("Attempting to link media for event with eveId {}", eveId);
             try {
