@@ -109,6 +109,7 @@ class AudioLinkingAutomatedTaskTest {
 
         doReturn(eventIds).when(eventRepository).findAllByEventStatusAndNotCourtrooms(anyInt(), any(), any());
         doReturn(5).when(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
+        doNothing().when(eventProcessor).processEvent(1L);
         doThrow(new IllegalStateException("Audio linking task interrupted", new InterruptedException("Simulated interruption")))
             .when(eventProcessor).processEvent(2L);
 
