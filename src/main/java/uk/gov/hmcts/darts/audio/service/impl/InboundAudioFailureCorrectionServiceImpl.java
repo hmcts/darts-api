@@ -59,7 +59,7 @@ public class InboundAudioFailureCorrectionServiceImpl implements InboundAudioFai
             String inboundExternalLocation = eod.getExternalLocation();
             dataManagementService.restoreBlobVersion(dataManagementConfiguration.getInboundContainerName(), inboundExternalLocation);
             externalObjectDirectoryRepository.updateEodStatusAndTransferAttemptsWhereIdIn(
-                EodHelper.failureStatus(), 0, userAccount.getId(), List.of(eod.getId())
+                EodHelper.storedStatus(), 0, userAccount.getId(), List.of(eod.getId())
             );
             log.info("Restored audio file with EOD ID: {} to original location: {}", eod.getId(), eod.getExternalLocation());
         } else {
