@@ -39,6 +39,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
     private static final int USER_ID = 987;
 
     private ObjectRecordStatusEntity failureStatus;
+    private ObjectRecordStatusEntity storedStatus;
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -62,8 +63,13 @@ class InboundAudioFailureCorrectionServiceImplTest {
         failureStatus.setId(ObjectRecordStatusEnum.FAILURE.getId());
         failureStatus.setDescription(ObjectRecordStatusEnum.FAILURE.name());
 
+        storedStatus = new ObjectRecordStatusEntity();
+        storedStatus.setId(ObjectRecordStatusEnum.STORED.getId());
+        storedStatus.setDescription(ObjectRecordStatusEnum.STORED.name());
+
         ReflectionTestUtils.setField(EodHelper.class, "inboundLocation", inboundLocation);
         ReflectionTestUtils.setField(EodHelper.class, "failureStatus", failureStatus);
+        ReflectionTestUtils.setField(EodHelper.class, "storedStatus", storedStatus);
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(USER_ID);
@@ -85,7 +91,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
         verify(userIdentity).getUserAccount();
         verify(dataManagementService).restoreBlobVersion(INBOUND_CONTAINER_NAME, "audio-blob-id");
         verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereIdIn(
-            failureStatus,
+            storedStatus,
             0,
             USER_ID,
             List.of(123L)
@@ -130,13 +136,13 @@ class InboundAudioFailureCorrectionServiceImplTest {
         verify(dataManagementService).restoreBlobVersion(INBOUND_CONTAINER_NAME, "audio-blob-id");
         verify(dataManagementService).restoreBlobVersion(INBOUND_CONTAINER_NAME, "next-audio-blob-id");
         verify(externalObjectDirectoryRepository, never()).updateEodStatusAndTransferAttemptsWhereIdIn(
-            failureStatus,
+            storedStatus,
             0,
             USER_ID,
             List.of(123L)
         );
         verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereIdIn(
-            failureStatus,
+            storedStatus,
             0,
             USER_ID,
             List.of(456L)
