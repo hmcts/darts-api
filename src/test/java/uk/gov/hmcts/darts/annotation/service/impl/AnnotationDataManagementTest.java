@@ -144,7 +144,7 @@ class AnnotationDataManagementTest {
     @Test
     void retrieveFileFromStorage_throwsWhenArmDownForMaintenance() throws FileNotDownloadedException, ArmDownForMaintenanceException {
         when(dataManagementFacade.retrieveFileFromStorage(anyList()))
-            .thenThrow(new ArmDownForMaintenanceException("ARM down"));
+            .thenThrow(new ArmDownForMaintenanceException("ARM down for maintenance"));
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = someExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.getAnnotationDocumentEntity().setId(12L);
