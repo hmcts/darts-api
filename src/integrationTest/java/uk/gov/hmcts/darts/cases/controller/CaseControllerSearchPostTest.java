@@ -62,7 +62,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     private CourthouseEntity swanseaCourthouse;
     private CourthouseEntity myCourthouseWithDifferentDisplayName;
     private UserAccountEntity user;
-    
+
     @BeforeEach
     void setupData() {
         swanseaCourthouse = createCourthouseWithName("SWANSEA");
@@ -597,7 +597,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
               "type": "about:blank",
               "title": "Constraint Violation",
               "status": 400,
-              "detail": "",
               "instance": "/cases/search",
               "properties": {
                 "eventTextContains": "size must be between 3 and 2000"
