@@ -125,7 +125,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                     || group.getId() >= -6 && group.getId() <= -1
                     || group.getId() >= 9 && group.getId() <= 13
                     || group.getSecurityRoleId().equals(SecurityRoleEnum.SUPER_USER.getId())
-                    || group.getSecurityRoleId().equals(SecurityRoleEnum.DARTS.getId()))
+                    || group.getSecurityRoleId().equals(SecurityRoleEnum.DARTS.getId())
+                    || group.getSecurityRoleId().equals(SecurityRoleEnum.JUDICIAL_CONDUCT.getId()))
                 .toList();
 
 
