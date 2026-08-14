@@ -25,7 +25,7 @@ public enum SecurityRoleEnum {
     DAR_PC(13),
     MID_TIER(14),
     MEDIA_IN_PERPETUITY(15),
-    JUDICIAL_CONDUCT(15);
+    JUDICIAL_CONDUCT(16);
 
     private final Integer id;
 
