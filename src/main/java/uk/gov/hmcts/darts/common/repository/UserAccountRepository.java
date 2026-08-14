@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.history.RevisionRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -16,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
+@SuppressWarnings("PMD.TooManyMethods")//Repository class so low complexity in this case
 public interface UserAccountRepository extends
     RevisionRepository<UserAccountEntity, Integer, Long>,
     JpaRepository<UserAccountEntity, Integer>,
@@ -72,6 +75,28 @@ public interface UserAccountRepository extends
         WHERE id = :userId
         """)
     void updateLastLoginTime(Integer userId, OffsetDateTime now);
+
+    @Query("""
+        SELECT DISTINCT userAccount
+        FROM UserAccountEntity userAccount
+        WHERE userAccount.active = true
+        AND userAccount.isSystemUser = false
+        AND (
+            userAccount.lastLoginTime <= :cutoffDateTime
+            OR (userAccount.lastLoginTime IS NULL AND userAccount.createdDateTime <= :cutoffDateTime)
+        )
+        AND NOT EXISTS (
+            SELECT securityGroup
+            FROM UserAccountEntity excludedUser
+            JOIN excludedUser.securityGroupEntities securityGroup
+            WHERE excludedUser = userAccount
+            AND securityGroup.securityRoleEntity.id IN :excludedRoleIds
+        )
+        ORDER BY userAccount.id ASC
+        """)
+    List<UserAccountEntity> findInactiveUsersExcludingRoles(@Param("cutoffDateTime") OffsetDateTime cutoffDateTime,
+                                                            @Param("excludedRoleIds") Set<Integer> excludedRoleIds,
+                                                            Pageable pageable);
 
     List<UserAccountEntity> findByIdInAndActive(List<Integer> userIds, Boolean active);
 

@@ -8,18 +8,26 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserAccountRepositoryTest extends PostgresIntegrationBase {
@@ -183,6 +191,37 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
         assertThat(users.get(0).getId(), equalTo(userAccountEntity3.getId()));
     }
 
+    @Test
+    void findInactiveUsersExcludingRoles_shouldReturnOnlyEligibleInactiveUsers() {
+        OffsetDateTime cutoffDateTime = OffsetDateTime.of(2026, 2, 14, 10, 5, 0, 0, ZoneOffset.UTC);
+        UserAccountEntity oldLastLoginUser = persistUser(
+            "old.last.login@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, false);
+        UserAccountEntity oldNeverLoggedInUser = persistUser(
+            "old.never.logged.in@example.net", cutoffDateTime.minusDays(1), null, true, false);
+        persistUser("recent.last.login@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.plusDays(1), true, false);
+        persistUser("inactive.user@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), false, false);
+        persistUser("system.user@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, true);
+
+        UserAccountEntity superUser = persistUser(
+            "super.user@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, false);
+        UserAccountEntity superAdmin = persistUser(
+            "super.admin@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, false);
+        dartsDatabase.addUserToGroup(superUser, SecurityGroupEnum.SUPER_USER);
+        dartsDatabase.addUserToGroup(superAdmin, SecurityGroupEnum.SUPER_ADMIN);
+
+        List<UserAccountEntity> users = userAccountRepository.findInactiveUsersExcludingRoles(
+            cutoffDateTime,
+            Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId()),
+            PageRequest.of(0, 10)
+        );
+
+        List<Integer> actualIds = users.stream()
+            .map(UserAccountEntity::getId)
+            .toList();
+
+        assertThat(actualIds, containsInAnyOrder(oldLastLoginUser.getId(), oldNeverLoggedInUser.getId()));
+    }
+
     @ParameterizedTest
     @MethodSource("provideTestCombinations")
     void findUsers_shouldFailWithOneNonMatchingField_WhenOtherFieldsMatch(boolean includeSystemUsers, String emailAddress, List<Integer> userIds) {
@@ -202,4 +241,23 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
         );
     }
 
+    private UserAccountEntity persistUser(String emailAddress,
+                                          OffsetDateTime createdDateTime,
+                                          OffsetDateTime lastLoginTime,
+                                          boolean active,
+                                          boolean isSystemUser) {
+        UserAccountEntity userAccount = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
+            .emailAddress(emailAddress)
+            .createdDateTime(createdDateTime)
+            .lastLoginTime(lastLoginTime)
+            .active(active)
+            .isSystemUser(isSystemUser)
+            .securityGroupEntities(new LinkedHashSet<>())
+            .build()
+            .getEntity();
+        UserAccountEntity savedUserAccount = dartsPersistence.save(userAccount);
+        savedUserAccount.setCreatedDateTime(createdDateTime);
+        savedUserAccount.setLastLoginTime(lastLoginTime);
+        return userAccountRepository.saveAndFlush(savedUserAccount);
+    }
 }
