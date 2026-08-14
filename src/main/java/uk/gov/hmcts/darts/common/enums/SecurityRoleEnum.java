@@ -24,7 +24,8 @@ public enum SecurityRoleEnum {
     CPP(12),
     DAR_PC(13),
     MID_TIER(14),
-    MEDIA_IN_PERPETUITY(15);
+    MEDIA_IN_PERPETUITY(15),
+    JUDICIAL_CONDUCT(15);
 
     private final Integer id;
 

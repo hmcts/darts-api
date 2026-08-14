@@ -91,10 +91,10 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
             false, null, List.of(userAccountEntity1.getId(), userAccountEntity2.getId()), null
         );
         assertThat(users, Matchers.hasSize(2));
-        UserAccountEntity firstFoundUser = users.get(0);
-        UserAccountEntity secondFoundUser = users.get(1);
-        assertThat(firstFoundUser.getId(), equalTo(userAccountEntity1.getId()));
-        assertThat(secondFoundUser.getId(), equalTo(userAccountEntity2.getId()));
+        assertThat(
+            users.stream().map(UserAccountEntity::getId).toList(),
+            containsInAnyOrder(userAccountEntity1.getId(), userAccountEntity2.getId())
+        );
     }
 
     @Test
