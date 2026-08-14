@@ -453,6 +453,11 @@ darts:
         chunk-size: 10000
         async-timeout: 20M
         threads: 20
+      disable-inactive-user-accounts:
+        system-user-email: system_DisableInactiveUserAccountsAutomatedTask@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT45M
       cleanup-arm-response-files:
         system-user-email: system_CleanupArmResponseFiles@hmcts.net
         lock:
