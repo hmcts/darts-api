@@ -28,6 +28,7 @@ public class InboundAudioFailureCorrectionServiceImpl implements InboundAudioFai
     private final DataManagementService dataManagementService;
     private final DataManagementConfiguration dataManagementConfiguration;
     private final UserIdentity userIdentity;
+    private final InboundAudioFailureCorrectionUpdateService inboundAudioFailureCorrectionUpdateService;
 
     @Override
     public void correctAudioFailure(int batchSize) {
@@ -48,7 +49,7 @@ public class InboundAudioFailureCorrectionServiceImpl implements InboundAudioFai
             try {
                 restoreAudioLocation(eod, userAccount);
             } catch (Exception ex) {
-                log.error("Failed to correct inbound audio file with EOD ID: {}. Error: {}", eod.getId(), ex.getMessage());
+                log.error("Failed to correct inbound audio file with EOD ID: {}.", eod.getId(), ex);
             }
         }
     }
@@ -58,9 +59,7 @@ public class InboundAudioFailureCorrectionServiceImpl implements InboundAudioFai
             log.info("Restoring audio file with EOD ID: {} to original location: {}", eod.getId(), eod.getExternalLocation());
             String inboundExternalLocation = eod.getExternalLocation();
             dataManagementService.restoreBlobVersion(dataManagementConfiguration.getInboundContainerName(), inboundExternalLocation);
-            externalObjectDirectoryRepository.updateEodStatusAndTransferAttemptsWhereIdIn(
-                EodHelper.storedStatus(), 0, userAccount.getId(), List.of(eod.getId())
-            );
+            inboundAudioFailureCorrectionUpdateService.markEodAsStored(eod.getId(), userAccount.getId());
             log.info("Restored audio file with EOD ID: {} to original location: {}", eod.getId(), eod.getExternalLocation());
         } else {
             log.warn("EOD ID: {} has no external location to restore.", eod.getId());

@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -38,9 +40,6 @@ class InboundAudioFailureCorrectionServiceImplTest {
     private static final int BATCH_SIZE = 25;
     private static final int USER_ID = 987;
 
-    private ObjectRecordStatusEntity failureStatus;
-    private ObjectRecordStatusEntity storedStatus;
-
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
@@ -49,6 +48,8 @@ class InboundAudioFailureCorrectionServiceImplTest {
     private DataManagementConfiguration dataManagementConfiguration;
     @Mock
     private UserIdentity userIdentity;
+    @Mock
+    private InboundAudioFailureCorrectionUpdateService inboundAudioFailureCorrectionUpdateService;
 
     @InjectMocks
     private InboundAudioFailureCorrectionServiceImpl service;
@@ -59,17 +60,12 @@ class InboundAudioFailureCorrectionServiceImplTest {
         inboundLocation.setId(ExternalLocationTypeEnum.INBOUND.getId());
         inboundLocation.setDescription(ExternalLocationTypeEnum.INBOUND.name());
 
-        failureStatus = new ObjectRecordStatusEntity();
+        ObjectRecordStatusEntity failureStatus = new ObjectRecordStatusEntity();
         failureStatus.setId(ObjectRecordStatusEnum.FAILURE.getId());
         failureStatus.setDescription(ObjectRecordStatusEnum.FAILURE.name());
 
-        storedStatus = new ObjectRecordStatusEntity();
-        storedStatus.setId(ObjectRecordStatusEnum.STORED.getId());
-        storedStatus.setDescription(ObjectRecordStatusEnum.STORED.name());
-
         ReflectionTestUtils.setField(EodHelper.class, "inboundLocation", inboundLocation);
         ReflectionTestUtils.setField(EodHelper.class, "failureStatus", failureStatus);
-        ReflectionTestUtils.setField(EodHelper.class, "storedStatus", storedStatus);
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(USER_ID);
@@ -90,12 +86,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
 
         verify(userIdentity).getUserAccount();
         verify(dataManagementService).restoreBlobVersion(INBOUND_CONTAINER_NAME, "audio-blob-id");
-        verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereIdIn(
-            storedStatus,
-            0,
-            USER_ID,
-            List.of(123L)
-        );
+        verify(inboundAudioFailureCorrectionUpdateService).markEodAsStored(123L, USER_ID);
     }
 
     @Test
@@ -111,12 +102,7 @@ class InboundAudioFailureCorrectionServiceImplTest {
 
         verify(userIdentity).getUserAccount();
         verify(dataManagementService, never()).restoreBlobVersion(anyString(), anyString());
-        verify(externalObjectDirectoryRepository, never()).updateEodStatusAndTransferAttemptsWhereIdIn(
-            failureStatus,
-            0,
-            USER_ID,
-            List.of(123L)
-        );
+        verify(inboundAudioFailureCorrectionUpdateService, never()).markEodAsStored(anyLong(), anyInt());
     }
 
     @Test
@@ -135,18 +121,8 @@ class InboundAudioFailureCorrectionServiceImplTest {
 
         verify(dataManagementService).restoreBlobVersion(INBOUND_CONTAINER_NAME, "audio-blob-id");
         verify(dataManagementService).restoreBlobVersion(INBOUND_CONTAINER_NAME, "next-audio-blob-id");
-        verify(externalObjectDirectoryRepository, never()).updateEodStatusAndTransferAttemptsWhereIdIn(
-            storedStatus,
-            0,
-            USER_ID,
-            List.of(123L)
-        );
-        verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereIdIn(
-            storedStatus,
-            0,
-            USER_ID,
-            List.of(456L)
-        );
+        verify(inboundAudioFailureCorrectionUpdateService, never()).markEodAsStored(123L, USER_ID);
+        verify(inboundAudioFailureCorrectionUpdateService).markEodAsStored(456L, USER_ID);
     }
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectory(Long id, String externalLocation) {
