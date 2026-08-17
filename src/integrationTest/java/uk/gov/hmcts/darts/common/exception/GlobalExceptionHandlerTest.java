@@ -183,12 +183,12 @@ class GlobalExceptionHandlerTest extends IntegrationBase {
     @Test
     void shouldReturnRfc9457ResponseWithProblemPropertiesWhenValidationExceptionIsThrown() throws Exception {
         MvcResult response = mockMvc.perform(post(ENDPOINT)
-                                                .contentType(MediaType.APPLICATION_JSON)
-                                                .content("""
-                                                             {
-                                                               "name":"too-long"
-                                                             }
-                                                             """))
+                                                 .contentType(MediaType.APPLICATION_JSON)
+                                                 .content("""
+                                                              {
+                                                                "name":"too-long"
+                                                              }
+                                                              """))
             .andExpect(status().isBadRequest())
             .andReturn();
 
@@ -196,10 +196,9 @@ class GlobalExceptionHandlerTest extends IntegrationBase {
 
         String expectedResponseBody = """
             {
-                "type":"about:blank",
-                "title":"Constraint Violation",
+                "type":"COMMON_104",
+                "title":"Invalid request",
                 "status":400,
-                "detail":"",
                 "instance":"/test",
                 "properties":{
                     "name":"size must be between 1 and 5"
