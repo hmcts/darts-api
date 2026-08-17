@@ -2,5 +2,5 @@
   "type": "TRANSCRIPTION_124",
   "title": "Invalid transcription id",
   "status": 400,
-  "instance": "/transcriptions/$TRANSCRIPTION_ID"
+  "instance": "/transcriptions/$TRANSCRIPTION_ID/document"
 }
