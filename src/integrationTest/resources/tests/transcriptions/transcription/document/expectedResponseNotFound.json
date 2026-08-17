@@ -2,5 +2,5 @@
   "type": "TRANSCRIPTION_101",
   "title": "The requested transcription cannot be found",
   "status": 404,
-  "instance": "/transcriptions/$TRANSCRIPTION_ID"
+  "instance": "/transcriptions/$TRANSCRIPTION_ID/document"
 }
