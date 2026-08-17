@@ -338,7 +338,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         String expectedResponse = """
             {
               "type": "COMMON_104",
-              "title": "Constraint Violation",
+              "title": "Invalid request",
               "status": 400,
               "instance": "/admin/medias/%s/hide",
               "properties": {
