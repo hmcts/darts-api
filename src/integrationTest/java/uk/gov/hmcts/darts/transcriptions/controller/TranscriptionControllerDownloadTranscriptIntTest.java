@@ -334,7 +334,8 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
-        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json");
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/document/expectedResponseBadRequest.json")
+            .replace("$TRANSCRIPTION_ID", "-123");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);

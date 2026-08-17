@@ -96,10 +96,9 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
         String expectedResponse = """
             {
-              "type": "about:blank",
-              "title": "Constraint Violation",
+              "type": "COMMON_104",
+              "title": "Invalid request",
               "status": 400,
-              "detail": "",
               "instance": "/admin/users/search",
               "properties": {
                 "emailAddress": "size must be between 1 and 256"
