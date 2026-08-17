@@ -31,9 +31,9 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     private static final URI ENDPOINT_URI = URI.create("/transcriptions/transcriber-view");
     private static final String USER_ID_HEADER = "user_id";
     private static final String ASSIGNED_QUERY_PARAM = "assigned";
-    private static final String PLACEHOLDER_URGENCY_ID = "$URGENCY";
-    private static final String TODAYS_DATE = "$TODAYS_DATE";
-    private static final String MINUS_30_DAYS = "$MINUS_30_DAYS";
+    private static final String URGENCY_ID_PLACEHOLDER = "$URGENCY";
+    private static final String TODAYS_DATE_PLACEHOLDER = "$TODAYS_DATE";
+    private static final String MINUS_30_DAYS_PLACEHOLDER = "$MINUS_30_DAYS";
 
     @Autowired
     private MockMvc mockMvc;
@@ -71,9 +71,10 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
 
         String expectedResponse = """
             {
+              "type": "about:blank",
               "title": "Bad Request",
               "status": 400,
-              "detail": "Required request header 'user_id' for method parameter type Integer is not present",
+              "detail": "Required header 'user_id' is not present.",
               "instance": "/transcriptions/transcriber-view"
             }
             """;
@@ -95,9 +96,10 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
 
         String expectedResponse = """
             {
+              "type": "about:blank",
               "title": "Bad Request",
               "status": 400,
-              "detail": "Required request parameter 'assigned' for method parameter type Boolean is not present",
+              "detail": "Required parameter 'assigned' is not present.",
               "instance": "/transcriptions/transcriber-view"
             }
             """;
@@ -473,9 +475,9 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                     INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                     VALUES (249, 151, 5, -410, '$MINUS_30_DAYS');
                 
-                """.replace(PLACEHOLDER_URGENCY_ID, generatedUrgency ? "1" : "NULL")
-                .replace(TODAYS_DATE, todaysDate)
-                .replace(MINUS_30_DAYS, dateMinus30Days)
+                """.replace(URGENCY_ID_PLACEHOLDER, generatedUrgency ? "1" : "NULL")
+                .replace(TODAYS_DATE_PLACEHOLDER, todaysDate)
+                .replace(MINUS_30_DAYS_PLACEHOLDER, dateMinus30Days)
         );
     }
 

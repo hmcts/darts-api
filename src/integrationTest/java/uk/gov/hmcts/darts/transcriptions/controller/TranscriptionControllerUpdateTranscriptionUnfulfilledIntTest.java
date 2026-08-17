@@ -213,7 +213,8 @@ class TranscriptionControllerUpdateTranscriptionUnfulfilledIntTest extends Integ
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json");
+        String expectedJson = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json")
+            .replace("$TRANSCRIPTION_ID", String.valueOf(-1));
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
         verifyNoInteractions(notificationApi);
