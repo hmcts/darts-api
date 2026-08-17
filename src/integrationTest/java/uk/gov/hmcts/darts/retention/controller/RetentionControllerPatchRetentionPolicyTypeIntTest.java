@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.domain.Example;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -629,8 +630,9 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
         // Then
         resultActions
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("about:blank"))
-            .andExpect(jsonPath("$.title").value("Constraint Violation"))
+            .andExpect(jsonPath("$.type").value("COMMON_104"))
+            .andExpect(jsonPath("$.title").value("Invalid request"))
+            .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
             .andExpect(jsonPath("$.properties.duration").value("must match \"^\\d{1,2}Y\\d{1,2}M\\d{1,2}D$\""));
     }
 
@@ -686,8 +688,9 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
         // Then
         resultActions
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("about:blank"))
-            .andExpect(jsonPath("$.title").value("Constraint Violation"))
+            .andExpect(jsonPath("$.type").value("COMMON_104"))
+            .andExpect(jsonPath("$.title").value("Invalid request"))
+            .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
             .andExpect(jsonPath("$.properties.description").value("size must be between 0 and 256"));
     }
 
