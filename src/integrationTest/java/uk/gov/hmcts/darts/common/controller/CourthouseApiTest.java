@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -689,8 +690,9 @@ class CourthouseApiTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             // Then
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("about:blank"))
-            .andExpect(jsonPath("$.title").value("Constraint Violation"))
+            .andExpect(jsonPath("$.type").value("COMMON_104"))
+            .andExpect(jsonPath("$.title").value("Invalid request"))
+            .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
             .andExpect(jsonPath("$.properties.courthouseName").value("must not be null"));
     }
 
@@ -714,8 +716,9 @@ class CourthouseApiTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             // Then
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("about:blank"))
-            .andExpect(jsonPath("$.title").value("Constraint Violation"))
+            .andExpect(jsonPath("$.type").value("COMMON_104"))
+            .andExpect(jsonPath("$.title").value("Invalid request"))
+            .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
             .andExpect(jsonPath("$.properties.displayName").value("must not be null"));
     }
 
