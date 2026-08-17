@@ -594,8 +594,8 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
         String expectedResponse = """
             {
-              "type": "about:blank",
-              "title": "Constraint Violation",
+              "type": "COMMON_104",
+              "title": "Invalid request",
               "status": 400,
               "instance": "/cases/search",
               "properties": {
