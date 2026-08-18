@@ -172,7 +172,6 @@ class AudioTransformationServiceImplTest {
 
         ReflectionTestUtils.setField(processMediaRequestsForKeda, "audioTransformationService", audioTransformationService);
 
-
         lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         lenient().when(audioTransformationServiceProperties.getLoopCutoffMinutes()).thenReturn(15);
     }
