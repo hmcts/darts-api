@@ -74,7 +74,7 @@ module "postgresql_flexible" {
     azurerm.postgres_network = azurerm.postgres_network
   }
 
-  source               = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
+  source               = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=DTSPO-30107-additional-postgres-admins"
   env                  = var.env
   product              = var.product
   resource_group_name  = local.rg_name
