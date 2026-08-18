@@ -6,7 +6,7 @@ properties([
         booleanParam(name: 'FAIL_FAST', defaultValue: false, description: 'Should tests fail fast'),
     ])
 ])
-@Library("Infrastructure")
+@Library("Infrastructure@2.5.0") _
 
 import uk.gov.hmcts.contino.GradleBuilder
 import uk.gov.hmcts.contino.GithubAPI
