@@ -51,7 +51,8 @@ class DailyListPostControllerTest extends IntegrationBase {
     private ProcessDailyListOnDemandTask dailyListAutomatedTask;
 
     private static String getExpectedResponse() {
-        return "{\"type\":\"DAILYLIST_101\",\"title\":\"Either xml_document or json_document or both needs to be provided.\",\"status\":422}";
+        return "{\"type\":\"DAILYLIST_101\",\"title\":\"Either xml_document or json_document or both needs to be provided.\","
+            + "\"status\":422,\"instance\":\"/dailylists\"}";
     }
 
     @Test
@@ -122,7 +123,8 @@ class DailyListPostControllerTest extends IntegrationBase {
         String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
         String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
-        final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":422}";
+        final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\","
+            + "\"status\":422,\"instance\":\"/dailylists\"}";
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
 
@@ -189,7 +191,16 @@ class DailyListPostControllerTest extends IntegrationBase {
         String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
         String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
-        final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":422}";
+        final String expectedResponse =
+            """
+                {
+                      "type":"DAILYLIST_105",
+                      "title":"Invalid source system. Should be CPP or XHB.",
+                      "status":422,
+                      "instance":"/dailylists"
+                }
+                """;
+
 
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
@@ -255,7 +266,7 @@ class DailyListPostControllerTest extends IntegrationBase {
         String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
 
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLIST_URL_RUN)
-           .queryParam("listing_courthouse", courthouseName)
+            .queryParam("listing_courthouse", courthouseName)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful());
