@@ -37,22 +37,22 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
         while (totalProcessed < batchSize && chunkSize > 0) {
             log.info("Processing clean up of DETS data with chunk size: {}", chunkSize);
 
-            List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> eodIdsToCleanUp =
+            List<CleanUpDetsDataProcessorImpl.CleanUpDetsProcedureResponse> processedRows =
                 cleanUpDetsDataTransactionalProcessor.callDetsCleanUpStoredProcedure(chunkSize, minimumStoredAge);
 
-            if (eodIdsToCleanUp.isEmpty()) {
+            if (processedRows.isEmpty()) {
                 log.info("No more DETS data to clean up. Ending process.");
                 break;
             }
             
             //Update total processed count and adjust chunk size for next iteration if needed
-            totalProcessed += eodIdsToCleanUp.size();
+            totalProcessed += processedRows.size();
             //Ensure we do not exceed the batch size in the next iteration
             //Takes into account the possibility that the procedure may return more records than requested
             if (totalProcessed + chunkSize > batchSize) {
                 chunkSize = batchSize - totalProcessed;
             }
-            log.info("Processed batch of DETS data clean up. Total processed so far: {}. Batch size: {}", totalProcessed, eodIdsToCleanUp.size());
+            log.info("Processed batch of DETS data clean up. Total processed so far: {}. Batch size: {}", totalProcessed, processedRows.size());
         }
         log.info("Completed processing clean up of DETS data. Total processed: {}", totalProcessed);
     }
