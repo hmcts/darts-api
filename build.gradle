@@ -666,10 +666,6 @@ tasks.register('updateOpenSpecificationsWithVersion') {
   }
 }
 
-tasks.register('printVersionInit') {
-  doLast { println version }
-}
-
 task runAllStyleChecks {
   dependsOn 'checkstyleMain'
   dependsOn 'checkstyleTest'
