@@ -653,7 +653,7 @@ class AudioUploadServiceImplTest {
     }
 
     @Test
-    void deleteUploadedAudio_whenAnExceptionOccures_shouldLogAndConsume(CapturedOutput output) throws AzureDeleteBlobException {
+    void deleteUploadedAudio_whenAnExceptionOccurs_shouldLogAndConsume(CapturedOutput output) throws AzureDeleteBlobException {
         AzureDeleteBlobException exception = new AzureDeleteBlobException("Failed to delete blob");
         doThrow(exception).when(dataManagementApi).deleteBlobDataFromInboundContainer(any());
 
