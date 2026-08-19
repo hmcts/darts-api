@@ -12,9 +12,11 @@
 - `**/util`: shared helpers (check before adding new utilities).
 
 Flyway migrations live under `src/main/resources/db/migration/common` and `src/main/resources/db/migration/postgres`.
+Reference-only production manual data fixes live under `src/main/resources/db/reference/manual-data-fixes`; do not treat them as Flyway migrations.
 
 OpenAPI specs live under `src/main/resources/openapi`. They are processed + versioned into `build/processedSpecs/` and server stubs are generated into
 `build/generated/openapi/src/main/java` (wired into the `main` source set).
+When adding a new OAS definition, also update `index.html` so the GitHub Pages Swagger UI can list it.
 
 Tests are split across Gradle source sets:
 
@@ -23,6 +25,8 @@ Tests are split across Gradle source sets:
 - `src/integrationTest/java`
 - `src/functionalTest/java`
 - `src/smokeTest/java`
+
+Shared test data helpers and entity builders live under `src/testCommon/java/uk/gov/hmcts/darts/test/common`; prefer extending these over duplicating setup.
 
 Operational assets stay in `charts/`, `config/`, and `infrastructure/`. Helper scripts live under `bin/`. Docker Compose files live in the repository root.
 
@@ -48,6 +52,7 @@ Local run (minimal path):
 - Run the service via IntelliJ or `./gradlew bootRun` with `spring.profiles.active=local`
 
 For a full stack in Docker (API + dependencies), use `./bin/dcup` or `./bin/run-in-docker.sh`.
+`docker-compose-local.yml` provides Postgres 16, Redis 8.8, Azurite blob storage, `darts-gateway`, and `darts-stub-services` for local parity.
 
 ## Build, Test, and Development Commands
 
@@ -81,12 +86,16 @@ OpenAPI validation:
 - `local`: local development with `docker-compose-local.yml`
 - `intTest`: integration tests (embedded db, mocks; security disabled)
 - `functionalTest`: functional tests against deployed environment
+- `h2db`: H2-backed test profile used alongside `intTest` / `functionalTest`
+- `in-memory-caching`: simple cache profile used by integration tests and local runs when Redis is not desired
+- `smoke`: smoke tests (source set `smokeTest`)
+- `dets`: DETS-specific configuration (`src/main/resources/application-dets.yaml`)
 - `dev`: PR environment configuration
 
 ## Coding Style & Naming Conventions
 
-Target Java 21 with Spring Boot 3.5 and Lombok. The `uk.gov.hmcts.java` Gradle plugin enforces Checkstyle, PMD, and SpotBugs: 4-space indentation, 120-character
-lines, fail-fast warnings.
+Target Java 21 with Spring Boot 3.5.16 and Lombok. Gradle explicitly runs Checkstyle and PMD, and Java compilation uses `-Xlint:unchecked -Werror`:
+4-space indentation, 160-character lines, fail-fast warnings.
 
 Code style in this repo is effectively:
 
@@ -96,6 +105,8 @@ Code style in this repo is effectively:
 
 Use constructor injection and `@Slf4j` for logging. Packages use lowercase dot notation (root `uk.gov.hmcts.darts`); classes/enums stay PascalCase and beans end
 with `Service`, `Controller`, or `Repository`.
+
+For DTO/entity mapping, prefer existing MapStruct mappers under `**/mapper` with `@Mapper(componentModel = "spring")` over hand-written conversion logic.
 
 Agents must consult the active Checkstyle profile (`config/checkstyle/checkstyle.xml`) and the JetBrains scheme (`.idea/codeStyles/project.xml`) when generating
 code so formatting, imports, and annotations align with what CI enforces.
