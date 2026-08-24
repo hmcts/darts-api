@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.usermanagement.service.DisableInactiveUserAccountsService;
 
 import java.time.OffsetDateTime;
@@ -17,6 +18,7 @@ import java.util.Set;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @Service
 @Slf4j
@@ -29,6 +31,7 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
 
     private final UserAccountRepository userAccountRepository;
     private final CurrentTimeHelper currentTimeHelper;
+    private final TranscriptionService transcriptionService;
 
     @Override
     @Transactional
@@ -53,7 +56,18 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
     }
 
     private void disableAndRemoveFromSecurityGroups(UserAccountEntity userAccount) {
+        rollbackAssignedTranscriptionsIfTranscriber(userAccount);
         userAccount.getSecurityGroupEntities().clear();
         userAccount.setActive(false);
+    }
+
+    private void rollbackAssignedTranscriptionsIfTranscriber(UserAccountEntity userAccount) {
+        boolean isTranscriber = userAccountRepository
+            .findByRoleAndUserId(TRANSCRIBER.getId(), userAccount.getId())
+            .isPresent();
+
+        if (isTranscriber) {
+            transcriptionService.rollbackUserTranscriptions(userAccount);
+        }
     }
 }
