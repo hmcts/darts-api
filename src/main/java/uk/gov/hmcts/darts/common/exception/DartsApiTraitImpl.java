@@ -50,9 +50,9 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
 
     @Override
     protected ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException exception,
-                                                                           HttpHeaders headers,
-                                                                           HttpStatusCode status,
-                                                                           WebRequest request) {
+                                                                            HttpHeaders headers,
+                                                                            HttpStatusCode status,
+                                                                            WebRequest request) {
         ProblemDetail problemDetail = createConstraintViolationProblemDetail(request);
         Locale locale = LocaleContextHolder.getLocale();
 
@@ -97,9 +97,9 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
 
     @Override
     protected ResponseEntity<Object> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exception,
-                                                                         HttpHeaders headers,
-                                                                         HttpStatusCode status,
-                                                                         WebRequest request) {
+                                                                          HttpHeaders headers,
+                                                                          HttpStatusCode status,
+                                                                          WebRequest request) {
         ProblemDetail problemDetail = exception.getBody();
         problemDetail.setStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setInstance(getRequestUri(request));
