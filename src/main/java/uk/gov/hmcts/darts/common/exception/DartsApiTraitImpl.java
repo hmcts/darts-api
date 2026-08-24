@@ -63,7 +63,7 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
                 .map(error -> getMessageSource().getMessage(error, locale))
                 .toList();
 
-            if (!messages.isEmpty()) {
+            if (!messages.isEmpty() && parameterName != null) {
                 problemDetail.setProperty(parameterName, String.join(", ", messages));
             }
         }
