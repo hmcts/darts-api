@@ -30,7 +30,7 @@ class DartsApiTraitImplTest {
 
     private static final String REQUEST_URI = "/validation-test";
 
-    private final TestDartsApiTraitImpl trait = new TestDartsApiTraitImpl();
+    private final ExposedDartsApiTraitImpl trait = new ExposedDartsApiTraitImpl();
 
     @Test
     void givenMethodArgumentNotValidException_whenHandled_thenReturnsBadRequestProblemDetailWithValidationProperties()
@@ -39,7 +39,7 @@ class DartsApiTraitImplTest {
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(requestBody, "testRequest");
         bindingResult.addError(new FieldError("testRequest", "name", "size must be between 1 and 5"));
         MethodParameter methodParameter = new MethodParameter(
-            TestController.class.getDeclaredMethod("test", TestRequest.class),
+            DartsApiTraitTestController.class.getDeclaredMethod("test", TestRequest.class),
             0
         );
         MethodArgumentNotValidException exception = new MethodArgumentNotValidException(methodParameter, bindingResult);
@@ -146,12 +146,12 @@ class DartsApiTraitImplTest {
     private record TestRequest(String name) {
     }
 
-    private static class TestController {
+    private static final class DartsApiTraitTestController {
         void test(TestRequest request) {
         }
     }
 
-    private static class TestDartsApiTraitImpl extends DartsApiTraitImpl {
+    private static final class ExposedDartsApiTraitImpl extends DartsApiTraitImpl {
         @Override
         public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
                                                                    HttpHeaders headers,
