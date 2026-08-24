@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.exception;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.context.support.StaticMessageSource;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@Slf4j
 class DartsApiTraitImplTest {
 
     private static final String REQUEST_URI = "/validation-test";
@@ -226,7 +228,7 @@ class DartsApiTraitImplTest {
 
     private static final class DartsApiTraitTestController {
         void test(TestRequest request) {
-            System.out.println("Test method called with request: " + request);
+            log.debug("Test method called with request: " + request);
         }
     }
 
