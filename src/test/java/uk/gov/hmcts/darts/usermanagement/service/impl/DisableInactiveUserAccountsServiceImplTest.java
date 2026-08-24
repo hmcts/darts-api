@@ -10,10 +10,12 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @ExtendWith(MockitoExtension.class)
 class DisableInactiveUserAccountsServiceImplTest {
@@ -34,12 +37,14 @@ class DisableInactiveUserAccountsServiceImplTest {
     private UserAccountRepository userAccountRepository;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
+    @Mock
+    private TranscriptionService transcriptionService;
 
     private DisableInactiveUserAccountsServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        service = new DisableInactiveUserAccountsServiceImpl(userAccountRepository, currentTimeHelper);
+        service = new DisableInactiveUserAccountsServiceImpl(userAccountRepository, currentTimeHelper, transcriptionService);
     }
 
     @Test
@@ -51,11 +56,30 @@ class DisableInactiveUserAccountsServiceImplTest {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
         when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, PageRequest.of(0, 1000)))
             .thenReturn(List.of(inactiveUser));
+        when(userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), inactiveUser.getId()))
+            .thenReturn(Optional.empty());
 
         service.process(1000);
 
         assertThat(inactiveUser.isActive()).isFalse();
         assertThat(inactiveUser.getSecurityGroupEntities()).isEmpty();
+        verify(transcriptionService, never()).rollbackUserTranscriptions(inactiveUser);
+        verify(userAccountRepository).saveAll(List.of(inactiveUser));
+    }
+
+    @Test
+    void process_shouldRollbackAssignedTranscriptions_WhenInactiveUserIsTranscriber() {
+        UserAccountEntity inactiveUser = userAccount(123);
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
+        when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, PageRequest.of(0, 1000)))
+            .thenReturn(List.of(inactiveUser));
+        when(userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), inactiveUser.getId()))
+            .thenReturn(Optional.of(inactiveUser));
+
+        service.process(1000);
+
+        verify(transcriptionService).rollbackUserTranscriptions(inactiveUser);
         verify(userAccountRepository).saveAll(List.of(inactiveUser));
     }
 
