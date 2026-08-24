@@ -4,6 +4,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,12 +16,17 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.method.MethodValidationResult;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,6 +65,51 @@ class DartsApiTraitImplTest {
             assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
             assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI));
             assertThat(problemDetail.getProperties()).containsEntry("name", "size must be between 1 and 5");
+        });
+    }
+
+    @Test
+    void givenHandlerMethodValidationException_whenHandled_thenReturnsBadRequestProblemDetailWithValidationProperties()
+        throws NoSuchMethodException {
+        StaticMessageSource messageSource = new StaticMessageSource();
+        trait.setMessageSource(messageSource);
+
+        MethodParameter methodParameter = mock(MethodParameter.class);
+        when(methodParameter.getParameterName()).thenReturn("name");
+
+        ParameterValidationResult validationResult = new ParameterValidationResult(
+            methodParameter,
+            "too long",
+            List.of(
+                new DefaultMessageSourceResolvable(new String[]{"name.too.long"}, "must be shorter"),
+                new DefaultMessageSourceResolvable(new String[]{"name.invalid"}, "must only contain letters")
+            ),
+            null,
+            null,
+            null,
+            (error, sourceType) -> null
+        );
+        MethodValidationResult methodValidationResult = MethodValidationResult.create(
+            new DartsApiTraitTestController(),
+            DartsApiTraitTestController.class.getDeclaredMethod("test", TestRequest.class),
+            List.of(validationResult)
+        );
+        HandlerMethodValidationException exception = new HandlerMethodValidationException(methodValidationResult);
+
+        ResponseEntity<Object> response = trait.handleHandlerMethodValidationException(
+            exception,
+            HttpHeaders.EMPTY,
+            HttpStatus.BAD_REQUEST,
+            webRequest()
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isInstanceOfSatisfying(ProblemDetail.class, problemDetail -> {
+            assertThat(problemDetail.getType()).isEqualTo(URI.create(CommonApiError.BAD_REQUEST.getType()));
+            assertThat(problemDetail.getTitle()).isEqualTo(CommonApiError.BAD_REQUEST.getTitle());
+            assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI));
+            assertThat(problemDetail.getProperties()).containsEntry("name", "must be shorter, must only contain letters");
         });
     }
 
@@ -124,6 +176,32 @@ class DartsApiTraitImplTest {
     }
 
     @Test
+    void givenWebRequestWithoutNativeRequest_whenHandled_thenReturnsProblemDetailWithoutInstance() {
+        HttpMessageNotReadableException exception = new HttpMessageNotReadableException("Original parser message");
+
+        ResponseEntity<Object> response = trait.handleHttpMessageNotReadable(
+            exception,
+            HttpHeaders.EMPTY,
+            HttpStatus.BAD_REQUEST,
+            mock(WebRequest.class)
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isInstanceOfSatisfying(ProblemDetail.class, problemDetail -> assertThat(problemDetail.getInstance()).isNull());
+    }
+
+    @Test
+    void givenNativeWebRequestWithoutServletRequest_whenHandled_thenReturnsProblemDetailWithoutInstance() {
+        NativeWebRequest request = mock(NativeWebRequest.class);
+        RuntimeException exception = new RuntimeException("Something failed");
+
+        ResponseEntity<ProblemDetail> response = trait.handleRuntimeException(exception, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).satisfies(problemDetail -> assertThat(problemDetail.getInstance()).isNull());
+    }
+
+    @Test
     void givenRuntimeException_whenHandled_thenReturnsInternalServerErrorProblemDetail() {
         RuntimeException exception = new RuntimeException("Something failed");
 
@@ -148,6 +226,7 @@ class DartsApiTraitImplTest {
 
     private static final class DartsApiTraitTestController {
         void test(TestRequest request) {
+            System.out.println("Test method called with request: " + request);
         }
     }
 
@@ -158,6 +237,14 @@ class DartsApiTraitImplTest {
                                                                    HttpStatusCode status,
                                                                    WebRequest request) {
             return super.handleMethodArgumentNotValid(exception, headers, status, request);
+        }
+
+        @Override
+        public ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException exception,
+                                                                             HttpHeaders headers,
+                                                                             HttpStatusCode status,
+                                                                             WebRequest request) {
+            return super.handleHandlerMethodValidationException(exception, headers, status, request);
         }
 
         @Override
