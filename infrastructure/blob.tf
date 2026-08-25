@@ -1,6 +1,6 @@
 locals {
   blob_folders = [
-  "collected",
+    "collected",
     "response",
     "submission"
   ]
