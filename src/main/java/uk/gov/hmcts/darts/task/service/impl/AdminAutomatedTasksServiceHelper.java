@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionScheduleResponse;
-import uk.gov.hmcts.darts.util.DateTimeHelper;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -28,7 +28,7 @@ public class AdminAutomatedTasksServiceHelper {
     public List<AutomatedTaskCronExpressionScheduleResponse> getCronExpressionSchedulePreview(CronExpression cron) {
         List<AutomatedTaskCronExpressionScheduleResponse> scheduleResponseObject = new ArrayList<>();
 
-        ZonedDateTime next = DateTimeHelper.getCurrentTimeInEuropeLondon(clock);
+        ZonedDateTime next = DateConverterUtil.toZonedDateTime(OffsetDateTime.now(clock));
 
         for (int executionNumber = 1; executionNumber <= cronExpressionPreviewCount; executionNumber++) {
             next = cron.next(next);
