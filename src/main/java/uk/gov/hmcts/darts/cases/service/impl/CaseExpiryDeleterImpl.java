@@ -41,7 +41,7 @@ public class CaseExpiryDeleterImpl implements CaseExpiryDeleter {
 
         List<Integer> caseIds = caseRepository.findCaseIdsToBeAnonymised(maxRetentionDate, Limit.of(batchSize));
         log.info("Found {} cases to be anonymised out of a batch size {}", caseIds.size(), batchSize);
-        for (Integer courtCaseId : caseIds) {
+        caseIds.forEach(courtCaseId -> {
             try {
                 log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
                 dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId, false);
@@ -52,7 +52,7 @@ public class CaseExpiryDeleterImpl implements CaseExpiryDeleter {
                     throw e;
                 }
             }
-        }
+        });
     }
 
 }
