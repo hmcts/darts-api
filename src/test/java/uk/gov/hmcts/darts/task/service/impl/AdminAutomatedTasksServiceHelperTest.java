@@ -47,6 +47,17 @@ class AdminAutomatedTasksServiceHelperTest {
     }
 
     @Test
+    void getCronExpressionSchedulePreviewConvertsCurrentInstantToEuropeLondonBeforeCalculatingNextRun() {
+        AdminAutomatedTasksServiceHelper helper = createHelper("2026-07-16T09:30:00Z");
+
+        CronExpression cronExpression = helper.validateAndParseCronExpression("0 0 10 * * *");
+
+        List<AutomatedTaskCronExpressionScheduleResponse> schedule = helper.getCronExpressionSchedulePreview(cronExpression);
+
+        assertScheduledRun(schedule.get(0), "1", "2026-07-17T10:00:00+01:00");
+    }
+
+    @Test
     void validateAndParseCronExpressionReturnsParsedCronExpressionWhenValid() {
         AdminAutomatedTasksServiceHelper helper = createHelper("2026-07-16T08:30:00Z");
 
