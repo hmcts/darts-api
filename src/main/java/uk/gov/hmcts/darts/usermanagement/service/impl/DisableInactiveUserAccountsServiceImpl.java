@@ -26,7 +26,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUserAccountsService {
 
     private static final Period INACTIVITY_PERIOD = Period.ofMonths(6);
-    private static final Set<Integer> EXCLUDED_ROLE_IDS = Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId());
+    private static final Set<Integer> PRIVILEGED_USER_ROLE_IDS = Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId());
     private static final int MINIMUM_BATCH_SIZE = 1;
 
     private final UserAccountRepository userAccountRepository;
@@ -38,9 +38,11 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
     public void process(int batchSize) {
         int safeBatchSize = Math.max(batchSize, MINIMUM_BATCH_SIZE);
         OffsetDateTime cutoffDateTime = currentTimeHelper.currentOffsetDateTime().minus(INACTIVITY_PERIOD);
+
+        // System users are excluded in the repository query with isSystemUser = false.
         List<UserAccountEntity> inactiveUsers = userAccountRepository.findInactiveUsersExcludingRoles(
             cutoffDateTime,
-            EXCLUDED_ROLE_IDS,
+            PRIVILEGED_USER_ROLE_IDS,
             PageRequest.of(0, safeBatchSize)
         );
 
