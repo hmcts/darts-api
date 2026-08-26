@@ -33,7 +33,7 @@ module "armsa" {
 
 resource "azurerm_storage_blob" "blob_folder" {
   for_each               = toset(local.blob_folders)
-  name                   = "${each.value}/"
+  name                   = "DARTS/${each.value}/"
   storage_account_name   = module.armsa.storageaccount_name
   storage_container_name = "dropzone"
   type                   = "Block"
