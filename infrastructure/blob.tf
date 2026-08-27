@@ -37,12 +37,14 @@ resource "azurerm_storage_blob" "blob_folder" {
   storage_account_name   = module.armsa.storageaccount_name
   storage_container_name = "dropzone"
   type                   = "Block"
+
+  depends_on = [module.armsa]
 }
 
-resource "azurerm_role_assignment" "storage_contributors" {
-  for_each             = toset(var.storage_account_contributor_ids)
-  scope                = module.armsa.storageaccount_id
-  role_definition_name = "Storage Account Contributor"
-  principal_id         = each.value
-}
+# resource "azurerm_role_assignment" "storage_contributors" {
+#   for_each             = toset(var.storage_account_contributor_ids)
+#   scope                = module.armsa.storageaccount_id
+#   role_definition_name = "Storage Account Contributor"
+#   principal_id         = each.value
+# }
 
