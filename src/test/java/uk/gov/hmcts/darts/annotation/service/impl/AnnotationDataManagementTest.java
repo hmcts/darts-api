@@ -136,6 +136,7 @@ class AnnotationDataManagementTest {
         when(mockFileBasedDownloadResponseMetaData.getResource()).thenThrow(new IOException());
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = Arrays.asList(someExternalObjectDirectoryEntity());
+
         assertThatThrownBy(() -> annotationDataManagement.download(externalObjectDirectoryEntities))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
