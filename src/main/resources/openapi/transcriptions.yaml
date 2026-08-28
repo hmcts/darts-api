@@ -465,7 +465,6 @@ paths:
               required:
                 - transcript
               type: object
-              additionalProperties: false
               properties:
                 transcript:
                   type: string
