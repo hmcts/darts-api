@@ -93,6 +93,18 @@ public class ArmServiceStubImpl implements ArmService {
         return true;
     }
 
+    @Override
+    public boolean deleteMultipleBlobsUsingBatching(String containerName, List<String> blobPathAndName) {
+        logStubUsageWarning();
+        return true;
+    }
+
+    @Override
+    public boolean deleteMultipleBlobsIndividually(String containerName, List<String> blobPathAndName) {
+        logStubUsageWarning();
+        return true;
+    }
+
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
                      + " you should ask questions! ###");
