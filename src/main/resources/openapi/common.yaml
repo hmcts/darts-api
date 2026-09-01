@@ -189,6 +189,18 @@ components:
         - "Invalid cron expression"
       x-enum-varnames: [ FAILED_TO_FIND_AUTOMATED_TASK, INVALID_CRON_EXPRESSION ]
 
+    ArmErrorCode:
+      type: string
+      enum:
+        - "ARM_DOWN_FOR_MAINTENTANCE_100"
+      x-enum-varnames: [ ARM_DOWN_FOR_MAINTENTANCE ]
+
+    ArmTitleErrors:
+      type: string
+      enum:
+        - "ARM is down for maintenance"
+      x-enum-varnames: [ ARM_DOWN_FOR_MAINTENTANCE ]
+
     CommonErrorCode:
       type: string
       enum:

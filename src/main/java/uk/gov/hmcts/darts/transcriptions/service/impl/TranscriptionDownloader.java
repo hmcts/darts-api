@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.enums.ArmApiError;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
@@ -68,6 +70,8 @@ public class TranscriptionDownloader {
         try {
             DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(latestTranscriptionDocument);
             return downloadResponseMetaData.getResource();
+        } catch (ArmDownForMaintenanceException e) {
+            throw new DartsApiException(ArmApiError.ARM_DOWN_FOR_MAINTENANCE, e);
         } catch (IOException | FileNotDownloadedException ex) {
             log.error("Failed to download transcript file using latestTranscriptionDocument ID {}",
                       latestTranscriptionDocument.getId(),
