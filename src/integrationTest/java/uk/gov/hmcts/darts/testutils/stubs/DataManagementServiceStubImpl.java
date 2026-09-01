@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownload
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
@@ -137,7 +136,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
     @Override
     @SneakyThrows
-    public DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, String blobId) throws FileNotDownloadedException {
+    public DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, String blobId) {
         logStubUsageWarning();
 
         FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
@@ -159,6 +158,13 @@ public class DataManagementServiceStubImpl implements DataManagementService {
             log.debug("Downloading of guid {}, took {}ms", blobId, downloadDuration.toMillis());
         }
         return fileBasedDownloadResponseMetaData;
+    }
+
+    @Override
+    public void restoreBlobVersion(String containerName, String blobId) {
+        logStubUsageWarning();
+
+        log.info("Restore blob version method executed");
     }
 
     private void logStubUsageWarning() {

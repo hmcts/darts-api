@@ -48,7 +48,7 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
     private DataManagementService dataManagementService;
     @Autowired
     private DataManagementConfiguration dataManagementConfiguration;
-
+    
     @Test
     void saveBinaryDataToBlobStorage() {
 
@@ -120,6 +120,28 @@ class DataManagementServiceFunctionalTest extends FunctionalTest {
 
         assertNotNull(blobClientUploadResponse.getBlobName());
         assertNotNull(blobClientUploadResponse.getBlobSize());
+    }
+
+    @Test
+    void restoreBlobData() throws AzureDeleteBlobException {
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        String inboundContainerName = dataManagementConfiguration.getInboundContainerName();
+        var uniqueBlobName = dataManagementService.saveBlobData(inboundContainerName, data);
+
+        try {
+            dataManagementService.deleteBlobData(inboundContainerName, uniqueBlobName);
+            dataManagementService.restoreBlobVersion(inboundContainerName, uniqueBlobName);
+
+            assertEquals(
+                TEST_BINARY_STRING,
+                dataManagementService.getBlobData(inboundContainerName, uniqueBlobName).toString()
+            );
+            
+        } finally {
+            dataManagementService.deleteBlobData(inboundContainerName, uniqueBlobName);
+        }
     }
 
     @Disabled // Disabled as this test is currently giving a false negative

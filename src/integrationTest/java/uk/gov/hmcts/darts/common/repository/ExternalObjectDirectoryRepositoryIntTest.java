@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
+class ExternalObjectDirectoryRepositoryIntTest extends PostgresIntegrationBase {
 
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -1114,6 +1114,35 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             caseDocument.getId(), List.of(EodHelper.armLocation(), EodHelper.detsLocation()));
 
         assertThat(results).hasSize(2);
+
+    }
+
+    @Test
+    void findFailedAudiosWithMaxAttempts_ShouldReturnMatchingResults() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+        // set up the test data
+        int numberOfObjectDirectory = 10;
+        var externalObjectDirectoryEntities = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.INBOUND, ObjectRecordStatusEnum.FAILURE, numberOfObjectDirectory, Optional.empty());
+        assertEquals(numberOfObjectDirectory, externalObjectDirectoryEntities.size());
+
+        externalObjectDirectoryEntities.getFirst().setTransferAttempts(4);
+        externalObjectDirectoryEntities.get(1).setTransferAttempts(3);
+        dartsPersistence.saveAll(externalObjectDirectoryEntities);
+
+        List<ExternalObjectDirectoryEntity> failedAudiosWithMaxAttempts = externalObjectDirectoryRepository.findFailedAudiosWithMaxAttempts(
+            EodHelper.inboundLocation(),
+            EodHelper.failureStatus(),
+            3,
+            Limit.of(numberOfObjectDirectory)
+        );
+
+        assertEquals(2, failedAudiosWithMaxAttempts.size());
+        for (var eod : failedAudiosWithMaxAttempts) {
+            assertEquals(EodHelper.inboundLocation().getId(), eod.getExternalLocationType().getId());
+            assertEquals(EodHelper.failureStatus().getId(), eod.getStatus().getId());
+            assertTrue(eod.getTransferAttempts() >= 3);
+        }
 
     }
 

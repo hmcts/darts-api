@@ -736,4 +736,14 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         """)
     ExternalObjectDirectoryEntity findOldestByCreateRecordProcessedTsAndStatusAndLocation(ObjectRecordStatusEntity status,
                                                                                           ExternalLocationTypeEntity locationType);
+
+    @Query("""
+        SELECT eod FROM ExternalObjectDirectoryEntity eod
+        WHERE eod.status = :status
+        AND eod.externalLocationType = :externalLocationTypeEntity
+        AND eod.transferAttempts >= :maxAttempts
+        AND eod.media is not null
+        """)
+    List<ExternalObjectDirectoryEntity> findFailedAudiosWithMaxAttempts(ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                        ObjectRecordStatusEntity status, int maxAttempts, Limit limit);
 }
