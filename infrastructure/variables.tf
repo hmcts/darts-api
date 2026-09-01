@@ -44,3 +44,10 @@ variable "db_max_connections" {
   description = "Max connections allowed for the PGSql Flexibile instance"
   default     = 1600
 }
+
+variable "storage_account_contributor_ids" {
+  type        = list(string)
+  description = "List of pricipal IDs to create a role assignemnt to grant the storage account contributor role."
+  default     = []
+}
+

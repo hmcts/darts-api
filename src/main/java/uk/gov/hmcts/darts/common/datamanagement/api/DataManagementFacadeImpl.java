@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -35,8 +36,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType.ARM;
+import static uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Slf4j
@@ -58,7 +61,8 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     private final ObjectRetrievalQueueRepository objectRetrievalQueueRepository;
 
     @Override
-    public DownloadResponseMetaData retrieveFileFromStorage(MediaEntity mediaEntity) throws FileNotDownloadedException {
+    public DownloadResponseMetaData retrieveFileFromStorage(MediaEntity mediaEntity)
+        throws FileNotDownloadedException, ArmDownForMaintenanceException {
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         List<ExternalObjectDirectoryEntity> storedEodEntities = externalObjectDirectoryRepository.findByEntityAndStatus(mediaEntity, storedStatus);
         if (CollectionUtils.isEmpty(storedEodEntities)) {
@@ -82,7 +86,8 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     }
 
     @Override
-    public DownloadResponseMetaData retrieveFileFromStorage(TranscriptionDocumentEntity transcriptionDocumentEntity) throws FileNotDownloadedException {
+    public DownloadResponseMetaData retrieveFileFromStorage(TranscriptionDocumentEntity transcriptionDocumentEntity)
+        throws FileNotDownloadedException, ArmDownForMaintenanceException {
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         List<ExternalObjectDirectoryEntity> storedEodEntities = externalObjectDirectoryRepository.findByEntityAndStatus(transcriptionDocumentEntity,
                                                                                                                         storedStatus);
@@ -108,7 +113,8 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     }
 
     @Override
-    public DownloadResponseMetaData retrieveFileFromStorage(AnnotationDocumentEntity annotationDocumentEntity) throws FileNotDownloadedException {
+    public DownloadResponseMetaData retrieveFileFromStorage(
+        AnnotationDocumentEntity annotationDocumentEntity) throws FileNotDownloadedException, ArmDownForMaintenanceException {
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         List<ExternalObjectDirectoryEntity> storedEodEntities = externalObjectDirectoryRepository.findByEntityAndStatus(annotationDocumentEntity, storedStatus);
         if (CollectionUtils.isEmpty(storedEodEntities)) {
@@ -125,7 +131,8 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     }
 
     @Override
-    public DownloadResponseMetaData retrieveFileFromStorage(List<ExternalObjectDirectoryEntity> eodEntities) throws FileNotDownloadedException {
+    public DownloadResponseMetaData retrieveFileFromStorage(
+        List<ExternalObjectDirectoryEntity> eodEntities) throws FileNotDownloadedException, ArmDownForMaintenanceException {
         if (CollectionUtils.isEmpty(eodEntities)) {
             log.error("Supplied list of EodEntities is empty");
             throw new FileNotDownloadedException("Supplied list of EodEntities is empty");
@@ -160,10 +167,12 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     }
 
     /**
-     * Loop through each storage type in order to see if it has a matched EodEntity, and if it does, try to download the file from there, if it fails,
+     * Loop through each storage type in order to see if it has a matched EodEntity, and if it does, try to download the file from there. If it fails,
      * move to the next one, if they all fail then throw a FileNotDownloadedException.
      */
-    private DownloadResponseMetaData getDataFromStorage(List<ExternalObjectDirectoryEntity> storedEodEntities) throws FileNotDownloadedException {
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    private DownloadResponseMetaData getDataFromStorage(
+        List<ExternalObjectDirectoryEntity> storedEodEntities) throws FileNotDownloadedException, ArmDownForMaintenanceException {
         List<DatastoreContainerType> storageOrder = storageOrderHelper.getStorageOrder();
         StringBuilder logBuilder = new StringBuilder(134)
             .append("Starting to search for files with ")
@@ -182,7 +191,11 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                     .append('\n');
                 continue;
             }
-            if (datastoreContainerType.equals(DatastoreContainerType.UNSTRUCTURED)) {
+            if (TRUE.equals(dataManagementConfiguration.getArmDownForMaintenance())
+                && datastoreContainerType.equals(ARM)) {
+                throw new ArmDownForMaintenanceException("ARM is currently down for maintenance, cannot download files from ARM at this time");
+            }
+            if (datastoreContainerType.equals(UNSTRUCTURED)) {
                 eodEntityToDelete = eodEntity;
             }
             Optional<BlobContainerDownloadable> container = getSupportedContainer(datastoreContainerType);
