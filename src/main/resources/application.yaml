@@ -606,6 +606,11 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT59M
+      inbound-audio-failure-correction:
+        system-user-email: system_InboundAudioFailureCorrectionAutomatedTask@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT45M
 
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100

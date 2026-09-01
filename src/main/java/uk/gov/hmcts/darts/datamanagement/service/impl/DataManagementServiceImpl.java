@@ -5,8 +5,11 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobListDetails;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
+import com.azure.storage.blob.models.ListBlobsOptions;
 import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import lombok.RequiredArgsConstructor;
@@ -33,11 +36,14 @@ import uk.gov.hmcts.darts.util.AzureCopyUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -54,7 +60,7 @@ import static org.springframework.http.HttpStatus.valueOf;
 })
 public class DataManagementServiceImpl implements DataManagementService {
 
-    public static final String BLOB_DOES_NOT_EXIST_IN_CONTAINER = "Blob {} does not exist in {} container";
+    private static final String BLOB_DOES_NOT_EXIST_IN_CONTAINER = "Blob {} does not exist in {} container";
     private final DataManagementConfiguration dataManagementConfiguration;
 
     private final DataManagementAzureClientFactory blobServiceFactory;
@@ -226,7 +232,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")//TODO - refactor to avoid deeply nested if statements when this class is next edited
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public String getChecksum(String containerName, String blobId) {
         log.info("Getting checksum for blob '{}' in container '{}'", blobId, containerName);
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
@@ -285,6 +291,54 @@ public class DataManagementServiceImpl implements DataManagementService {
                 "Could not delete from storage container=" + containerName + ", blobId=" + blobId, e
             );
         }
+    }
+
+    @Override
+    public void restoreBlobVersion(String containerName, String blobId) {
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+        BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
+
+        restoreBlobVersion(containerName, containerClient, blobClient);
+    }
+
+    private void restoreBlobVersion(String containerName, BlobContainerClient containerClient, BlobClient blobClient) {
+        String blobName = blobClient.getBlobName();
+        ListBlobsOptions options = new ListBlobsOptions()
+            .setPrefix(blobName)
+            .setDetails(new BlobListDetails()
+                            .setRetrieveVersions(true));
+        Iterator<BlobItem> blobItems = containerClient.listBlobs(options, dataManagementConfiguration.getBlobClientTimeout()).iterator();
+        String latestVersion = null;
+        while (blobItems.hasNext()) {
+            BlobItem blobItem = blobItems.next();
+            String versionId = blobItem.getVersionId();
+            if (blobName.equals(blobItem.getName()) && versionId != null && (latestVersion == null || versionId.compareTo(latestVersion) > 0)) {
+                latestVersion = versionId;
+            }
+        }
+
+        if (latestVersion == null) {
+            throw new DartsException(String.format("No blob versions found for storage container=%s, blobId=%s",
+                                                   containerClient.getBlobContainerName(), blobName));
+        }
+
+        String containerSasUrl = dataManagementConfiguration.getContainerSasUrl(containerName);
+        String destinationBlobSasUrl = buildBlobSasUrl(containerName, containerSasUrl, blobName);
+        String sourceBlobSasUrl = buildVersionedBlobSasUrl(destinationBlobSasUrl, latestVersion);
+
+        azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
+
+        log.info("Restored blob version {} for blobId {} in container {}", latestVersion, blobName, containerClient.getBlobContainerName());
+    }
+
+    private String buildVersionedBlobSasUrl(String blobSasUrl, String versionId) {
+        String encodedVersionId = URLEncoder.encode(versionId, StandardCharsets.UTF_8);
+        int queryStartIndex = blobSasUrl.indexOf('?');
+        if (queryStartIndex == -1) {
+            return blobSasUrl + "?versionid=" + encodedVersionId;
+        }
+        return blobSasUrl.substring(0, queryStartIndex) + "?versionid=" + encodedVersionId + "&" + blobSasUrl.substring(queryStartIndex + 1);
     }
 
     private String buildBlobSasUrl(String containerName, String containerSasUrl, String location) {
