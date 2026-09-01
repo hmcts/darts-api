@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
@@ -17,7 +18,6 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
-import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
@@ -71,16 +71,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final OutboundFileZipGenerator outboundFileZipGenerator;
     private final FileOperationService fileOperationService;
     private final MediaRepository mediaRepository;
-    private final ExternalObjectDirectoryService eodService;
-    private final TransformedMediaHelper transformedMediaHelper;
-    private final LogApi logApi;
     private final DataManagementFacade dataManagementFacade;
-    private final UnstructuredDataHelper unstructuredDataHelper;
     private final CurrentTimeHelper currentTimeHelper;
     private final AudioTransformationServiceProperties config;
     private final ProcessMediaRequestsForKeda processMediaRequestsForKeda;
     private final MediaRequestService mediaRequestService;
-
 
     private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
         if (media1.getStart().equals(media2.getStart())) {
@@ -133,7 +128,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         private final TransformedMediaHelper transformedMediaHelper;
         private final LogApi logApi;
         private AudioTransformationServiceImpl audioTransformationService;
-
 
         /**
          * For all audio related to a given AudioRequest, download, transform and upload the processed file to outbound
@@ -238,7 +232,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         }
     }
 
-
     @Override
     public List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
                                                                                             OffsetDateTime startTime,
@@ -256,7 +249,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     private Map<MediaEntity, Path> downloadAndSaveMediaToWorkspace(List<MediaEntity> mediaEntitiesForRequest)
-        throws IOException {
+        throws IOException, ArmDownForMaintenanceException {
         Map<MediaEntity, Path> downloadedMedias = new LinkedHashMap<>();
         for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
             Path downloadPath = retrieveFromStorageAndSaveToTempWorkspace(mediaEntity);
@@ -268,7 +261,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes"})
-    public Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException {
+    public Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException, ArmDownForMaintenanceException {
 
         try (DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
             String id = downloadResponseMetaData.getEodEntity().getExternalLocation();
