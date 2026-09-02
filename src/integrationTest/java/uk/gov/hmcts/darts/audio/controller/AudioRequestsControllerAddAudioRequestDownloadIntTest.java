@@ -32,10 +32,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB;
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
@@ -173,6 +175,24 @@ class AudioRequestsControllerAddAudioRequestDownloadIntTest extends IntegrationB
 
             assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
         });
+    }
+
+    @Test
+    void addAudioRequestDownloadPostShouldReturnSuccessForHmctsTranscriptionHub() throws Exception {
+        when(mockUserIdentity.userHasGlobalAccess(argThat(roles -> roles.contains(HMCTS_TRANSCRIPTION_HUB)))).thenReturn(true);
+        var audioRequestDetails = createAudioRequestDetails(hearingEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(audioRequestDetails));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.request_id").isNumber())
+            .andExpect(jsonPath("$.case_id").isNumber())
+            .andExpect(jsonPath("$.case_number").value(SOME_CASE_NUMBER))
+            .andExpect(jsonPath("$.courthouse_name").value(SOME_COURTHOUSE))
+            .andExpect(jsonPath("$.hearing_date").value(HEARING_DATE));
     }
 
     @Test

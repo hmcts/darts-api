@@ -19,10 +19,12 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCase;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
@@ -98,6 +100,18 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
         expectedJson = expectedJson.replace("<courthouse-id>", hearingEntity.getCourtCase().getCourthouse().getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
+    }
+
+    @Test
+    void casesSearchGetEndpointShouldReturnSuccessForHmctsTranscriptionHub() throws Exception {
+        setupData();
+        when(mockUserIdentity.userHasGlobalAccess(argThat(roles -> roles.contains(HMCTS_TRANSCRIPTION_HUB)))).thenReturn(true);
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.case_number", Matchers.is(SOME_CASE_NUMBER)));
     }
 
     @Test
