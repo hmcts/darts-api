@@ -125,23 +125,32 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                     || group.getId() >= -6 && group.getId() <= -1
                     || group.getId() >= 9 && group.getId() <= 13
                     || group.getSecurityRoleId().equals(SecurityRoleEnum.SUPER_USER.getId())
-                    || group.getSecurityRoleId().equals(SecurityRoleEnum.DARTS.getId()))
+                    || group.getSecurityRoleId().equals(SecurityRoleEnum.DARTS.getId())
+                    || group.getSecurityRoleId().equals(SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB.getId()))
                 .toList();
 
-        checkGroup(staticGroups.getFirst(), "CPP", true, 12, false, null);
-        checkGroup(staticGroups.get(1), "DAR_PC", true, 13, false, null);
-        checkGroup(staticGroups.get(2), "DARTS", true, 10, false, null);
-        checkGroup(staticGroups.get(3), "hmcts_staff_1", false, 3, true, 127);
-        checkGroup(staticGroups.get(4), "hmcts_staff_2", false, 2, true, 127);
-        checkGroup(staticGroups.get(5), "hmcts_staff_3", false, 1, true, 127);
-        checkGroup(staticGroups.get(6), "hmcts_staff_4", false, 4, true, 127);
-        checkGroup(staticGroups.get(7), "hmcts_staff_5", true, 5, true, 127);
-        checkGroup(staticGroups.get(8), "hmcts_staff_6", true, 6, true, 127);
-        checkGroup(staticGroups.get(9), "MID_TIER", true, 14, false, null);
-        checkGroup(staticGroups.get(10), "SUPER_ADMIN", true, 8, true, null);
-        checkGroup(staticGroups.get(11), "SUPER_USER", true, 7, true, null);
-        checkGroup(staticGroups.get(12), "XHIBIT", true, 11, false, null);
+        checkGroup(getGroupByName(staticGroups, "CPP"), "CPP", true, 12, false, null);
+        checkGroup(getGroupByName(staticGroups, "DAR_PC"), "DAR_PC", true, 13, false, null);
+        checkGroup(getGroupByName(staticGroups, "DARTS"), "DARTS", true, 10, false, null);
+        checkGroup(getGroupByName(staticGroups, "hmcts_staff_1"), "hmcts_staff_1", false, 3, true, 127);
+        checkGroup(getGroupByName(staticGroups, "hmcts_staff_2"), "hmcts_staff_2", false, 2, true, 127);
+        checkGroup(getGroupByName(staticGroups, "hmcts_staff_3"), "hmcts_staff_3", false, 1, true, 127);
+        checkGroup(getGroupByName(staticGroups, "hmcts_staff_4"), "hmcts_staff_4", false, 4, true, 127);
+        checkGroup(getGroupByName(staticGroups, "hmcts_staff_5"), "hmcts_staff_5", true, 5, true, 127);
+        checkGroup(getGroupByName(staticGroups, "hmcts_staff_6"), "hmcts_staff_6", true, 6, true, 127);
+        checkGroup(getGroupByName(staticGroups, "HMCTS_TRANSCRIPTION_HUB"), "HMCTS_TRANSCRIPTION_HUB", true, 17, true, null);
+        checkGroup(getGroupByName(staticGroups, "MID_TIER"), "MID_TIER", true, 14, false, null);
+        checkGroup(getGroupByName(staticGroups, "SUPER_ADMIN"), "SUPER_ADMIN", true, 8, true, null);
+        checkGroup(getGroupByName(staticGroups, "SUPER_USER"), "SUPER_USER", true, 7, true, null);
+        checkGroup(getGroupByName(staticGroups, "XHIBIT"), "XHIBIT", true, 11, false, null);
 
+    }
+
+    private SecurityGroupWithIdAndRoleAndUsers getGroupByName(List<SecurityGroupWithIdAndRoleAndUsers> groups, String name) {
+        return groups.stream()
+            .filter(group -> name.equals(group.getName()))
+            .findFirst()
+            .orElseThrow();
     }
 
     private void checkGroup(SecurityGroupWithIdAndRoleAndUsers group, String name, boolean globalAccess, Integer roleId, boolean displayState,

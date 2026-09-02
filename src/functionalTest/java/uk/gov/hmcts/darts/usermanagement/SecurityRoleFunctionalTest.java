@@ -117,6 +117,12 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
                     "role_name": "MEDIA_IN_PERPETUITY",
                     "display_name": "Media in Perpetuity",
                     "display_state": true
+                  },
+                  {
+                    "id": 17,
+                    "role_name": "HMCTS_TRANSCRIPTION_HUB",
+                    "display_name": "HMCTS Transcription Hub",
+                    "display_state": true
                   }
                 ]
                 """,

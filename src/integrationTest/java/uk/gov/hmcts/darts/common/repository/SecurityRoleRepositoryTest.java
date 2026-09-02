@@ -12,9 +12,11 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
@@ -43,7 +45,7 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
     @Test
     void shouldFindAllSecurityRoles() {
         List<SecurityRoleEntity> securityRoleEntityList = securityRoleRepository.findAll();
-        assertEquals(15, securityRoleEntityList.size());
+        assertEquals(16, securityRoleEntityList.size());
     }
 
     @Test
@@ -130,5 +132,11 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
         assertEquals(0, securityPermissionEntities.size());
     }
 
-
+    @Test
+    void shouldFindAllHmctsTranscriptionHubPermissions() {
+        SecurityRoleEntity hmctsTranscriptionHubRole = securityRoleRepository.findById(HMCTS_TRANSCRIPTION_HUB.getId()).orElseThrow();
+        final Set<SecurityPermissionEntity> securityPermissionEntities = hmctsTranscriptionHubRole.getSecurityPermissionEntities();
+        //TODO this will be false once the hmcts transcription hub role is filled out
+        assertTrue(securityPermissionEntities.isEmpty());
+    }
 }
