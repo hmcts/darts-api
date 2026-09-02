@@ -3,13 +3,18 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.SecurityPermissionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,95 +53,29 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
         assertEquals(16, securityRoleEntityList.size());
     }
 
-    @Test
-    void shouldFindAllApproverPermissions() {
-        SecurityRoleEntity approverRole = securityRoleRepository.findById(APPROVER.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = approverRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllRequesterPermissions() {
-        SecurityRoleEntity requesterRole = securityRoleRepository.findById(REQUESTER.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = requesterRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllJudgePermissions() {
-        SecurityRoleEntity judgeRole = securityRoleRepository.findById(JUDICIARY.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = judgeRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllTranscriberPermissions() {
-        SecurityRoleEntity transcriberRole = securityRoleRepository.findById(TRANSCRIBER.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = transcriberRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllTranslationQaPermissions() {
-        SecurityRoleEntity translationQaRole = securityRoleRepository.findById(TRANSLATION_QA.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = translationQaRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllRcjAppealsPermissions() {
-        SecurityRoleEntity rcjAppealsRole = securityRoleRepository.findById(RCJ_APPEALS.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = rcjAppealsRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllXhibitPermissions() {
-        SecurityRoleEntity xhibitRole = securityRoleRepository.findById(XHIBIT.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = xhibitRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllCppPermissions() {
-        SecurityRoleEntity cppRole = securityRoleRepository.findById(CPP.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = cppRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllDarPcPermissions() {
-        SecurityRoleEntity darPcRole = securityRoleRepository.findById(DAR_PC.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = darPcRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllMidTierPermissions() {
-        SecurityRoleEntity midTierRole = securityRoleRepository.findById(MID_TIER.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = midTierRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllSuperAdminPermissions() {
-        SecurityRoleEntity superAdminRole = securityRoleRepository.findById(SUPER_ADMIN.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = superAdminRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllSuperUserPermissions() {
-        SecurityRoleEntity superUserRole = securityRoleRepository.findById(SUPER_USER.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = superUserRole.getSecurityPermissionEntities();
-        assertEquals(0, securityPermissionEntities.size());
-    }
-
-    @Test
-    void shouldFindAllHmctsTranscriptionHubPermissions() {
-        SecurityRoleEntity hmctsTranscriptionHubRole = securityRoleRepository.findById(HMCTS_TRANSCRIPTION_HUB.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = hmctsTranscriptionHubRole.getSecurityPermissionEntities();
-        //TODO this will be false once the hmcts transcription hub role is filled out
+    @ParameterizedTest(name = "{0} should have no permissions")
+    @MethodSource("rolesWithNoPermissions")
+    void shouldFindNoPermissions(SecurityRoleEnum securityRole) {
+        SecurityRoleEntity securityRoleEntity = securityRoleRepository.findById(securityRole.getId()).orElseThrow();
+        final Set<SecurityPermissionEntity> securityPermissionEntities = securityRoleEntity.getSecurityPermissionEntities();
         assertTrue(securityPermissionEntities.isEmpty());
+    }
+
+    private static Stream<Arguments> rolesWithNoPermissions() {
+        return Stream.of(
+            Arguments.of(APPROVER),
+            Arguments.of(REQUESTER),
+            Arguments.of(JUDICIARY),
+            Arguments.of(TRANSCRIBER),
+            Arguments.of(TRANSLATION_QA),
+            Arguments.of(RCJ_APPEALS),
+            Arguments.of(XHIBIT),
+            Arguments.of(CPP),
+            Arguments.of(DAR_PC),
+            Arguments.of(MID_TIER),
+            Arguments.of(SUPER_ADMIN),
+            Arguments.of(SUPER_USER),
+            Arguments.of(HMCTS_TRANSCRIPTION_HUB)
+        );
     }
 }
