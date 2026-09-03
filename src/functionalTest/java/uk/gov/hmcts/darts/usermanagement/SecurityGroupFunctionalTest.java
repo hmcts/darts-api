@@ -125,8 +125,10 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                     || group.getId() >= -6 && group.getId() <= -1
                     || group.getId() >= 9 && group.getId() <= 13
                     || group.getSecurityRoleId().equals(SecurityRoleEnum.SUPER_USER.getId())
-                    || group.getSecurityRoleId().equals(SecurityRoleEnum.DARTS.getId()))
+                    || group.getSecurityRoleId().equals(SecurityRoleEnum.DARTS.getId())
+                    || group.getSecurityRoleId().equals(SecurityRoleEnum.JUDICIAL_CONDUCT.getId()))
                 .toList();
+
 
         checkGroup(staticGroups.getFirst(), "CPP", true, 12, false, null);
         checkGroup(staticGroups.get(1), "DAR_PC", true, 13, false, null);
@@ -137,10 +139,11 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         checkGroup(staticGroups.get(6), "hmcts_staff_4", false, 4, true, 127);
         checkGroup(staticGroups.get(7), "hmcts_staff_5", true, 5, true, 127);
         checkGroup(staticGroups.get(8), "hmcts_staff_6", true, 6, true, 127);
-        checkGroup(staticGroups.get(9), "MID_TIER", true, 14, false, null);
-        checkGroup(staticGroups.get(10), "SUPER_ADMIN", true, 8, true, null);
-        checkGroup(staticGroups.get(11), "SUPER_USER", true, 7, true, null);
-        checkGroup(staticGroups.get(12), "XHIBIT", true, 11, false, null);
+        checkGroup(staticGroups.get(9), "JUDICIAL_CONDUCT", true, 16, true, null);
+        checkGroup(staticGroups.get(10), "MID_TIER", true, 14, false, null);
+        checkGroup(staticGroups.get(11), "SUPER_ADMIN", true, 8, true, null);
+        checkGroup(staticGroups.get(12), "SUPER_USER", true, 7, true, null);
+        checkGroup(staticGroups.get(13), "XHIBIT", true, 11, false, null);
 
     }
 

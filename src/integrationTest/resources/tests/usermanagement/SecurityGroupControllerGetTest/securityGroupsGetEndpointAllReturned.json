@@ -148,5 +148,15 @@
     "name": "MEDIA_IN_PERPETUITY",
     "display_name": "MEDIA_IN_PERPETUITY",
     "security_role_id": 15
+  },
+  {
+    "courthouse_ids": [],
+    "display_name": "Judicial Conduct",
+    "display_state": true,
+    "global_access": true,
+    "id": 5,
+    "name": "JUDICIAL_CONDUCT",
+    "security_role_id": 16,
+    "user_ids": []
   }
 ]

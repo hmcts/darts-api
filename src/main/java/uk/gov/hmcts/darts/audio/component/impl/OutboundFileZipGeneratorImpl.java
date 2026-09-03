@@ -40,6 +40,7 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
     private static final String DAUDIO = "daudio";
     private static final String LOCALAUDIO = "localaudio";
     private static final String VIQ_METADATA_TYPE = "Zip";
+    private static final int CASE_NUMBER_SPLIT_INDEX = 5;
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final OutboundFileZipGeneratorHelper outboundFileZipGeneratorHelper;
 
@@ -156,11 +157,14 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
     private Path generateZipPath(String caseNumber, int directoryIndex, AudioFileInfo audioFileInfo) {
         var nameElement1 = DAUDIO;
         var nameElement2 = LOCALAUDIO;
-        var nameElement3 = caseNumber.substring(0, 5);
-        var nameElement4 = caseNumber.substring(5);
         var nameElement5 = String.format("%04d", directoryIndex + 1);
         var filename = String.format("%s.a%02d", nameElement5, audioFileInfo.getChannel() - 1);
+        if (caseNumber.length() <= CASE_NUMBER_SPLIT_INDEX) {
+            return Path.of(nameElement1, nameElement2, caseNumber, nameElement5, filename);
+        }
 
+        var nameElement3 = caseNumber.substring(0, CASE_NUMBER_SPLIT_INDEX);
+        var nameElement4 = caseNumber.substring(CASE_NUMBER_SPLIT_INDEX);
         return Path.of(nameElement1, nameElement2, nameElement3, nameElement4, nameElement5, filename);
     }
 
