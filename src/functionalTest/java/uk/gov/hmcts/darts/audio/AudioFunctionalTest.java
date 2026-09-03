@@ -91,7 +91,14 @@ class AudioFunctionalTest extends FunctionalTest {
 
         String actualJson = response.asPrettyString();
         String expectedJson = """
-            {"type":"COMMON_100","title":"Provided courthouse does not exist","status":404,"detail":"Courthouse 'INVALIDCOURTHOUSENAME' not found."}""";
+            {
+                 "type": "COMMON_100",
+                 "title": "Provided courthouse does not exist",
+                 "status": 404,
+                 "detail": "Courthouse 'INVALIDCOURTHOUSENAME' not found.",
+                 "instance": "/audios/metadata"
+             }
+            """;
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 

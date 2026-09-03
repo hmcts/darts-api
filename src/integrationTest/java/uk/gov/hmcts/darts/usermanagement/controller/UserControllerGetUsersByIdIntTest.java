@@ -101,9 +101,12 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
             .andReturn();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109",
+            {
+            "type":"AUTHORISATION_109",
             "title":"User is not authorised for this endpoint",
-            "status":403}
+            "status":403,
+            "instance":"/admin/users/1"
+            }
             """;
         JSONAssert.assertEquals(
             expectedResponse,
@@ -125,10 +128,13 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
             .andReturn();
 
         String expectedResponse = """
-            {"type":"USER_MANAGEMENT_100",
+            {
+            "type":"USER_MANAGEMENT_100",
             "title":"The provided user does not exist",
             "status":404,
-            "detail":"User id 123456 not found"}
+            "detail":"User id 123456 not found",
+            "instance":"/admin/users/123456"
+            }
             """;
         JSONAssert.assertEquals(
             expectedResponse,

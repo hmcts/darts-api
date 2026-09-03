@@ -2,46 +2,36 @@ package uk.gov.hmcts.darts.common.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.zalando.problem.Problem;
-import org.zalando.problem.ProblemBuilder;
-import org.zalando.problem.spring.common.HttpStatusAdapter;
-import org.zalando.problem.spring.web.advice.AdviceTrait;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map.Entry;
 
-public interface DartsApiTrait extends AdviceTrait {
+public interface DartsApiTrait {
 
     Logger DARTS_API_EXCEPTION_LOGGER = LoggerFactory.getLogger(DartsApiTrait.class);
 
     @ExceptionHandler
-    default ResponseEntity<Problem> handleDartsApiException(DartsApiException exception, NativeWebRequest request) {
-        var error = exception.getError();
+    default ResponseEntity<ProblemDetail> handleDartsApiException(DartsApiException exception, NativeWebRequest request) {
         if (shouldLogException(exception)) {
             DARTS_API_EXCEPTION_LOGGER.error("A darts exception occurred", exception);
         }
-        HttpStatusAdapter problemHttpStatus = new HttpStatusAdapter(error.getHttpStatus());
 
-        ProblemBuilder problemBuilder = Problem.builder()
-            .withType(URI.create(error.getType()))
-            .withStatus(problemHttpStatus)
-            .withTitle(error.getTitle())
-            .withDetail(exception.getDetail());
-
-        for (Entry<String, Object> stringStringEntry : exception.getCustomProperties().entrySet()) {
-            problemBuilder.with(stringStringEntry.getKey(), stringStringEntry.getValue());
-        }
-
-        return create(exception, getContentForException(exception), request);
+        var problemDetail = getContentForException(exception);
+        problemDetail.setInstance(getInstance(request));
+        return new ResponseEntity<>(problemDetail, exception.getError().getHttpStatus());
     }
 
     static boolean isInactiveUserException(Exception exception) {
@@ -53,36 +43,41 @@ public interface DartsApiTrait extends AdviceTrait {
     static void writeErrorResponse(HttpServletResponse servletResponse, ObjectMapper mapper, Exception exception) throws IOException {
         HttpStatus httpStatus = isInactiveUserException(exception) ? HttpStatus.FORBIDDEN : HttpStatus.UNAUTHORIZED;
         servletResponse.setStatus(httpStatus.value());
-        servletResponse.setHeader("Content-Type", "application/problem+json");
+        servletResponse.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         var dartsException = exception instanceof DartsApiException
             ? (DartsApiException) exception
             : new DartsApiException(AuthorisationError.USER_DETAILS_INVALID);
         servletResponse.getWriter().write(getJsonForProblem(mapper, getContentForException(dartsException)));
     }
 
-    static String getJsonForProblem(ObjectMapper mapper, Problem problem) throws JsonProcessingException {
+    static String getJsonForProblem(ObjectMapper mapper, ProblemDetail problem) throws JsonProcessingException {
         return mapper.writeValueAsString(problem);
     }
 
-    static Problem getContentForException(DartsApiException exception) {
+    static ProblemDetail getContentForException(DartsApiException exception) {
         var error = exception.getError();
 
-        if (shouldLogException(exception)) {
-            DARTS_API_EXCEPTION_LOGGER.error("A darts exception occurred", exception);
-        }
-        HttpStatusAdapter problemHttpStatus = new HttpStatusAdapter(error.getHttpStatus());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(error.getHttpStatus(), exception.getDetail());
+        problemDetail.setType(URI.create(error.getType()));
+        problemDetail.setTitle(error.getTitle());
 
-        ProblemBuilder problemBuilder = Problem.builder()
-            .withType(URI.create(error.getType()))
-            .withStatus(problemHttpStatus)
-            .withTitle(error.getTitle())
-            .withDetail(exception.getDetail());
+        if (!exception.getCustomProperties().isEmpty()) {
+            problemDetail.setProperties(new HashMap<>());
+        }
 
         for (Entry<String, Object> stringStringEntry : exception.getCustomProperties().entrySet()) {
-            problemBuilder.with(stringStringEntry.getKey(), stringStringEntry.getValue());
+            problemDetail.getProperties().put(stringStringEntry.getKey(), stringStringEntry.getValue());
         }
 
-        return problemBuilder.build();
+        return problemDetail;
+    }
+
+    private static URI getInstance(NativeWebRequest request) {
+        HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
+        if (servletRequest == null) {
+            return null;
+        }
+        return URI.create(servletRequest.getRequestURI());
     }
 
     private static boolean shouldLogException(DartsApiException exception) {

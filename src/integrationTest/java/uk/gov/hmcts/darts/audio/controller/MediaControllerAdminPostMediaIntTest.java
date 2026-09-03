@@ -337,18 +337,16 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
 
         String expectedResponse = """
             {
-              "violations": [
-                {
-                  "field": "isHidden",
-                  "message": "must not be null"
-                }
-              ],
-              "type": "https://zalando.github.io/problem/constraint-violation",
+              "type": "COMMON_104",
+              "title": "Invalid request",
               "status": 400,
-              "title": "Constraint Violation"
+              "instance": "/admin/medias/%s/hide",
+              "properties": {
+                "isHidden": "must not be null"
+              }
             }""";
         String actualResponse = response.getResponse().getContentAsString();
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expectedResponse.formatted(mediaEntity.getId()), actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
