@@ -135,6 +135,12 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                     "role_name": "MEDIA_IN_PERPETUITY",
                     "display_name": "Media in Perpetuity",
                     "display_state": true
+                  },
+                                    {
+                    "id": 16,
+                    "role_name": "JUDICIAL_CONDUCT",
+                    "display_name": "Judicial Conduct",
+                    "display_state": true
                   }
                 ]
             """;
