@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,8 @@ public class CaseExpiryDeleterImpl implements CaseExpiryDeleter {
 
     @Transactional
     @Override
+    @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")//Required to handle interrupted exceptions
+    @SneakyThrows
     public void delete(Integer batchSize) {
         final UserAccountEntity userAccount = userAccountService.getUserAccount();
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
@@ -45,6 +48,9 @@ public class CaseExpiryDeleterImpl implements CaseExpiryDeleter {
                 hearingsService.removeMediaLinkToHearing(courtCaseId);
             } catch (Exception e) {
                 log.error("An error occurred while anonymising case with id: {}", courtCaseId, e);
+                if (e instanceof InterruptedException) {
+                    throw e;
+                }
             }
         });
     }
