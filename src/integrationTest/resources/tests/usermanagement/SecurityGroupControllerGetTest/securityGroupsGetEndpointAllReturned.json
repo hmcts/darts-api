@@ -148,5 +148,15 @@
     "name": "MEDIA_IN_PERPETUITY",
     "display_name": "MEDIA_IN_PERPETUITY",
     "security_role_id": 15
+  },
+  {
+    "courthouse_ids": [],
+    "display_name": "HMCTS Transcription Hub",
+    "display_state": true,
+    "global_access": true,
+    "id": 5,
+    "name": "HMCTS_TRANSCRIPTION_HUB",
+    "security_role_id": 17,
+    "user_ids": []
   }
 ]
