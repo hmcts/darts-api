@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.domain.Limit;
@@ -65,7 +66,6 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
              batchCleanupConfiguration, armDataManagementConfiguration, currentTimeHelper, armResponseFileHelper,
              manifestFilePrefix, manifestFilePrefix);
     }
-
 
     @Override
     public void cleanupResponseFiles(int batchsize) {
@@ -154,9 +154,11 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
     }
 
     @SuppressWarnings({
-        "PMD.CognitiveComplexity",//TODO - refactor to reduce complexity when this is next edited
-        "PMD.CyclomaticComplexity"//TODO - refactor to reduce complexity when this is next edited
+        "PMD.CognitiveComplexity",
+        "PMD.CyclomaticComplexity",
+        "PMD.AvoidInstanceofChecksInCatchClause"//Required to handle interrupted exceptions
     })
+    @SneakyThrows
     private void deleteResponseFiles(UserAccountEntity userAccount, InputUploadAndAssociatedFilenames inputUploadAndAssociates,
                                      List<ExternalObjectDirectoryEntity> eodEntriesWithManifestFilename) {
         List<EodIdAndAssociatedFilenames> eodIdAndAssociatedFilenamesList = inputUploadAndAssociates.getEodIdAndAssociatedFilenamesList();
@@ -180,6 +182,9 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
                     }
                 } catch (Exception e) {
                     log.error("{}: Failure to delete response file {} for EOD {} - {}", loggingPrefix, associatedFile, eodId, e.getMessage(), e);
+                    if (e instanceof InterruptedException) {
+                        throw e;
+                    }
                     successfullyDeletedAssociatedFiles = false;
                 }
                 if (!successfullyDeletedAssociatedFiles) {
