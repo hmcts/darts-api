@@ -456,7 +456,9 @@ paths:
           schema:
             type: integer
             format: int64
+            description: Transcription ID. Validated by the application for min and max range.
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
@@ -467,6 +469,7 @@ paths:
                 transcript:
                   type: string
                   format: binary
+                  description: Transcript file. Validated by the application for file extension, content type, and maximum size (10MB).
       responses:
         '200':
           description: OK
