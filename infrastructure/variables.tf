@@ -20,6 +20,12 @@ variable "common_tags" {
   type = map(string)
 }
 
+variable "extra_tags" {
+  description = "Additional tags merged on top of common_tags, without replacing tags the pipeline injects."
+  type        = map(string)
+  default     = {}
+}
+
 variable "businessArea" {
   default = "sds"
 }
