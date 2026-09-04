@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
+import uk.gov.hmcts.darts.arm.exception.ArmDownForMaintenanceException;
 import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
 import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -39,7 +40,6 @@ import uk.gov.hmcts.darts.common.repository.ObjectRetrievalQueueRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
-import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.test.common.FileStore;
 
@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -67,9 +66,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -81,8 +80,9 @@ import static org.mockito.Mockito.when;
 @Slf4j
 class DataManagementFacadeImplTest {
 
-    private static final String SOME_TEMP_WORKSPACE = "some/temp/workspace";
     private static final String DOWNLOAD_RESPONSE_META_DATA = "DownloadResponseMetaData: {}";
+
+    private String tempWorkspace;
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -106,22 +106,22 @@ class DataManagementFacadeImplTest {
     private ObjectRetrievalQueueRepository objectRetrievalQueueRepository;
     @Mock
     private DownloadResponseMetaData downloadResponseMetaDataMock;
-    @Mock
-    private BlobClientUploadResponseImpl blobClientUploadResponseImpl;
 
     private ExternalLocationTypeEntity inboundLocationEntity;
     private ExternalLocationTypeEntity unstructuredLocationEntity;
     private ExternalLocationTypeEntity detsLocationEntity;
     private ExternalLocationTypeEntity armLocationEntity;
-    FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
-    DownloadResponseMetaData downloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+    private final FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+    private DownloadResponseMetaData downloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+
     @TempDir
     private File tempDirectory;
 
     @SneakyThrows
     @BeforeEach
     void setup() {
-        Files.createDirectories(Paths.get(SOME_TEMP_WORKSPACE));
+        tempWorkspace = tempDirectory.toPath().resolve("workspace").toString();
+        Files.createDirectories(Paths.get(tempWorkspace));
         List<DatastoreContainerType> datastoreOrder = new ArrayList<>();
         datastoreOrder.add(DatastoreContainerType.UNSTRUCTURED);
         datastoreOrder.add(DatastoreContainerType.DETS);
@@ -156,7 +156,7 @@ class DataManagementFacadeImplTest {
 
         lenient().when(objectRecordStatusRepository.getReferenceById(anyInt())).thenReturn(storedStatus);
 
-        lenient().when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/tmp");
+        lenient().when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn(tempWorkspace);
         lenient().when(resource.getInputStream()).thenReturn(toInputStream("testInputStream", UTF_8));
         lenient().when(downloadResponseMetaDataMock.getResource()).thenReturn(resource);
         lenient().when(downloadResponseMetaDataMock.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.ARM);
@@ -169,14 +169,14 @@ class DataManagementFacadeImplTest {
         downloadResponseMetaData.close();
 
         FileStore.getFileStore().remove();
-        FileUtils.cleanDirectory(new File(SOME_TEMP_WORKSPACE));
+        FileUtils.deleteQuietly(new File(tempWorkspace));
         try (Stream<Path> files = Files.list(tempDirectory.toPath())) {
             assertEquals(0, files.count());
         }
     }
 
     @Test
-    void testDownloadOfFacadeWithArm() throws Exception {
+    void retrieveFileFromStorage_shouldDownloadFacadeWithArm() throws Exception {
 
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
@@ -194,18 +194,20 @@ class DataManagementFacadeImplTest {
         when(armApiService.downloadArmData(arm.getExternalRecordId(), arm.getExternalFileId())).thenReturn(downloadResponseMetaDataMock);
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelperTest,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelperTest,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
-        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(entitiesToDownload)) {
             assertEquals(DatastoreContainerType.ARM, downloadResponseMetaDataAutoClose.getContainerTypeUsedToDownload());
         }
     }
 
     @Test
-    void testDownloadOfFacadeWithUnstructured() throws Exception {
+    void retrieveFileFromStorage_shouldDownloadFacadeWithUnstructured() throws Exception {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
@@ -218,18 +220,20 @@ class DataManagementFacadeImplTest {
         List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(dets);
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
-        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(entitiesToDownload)) {
             assertEquals(DatastoreContainerType.UNSTRUCTURED, downloadResponseMetaDataAutoClose.getContainerTypeUsedToDownload());
         }
     }
 
     @Test
-    void testThrowErrorNoStoredEodEntities() {
+    void retrieveFileFromStorage_shouldThrowError_WhenNoStoredEodEntities() {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
@@ -241,15 +245,17 @@ class DataManagementFacadeImplTest {
         List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(dets);
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(entitiesToDownload)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -260,7 +266,7 @@ class DataManagementFacadeImplTest {
     }
 
     @Test
-    void testDownloadOfFacadeWithDetsEnabled() throws Exception {
+    void downloadOfFacadeWithDetsEnabled() throws Exception {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
@@ -273,18 +279,20 @@ class DataManagementFacadeImplTest {
         List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(dets);
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
-        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+        try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(entitiesToDownload)) {
             assertEquals(DatastoreContainerType.DETS, downloadResponseMetaDataAutoClose.getContainerTypeUsedToDownload());
         }
     }
 
     @Test
-    void testDownloadOfFacadeWithNoneProcessed() throws Exception {
+    void downloadOfFacadeWithNoneProcessed() throws Exception {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.INBOUND, false));
@@ -298,15 +306,17 @@ class DataManagementFacadeImplTest {
         List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(inboundEntity);
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(entitiesToDownload)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -317,7 +327,7 @@ class DataManagementFacadeImplTest {
     }
 
     @Test
-    void testDownloadOfFacadeWithUnstructuredAndArmProcessedInPriorityOrder() throws Exception {
+    void downloadOfFacadeWithUnstructuredAndArmProcessedInPriorityOrder() throws Exception {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
@@ -331,15 +341,17 @@ class DataManagementFacadeImplTest {
         when(armApiService.downloadArmData(any(), any())).thenThrow(FileNotDownloadedException.class);
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(entitiesToDownload)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -357,15 +369,17 @@ class DataManagementFacadeImplTest {
         List<ExternalObjectDirectoryEntity> entitiesToDownload = new ArrayList<>();
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(entitiesToDownload)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -385,15 +399,17 @@ class DataManagementFacadeImplTest {
         mediaEntity.setContentObjectId("2");
         mediaEntity.setClipId("clip-id");
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -417,9 +433,11 @@ class DataManagementFacadeImplTest {
         ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         when(objectRetrievalQueueRepository.findMatchingObjectRetrievalQueueItem(mediaEntity,
                                                                                  null,
@@ -431,7 +449,7 @@ class DataManagementFacadeImplTest {
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -457,15 +475,17 @@ class DataManagementFacadeImplTest {
         ObjectRetrievalQueueEntity objectRetrievalQueueEntity = createObjectRetrievalQueueEntity(mediaEntity, userAccount);
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
         assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -473,17 +493,6 @@ class DataManagementFacadeImplTest {
         );
 
         verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(objectRetrievalQueueEntity);
-    }
-
-    private static @NotNull ObjectRetrievalQueueEntity createObjectRetrievalQueueEntity(MediaEntity mediaEntity, UserAccountEntity userAccount) {
-        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
-        objectRetrievalQueueEntity.setMedia(mediaEntity);
-        objectRetrievalQueueEntity.setCreatedBy(userAccount);
-        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
-        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(mediaEntity.getId()));
-        objectRetrievalQueueEntity.setContentObjectId(mediaEntity.getContentObjectId());
-        objectRetrievalQueueEntity.setClipId(mediaEntity.getClipId());
-        return objectRetrievalQueueEntity;
     }
 
     @Test
@@ -497,15 +506,17 @@ class DataManagementFacadeImplTest {
                                                                                               userAccount);
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
         assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -552,14 +563,16 @@ class DataManagementFacadeImplTest {
         when(externalObjectDirectoryRepository.findByEntityAndStatus(any(MediaEntity.class), any(ObjectRecordStatusEntity.class)))
             .thenReturn(List.of(inboundEntity));
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(mediaEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -580,15 +593,17 @@ class DataManagementFacadeImplTest {
         transcriptionDocumentEntity.setClipId("clip-id");
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -610,14 +625,16 @@ class DataManagementFacadeImplTest {
         when(externalObjectDirectoryRepository.findByEntityAndStatus(any(TranscriptionDocumentEntity.class), any(ObjectRecordStatusEntity.class)))
             .thenReturn(List.of(inboundEntity));
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(transcriptionDocumentEntity)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -634,15 +651,17 @@ class DataManagementFacadeImplTest {
         AnnotationDocumentEntity annotationDocumentEntity = new AnnotationDocumentEntity();
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(annotationDocumentEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(annotationDocumentEntity)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -664,14 +683,16 @@ class DataManagementFacadeImplTest {
         when(externalObjectDirectoryRepository.findByEntityAndStatus(any(AnnotationDocumentEntity.class), any(ObjectRecordStatusEntity.class)))
             .thenReturn(List.of(inboundEntity));
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelper,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
         assertThrows(
             FileNotDownloadedException.class,
             () -> {
-                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dmFacade.retrieveFileFromStorage(annotationDocumentEntity)) {
+                try (DownloadResponseMetaData downloadResponseMetaDataAutoClose = dataManagementFacade.retrieveFileFromStorage(annotationDocumentEntity)) {
                     // add for try close with resources
                     log.info(DOWNLOAD_RESPONSE_META_DATA, downloadResponseMetaDataAutoClose);
                 }
@@ -679,32 +700,9 @@ class DataManagementFacadeImplTest {
         );
     }
 
-    @Test
-    void testUnstructuredDataHelperCreate() {
-        when(blobClientUploadResponseImpl.getBlobName()).thenReturn(UUID.randomUUID().toString());
-
-        when(dataManagementConfiguration.getUnstructuredContainerName()).thenReturn("unstructured");
-        when(dataManagementService.saveBlobData(anyString(), (InputStream) any())).thenReturn(blobClientUploadResponseImpl);
-
-        UnstructuredDataHelper unstructuredDataHelperTest = getUnstructuredDataHelper();
-
-        MediaEntity mediaEntity = new MediaEntity();
-        ExternalObjectDirectoryEntity eodEntity = createEodEntity(unstructuredLocationEntity);
-        eodEntity.setMedia(mediaEntity);
-        ExternalObjectDirectoryEntity eodEntityToDelete = createEodEntity(unstructuredLocationEntity);
-        eodEntityToDelete.setMedia(mediaEntity);
-        BinaryData data = BinaryData.fromString("Test String");
-
-        boolean created = unstructuredDataHelperTest.createUnstructuredDataFromEod(
-            eodEntityToDelete,
-            eodEntity,
-            data.toStream());
-
-        assertTrue(created);
-    }
 
     @Test
-    void testUnstructuredDataHelperCreateFailed() {
+    void unstructuredDataHelperCreateFailed() {
 
         UnstructuredDataHelper unstructuredDataHelperTest = getUnstructuredDataHelper();
 
@@ -724,7 +722,7 @@ class DataManagementFacadeImplTest {
     }
 
     @Test
-    void testDownloadOfFacadeCreatesUnstructuredWhenUnstructuredNotFound() throws Exception {
+    void downloadOfFacadeCreatesUnstructuredWhenUnstructuredNotFound() throws Exception {
         ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
         ExternalObjectDirectoryEntity unstructuredEntity = createEodEntity(unstructuredLocationEntity);
         ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
@@ -740,11 +738,13 @@ class DataManagementFacadeImplTest {
         when(armApiService.downloadArmData(armEntity.getExternalRecordId(), armEntity.getExternalFileId())).thenReturn(downloadResponseMetaDataMock);
 
         // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelperFacade,
-                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                           objectRecordStatusRepository, storageOrderHelper,
+                                                                                           unstructuredDataHelperFacade,
+                                                                                           dataManagementConfiguration, armApiService,
+                                                                                           objectRetrievalQueueRepository);
 
-        downloadResponseMetaData = dmFacade.retrieveFileFromStorage(mediaEntity);
+        downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity);
         assertEquals(DatastoreContainerType.ARM, downloadResponseMetaData.getContainerTypeUsedToDownload());
     }
 
@@ -755,12 +755,12 @@ class DataManagementFacadeImplTest {
         File targetFile = Files.createTempFile("test", "txt").toFile();
 
 
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(null, null,
-                                                                               null, null, unstructuredDataHelper,
-                                                                               null, null, null);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(null, null,
+                                                                                           null, null, unstructuredDataHelper,
+                                                                                           null, null, null);
 
         assertThat(targetFile).exists();
-        dmFacade.createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, true);
+        dataManagementFacade.createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, true);
 
         verify(unstructuredDataHelper).createUnstructuredDataFromEod(eq(eodEntityToDelete), eq(eodEntityToUpload), any(InputStream.class));
         assertThat(targetFile).doesNotExist();
@@ -773,12 +773,12 @@ class DataManagementFacadeImplTest {
         File targetFile = Files.createTempFile("test", "txt").toFile();
 
 
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(null, null,
-                                                                               null, null, unstructuredDataHelper,
-                                                                               null, null, null);
+        final DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(null, null,
+                                                                                           null, null, unstructuredDataHelper,
+                                                                                           null, null, null);
 
         assertThat(targetFile).exists();
-        dmFacade.createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, false);
+        dataManagementFacade.createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, false);
 
         verify(unstructuredDataHelper).createUnstructuredDataFromEod(eq(eodEntityToDelete), eq(eodEntityToUpload), any(InputStream.class));
         assertThat(targetFile).exists();
@@ -797,17 +797,17 @@ class DataManagementFacadeImplTest {
         when(downloadResponseMetaData.getFileToBeDownloadedTo()).thenReturn(targetFile);
 
 
-        final DataManagementFacadeImpl dmFacade = spy(new DataManagementFacadeImpl(null, null,
-                                                                                   null, null, null,
-                                                                                   null, null, null));
+        final DataManagementFacadeImpl dataManagementFacade = spy(new DataManagementFacadeImpl(null, null,
+                                                                                               null, null, null,
+                                                                                               null, null, null));
 
-        doNothing().when(dmFacade).createCopyInUnstructuredDatastore(any(), any(), any(), anyBoolean());
+        doNothing().when(dataManagementFacade).createCopyInUnstructuredDatastore(any(), any(), any(), anyBoolean());
 
-        dmFacade
+        dataManagementFacade
             .processUnstructuredData(datastoreContainerType, downloadResponseMetaData, eodEntityToUpload, eodEntityToDelete);
 
         verify(downloadResponseMetaData).getFileToBeDownloadedTo();
-        verify(dmFacade).createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, false);
+        verify(dataManagementFacade).createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, false);
     }
 
     @Test
@@ -826,14 +826,14 @@ class DataManagementFacadeImplTest {
         when(resource.getInputStream()).thenReturn(stream);
 
         DataManagementConfiguration dataManagementConfiguration = mock(DataManagementConfiguration.class);
-        when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn(SOME_TEMP_WORKSPACE);
-        final DataManagementFacadeImpl dmFacade = spy(new DataManagementFacadeImpl(null, null,
-                                                                                   null, null, null,
-                                                                                   dataManagementConfiguration, null, null));
+        when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn(tempWorkspace);
+        final DataManagementFacadeImpl dataManagementFacade = spy(new DataManagementFacadeImpl(null, null,
+                                                                                               null, null, null,
+                                                                                               dataManagementConfiguration, null, null));
 
-        doNothing().when(dmFacade).createCopyInUnstructuredDatastore(any(), any(), any(), anyBoolean());
+        doNothing().when(dataManagementFacade).createCopyInUnstructuredDatastore(any(), any(), any(), anyBoolean());
 
-        dmFacade
+        dataManagementFacade
             .processUnstructuredData(datastoreContainerType, downloadResponseMetaData, eodEntityToUpload, eodEntityToDelete);
 
         ArgumentCaptor<File> targetFileArgumentCaptor = ArgumentCaptor.forClass(File.class);
@@ -841,10 +841,201 @@ class DataManagementFacadeImplTest {
         verify(dataManagementConfiguration).getTempBlobWorkspace();
         verify(downloadResponseMetaData).getResource();
         verify(resource).getInputStream();
-        verify(dmFacade).createCopyInUnstructuredDatastore(eq(eodEntityToUpload), eq(eodEntityToDelete), targetFileArgumentCaptor.capture(), eq(true));
+        verify(dataManagementFacade).createCopyInUnstructuredDatastore(eq(eodEntityToUpload), eq(eodEntityToDelete), targetFileArgumentCaptor.capture(),
+                                                                       eq(true));
 
         File targetFileActual = targetFileArgumentCaptor.getValue();
-        assertThat(targetFileActual.getAbsolutePath()).matches(".*/" + SOME_TEMP_WORKSPACE + "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+        assertThat(targetFileActual.getAbsolutePath()).matches(".*/workspace/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+    }
+
+    @Test
+    void retrieveFileFromStorage_whenArmDownForMaintenance_shouldThrow() throws Exception {
+        List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.ARM);
+        when(storageOrderHelper.getStorageOrder()).thenReturn(datastoreOrder);
+        when(dataManagementConfiguration.getArmDownForMaintenance()).thenReturn(true);
+
+        ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(armEntity);
+
+        List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, true));
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                     objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
+                                                                                     dataManagementConfiguration, armApiService,
+                                                                                     objectRetrievalQueueRepository);
+
+        assertThrows(ArmDownForMaintenanceException.class, () -> dataManagementFacade.retrieveFileFromStorage(entitiesToDownload));
+        verify(armApiService, times(0)).downloadArmData(any(), any());
+    }
+
+    @Test
+    void retrieveFileFromStorage_whenSupportedContainerMissing_shouldContinueToNext() throws Exception {
+        List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.DETS, DatastoreContainerType.ARM);
+        when(storageOrderHelper.getStorageOrder()).thenReturn(datastoreOrder);
+
+        ExternalObjectDirectoryEntity detsEntity = createEodEntity(detsLocationEntity);
+        ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
+
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(detsEntity, armEntity);
+
+        BlobContainerDownloadable detsContainer = mock(BlobContainerDownloadable.class);
+        when(detsContainer.getContainerName(DatastoreContainerType.DETS)).thenReturn(Optional.empty());
+
+        BlobContainerDownloadable armContainer = setupDownloadableContainer(DatastoreContainerType.ARM, true);
+        when(armApiService.downloadArmData(any(), any())).thenReturn(downloadResponseMetaDataMock);
+
+        List<BlobContainerDownloadable> blobContainerDownloadables = List.of(detsContainer, armContainer);
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                     objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
+                                                                                     dataManagementConfiguration, armApiService,
+                                                                                     objectRetrievalQueueRepository);
+
+        try (DownloadResponseMetaData response = dataManagementFacade.retrieveFileFromStorage(entitiesToDownload)) {
+            assertEquals(DatastoreContainerType.ARM, response.getContainerTypeUsedToDownload());
+        }
+    }
+
+    @Test
+    void retrieveFileFromStorage_whenFirstContainerFails_shouldFallbackToNext() throws Exception {
+        List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.UNSTRUCTURED, DatastoreContainerType.DETS);
+        when(storageOrderHelper.getStorageOrder()).thenReturn(datastoreOrder);
+
+        ExternalObjectDirectoryEntity unstructuredEntity = createEodEntity(unstructuredLocationEntity);
+        ExternalObjectDirectoryEntity detsEntity = createEodEntity(detsLocationEntity);
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(unstructuredEntity, detsEntity);
+
+        BlobContainerDownloadable unstructuredContainer = setupDownloadableContainer(DatastoreContainerType.UNSTRUCTURED, false);
+        BlobContainerDownloadable detsContainer = setupDownloadableContainer(DatastoreContainerType.DETS, true);
+
+        List<BlobContainerDownloadable> blobContainerDownloadables = List.of(unstructuredContainer, detsContainer);
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                     objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
+                                                                                     dataManagementConfiguration, armApiService,
+                                                                                     objectRetrievalQueueRepository);
+
+        try (DownloadResponseMetaData response = dataManagementFacade.retrieveFileFromStorage(entitiesToDownload)) {
+            assertEquals(DatastoreContainerType.DETS, response.getContainerTypeUsedToDownload());
+        }
+    }
+
+    @Test
+    void retrieveFileFromStorage_whenMixedStatuses_shouldUseStoredOnly() throws Exception {
+        List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.DETS);
+        when(storageOrderHelper.getStorageOrder()).thenReturn(datastoreOrder);
+
+        ExternalObjectDirectoryEntity detsEntityStored = createEodEntity(detsLocationEntity);
+        ExternalObjectDirectoryEntity detsEntityNotStored = createEodEntity(detsLocationEntity);
+        detsEntityNotStored.getStatus().setId(ObjectRecordStatusEnum.FAILURE.getId());
+
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = List.of(detsEntityNotStored, detsEntityStored);
+
+        BlobContainerDownloadable detsContainer = setupDownloadableContainer(DatastoreContainerType.DETS, true);
+
+        List<BlobContainerDownloadable> blobContainerDownloadables = List.of(detsContainer);
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                                     objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
+                                                                                     dataManagementConfiguration, armApiService,
+                                                                                     objectRetrievalQueueRepository);
+
+        try (DownloadResponseMetaData response = dataManagementFacade.retrieveFileFromStorage(entitiesToDownload)) {
+            assertEquals(DatastoreContainerType.DETS, response.getContainerTypeUsedToDownload());
+        }
+    }
+
+    @Test
+    void createCopyInUnstructuredDatastore_whenHelperThrows_shouldNotDeleteFile() throws IOException {
+        ExternalObjectDirectoryEntity eodEntityToUpload = mock(ExternalObjectDirectoryEntity.class);
+        ExternalObjectDirectoryEntity eodEntityToDelete = mock(ExternalObjectDirectoryEntity.class);
+        when(eodEntityToUpload.getId()).thenReturn(1L);
+
+        File targetFile = Files.createTempFile("test", "txt").toFile();
+
+        doThrow(new RuntimeException("boom")).when(unstructuredDataHelper)
+            .createUnstructuredDataFromEod(eq(eodEntityToDelete), eq(eodEntityToUpload), any(InputStream.class));
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(null, null,
+                                                                                     null, null, unstructuredDataHelper,
+                                                                                     null, null, null);
+
+        assertThat(targetFile).exists();
+        dataManagementFacade.createCopyInUnstructuredDatastore(eodEntityToUpload, eodEntityToDelete, targetFile, true);
+
+        assertThat(targetFile).exists();
+    }
+
+    @Test
+    void retrieveFileFromStorageMedia_whenArmDownForMaintenance_shouldThrow() throws Exception {
+        List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.ARM);
+        when(storageOrderHelper.getStorageOrder()).thenReturn(datastoreOrder);
+        when(dataManagementConfiguration.getArmDownForMaintenance()).thenReturn(true);
+
+        ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(1L);
+
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(eq(mediaEntity), any(ObjectRecordStatusEntity.class)))
+            .thenReturn(List.of(armEntity));
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(List.of(), externalObjectDirectoryRepository,
+                                                                                     objectRecordStatusRepository, storageOrderHelper,
+                                                                                     unstructuredDataHelper, dataManagementConfiguration,
+                                                                                     armApiService, objectRetrievalQueueRepository);
+
+        assertThrows(ArmDownForMaintenanceException.class, () -> dataManagementFacade.retrieveFileFromStorage(mediaEntity));
+        verify(armApiService, times(0)).downloadArmData(any(), any());
+    }
+
+    @Test
+    void retrieveFileFromStorageTranscription_whenArmDownForMaintenance_shouldThrow() throws Exception {
+        List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.ARM);
+        when(storageOrderHelper.getStorageOrder()).thenReturn(datastoreOrder);
+        when(dataManagementConfiguration.getArmDownForMaintenance()).thenReturn(true);
+
+        ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(11L);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setId(21L);
+        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
+
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(eq(transcriptionDocumentEntity), any(ObjectRecordStatusEntity.class)))
+            .thenReturn(List.of(armEntity));
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(List.of(), externalObjectDirectoryRepository,
+                                                                                     objectRecordStatusRepository, storageOrderHelper,
+                                                                                     unstructuredDataHelper, dataManagementConfiguration,
+                                                                                     armApiService, objectRetrievalQueueRepository);
+
+        assertThrows(ArmDownForMaintenanceException.class,
+                     () -> dataManagementFacade.retrieveFileFromStorage(transcriptionDocumentEntity));
+        verify(armApiService, times(0)).downloadArmData(any(), any());
+    }
+
+    @Test
+    void retrieveFileFromStorageAnnotation_whenArmDownForMaintenance_shouldThrow() throws Exception {
+        List<DatastoreContainerType> datastoreOrder = List.of(DatastoreContainerType.ARM);
+        when(storageOrderHelper.getStorageOrder()).thenReturn(datastoreOrder);
+        when(dataManagementConfiguration.getArmDownForMaintenance()).thenReturn(true);
+
+        ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
+        AnnotationDocumentEntity annotationDocumentEntity = new AnnotationDocumentEntity();
+        annotationDocumentEntity.setId(31L);
+
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(eq(annotationDocumentEntity), any(ObjectRecordStatusEntity.class)))
+            .thenReturn(List.of(armEntity));
+
+        DataManagementFacadeImpl dataManagementFacade = new DataManagementFacadeImpl(List.of(), externalObjectDirectoryRepository,
+                                                                                     objectRecordStatusRepository, storageOrderHelper,
+                                                                                     unstructuredDataHelper, dataManagementConfiguration,
+                                                                                     armApiService, objectRetrievalQueueRepository);
+
+        assertThrows(ArmDownForMaintenanceException.class,
+                     () -> dataManagementFacade.retrieveFileFromStorage(annotationDocumentEntity));
+        verify(armApiService, times(0)).downloadArmData(any(), any());
     }
 
     @NotNull
@@ -891,4 +1082,17 @@ class DataManagementFacadeImplTest {
 
         return entity;
     }
+
+    private static @NotNull ObjectRetrievalQueueEntity createObjectRetrievalQueueEntity(MediaEntity mediaEntity, UserAccountEntity userAccount) {
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
+        objectRetrievalQueueEntity.setMedia(mediaEntity);
+        objectRetrievalQueueEntity.setCreatedBy(userAccount);
+        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
+        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(mediaEntity.getId()));
+        objectRetrievalQueueEntity.setContentObjectId(mediaEntity.getContentObjectId());
+        objectRetrievalQueueEntity.setClipId(mediaEntity.getClipId());
+        return objectRetrievalQueueEntity;
+    }
+
+
 }

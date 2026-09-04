@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public interface DataManagementService {
+
     BinaryData getBlobData(String containerName, String blobId);
 
     Path downloadBlobToFile(String containerName, String blobId, String inboundWorkspace);
@@ -36,4 +37,7 @@ public interface DataManagementService {
     Response<Boolean> deleteBlobData(String containerName, String blobId) throws AzureDeleteBlobException;
 
     DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, String blobId) throws FileNotDownloadedException;
+
+    void restoreBlobVersion(String containerName, String blobId);
+
 }

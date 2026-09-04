@@ -269,6 +269,7 @@ darts:
       url: ${ARM_URL}
       arm-service-entitlement: ${ARM_SERVICE_ENTITLEMENT:}
       arm-storage-account-name: ${ARM_STORAGE_ACCOUNT_NAME:}
+      arm-down-for-maintenance: ${ARM_DOWN_FOR_MAINTENANCE:false}
 
       authentication-url:
         token-path: /auth/account/token
@@ -350,6 +351,7 @@ darts:
       az-copy-preserve-access-tier: "--s2s-preserve-access-tier=false"
       az-copy-log-level: ${AZCOPY_LOG_LEVEL:}
       az-copy-output-level: ${AZCOPY_OUTPUT_LEVEL:}
+      arm-down-for-maintenance: ${ARM_DOWN_FOR_MAINTENANCE:false}
     search:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   case-document:
@@ -606,6 +608,11 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT59M
+      inbound-audio-failure-correction:
+        system-user-email: system_InboundAudioFailureCorrectionAutomatedTask@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT45M
 
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
