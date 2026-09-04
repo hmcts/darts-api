@@ -26,12 +26,6 @@ variable "extra_tags" {
   default     = {}
 }
 
-variable "service_criticality" {
-  description = "Service criticality rating from 1-5, passed to the postgresql_flexible module. Ratings >= 4 enroll the server in the immutable backup vault."
-  type        = number
-  default     = 1
-}
-
 variable "businessArea" {
   default = "sds"
 }

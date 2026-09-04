@@ -6,5 +6,6 @@ db_max_connections              = "5000"
 service_criticality = 5
 
 extra_tags = {
-  "bcdr-risk-status" = "v1-unsupported"
+  "bcdr-risk-status"    = "v1-unsupported"
+  "service_criticality" = "5"
 }

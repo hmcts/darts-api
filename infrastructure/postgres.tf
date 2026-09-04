@@ -16,7 +16,6 @@ module "postgresql_flexible" {
   common_tags          = merge(var.common_tags, var.extra_tags)
   admin_user_object_id = var.jenkins_AAD_objectId
   enable_qpi           = true
-  service_criticality  = var.service_criticality
   pgsql_databases = [
     {
       name : local.db_name
