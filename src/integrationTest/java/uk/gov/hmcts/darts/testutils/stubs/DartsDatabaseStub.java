@@ -67,6 +67,7 @@ import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
@@ -176,6 +177,7 @@ public class DartsDatabaseStub {
     private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
     private final AuditRepository auditRepository;
     private final CaseDocumentRepository caseDocumentRepository;
+    private final CaseLinkedCaseRepository caseLinkedCaseRepository;
     private final CaseManagementRetentionRepository caseManagementRetentionRepository;
     private final CaseRepository caseRepository;
     private final CaseRetentionRepository caseRetentionRepository;
@@ -327,6 +329,7 @@ public class DartsDatabaseStub {
             defenceRepository.deleteAllInBatch();
             defendantRepository.deleteAllInBatch();
             prosecutorRepository.deleteAllInBatch();
+            caseLinkedCaseRepository.deleteAllInBatch();
             caseRepository.deleteAllInBatch();
             judgeRepository.deleteAllInBatch();
             dailyListRepository.deleteAllInBatch();
