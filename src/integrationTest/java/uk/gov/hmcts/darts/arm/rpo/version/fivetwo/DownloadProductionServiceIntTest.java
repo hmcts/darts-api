@@ -1,88 +1,98 @@
-package uk.gov.hmcts.darts.arm.rpo;
+package uk.gov.hmcts.darts.arm.rpo.version.fivetwo;
 
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.rpo.DownloadProductionService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
-class RemoveProductionServiceIntTest extends IntegrationBase {
+@TestPropertySource(properties = {
+    "darts.storage.arm.is-mock-arm-rpo-download-csv=false",
+    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
+})
+@SuppressWarnings("PMD.CloseResource")
+class DownloadProductionServiceIntTest extends IntegrationBase {
 
     @MockitoBean
     private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
-    private RemoveProductionService removeProductionService;
-
+    private DownloadProductionService downloadProductionService;
 
     @Test
-    void removeProductionSuccess() {
-
+    void downloadProductionSuccess() throws IOException {
         // given
-        RemoveProductionResponse response = new RemoveProductionResponse();
-        response.setStatus(200);
-        response.setIsError(false);
-        when(armApiBaseClient.removeProduction(any(), any())).thenReturn(response);
+        feign.Response response = mock(feign.Response.class);
+        when(response.status()).thenReturn(200);
+        InputStream inputStream = mock(InputStream.class);
+        feign.Response.Body body = mock(feign.Response.Body.class);
+        when(response.body()).thenReturn(body);
+        when(body.asInputStream()).thenReturn(inputStream);
+        when(armApiBaseClient.downloadProduction(anyString(), anyString())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setCreatedBy(userAccount);
         armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
-        armRpoExecutionDetailEntity.setProductionId("productionId");
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
 
-        var bearerAuth = "Bearer some-token";
 
         // when
-        removeProductionService.removeProduction(bearerAuth, armRpoExecutionDetail.getId(), userAccount);
+        try (InputStream result =
+                 downloadProductionService.downloadProduction("token", armRpoExecutionDetailEntity.getId(), "productionExportId", userAccount)) {
+            // then
+            assertNotNull(result);
+        }
 
         // then
-        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
-        assertEquals(ArmRpoStateEnum.REMOVE_PRODUCTION.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
+        assertEquals(ArmRpoStateEnum.DOWNLOAD_PRODUCTION.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
 
     }
 
     @Test
-    void removeProductionThrowsFeignException() {
-
+    void downloadProductionThrowsFeignException() {
         // given
-        when(armApiBaseClient.removeProduction(any(), any())).thenThrow(FeignException.BadRequest.class);
+        when(armApiBaseClient.downloadProduction(anyString(), anyString())).thenThrow(FeignException.class);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setCreatedBy(userAccount);
         armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
-        armRpoExecutionDetailEntity.setProductionId("productionId");
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
-
-        var bearerAuth = "Bearer some-token";
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            removeProductionService.removeProduction(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
+            downloadProductionService.downloadProduction("token", armRpoExecutionDetailEntity.getId(), "productionExportId", userAccount));
+
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM RPO removeProduction: Unable to get ARM RPO response"));
-        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
-        assertEquals(ArmRpoStateEnum.REMOVE_PRODUCTION.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+            "Failure during download production: Error during ARM RPO download production id: productionExportId"));
+
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
+        assertEquals(ArmRpoStateEnum.DOWNLOAD_PRODUCTION.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
 
     }

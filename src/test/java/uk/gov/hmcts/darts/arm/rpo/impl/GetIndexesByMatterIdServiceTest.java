@@ -12,15 +12,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceWrapper;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -45,17 +47,20 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.CloseResource"})
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
 class GetIndexesByMatterIdServiceTest {
 
     private static final Integer EXECUTION_ID = 1;
     private static final String BEARER_TOKEN = "token";
 
     @Mock
-    private ArmRpoClient armRpoClient;
-    @Mock
     private ArmApiService armApiService;
     @Mock
     private ArmRpoService armRpoService;
+    @Mock
+    private ArmAuthClient armAuthClient;
+    @Mock
+    private ArmApiBaseClient armApiBaseClient;
 
     private ArmRpoUtil armRpoUtil;
 
@@ -77,7 +82,7 @@ class GetIndexesByMatterIdServiceTest {
         userAccount = new UserAccountEntity();
         armRpoExecutionDetailEntityArgumentCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
         armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        ArmClientService armClientService = new ArmClientServiceWrapper(armAuthClient, armApiBaseClient);
 
         getIndexesByMatterIdService = new GetIndexesByMatterIdServiceImpl(armClientService, armRpoService, armRpoUtil);
     }
@@ -88,7 +93,7 @@ class GetIndexesByMatterIdServiceTest {
         IndexesByMatterIdResponse response = getIndexesByMatterIdResponse("indexId");
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
 
         // when
         getIndexesByMatterIdService.getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, "matterId", userAccount);
@@ -107,7 +112,7 @@ class GetIndexesByMatterIdServiceTest {
     void getIndexesByMatterId_ThrowsFeignException() {
         // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenThrow(FeignException.class);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenThrow(FeignException.class);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class,
@@ -127,7 +132,7 @@ class GetIndexesByMatterIdServiceTest {
     @Test
     void getIndexesByMatterId_WithNullResponse() {
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(null);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(null);
 
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class,
                                                        () -> getIndexesByMatterIdService.getIndexesByMatterId("token", 1, "matterId", userAccount));
@@ -150,7 +155,7 @@ class GetIndexesByMatterIdServiceTest {
         response.setIndexes(Collections.emptyList());
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
 
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class,
                                                        () -> getIndexesByMatterIdService.getIndexesByMatterId("token", 1, "matterId", userAccount));
@@ -175,7 +180,7 @@ class GetIndexesByMatterIdServiceTest {
         response.setIndexes(List.of(index));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
 
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class,
                                                        () -> getIndexesByMatterIdService.getIndexesByMatterId("token", 1, "matterId", userAccount));
@@ -200,7 +205,7 @@ class GetIndexesByMatterIdServiceTest {
             .reason("Unauthorised")
             .build();
         FeignException feign401 = FeignException.errorStatus("getIndexesByMatterId", response);
-        when(armRpoClient.getIndexesByMatterId(eq(BEARER_TOKEN), any(IndexesByMatterIdRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.getIndexesByMatterId(eq(BEARER_TOKEN), any(IndexesByMatterIdRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -208,7 +213,7 @@ class GetIndexesByMatterIdServiceTest {
         IndexesByMatterIdResponse indexesByMatterIdResponse = getIndexesByMatterIdResponse("indexId");
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(eq("Bearer refreshed"), any(IndexesByMatterIdRequest.class))).thenReturn(indexesByMatterIdResponse);
+        when(armApiBaseClient.getIndexesByMatterId(eq("Bearer refreshed"), any(IndexesByMatterIdRequest.class))).thenReturn(indexesByMatterIdResponse);
 
         // when
         getIndexesByMatterIdService.getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, "matterId", userAccount);
@@ -233,13 +238,13 @@ class GetIndexesByMatterIdServiceTest {
             .reason("Unauthorised")
             .build();
         FeignException feign401 = FeignException.errorStatus("getIndexesByMatterId", response);
-        when(armRpoClient.getIndexesByMatterId(eq(BEARER_TOKEN), any(IndexesByMatterIdRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.getIndexesByMatterId(eq(BEARER_TOKEN), any(IndexesByMatterIdRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(eq("Bearer refreshed"), any(IndexesByMatterIdRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.getIndexesByMatterId(eq("Bearer refreshed"), any(IndexesByMatterIdRequest.class))).thenThrow(feign401);
 
         // when
         ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
@@ -278,7 +283,7 @@ class GetIndexesByMatterIdServiceTest {
             .reason("Forbidden")
             .build();
         FeignException feign403 = FeignException.errorStatus("getIndexesByMatterId", response);
-        when(armRpoClient.getIndexesByMatterId(eq(BEARER_TOKEN), any(IndexesByMatterIdRequest.class))).thenThrow(feign403);
+        when(armApiBaseClient.getIndexesByMatterId(eq(BEARER_TOKEN), any(IndexesByMatterIdRequest.class))).thenThrow(feign403);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken("getIndexesByMatterId");
@@ -286,7 +291,7 @@ class GetIndexesByMatterIdServiceTest {
         IndexesByMatterIdResponse indexesByMatterIdResponse = getIndexesByMatterIdResponse("indexId");
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(eq("Bearer refreshed"), any(IndexesByMatterIdRequest.class))).thenReturn(indexesByMatterIdResponse);
+        when(armApiBaseClient.getIndexesByMatterId(eq("Bearer refreshed"), any(IndexesByMatterIdRequest.class))).thenReturn(indexesByMatterIdResponse);
 
         // when
         getIndexesByMatterIdService.getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, "matterId", userAccount);
@@ -321,7 +326,7 @@ class GetIndexesByMatterIdServiceTest {
         response.setIndexes(List.of(index1, index2));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
 
         // when
         getIndexesByMatterIdService.getIndexesByMatterId(BEARER_TOKEN, EXECUTION_ID, "matterId", userAccount);
@@ -342,7 +347,7 @@ class GetIndexesByMatterIdServiceTest {
         IndexesByMatterIdResponse response = getIndexesByMatterIdResponse(null);
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
@@ -371,7 +376,7 @@ class GetIndexesByMatterIdServiceTest {
         response.setIndexes(List.of(index));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
@@ -397,7 +402,7 @@ class GetIndexesByMatterIdServiceTest {
         response.setIndexes(Collections.emptyList());
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
@@ -423,7 +428,7 @@ class GetIndexesByMatterIdServiceTest {
         response.setIndexes(null);
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
+        when(armApiBaseClient.getIndexesByMatterId(anyString(), any(IndexesByMatterIdRequest.class))).thenReturn(response);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->

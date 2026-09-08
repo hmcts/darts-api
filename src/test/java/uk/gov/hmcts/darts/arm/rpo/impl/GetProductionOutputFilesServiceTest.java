@@ -12,10 +12,12 @@ import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.test.context.TestPropertySource;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoInProgressException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
@@ -23,7 +25,7 @@ import uk.gov.hmcts.darts.arm.rpo.GetProductionOutputFilesService;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceWrapper;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -53,6 +55,7 @@ import static uk.gov.hmcts.darts.arm.enums.ArmRpoResponseStatusCode.READY_STATUS
 @TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=true"})
 @SuppressWarnings({"checkstyle:linelength", "PMD.CloseResource"})
 @ExtendWith(MockitoExtension.class)
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
 class GetProductionOutputFilesServiceTest {
 
     private static final Integer EXECUTION_ID = 1;
@@ -64,7 +67,10 @@ class GetProductionOutputFilesServiceTest {
     private GetProductionOutputFilesService getProductionOutputFilesService;
     private ArmRpoUtil armRpoUtil;
     private ArmRpoService armRpoService;
-    private ArmRpoClient armRpoClient;
+    @Mock
+    private ArmAuthClient armAuthClient;
+    @Mock
+    private ArmApiBaseClient armApiBaseClient;
 
     @Mock
     private ArmApiService armApiService;
@@ -74,9 +80,8 @@ class GetProductionOutputFilesServiceTest {
     @BeforeEach
     void setUp() {
         armRpoService = spy(ArmRpoService.class);
-        armRpoClient = spy(ArmRpoClient.class);
         armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        ArmClientService armClientService = new ArmClientServiceWrapper(armAuthClient, armApiBaseClient);
 
         getProductionOutputFilesService = new GetProductionOutputFilesServiceImpl(armClientService, armRpoService, armRpoUtil);
 
@@ -97,7 +102,7 @@ class GetProductionOutputFilesServiceTest {
             Collections.singletonList(createProductionExportFile(createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_1)))
         );
 
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(response);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -133,7 +138,7 @@ class GetProductionOutputFilesServiceTest {
                                                            )
         );
 
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(response);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -172,7 +177,7 @@ class GetProductionOutputFilesServiceTest {
                                                            )
         );
 
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(response);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -234,7 +239,7 @@ class GetProductionOutputFilesServiceTest {
         // Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenThrow(mock(FeignException.class));
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -267,7 +272,7 @@ class GetProductionOutputFilesServiceTest {
 
         var response = createProductionOutputFilesResponse(productionExportFiles);
 
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(response);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -301,7 +306,7 @@ class GetProductionOutputFilesServiceTest {
             createProductionExportFile(createProductionExportFileDetail(productionExportFileId)))
         );
 
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(response);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -338,7 +343,7 @@ class GetProductionOutputFilesServiceTest {
                                                            )
         );
 
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(response);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -376,7 +381,7 @@ class GetProductionOutputFilesServiceTest {
                                                            )
         );
 
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(response);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -413,7 +418,7 @@ class GetProductionOutputFilesServiceTest {
                                                            )
         );
 
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class)))
             .thenReturn(response);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -448,7 +453,7 @@ class GetProductionOutputFilesServiceTest {
             .reason("Unauthorized")
             .build();
         FeignException feign401 = FeignException.errorStatus("getProductionOutputFiles", response);
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -459,7 +464,7 @@ class GetProductionOutputFilesServiceTest {
             Collections.singletonList(createProductionExportFile(createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_1)))
         );
 
-        when(armRpoClient.getProductionOutputFiles(eq("Bearer refreshed"), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq("Bearer refreshed"), any(ProductionOutputFilesRequest.class)))
             .thenReturn(productionOutputFilesResponse);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -493,14 +498,14 @@ class GetProductionOutputFilesServiceTest {
             .reason("Unauthorized")
             .build();
         FeignException feign401 = FeignException.errorStatus("getProductionOutputFiles", response);
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
-        when(armRpoClient.getProductionOutputFiles(eq("Bearer refreshed"), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq("Bearer refreshed"), any(ProductionOutputFilesRequest.class)))
             .thenThrow(feign401);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -532,7 +537,7 @@ class GetProductionOutputFilesServiceTest {
             .reason("Forbidden")
             .build();
         FeignException feign403 = FeignException.errorStatus("getProductionOutputFiles", response);
-        when(armRpoClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class))).thenThrow(feign403);
+        when(armApiBaseClient.getProductionOutputFiles(eq(TOKEN), any(ProductionOutputFilesRequest.class))).thenThrow(feign403);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -543,7 +548,7 @@ class GetProductionOutputFilesServiceTest {
             Collections.singletonList(createProductionExportFile(createProductionExportFileDetail(PRODUCTION_EXPORT_FILE_ID_1)))
         );
 
-        when(armRpoClient.getProductionOutputFiles(eq("Bearer refreshed"), any(ProductionOutputFilesRequest.class)))
+        when(armApiBaseClient.getProductionOutputFiles(eq("Bearer refreshed"), any(ProductionOutputFilesRequest.class)))
             .thenReturn(productionOutputFilesResponse);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
