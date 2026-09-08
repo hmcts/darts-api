@@ -12,10 +12,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
@@ -48,30 +47,31 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
 @Profile("in-memory-caching")
 @Import(InMemoryTestCache.class)
 @SpringBootTest
-@TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=false"})
+@TestPropertySource(properties = {
+    "darts.storage.arm.is-mock-arm-rpo-download-csv=false",
+    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
+})
 @Slf4j
 @SuppressWarnings({"PMD.CloseResource"})
 class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
 
-    @Autowired
-    private ArmApiConfigurationProperties armApiConfigurationProperties;
-    @MockitoBean
-    private ArmTokenClient armTokenClient;
     @MockitoBean
     private UserIdentity userIdentity;
     @MockitoBean
     private ArmApiBaseClient armApiBaseClient;
     @MockitoBean
+    private ArmAuthClient armAuthClient;
+    @MockitoBean
     private ArmRpoUtil armRpoUtil;
-    
+
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
-    private final Duration  waitDuration = Duration.ofDays(30);
+    private final Duration waitDuration = Duration.ofDays(30);
 
     @Autowired
     private RemoveRpoProductionsService removeRpoProductionsService;
     @Autowired
     private ArmRpoService armRpoService;
-    
+
     @BeforeEach
     void setUp() {
         UserAccountEntity userAccountEntity = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -79,7 +79,7 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
 
         armRpoExecutionDetailEntity = dartsPersistence.save(getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
     }
-    
+
     @Test
     void removeOldArmRpoProductions_ShouldRemoveProductions_WhenFailedAndOlderThanDuration() {
         RemoveProductionResponse response = new RemoveProductionResponse();
@@ -94,17 +94,17 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
         armRpoExecutionDetailEntity.setProductionId("some-production-id");
         dartsPersistence.save(armRpoExecutionDetailEntity);
-        
+
         // update automatically set lastModifiedDateTime to be older than waitDuration. This defaults to now() on save
         dartsPersistence.getArmRpoExecutionDetailRepository()
             .updateLastModifiedDateTimeById(
                 armRpoExecutionDetailEntity.getId(),
                 OffsetDateTime.now().minusDays(31)
             );
-        
+
         // when
         removeRpoProductionsService.removeOldArmRpoProductions(false, waitDuration, 10);
-        
+
         // then
         var updatedArmRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetailEntity.getId());
 
@@ -223,7 +223,7 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         RemoveProductionResponse response = new RemoveProductionResponse();
         response.setStatus(200);
         response.setIsError(false);
-        
+
         //given
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
@@ -277,7 +277,7 @@ class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
         RemoveProductionResponse response = new RemoveProductionResponse();
         response.setStatus(200);
         response.setIsError(false);
-        
+
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.failedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
         armRpoExecutionDetailEntity.setProductionId("some-production-id");

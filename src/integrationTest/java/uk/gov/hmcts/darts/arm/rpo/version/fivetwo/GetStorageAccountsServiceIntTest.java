@@ -1,14 +1,14 @@
-package uk.gov.hmcts.darts.arm.rpo;
-
+package uk.gov.hmcts.darts.arm.rpo.version.fivetwo;
 
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.rpo.GetStorageAccountsService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
@@ -26,28 +26,33 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
-class GetIndexesByMatterIdServiceIntTest extends IntegrationBase {
+class GetStorageAccountsServiceIntTest extends IntegrationBase {
+
     @MockitoBean
     private ArmApiBaseClient armApiBaseClient;
 
     @Autowired
-    private GetIndexesByMatterIdService getIndexesByMatterIdService;
+    private GetStorageAccountsService getStorageAccountsService;
+
 
     @Test
-    void getIndexesByMatterIdSuccess() {
-
+    void getStorageAccountsSuccess() {
         // given
-        IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
-        response.setStatus(200);
-        response.setIsError(false);
+        StorageAccountResponse.DataDetails dataDetails1 = new StorageAccountResponse.DataDetails();
+        dataDetails1.setId("indexId1");
+        dataDetails1.setName("unexpectedAccountName");
 
-        IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
-        IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
-        indexDetails.setIndexId("indexId");
-        index.setIndexDetails(indexDetails);
-        response.setIndexes(List.of(index));
+        StorageAccountResponse.DataDetails dataDetails2 = new StorageAccountResponse.DataDetails();
+        dataDetails2.setId("indexId2");
+        dataDetails2.setName("some-account-name");
 
-        when(armApiBaseClient.getIndexesByMatterId(any(), any())).thenReturn(response);
+        StorageAccountResponse storageAccountResponse = new StorageAccountResponse();
+        storageAccountResponse.setStatus(200);
+        storageAccountResponse.setIsError(false);
+        storageAccountResponse.setDataDetails(List.of(dataDetails1, dataDetails2));
+
+        var bearerAuth = "Bearer some-token";
+        when(armApiBaseClient.getStorageAccounts(any(), any())).thenReturn(storageAccountResponse);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -55,27 +60,24 @@ class GetIndexesByMatterIdServiceIntTest extends IntegrationBase {
         armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
 
-        var bearerAuth = "Bearer some-token";
-
         // when
-        getIndexesByMatterIdService.getIndexesByMatterId(bearerAuth, armRpoExecutionDetail.getId(), "matterId", userAccount);
+        getStorageAccountsService.getStorageAccounts(bearerAuth, armRpoExecutionDetail.getId(), userAccount);
 
         // then
-        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
-        assertEquals(ArmRpoStateEnum.GET_INDEXES_BY_MATTERID.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
+        assertEquals(ArmRpoStateEnum.GET_STORAGE_ACCOUNTS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
-        assertEquals("indexId", armRpoExecutionDetailEntityUpdated.getIndexId());
-
+        assertEquals("indexId2", armRpoExecutionDetailEntityUpdated.getStorageAccountId());
     }
 
     @Test
-    void getIndexesByMatterIdShouldFailWithMissingMatterId() {
+    void getStorageAccountsWithMissingMatchingStorage() {
 
         // given
-        IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
+        StorageAccountResponse response = new StorageAccountResponse();
         response.setStatus(200);
         response.setIsError(false);
-        when(armApiBaseClient.getIndexesByMatterId(any(), any())).thenReturn(response);
+        when(armApiBaseClient.getStorageAccounts(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -86,23 +88,24 @@ class GetIndexesByMatterIdServiceIntTest extends IntegrationBase {
         var bearerAuth = "Bearer some-token";
 
         // when
-        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            getIndexesByMatterIdService.getIndexesByMatterId(bearerAuth, armRpoExecutionDetail.getId(), "matterId", userAccount));
+        ArmRpoException armRpoException = assertThrows(
+            ArmRpoException.class, () -> getStorageAccountsService.getStorageAccounts(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM RPO get indexes by matter ID: Unable to find any indexes by matter ID in response"));
-        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
-        assertEquals(ArmRpoStateEnum.GET_INDEXES_BY_MATTERID.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+            "Failure during ARM get storage accounts: No data details were present in the storage account response"));
+
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
+        assertEquals(ArmRpoStateEnum.GET_STORAGE_ACCOUNTS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
-        assertNull(armRpoExecutionDetailEntityUpdated.getMatterId());
+        assertNull(armRpoExecutionDetailEntityUpdated.getStorageAccountId());
     }
 
     @Test
-    void getIndexesByMatterIdFailsWhenClientReturns400Error() {
+    void getStorageAccountsFailsWhenClientThrowsFeignException() {
 
         // given
-        when(armApiBaseClient.getIndexesByMatterId(any(), any())).thenThrow(FeignException.BadRequest.class);
+        when(armApiBaseClient.getStorageAccounts(any(), any())).thenThrow(FeignException.BadRequest.class);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -113,16 +116,17 @@ class GetIndexesByMatterIdServiceIntTest extends IntegrationBase {
         var bearerAuth = "Bearer some-token";
 
         // when
-        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-            getIndexesByMatterIdService.getIndexesByMatterId(bearerAuth, armRpoExecutionDetail.getId(), "matterId", userAccount));
+        ArmRpoException armRpoException = assertThrows(
+            ArmRpoException.class, () -> getStorageAccountsService.getStorageAccounts(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM RPO get indexes by matter ID: Unable to get ARM RPO response"));
-        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
-        assertEquals(ArmRpoStateEnum.GET_INDEXES_BY_MATTERID.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+            "Failure during ARM get storage accounts: Unable to get ARM RPO response"));
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
+        assertEquals(ArmRpoStateEnum.GET_STORAGE_ACCOUNTS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
-        assertNull(armRpoExecutionDetailEntityUpdated.getMatterId());
+        assertNull(armRpoExecutionDetailEntityUpdated.getStorageAccountId());
     }
+
 
 }

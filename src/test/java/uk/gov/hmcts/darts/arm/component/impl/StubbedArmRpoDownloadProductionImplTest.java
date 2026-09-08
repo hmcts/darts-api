@@ -9,12 +9,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceWrapper;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -43,7 +44,9 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("PMD.CloseResource")
 class StubbedArmRpoDownloadProductionImplTest {
     @Mock
-    private ArmRpoClient armRpoClient;
+    private ArmAuthClient armAuthClient;
+    @Mock
+    private ArmApiBaseClient armApiBaseClient;
 
     @Mock
     private ArmAutomatedTaskRepository armAutomatedTaskRepository;
@@ -62,7 +65,7 @@ class StubbedArmRpoDownloadProductionImplTest {
 
     @BeforeEach
     void setUp() {
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        ArmClientService armClientService = new ArmClientServiceWrapper(armAuthClient, armApiBaseClient);
         stubbedArmRpoDownloadProduction = new StubbedArmRpoDownloadProductionImpl(
             armClientService, armAutomatedTaskRepository, externalObjectDirectoryRepository, armRpoService);
     }
@@ -118,13 +121,13 @@ class StubbedArmRpoDownloadProductionImplTest {
             .thenReturn(Collections.singletonList(eod));
 
         Response response = mock(Response.class);
-        when(armRpoClient.downloadProduction(anyString(), anyString(), anyString()))
+        when(armApiBaseClient.downloadProduction(anyString(), anyString(), anyString()))
             .thenReturn(response);
 
         Response result = stubbedArmRpoDownloadProduction.downloadProduction("token", 1, "fileId");
 
         assertNotNull(result);
-        verify(armRpoClient).downloadProduction(anyString(), anyString(), anyString());
+        verify(armApiBaseClient).downloadProduction(anyString(), anyString(), anyString());
     }
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectoryEntity() {

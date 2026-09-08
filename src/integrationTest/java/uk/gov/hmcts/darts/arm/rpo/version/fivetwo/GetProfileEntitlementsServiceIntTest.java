@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.rpo;
+package uk.gov.hmcts.darts.arm.rpo.version.fivetwo;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.rpo.GetProfileEntitlementsService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;

@@ -10,16 +10,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoSearchNoResultsException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceWrapper;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -42,12 +44,15 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.CloseResource"})
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
 class SaveBackgroundSearchServiceTest {
 
     private static final Integer EXECUTION_ID = 1;
 
     @Mock
-    private ArmRpoClient armRpoClient;
+    private ArmAuthClient armAuthClient;
+    @Mock
+    private ArmApiBaseClient armApiBaseClient;
 
     @Mock
     private ArmRpoService armRpoService;
@@ -72,7 +77,7 @@ class SaveBackgroundSearchServiceTest {
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
         armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        ArmClientService armClientService = new ArmClientServiceWrapper(armAuthClient, armApiBaseClient);
         saveBackgroundSearchService = new SaveBackgroundSearchServiceImpl(armClientService, armRpoService, armRpoUtil, objectMapper);
     }
 
@@ -82,7 +87,7 @@ class SaveBackgroundSearchServiceTest {
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(200);
         saveBackgroundSearchResponse.setIsError(false);
-        when(armRpoClient.saveBackgroundSearch(anyString(), any())).thenReturn(saveBackgroundSearchResponse);
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any())).thenReturn(saveBackgroundSearchResponse);
 
         // when
         saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount);
@@ -102,7 +107,7 @@ class SaveBackgroundSearchServiceTest {
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(400);
         saveBackgroundSearchResponse.setIsError(true);
-        when(armRpoClient.saveBackgroundSearch(anyString(), any())).thenReturn(saveBackgroundSearchResponse);
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any())).thenReturn(saveBackgroundSearchResponse);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> saveBackgroundSearchService.saveBackgroundSearch(
@@ -123,7 +128,7 @@ class SaveBackgroundSearchServiceTest {
     @Test
     void saveBackgroundSearch_ThrowsFeignException() {
         // given
-        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
             .thenThrow(FeignException.class);
 
         // when
@@ -145,7 +150,7 @@ class SaveBackgroundSearchServiceTest {
     @Test
     void saveBackgroundSearch_ReturnsNullResponse() {
         // given
-        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> saveBackgroundSearchService.saveBackgroundSearch(
@@ -168,7 +173,7 @@ class SaveBackgroundSearchServiceTest {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setIsError(true);
-        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> saveBackgroundSearchService.saveBackgroundSearch(
@@ -191,7 +196,7 @@ class SaveBackgroundSearchServiceTest {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(200);
-        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> saveBackgroundSearchService.saveBackgroundSearch(
@@ -214,7 +219,7 @@ class SaveBackgroundSearchServiceTest {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(-1);
-        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> saveBackgroundSearchService.saveBackgroundSearch(
@@ -244,7 +249,7 @@ class SaveBackgroundSearchServiceTest {
                 .body("Search with no results", StandardCharsets.UTF_8)
                 .build()
         );
-        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
             .thenThrow(feignException);
 
         // when
@@ -274,7 +279,7 @@ class SaveBackgroundSearchServiceTest {
                 .body(jsonResponse, StandardCharsets.UTF_8)
                 .build()
         );
-        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
             .thenThrow(feignException);
 
         // when
@@ -304,7 +309,7 @@ class SaveBackgroundSearchServiceTest {
                 .body(jsonResponse, StandardCharsets.UTF_8)
                 .build()
         );
-        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
+        when(armApiBaseClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class)))
             .thenThrow(feignException);
 
         // when
@@ -332,7 +337,7 @@ class SaveBackgroundSearchServiceTest {
         FeignException feign401 = FeignException.errorStatus("saveBackgroundSearch", response);
 
         // First call throws 401
-        when(armRpoClient.saveBackgroundSearch(eq("token"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.saveBackgroundSearch(eq("token"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -340,7 +345,7 @@ class SaveBackgroundSearchServiceTest {
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(200);
         saveBackgroundSearchResponse.setIsError(false);
-        when(armRpoClient.saveBackgroundSearch(eq("Bearer refreshed"), any(SaveBackgroundSearchRequest.class))).thenReturn(saveBackgroundSearchResponse);
+        when(armApiBaseClient.saveBackgroundSearch(eq("Bearer refreshed"), any(SaveBackgroundSearchRequest.class))).thenReturn(saveBackgroundSearchResponse);
 
         // when
         saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount);
@@ -365,12 +370,12 @@ class SaveBackgroundSearchServiceTest {
         FeignException feign401 = FeignException.errorStatus("saveBackgroundSearch", response);
 
         // First call throws 401
-        when(armRpoClient.saveBackgroundSearch(eq("token"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.saveBackgroundSearch(eq("token"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
-        when(armRpoClient.saveBackgroundSearch(eq("Bearer refreshed"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.saveBackgroundSearch(eq("Bearer refreshed"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign401);
 
         // when
         ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
@@ -397,7 +402,7 @@ class SaveBackgroundSearchServiceTest {
         FeignException feign403 = FeignException.errorStatus("saveBackgroundSearch", response);
 
         // First call throws 403
-        when(armRpoClient.saveBackgroundSearch(eq("token"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign403);
+        when(armApiBaseClient.saveBackgroundSearch(eq("token"), any(SaveBackgroundSearchRequest.class))).thenThrow(feign403);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -405,7 +410,7 @@ class SaveBackgroundSearchServiceTest {
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(200);
         saveBackgroundSearchResponse.setIsError(false);
-        when(armRpoClient.saveBackgroundSearch(eq("Bearer refreshed"), any(SaveBackgroundSearchRequest.class))).thenReturn(saveBackgroundSearchResponse);
+        when(armApiBaseClient.saveBackgroundSearch(eq("Bearer refreshed"), any(SaveBackgroundSearchRequest.class))).thenReturn(saveBackgroundSearchResponse);
 
         // when
         saveBackgroundSearchService.saveBackgroundSearch("token", 1, "searchName", userAccount);
