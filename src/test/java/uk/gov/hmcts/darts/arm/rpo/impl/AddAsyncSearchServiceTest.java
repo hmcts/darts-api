@@ -11,15 +11,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.rpo.AddAsyncSearchService;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceWrapper;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -47,6 +49,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.CloseResource"})
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
 class AddAsyncSearchServiceTest {
 
     private static final Integer EXECUTION_ID = 1;
@@ -61,9 +64,13 @@ class AddAsyncSearchServiceTest {
 
     @Mock
     private ArmApiService armApiService;
+    @Mock
+    private ArmAuthClient armAuthClient;
+    @Mock
+    private ArmApiBaseClient armApiBaseClient;
 
     private ArmRpoService armRpoService;
-    private ArmRpoClient armRpoClient;
+
     private ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private AddAsyncSearchService addAsyncSearchService;
     private ArmRpoUtil armRpoUtil;
@@ -77,7 +84,6 @@ class AddAsyncSearchServiceTest {
         armRpoHelperMocks = new ArmRpoHelperMocks();
 
         armRpoService = spy(ArmRpoService.class);
-        armRpoClient = spy(ArmRpoClient.class);
         armAutomatedTaskRepository = mock(ArmAutomatedTaskRepository.class);
 
         executionDetailCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
@@ -85,7 +91,7 @@ class AddAsyncSearchServiceTest {
 
         armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
 
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        ArmClientService armClientService = new ArmClientServiceWrapper(armAuthClient, armApiBaseClient);
 
         addAsyncSearchService = new AddAsyncSearchServiceImpl(armClientService, armRpoService, armRpoUtil,
                                                               armAutomatedTaskRepository);
@@ -114,7 +120,7 @@ class AddAsyncSearchServiceTest {
                                                          someUserAccount);
 
         // And verify the expected request data has been created
-        verify(armRpoClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
+        verify(armApiBaseClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
 
         String jsonRequest = requestCaptor.getValue();
 
@@ -216,7 +222,7 @@ class AddAsyncSearchServiceTest {
         createArmAutomatedTaskEntityAndSetMock();
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
-        when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString()))
+        when(armApiBaseClient.addAsyncSearch(eq(TOKEN), anyString()))
             .thenThrow(mock(FeignException.class));
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -274,7 +280,7 @@ class AddAsyncSearchServiceTest {
             .reason("Unauthorized")
             .build();
         FeignException feign401 = FeignException.errorStatus("addAsyncSearch", response);
-        when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString())).thenThrow(feign401);
+        when(armApiBaseClient.addAsyncSearch(eq(TOKEN), anyString())).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -286,7 +292,7 @@ class AddAsyncSearchServiceTest {
         armAsyncSearchResponse.setStatus(200);
         armAsyncSearchResponse.setIsError(false);
         armAsyncSearchResponse.setSearchId(SEARCH_ID);
-        when(armRpoClient.addAsyncSearch(eq("Bearer refreshed"), anyString())).thenReturn(armAsyncSearchResponse);
+        when(armApiBaseClient.addAsyncSearch(eq("Bearer refreshed"), anyString())).thenReturn(armAsyncSearchResponse);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
 
@@ -303,7 +309,7 @@ class AddAsyncSearchServiceTest {
                                                          someUserAccount);
 
         // And verify the expected request data has been created
-        verify(armRpoClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
+        verify(armApiBaseClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
 
         String jsonRequest = requestCaptor.getValue();
 
@@ -350,7 +356,7 @@ class AddAsyncSearchServiceTest {
             .reason("Unauthorized")
             .build();
         FeignException feign401 = FeignException.errorStatus("addAsyncSearch", response);
-        when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString())).thenThrow(feign401);
+        when(armApiBaseClient.addAsyncSearch(eq(TOKEN), anyString())).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -358,7 +364,7 @@ class AddAsyncSearchServiceTest {
         createArmAutomatedTaskEntityAndSetMock();
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
-        when(armRpoClient.addAsyncSearch(eq("Bearer refreshed"), anyString())).thenThrow(feign401);
+        when(armApiBaseClient.addAsyncSearch(eq("Bearer refreshed"), anyString())).thenThrow(feign401);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
 
@@ -375,7 +381,7 @@ class AddAsyncSearchServiceTest {
                                                          someUserAccount);
 
         // And verify the expected request data has been created
-        verify(armRpoClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
+        verify(armApiBaseClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
 
         String jsonRequest = requestCaptor.getValue();
 
@@ -420,7 +426,7 @@ class AddAsyncSearchServiceTest {
             .reason("Forbidden")
             .build();
         FeignException feign403 = FeignException.errorStatus("addAsyncSearch", response);
-        when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString())).thenThrow(feign403);
+        when(armApiBaseClient.addAsyncSearch(eq(TOKEN), anyString())).thenThrow(feign403);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -432,7 +438,7 @@ class AddAsyncSearchServiceTest {
         armAsyncSearchResponse.setStatus(200);
         armAsyncSearchResponse.setIsError(false);
         armAsyncSearchResponse.setSearchId(SEARCH_ID);
-        when(armRpoClient.addAsyncSearch(eq("Bearer refreshed"), anyString())).thenReturn(armAsyncSearchResponse);
+        when(armApiBaseClient.addAsyncSearch(eq("Bearer refreshed"), anyString())).thenReturn(armAsyncSearchResponse);
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
 
@@ -449,7 +455,7 @@ class AddAsyncSearchServiceTest {
                                                          someUserAccount);
 
         // And verify the expected request data has been created
-        verify(armRpoClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
+        verify(armApiBaseClient).addAsyncSearch(eq(TOKEN), requestCaptor.capture());
 
         String jsonRequest = requestCaptor.getValue();
 
@@ -493,7 +499,7 @@ class AddAsyncSearchServiceTest {
         response.setIsError(false);
         response.setSearchId(searchId);
 
-        when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString()))
+        when(armApiBaseClient.addAsyncSearch(eq(TOKEN), anyString()))
             .thenReturn(response);
     }
 

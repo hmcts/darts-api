@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
@@ -33,7 +33,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
 
 @TestPropertySource(properties = {
     "darts.storage.arm.is-mock-arm-rpo-download-csv=true",
-    "darts.storage.arm-api.enable-arm-v5-2-upgrade=false"
+    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
 })
 @SuppressWarnings({"PMD.CloseResource"})
 @Slf4j
@@ -49,7 +49,7 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
     @MockitoBean
-    private ArmRpoClient armRpoClient;
+    private ArmApiBaseClient armApiBaseClient;
 
     @BeforeEach
     void setUp() {
@@ -95,7 +95,7 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
         dartsPersistence.saveAll(externalObjectDirectoryEntities);
 
         Response response = mock(Response.class);
-        when(armRpoClient.downloadProduction(anyString(), anyString(), anyString()))
+        when(armApiBaseClient.downloadProduction(anyString(), anyString(), anyString()))
             .thenReturn(response);
 
         // when
@@ -103,6 +103,6 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
 
         // then
         assertNotNull(result);
-        verify(armRpoClient).downloadProduction(anyString(), anyString(), anyString());
+        verify(armApiBaseClient).downloadProduction(anyString(), anyString(), anyString());
     }
 }
