@@ -51,7 +51,7 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
     @Test
     void shouldFindAllSecurityRoles() {
         List<SecurityRoleEntity> securityRoleEntityList = securityRoleRepository.findAll();
-        assertEquals(16, securityRoleEntityList.size());
+        assertEquals(17, securityRoleEntityList.size());
     }
 
     @ParameterizedTest(name = "{0} should have no permissions")
