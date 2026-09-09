@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIAL_CONDUCT;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
@@ -140,5 +141,12 @@ class SecurityRoleRepositoryTest extends PostgresIntegrationBase {
         //TODO this will be false once the judicial conduct role is filled out
         assertTrue(securityPermissionEntities.isEmpty());
     }
-    
+
+    @Test
+    void shouldFindAllHmctsTranscriptionHubPermissions() {
+        SecurityRoleEntity hmctsTranscriptionHubRole = securityRoleRepository.findById(HMCTS_TRANSCRIPTION_HUB.getId()).orElseThrow();
+        final Set<SecurityPermissionEntity> securityPermissionEntities = hmctsTranscriptionHubRole.getSecurityPermissionEntities();
+        //TODO this will be false once the hmcts transcription hub role is filled out
+        assertTrue(securityPermissionEntities.isEmpty());
+    }
 }

@@ -123,6 +123,12 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
                     "role_name": "JUDICIAL_CONDUCT",
                     "display_name": "Judicial Conduct",
                     "display_state": true
+                  },
+                  {
+                    "id": 17,
+                    "role_name": "HMCTS_TRANSCRIPTION_HUB",
+                    "display_name": "HMCTS Transcription Hub",
+                    "display_state": true
                   }
                 ]
                 """,
