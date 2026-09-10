@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -81,6 +81,7 @@ public interface UserAccountRepository extends
         FROM UserAccountEntity userAccount
         WHERE userAccount.active = true
         AND userAccount.isSystemUser = false
+        AND userAccount.emailAddress NOT ILIKE '%localhost%'
         AND (
             userAccount.lastLoginTime <= :cutoffDateTime
             OR (userAccount.lastLoginTime IS NULL AND userAccount.createdDateTime <= :cutoffDateTime)
@@ -96,7 +97,7 @@ public interface UserAccountRepository extends
         """)
     List<UserAccountEntity> findInactiveUsersExcludingRoles(@Param("cutoffDateTime") OffsetDateTime cutoffDateTime,
                                                             @Param("excludedRoleIds") Set<Integer> excludedRoleIds,
-                                                            Pageable pageable);
+                                                            Limit limit);
 
     List<UserAccountEntity> findByIdInAndActive(List<Integer> userIds, Boolean active);
 

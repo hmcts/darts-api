@@ -5,14 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import org.springframework.data.domain.Limit;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
+import java.time.Period;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,8 @@ class DisableInactiveUserAccountsServiceImplTest {
     @Mock
     private UserAccountRepository userAccountRepository;
     @Mock
+    private UserAccountSecurityGroupService userAccountSecurityGroupService;
+    @Mock
     private CurrentTimeHelper currentTimeHelper;
     @Mock
     private TranscriptionService transcriptionService;
@@ -44,17 +47,21 @@ class DisableInactiveUserAccountsServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new DisableInactiveUserAccountsServiceImpl(userAccountRepository, currentTimeHelper, transcriptionService);
+        service = new DisableInactiveUserAccountsServiceImpl(
+            userAccountRepository,
+            userAccountSecurityGroupService,
+            currentTimeHelper,
+            transcriptionService
+        );
+        ReflectionTestUtils.setField(service, "inactivityPeriodLimit", Period.ofMonths(6));
     }
 
     @Test
     void process_shouldDisableInactiveUsersAndRemoveThemFromSecurityGroups() {
         UserAccountEntity inactiveUser = userAccount(123);
-        SecurityGroupEntity securityGroup = securityGroup(inactiveUser);
-        inactiveUser.getSecurityGroupEntities().add(securityGroup);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, PageRequest.of(0, 1000)))
+        when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1000)))
             .thenReturn(List.of(inactiveUser));
         when(userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), inactiveUser.getId()))
             .thenReturn(Optional.empty());
@@ -62,7 +69,7 @@ class DisableInactiveUserAccountsServiceImplTest {
         service.process(1000);
 
         assertThat(inactiveUser.isActive()).isFalse();
-        assertThat(inactiveUser.getSecurityGroupEntities()).isEmpty();
+        verify(userAccountSecurityGroupService).unassignUserFromGroupsTheyArePartOf(inactiveUser);
         verify(transcriptionService, never()).rollbackUserTranscriptions(inactiveUser);
         verify(userAccountRepository).saveAll(List.of(inactiveUser));
     }
@@ -72,7 +79,7 @@ class DisableInactiveUserAccountsServiceImplTest {
         UserAccountEntity inactiveUser = userAccount(123);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, PageRequest.of(0, 1000)))
+        when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1000)))
             .thenReturn(List.of(inactiveUser));
         when(userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), inactiveUser.getId()))
             .thenReturn(Optional.of(inactiveUser));
@@ -86,19 +93,19 @@ class DisableInactiveUserAccountsServiceImplTest {
     @Test
     void process_shouldUseMinimumBatchSize_WhenBatchSizeIsLessThanOne() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, PageRequest.of(0, 1)))
+        when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1)))
             .thenReturn(List.of());
 
         service.process(0);
 
-        verify(userAccountRepository).findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, PageRequest.of(0, 1));
+        verify(userAccountRepository).findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1));
         verify(userAccountRepository, never()).saveAll(List.of());
     }
 
     @Test
     void process_shouldNotSave_WhenNoInactiveUsersAreFound() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, PageRequest.of(0, 1000)))
+        when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1000)))
             .thenReturn(List.of());
 
         service.process(1000);
@@ -114,9 +121,4 @@ class DisableInactiveUserAccountsServiceImplTest {
         return userAccount;
     }
 
-    private static SecurityGroupEntity securityGroup(UserAccountEntity userAccount) {
-        SecurityGroupEntity securityGroup = new SecurityGroupEntity();
-        securityGroup.getUsers().add(userAccount);
-        return securityGroup;
-    }
 }

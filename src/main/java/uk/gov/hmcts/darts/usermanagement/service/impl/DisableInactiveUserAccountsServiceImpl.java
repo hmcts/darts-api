@@ -2,7 +2,8 @@ package uk.gov.hmcts.darts.usermanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -25,11 +26,14 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 @RequiredArgsConstructor
 public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUserAccountsService {
 
-    private static final Period INACTIVITY_PERIOD = Period.ofMonths(6);
+    @Value("${darts.automated.task.disable-inactive-user-accounts.inactivity-period-limit:P6M}")
+    private Period inactivityPeriodLimit;
+
     private static final Set<Integer> PRIVILEGED_USER_ROLE_IDS = Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId());
     private static final int MINIMUM_BATCH_SIZE = 1;
 
     private final UserAccountRepository userAccountRepository;
+    private final UserAccountSecurityGroupService userAccountSecurityGroupService;
     private final CurrentTimeHelper currentTimeHelper;
     private final TranscriptionService transcriptionService;
 
@@ -37,13 +41,13 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
     @Transactional
     public void process(int batchSize) {
         int safeBatchSize = Math.max(batchSize, MINIMUM_BATCH_SIZE);
-        OffsetDateTime cutoffDateTime = currentTimeHelper.currentOffsetDateTime().minus(INACTIVITY_PERIOD);
+        OffsetDateTime cutoffDateTime = currentTimeHelper.currentOffsetDateTime().minus(inactivityPeriodLimit);
 
         // System users are excluded in the repository query with isSystemUser = false.
         List<UserAccountEntity> inactiveUsers = userAccountRepository.findInactiveUsersExcludingRoles(
             cutoffDateTime,
             PRIVILEGED_USER_ROLE_IDS,
-            PageRequest.of(0, safeBatchSize)
+            Limit.of(safeBatchSize)
         );
 
         if (inactiveUsers.isEmpty()) {
@@ -59,7 +63,7 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
 
     private void disableAndRemoveFromSecurityGroups(UserAccountEntity userAccount) {
         rollbackAssignedTranscriptionsIfTranscriber(userAccount);
-        userAccount.getSecurityGroupEntities().clear();
+        userAccountSecurityGroupService.unassignUserFromGroupsTheyArePartOf(userAccount);
         userAccount.setActive(false);
     }
 
