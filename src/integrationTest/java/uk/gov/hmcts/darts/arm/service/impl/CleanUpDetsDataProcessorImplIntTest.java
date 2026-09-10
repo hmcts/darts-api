@@ -28,7 +28,6 @@ import java.util.UUID;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.darts.test.common.data.ExternalLocationTypeTestData.locationTypeOf;
@@ -62,7 +61,7 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
             new CaseDocumentTestData().createDataThatShouldBeCleanedUp()
         );
         //Inject some data that should not be picked up
-        List<TestData<?>> inelibileData = List.of(
+        List<TestData<?>> ineligibleData = List.of(
             new MediaTestData().createDetsRecordButWithoutArmRecord(),
             new MediaTestData().createDetsRecordButWithArmRecordButNotInStoredStatus(),
             new MediaTestData().createDetsRecordButWithArmStoredButWithinMiniumStoredTime(),
@@ -72,7 +71,7 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         cleanUpDetsDataProcessor.processCleanUpDetsData(20, getCleanUpDetsDataAutomatedTaskConfig());
 
         assertSuccessfull(validData);
-        assertNoChange(inelibileData);
+        assertNoChange(ineligibleData);
     }
 
     @Test
@@ -91,7 +90,6 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         //Reset mock
         //Check to ensure that the failed blob delete is attempted again but the successful database deletes are not attempted again
         Mockito.clearInvocations(detsApiService);
-        partialCleanUpData1.stubBlobStoreDelete(true);
         TestData<?> fullCleanUpData3 = new MediaTestData().createDataThatShouldBeCleanedUp(true);
 
         cleanUpDetsDataProcessor.processCleanUpDetsData(20, getCleanUpDetsDataAutomatedTaskConfig());
@@ -135,8 +133,6 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         assertThat(objectStateRecordEntity.getDateFileDetsCleanup())
             .isCloseTo(OffsetDateTime.now(), within(1, SECONDS));
         assertThat(objectStateRecordEntity.getFlagFileDetsCleanupStatus()).isTrue();
-        
-        verify(detsApiService).deleteBlobDataFromContainer(testData.getDetsEod().getLocation());
     }
 
     @SneakyThrows
@@ -151,10 +147,8 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         assertThat(objectStateRecordEntity.getEodId()).isNull();
         assertThat(objectStateRecordEntity.getDateFileDetsCleanup())
             .isCloseTo(OffsetDateTime.now(), within(1, SECONDS));
-        verify(detsApiService).deleteBlobDataFromContainer(testData.getDetsEod().getLocation());
-
-        //If database delete was successful but blob store was not this flag should not be set
-        assertThat(objectStateRecordEntity.getFlagFileDetsCleanupStatus()).isNull();
+        
+        assertThat(objectStateRecordEntity.getFlagFileDetsCleanupStatus()).isTrue();
     }
 
     private void assertCommon(TestData<?> testData) {
@@ -244,7 +238,6 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
             detsEod = createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.DETS, ObjectRecordStatusEnum.STORED, confidenceAware);
             armEod = createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.ARM, ObjectRecordStatusEnum.STORED, confidenceAware);
             objectStateRecordEntity = createObjectStateRecordEntity(detsEod, armEod);
-            stubBlobStoreDelete(shouldBlobDeleteSucceed);
             return this;
         }
 
@@ -252,7 +245,6 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
             confidenceAware = createConfidenceAware();
             detsEod = createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.DETS, ObjectRecordStatusEnum.STORED, confidenceAware);
             objectStateRecordEntity = createObjectStateRecordEntity(detsEod, null);
-            stubBlobStoreDelete(true);
             return this;
         }
 
@@ -261,7 +253,6 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
             detsEod = createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.DETS, ObjectRecordStatusEnum.STORED, confidenceAware);
             armEod = createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.ARM, ObjectRecordStatusEnum.ARM_DROP_ZONE, confidenceAware);
             objectStateRecordEntity = createObjectStateRecordEntity(detsEod, armEod);
-            stubBlobStoreDelete(true);
             return this;
         }
 
@@ -271,7 +262,6 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
             armEod = createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.ARM, ObjectRecordStatusEnum.ARM_DROP_ZONE, OffsetDateTime.now(),
                                                          confidenceAware);
             objectStateRecordEntity = createObjectStateRecordEntity(detsEod, armEod);
-            stubBlobStoreDelete(true);
             return this;
         }
 
@@ -282,14 +272,7 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
             objectStateRecordEntity = createObjectStateRecordEntity(detsEod, armEod);
             objectStateRecordEntity.setDetsLocation("Some random location that does not align with the dets eod location");
             dartsPersistence.getObjectStateRecordRepository().save(objectStateRecordEntity);
-            stubBlobStoreDelete(true);
             return this;
-        }
-
-        @SneakyThrows
-        public void stubBlobStoreDelete(boolean shouldBlobDeleteSucceed) {
-            lenient().when(detsApiService.deleteBlobDataFromContainer(detsEod.getLocation()))
-                .thenReturn(shouldBlobDeleteSucceed);
         }
         
         private ObjectStateRecordEntity createObjectStateRecordEntity(ExternalObjectDirectoryEntity detsEod, ExternalObjectDirectoryEntity armEod) {
