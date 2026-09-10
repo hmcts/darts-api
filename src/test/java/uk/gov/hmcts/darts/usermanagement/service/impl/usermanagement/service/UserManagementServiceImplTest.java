@@ -127,7 +127,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void getUsers_ShouldReturnsUsers() {
+    void getUsers_shouldReturnUsers_whenUsersFound() {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
 
         when(userManagementQuery.getUsers(false, EXISTING_EMAIL_ADDRESS, null)).thenReturn(userAccountEntities);
@@ -142,7 +142,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void testGetUserWithIncludeSystemUser() {
+    void getUsers_shouldReturnSystemUsers_whenIncludeSystemUsersIsTrue() {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
 
         when(userManagementQuery.getUsers(true, EXISTING_EMAIL_ADDRESS, null)).thenReturn(userAccountEntities);
@@ -157,7 +157,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void modifyUser_ShouldReturnUpdatedUserAndRollsBackTranscriptions_WhenTranscriberAndWithActivateFalse() {
+    void modifyUser_shouldReturnUpdatedUserAndRollbackTranscriptions_whenTranscriberIsDeactivated() {
         UserAccountEntity user = createUserAccount(1, EXISTING_EMAIL_ADDRESS);
         user.setActive(true);
         user.setIsSystemUser(false);
@@ -200,7 +200,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void modifyUser_ShouldNotRollbackTranscriptions_WhenUserNotTranscriber() {
+    void modifyUser_shouldNotRollbackTranscriptions_whenUserIsNotTranscriber() {
         List<UserAccountEntity> userAccountEntities = new ArrayList<>();
         userAccountEntities.add(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
 
@@ -227,7 +227,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void modifyUser_ShouldReturnUpdatedUser_WhenActiveNotSet() {
+    void modifyUser_shouldReturnUpdatedUser_whenActiveNotSet() {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
         userAccountEntities.getFirst().setIsSystemUser(false);
 
@@ -269,7 +269,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void modifyUser_ShouldReturnUpdatedUser_WhenActiveTrue() {
+    void modifyUser_shouldReturnUpdatedUser_whenActiveIsTrue() {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
         userAccountEntities.getFirst().setIsSystemUser(false);
 
