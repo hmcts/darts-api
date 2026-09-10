@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -249,12 +249,13 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
     @Test
     void findInactiveUsersExcludingRoles_shouldReturnOnlyEligibleInactiveUsers() {
         OffsetDateTime cutoffDateTime = OffsetDateTime.of(2026, 2, 14, 10, 5, 0, 0, ZoneOffset.UTC);
-        UserAccountEntity oldLastLoginUser = persistUser(
+        final UserAccountEntity oldLastLoginUser = persistUser(
             "old.last.login@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, false);
-        UserAccountEntity oldNeverLoggedInUser = persistUser(
+        final UserAccountEntity oldNeverLoggedInUser = persistUser(
             "old.never.logged.in@example.net", cutoffDateTime.minusDays(1), null, true, false);
         persistUser("recent.last.login@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.plusDays(1), true, false);
         persistUser("inactive.user@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), false, false);
+        persistUser("old.localhost.user@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, false);
 
         UserAccountEntity systemUserWithSystemRole = persistUser(
             "system.user@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, true);
@@ -273,7 +274,7 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
         List<UserAccountEntity> users = userAccountRepository.findInactiveUsersExcludingRoles(
             cutoffDateTime,
             Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId()),
-            PageRequest.of(0, 10)
+            Limit.of(10)
         );
 
         List<Integer> actualIds = users.stream()
