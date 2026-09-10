@@ -61,7 +61,7 @@ class JudicialConductAccessIntTest extends IntegrationBase {
     }
 
     @Test
-    void judicialConductUser_canAccessCaseFileTabsAcrossAllCourts_withGlobalAccessSecurityRole() throws Exception {
+    void judicialConductUserRequest_shouldAccessCaseFileTabsAcrossAllCourts_whenGlobalAccessIsAuthorised() throws Exception {
         Integer caseId = hearing.getCourtCase().getId();
 
         mockMvc.perform(get("/cases/{case_id}", caseId))
@@ -84,7 +84,7 @@ class JudicialConductAccessIntTest extends IntegrationBase {
     }
 
     @Test
-    void judicialConductUser_canAccessHearingDetailsEventsAndAudioAcrossAllCourts_withGlobalAccessSecurityRole() throws Exception {
+    void judicialConductUserRequest_shouldAccessHearingDetailsEventsAndAudioAcrossAllCourts_whenGlobalAccessIsAuthorised() throws Exception {
         Integer hearingId = hearing.getId();
 
         mockMvc.perform(get("/hearings/{hearingId}", hearingId))
@@ -101,7 +101,7 @@ class JudicialConductAccessIntTest extends IntegrationBase {
     }
 
     @Test
-    void judicialConductUser_cannotAccessAnnotations_withoutAuthorisation() throws Exception {
+    void judicialConductUserRequest_shouldNotAccessAnnotations_whenAccessIsNotAuthorised() throws Exception {
         mockMvc.perform(get("/cases/{case_id}/annotations", hearing.getCourtCase().getId()))
             .andExpect(status().isForbidden());
 
