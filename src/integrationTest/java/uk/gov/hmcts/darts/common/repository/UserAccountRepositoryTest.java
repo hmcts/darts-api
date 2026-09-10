@@ -74,7 +74,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldReturnUsers_WhenOnlyEmailProvided() {
+    void findUsers_shouldReturnUser_whenOnlyEmailProvided() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             false, userAccountEntity1.getEmailAddress(), null, null
         );
@@ -84,7 +84,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldReturnUser_WhenOnlyIdProvided() {
+    void findUsers_shouldReturnUser_whenOnlyIdProvided() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             false, null, List.of(userAccountEntity1.getId()), null
         );
@@ -94,7 +94,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldReturnMultipleUsers_WhenOnlyIDsProvided() {
+    void findUsers_shouldReturnMultipleUsers_whenOnlyIdsProvided() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             false, null, List.of(userAccountEntity1.getId(), userAccountEntity2.getId()), null
         );
@@ -106,7 +106,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldSortUsersByIdDesc_WhenSortSetToIdDesc() {
+    void findUsers_shouldReturnUsersSortedByIdDescending_whenSortSetToIdDesc() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             false, null, List.of(userAccountEntity1.getId(), userAccountEntity2.getId()), Sort.by(Sort.Direction.DESC, "id")
         );
@@ -118,7 +118,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldNotReturnUsers_WhenOnlyNonMatchingEmailProvided() {
+    void findUsers_shouldNotReturnUsers_whenOnlyNonMatchingEmailProvided() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             false, "non-matching-email@example.net", null, null
         );
@@ -127,7 +127,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldNotReturnUsers_WhenOnlyNonMatchingIdProvided() {
+    void findUsers_shouldNotReturnUsers_whenOnlyNonMatchingIdProvided() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             false, null, List.of(123), null
         );
@@ -136,7 +136,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldReturnUsers_WhenOptionalFieldsBlank() {
+    void findUsers_shouldReturnUsers_whenOptionalFieldsBlank() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             false, null, null, null
         );
@@ -153,7 +153,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldReturnUser_WhenAllOptionalFieldsProvided() {
+    void findUsers_shouldReturnUser_whenAllOptionalFieldsProvided() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             false, userAccountEntity1.getEmailAddress(), List.of(userAccountEntity1.getId()), Sort.by(Sort.Direction.DESC, "id")
         );
@@ -163,7 +163,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldNotReturnUser_WhenAllOptionalFieldsIncorrect() {
+    void findUsers_shouldNotReturnUser_whenAllOptionalFieldsIncorrect() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             false, "non-matching-email@example.net", List.of(123), Sort.by(Sort.Direction.DESC, "id")
         );
@@ -172,7 +172,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldReturnSystemUser_WhenOnlyIdProvided() {
+    void findUsers_shouldReturnSystemUser_whenOnlyIdProvided() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             true, null, List.of(userAccountEntity3.getId()), null
         );
@@ -182,7 +182,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findUsers_shouldReturnSystemUser_WhenOnlyEmailProvided() {
+    void findUsers_shouldReturnSystemUser_whenOnlyEmailProvided() {
         List<UserAccountEntity> users = userAccountRepository.findUsers(
             true, userAccountEntity3.getEmailAddress(), null, null
         );
@@ -192,7 +192,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findInactiveUsersExcludingRoles_shouldReturnOnlyEligibleInactiveUsers() {
+    void findInactiveUsersExcludingRoles_shouldReturnEligibleUsers_whenInactiveUsersIncludeExcludedAccounts() {
         OffsetDateTime cutoffDateTime = OffsetDateTime.of(2026, 2, 14, 10, 5, 0, 0, ZoneOffset.UTC);
         final UserAccountEntity oldLastLoginUser = persistUser(
             "old.last.login@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, false);
