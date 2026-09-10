@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
@@ -43,24 +43,24 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
-@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
+@TestPropertySource(properties = {"darts.storage.arm-api.active-version=v5_2"})
 @Profile("in-memory-caching")
 @Import(InMemoryTestCache.class)
 @SpringBootTest
 @TestPropertySource(properties = {
     "darts.storage.arm.is-mock-arm-rpo-download-csv=false",
-    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
+    "darts.storage.arm-api.active-version=v5_2"
 })
 @Slf4j
 @SuppressWarnings({"PMD.CloseResource"})
-class RemoveArmRpoProductionsIntTest extends PostgresIntegrationBase {
+class RemoveArmRpoProductionsVersionFiveTwoIntTest extends PostgresIntegrationBase {
 
     @MockitoBean
     private UserIdentity userIdentity;
     @MockitoBean
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
     @MockitoBean
-    private ArmAuthClient armAuthClient;
+    private ArmAuthClientFiveTwo armAuthClient;
     @MockitoBean
     private ArmRpoUtil armRpoUtil;
 

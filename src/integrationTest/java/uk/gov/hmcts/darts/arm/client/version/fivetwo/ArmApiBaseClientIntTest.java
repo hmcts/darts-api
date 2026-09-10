@@ -61,7 +61,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
 
     @Autowired
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
 
     private static final String BASE_JSON_DIRECTORY = "tests/arm/client/version/fivetwo/ArmApiBaseClientIntTest/";
     private static final String MOCK_RESPONSE_DIRECTORY = BASE_JSON_DIRECTORY + "mocks/";
@@ -78,11 +78,11 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
     private static Stream<Arguments> armApiBaseClientTestArguments() {
         return Stream.of(
             Arguments.of("getRecordManagementMatter",
-                         (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+                         (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                              EmptyRpoRequest request = EmptyRpoRequest.builder().build();
                              return new ClientCallable(request, armApiBaseClient.getRecordManagementMatter(bearerAuth, request));
                          }),
-            Arguments.of("getStorageAccounts", (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+            Arguments.of("getStorageAccounts", (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                 StorageAccountRequest request = StorageAccountRequest.builder()
                     .onlyKeyAccessType(false)
                     .storageType(1)
@@ -90,7 +90,7 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
                 return new ClientCallable(request, armApiBaseClient.getStorageAccounts(bearerAuth, request));
             }),
             Arguments.of("getMasterIndexFieldByRecordClassSchema",
-                         (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+                         (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                              MasterIndexFieldByRecordClassSchemaRequest request = MasterIndexFieldByRecordClassSchemaRequest.builder()
                                  .recordClassCode("some-record-class-code")
                                  .isForSearch(true)
@@ -99,21 +99,21 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
                                  .build();
                              return new ClientCallable(request, armApiBaseClient.getMasterIndexFieldByRecordClassSchema(bearerAuth, request));
                          }),
-            Arguments.of("getProfileEntitlements", (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+            Arguments.of("getProfileEntitlements", (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                 EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
                 return new ClientCallable(null, armApiBaseClient.getProfileEntitlementResponse(bearerAuth, emptyRpoRequest));
             }),
-            Arguments.of("addAsyncSearchRM", (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+            Arguments.of("addAsyncSearchRM", (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                 String request = "{\"request\": \"body\"}";
                 return new ClientCallable(request, armApiBaseClient.addAsyncSearch(bearerAuth, request));
             }),
-            Arguments.of("getIndexesByMatterId", (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+            Arguments.of("getIndexesByMatterId", (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                 IndexesByMatterIdRequest request = IndexesByMatterIdRequest.builder()
                     .matterId("matterId")
                     .build();
                 return new ClientCallable(request, armApiBaseClient.getIndexesByMatterId(bearerAuth, request));
             }),
-            Arguments.of("SaveBackgroundSearch", (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+            Arguments.of("SaveBackgroundSearch", (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                 SaveBackgroundSearchRequest request = SaveBackgroundSearchRequest.builder()
                     .name("some-name")
                     .searchId("some-search-id")
@@ -121,18 +121,18 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
                 return new ClientCallable(request, armApiBaseClient.saveBackgroundSearch(bearerAuth, request));
             }),
             Arguments.of("getExtendedSearchesByMatter",
-                         (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+                         (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                              String request = "{\"request\": \"body\"}";
                              return new ClientCallable(request, armApiBaseClient.getExtendedSearchesByMatter(bearerAuth, request));
                          }),
-            Arguments.of("getProductionOutputFiles", (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+            Arguments.of("getProductionOutputFiles", (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                 ProductionOutputFilesRequest request = ProductionOutputFilesRequest.builder()
                     .productionId("some-production-id")
                     .build();
                 return new ClientCallable(request, armApiBaseClient.getProductionOutputFiles(bearerAuth, request));
             }),
             Arguments.of("CreateExportBasedOnSearchResultsTable",
-                         (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+                         (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                              CreateExportBasedOnSearchResultsTableRequest request = CreateExportBasedOnSearchResultsTableRequest.builder()
                                  .core("some-core")
                                  .formFields("some-form-fields")
@@ -154,7 +154,7 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
                                  .build();
                              return new ClientCallable(request, armApiBaseClient.createExportBasedOnSearchResultsTable(bearerAuth, request));
                          }),
-            Arguments.of("removeProduction", (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+            Arguments.of("removeProduction", (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                 RemoveProductionRequest request = RemoveProductionRequest.builder()
                     .productionId("some-production-id")
                     .deleteSearch(true)
@@ -162,7 +162,7 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
                 return new ClientCallable(request, armApiBaseClient.removeProduction(bearerAuth, request));
             }),
             Arguments.of("getExtendedProductionsByMatter",
-                         (BiFunction<ArmApiBaseClient, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
+                         (BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable>) (armApiBaseClient, bearerAuth) -> {
                              String request = "{\"request\": \"body\"}";
                              return new ClientCallable(request, armApiBaseClient.getExtendedProductionsByMatter(bearerAuth, request));
                          })
@@ -178,7 +178,7 @@ class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
     @ParameterizedTest(name = "{0} should succeed when server returns 200")
     @MethodSource("armApiBaseClientTestArguments")
     void armApiBaseClient_Returns200Success_ShouldSucceed(String suffix,
-                                                          BiFunction<ArmApiBaseClient, String, ClientCallable> callClient) throws IOException {
+                                                          BiFunction<ArmApiBaseClientFiveTwo, String, ClientCallable> callClient) throws IOException {
         String requestFileLocation = MOCK_RESPONSE_DIRECTORY + suffix + ".json";
         log.info("Testing: {} with request: {}", suffix, requestFileLocation);
         stubFor(
