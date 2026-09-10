@@ -39,10 +39,10 @@ import static org.assertj.core.api.Assertions.within;
 @DisplayName("AssociatedObjectDataExpiryDeletionAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @TestPropertySource(properties = {
-    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true",
+    "darts.storage.arm-api.active-version=v5_2",
     "spring.main.allow-bean-definition-overriding=true"
 })
-class AssociatedObjectDataExpiryDeletionAutomatedTaskIntTest extends PostgresIntegrationBase {
+class AssociatedObjectDataExpiryDeletionAutomatedTaskVersionFiveTwoIntTest extends PostgresIntegrationBase {
 
     private final AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
     private static final int AUTOMATION_USER_ID = -28;

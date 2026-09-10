@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.rpo.DownloadProductionService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -28,13 +28,13 @@ import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
     "darts.storage.arm.is-mock-arm-rpo-download-csv=false",
-    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
+    "darts.storage.arm-api.active-version=v5_2"
 })
 @SuppressWarnings("PMD.CloseResource")
 class DownloadProductionServiceIntTest extends IntegrationBase {
 
     @MockitoBean
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
 
     @Autowired
     private DownloadProductionService downloadProductionService;

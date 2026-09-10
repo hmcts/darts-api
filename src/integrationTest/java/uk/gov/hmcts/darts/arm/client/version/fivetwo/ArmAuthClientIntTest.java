@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 })
 class ArmAuthClientIntTest extends IntegrationBaseWithWiremock {
     @Autowired
-    private ArmAuthClient armAuthClient;
+    private ArmAuthClientFiveTwo armAuthClient;
 
     private static final String TOKEN_PATH = "/account/token";
 

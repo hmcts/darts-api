@@ -15,8 +15,8 @@ import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRetentionEventDateProcessorImpl;
@@ -65,10 +65,10 @@ import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CA
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @Slf4j
-@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
+@TestPropertySource(properties = {"darts.storage.arm-api.active-version=v5_2"})
 @Profile("in-memory-caching")
 @Import(InMemoryTestCache.class)
-class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
+class ArmRetentionEventDateProcessorVersionFiveTwoIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DOCUMENT_RETENTION_DATE_TIME =
         OffsetDateTime.of(2023, 6, 10, 10, 50, 0, 0, ZoneOffset.UTC);
@@ -93,9 +93,9 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     private AuthorisationStub authorisationStub;
 
     @MockitoBean
-    private ArmAuthClient armAuthClient;
+    private ArmAuthClientFiveTwo armAuthClient;
     @MockitoBean
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
 
     @Autowired
     private ArmApiConfigurationProperties armApiConfigurationProperties;
