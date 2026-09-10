@@ -49,14 +49,14 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
     }
 
     @Test
-    void shouldFindAllSecurityRoles() {
+    void findAll_shouldReturnAllSecurityRoles() {
         List<SecurityRoleEntity> securityRoleEntityList = securityRoleRepository.findAll();
         assertEquals(17, securityRoleEntityList.size());
     }
 
     @ParameterizedTest(name = "{0} should have no permissions")
     @MethodSource("rolesWithNoPermissions")
-    void shouldFindNoPermissions(SecurityRoleEnum securityRole) {
+    void findById_shouldReturnNoPermissions_whenRoleHasNoPermissions(SecurityRoleEnum securityRole) {
         SecurityRoleEntity securityRoleEntity = securityRoleRepository.findById(securityRole.getId()).orElseThrow();
         final Set<SecurityPermissionEntity> securityPermissionEntities = securityRoleEntity.getSecurityPermissionEntities();
         assertTrue(securityPermissionEntities.isEmpty());

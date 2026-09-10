@@ -50,7 +50,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    void shouldCreateSecurityGroup() {
+    void postSecurityGroups_shouldCreateSecurityGroup_whenValidRequestProvided() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-groups"))
             .contentType(ContentType.JSON)
@@ -88,7 +88,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    void shouldGetSecurityGroupWithIdAndRoleAndUsers() throws JsonProcessingException {
+    void getSecurityGroup_shouldReturnSecurityGroupWithRoleAndUsers_whenSecurityGroupExists() throws JsonProcessingException {
         buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-groups/4"))
             .contentType(ContentType.JSON)
@@ -107,7 +107,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    void shouldGetSecurityGroups() throws JsonProcessingException {
+    void getSecurityGroups_shouldReturnSecurityGroups_whenSecurityGroupsExist() throws JsonProcessingException {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-groups"))
             .contentType(ContentType.JSON)
@@ -167,7 +167,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    void shouldPatchSecurityGroups() throws JsonProcessingException {
+    void patchSecurityGroup_shouldUpdateSecurityGroup_whenValidRequestProvided() throws JsonProcessingException {
 
         String postContent = """
             {

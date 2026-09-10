@@ -17,7 +17,7 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    void shouldGetSecurityRoles() {
+    void getSecurityRoles_shouldReturnSecurityRoles_whenUserHasGlobalAccess() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-roles"))
             .get()
