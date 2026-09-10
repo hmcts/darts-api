@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapperImpl;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
+import uk.gov.hmcts.darts.usermanagement.service.impl.UserAccountSecurityGroupService;
 import uk.gov.hmcts.darts.usermanagement.service.impl.UserManagementServiceImpl;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserEmailValidator;
@@ -78,6 +79,9 @@ class UserManagementServiceImplTest {
     private TranscriptionService transcriptionService;
 
     @Mock
+    private UserAccountSecurityGroupService userAccountSecurityGroupService;
+
+    @Mock
     private UserIdentity userIdentity;
 
     @Mock
@@ -115,6 +119,7 @@ class UserManagementServiceImplTest {
             enablementValidator,
             deactivateNotLastSuperAdminValidator,
             transcriptionService,
+            userAccountSecurityGroupService,
             auditApi,
             userAuthoriseValidator,
             notSameUserValidator
