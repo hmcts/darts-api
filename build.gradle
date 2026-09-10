@@ -379,20 +379,7 @@ dependencyCheck {
   // range of 0-10 fails the build, anything greater and it doesn't fail the build
   failBuildOnCVSS = 0
   suppressionFile = 'config/owasp/suppressions.xml'
-
-  analyzers {
-    // Disable scanning of .NET related binaries
-    assemblyEnabled = false
-  }
-  skipConfigurations = [
-      "compileOnly",
-      "pmd",
-      "integrationTest",
-      "functionalTest",
-      "smokeTest",
-      "contractTestRuntimeClasspath",
-      "contractTestCompileClasspath"
-  ]
+  scanConfigurations = ['runtimeClasspath', 'compileClasspath']
 }
 
 repositories {
