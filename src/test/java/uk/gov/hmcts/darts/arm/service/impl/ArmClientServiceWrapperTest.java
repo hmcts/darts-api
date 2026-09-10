@@ -25,8 +25,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 
 import java.util.ArrayList;
@@ -39,16 +39,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ArmClientServiceWrapperTest {
-    
-    private ArmAuthClient armAuthClient;
-    private ArmApiBaseClient armApiClient;
-    private ArmClientServiceWrapper service;
+
+    private ArmAuthClientFiveTwo armAuthClient;
+    private ArmApiBaseClientFiveTwo armApiClient;
+    private ArmClientServiceFiveTwo service;
 
     @BeforeEach
     void setUp() {
-        armAuthClient = mock(ArmAuthClient.class);
-        armApiClient = mock(ArmApiBaseClient.class);
-        service = new ArmClientServiceWrapper(armAuthClient, armApiClient);
+        armAuthClient = mock(ArmAuthClientFiveTwo.class);
+        armApiClient = mock(ArmApiBaseClientFiveTwo.class);
+        service = new ArmClientServiceFiveTwo(armAuthClient, armApiClient);
     }
 
     @Test

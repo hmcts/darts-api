@@ -13,8 +13,8 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
+@TestPropertySource(properties = {"darts.storage.arm-api.active-version=v5_2"})
 @Isolated
 @Profile("in-memory-caching")
 @Import(InMemoryTestCache.class)
@@ -39,9 +39,9 @@ class ArmAuthTokenCacheIntTest extends IntegrationBase {
     private ArmApiConfigurationProperties armApiConfigurationProperties;
 
     @MockitoBean
-    private ArmAuthClient armAuthClient;
+    private ArmAuthClientFiveTwo armAuthClient;
     @MockitoBean
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
 
     @BeforeEach
     void setUp() {

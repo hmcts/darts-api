@@ -17,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
@@ -26,7 +26,7 @@ import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceWrapper;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceFiveTwo;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
@@ -62,9 +62,9 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
     private static final String BEARER_TOKEN = "token";
 
     @Mock
-    private ArmAuthClient armAuthClient;
+    private ArmAuthClientFiveTwo armAuthClient;
     @Mock
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
 
     @Mock
     private ArmApiService armApiService;
@@ -90,7 +90,7 @@ class GetMasterIndexFieldByRecordClassSchemaServiceTest {
         userAccount = new UserAccountEntity();
         armRpoExecutionDetailEntityArgumentCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
         armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
-        ArmClientService armClientService = new ArmClientServiceWrapper(armAuthClient, armApiBaseClient);
+        ArmClientService armClientService = new ArmClientServiceFiveTwo(armAuthClient, armApiBaseClient);
 
         getMasterIndexFieldByRecordClassSchemaService = new GetMasterIndexFieldByRecordClassSchemaServiceImpl(
             armClientService, armRpoService, armRpoUtil);

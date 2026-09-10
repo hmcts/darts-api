@@ -271,6 +271,8 @@ darts:
       arm-storage-account-name: ${ARM_STORAGE_ACCOUNT_NAME:}
       arm-down-for-maintenance: ${ARM_DOWN_FOR_MAINTENANCE:false}
 
+      active-version: ${ARM_API_VERSION:v5_2}
+
       authentication-url:
         token-path: /auth/account/token
         available-entitlement-profiles-path: /api/v1/availableEntitlementProfiles
@@ -292,8 +294,6 @@ darts:
         remove-production-path: /api/v1/removeProduction
         get-extended-productions-by-matter: /api/v1/getExtendedProductionsByMatter
         download-production-path: /api/v1/downloadProduction/{productionExportFileID}/false
-
-      enable-arm-v5-2-upgrade: ${ENABLE_ARM_V5_2_UPGRADE:true}
 
       version5-2:
         authentication:
@@ -318,6 +318,36 @@ darts:
           remove-production-path: /v1/removeProduction
           get-extended-productions-by-matter: /v1/getExtendedProductionsByMatter
           download-production-path: /v1/downloadProduction/{productionExportFileID}/false
+
+      version5-3:
+        authentication:
+          auth-base-url: ${ARM_AUTH_URL:}
+          token-path: /api/v3/ad_auth/a2z-token
+        api:
+          api-base-url: ${ARM_API_URL:}
+          available-entitlement-profiles-path: /api/v3/ad_auth/get_available_profiles
+          select-entitlement-profile-path: /api/v3/ad_auth/select_entitlement_profile/{profileId}
+          update-metadata-path: /v3/UpdateMetadata
+          download-data-path: /v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
+          get-record-management-matter-path: /api/v3/a2z/v1/getRecordManagementMatter
+          get-storage-accounts-path: /v1/getStorageAccounts
+          get-indexes-by-matter-id-path: /api/v3/a2z/v1/getIndexesByMatterId
+          get-master-index-field-by-record-class-schema-path: /v1/getMasterIndexFieldByRecordClassSchema
+          get-profile-entitlements-path: /api/v3/a2z/v1/getProfileEntitlements/
+          add-async-search-path: /api/v3/a2z/v1/addAsyncSearch
+          save-background-search-path: /api/v3/a2z/v1/saveBackgroundSearch
+          create-export-based-on-search-results-table-path: /api/v3/a2z/v1/createExportBasedOnSearchResultsTable
+          get-extended-searches-by-matter-path: /v1/getExtendedSearchesByMatter
+          get-production-output-files-path: /api/v3/a2z/v1/getProductionOutputFiles
+          remove-production-path: /api/v3/a2z/v1/removeProduction
+          get-extended-productions-by-matter: /api/v3/a2z/v1/getExtendedProductionsByMatter
+          download-production-path: /api/v3/a2z/v1/downloadProduction/{productionExportFileID}/false
+
+          get-search-fields: /api/v3/a2z/v1/getSearchFields
+          is-search-available: /api/v3/a2z/v1/isSearchAvailable
+          async-saved-search: /api/v3/a2z/v1/azureAsyncSavedSearch
+          get-record-files: /api/v3/a2z/v3/getRecordFiles
+          get-blob: /api/v3/a2z/rest/Blob/
 
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}

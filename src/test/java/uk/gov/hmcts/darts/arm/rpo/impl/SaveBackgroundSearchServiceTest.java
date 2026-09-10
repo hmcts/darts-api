@@ -13,15 +13,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoSearchNoResultsException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceWrapper;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceFiveTwo;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -50,9 +50,9 @@ class SaveBackgroundSearchServiceTest {
     private static final Integer EXECUTION_ID = 1;
 
     @Mock
-    private ArmAuthClient armAuthClient;
+    private ArmAuthClientFiveTwo armAuthClient;
     @Mock
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
 
     @Mock
     private ArmRpoService armRpoService;
@@ -77,7 +77,7 @@ class SaveBackgroundSearchServiceTest {
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
         armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
-        ArmClientService armClientService = new ArmClientServiceWrapper(armAuthClient, armApiBaseClient);
+        ArmClientService armClientService = new ArmClientServiceFiveTwo(armAuthClient, armApiBaseClient);
         saveBackgroundSearchService = new SaveBackgroundSearchServiceImpl(armClientService, armRpoService, armRpoUtil, objectMapper);
     }
 

@@ -21,8 +21,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -45,7 +45,7 @@ import static org.mockito.Mockito.when;
 
 @Isolated
 @TestPropertySource(properties = {
-    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
+    "darts.storage.arm-api.active-version=v5_2"
 })
 @Profile("in-memory-caching")
 @Import(InMemoryTestCache.class)
@@ -54,9 +54,9 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
     @MockitoBean
     private UserIdentity userIdentity;
     @MockitoBean
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
     @MockitoBean
-    private ArmAuthClient armAuthClient;
+    private ArmAuthClientFiveTwo armAuthClient;
 
     @Autowired
     private TriggerArmRpoSearchServiceImpl triggerArmRpoSearchServiceImpl;
