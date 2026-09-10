@@ -29,7 +29,7 @@ class UserAccountSecurityGroupServiceTest {
     }
 
     @Test
-    void unassignUserFromGroupsTheyArePartOf_shouldRemoveUserFromBothSidesOfRelationship() {
+    void unassignUserFromGroupsTheyArePartOf_shouldRemoveUserFromUserGroupsAndSecurityGroupUsers_whenUserAssignedToGroups() {
         UserAccountEntity userAccount = new UserAccountEntity();
         SecurityGroupEntity securityGroup1 = securityGroup(userAccount);
         SecurityGroupEntity securityGroup2 = securityGroup(userAccount);

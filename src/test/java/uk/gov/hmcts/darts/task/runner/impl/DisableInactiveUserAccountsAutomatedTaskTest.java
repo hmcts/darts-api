@@ -47,7 +47,7 @@ class DisableInactiveUserAccountsAutomatedTaskTest {
     }
 
     @Test
-    void runTask_shouldProcessInactiveUsersWithAutomatedTaskBatchSize() {
+    void runTask_shouldProcessInactiveUsersWithBatchSize_whenAutomatedTaskHasBatchSize() {
         AutomatedTaskEntity automatedTaskEntity = new AutomatedTaskEntity();
         automatedTaskEntity.setBatchSize(1000);
         when(automatedTaskRepository.findByTaskName("DisableInactiveUserAccounts")).thenReturn(Optional.of(automatedTaskEntity));
@@ -58,7 +58,7 @@ class DisableInactiveUserAccountsAutomatedTaskTest {
     }
 
     @Test
-    void getAutomatedTaskName_shouldReturnCorrectName() {
+    void getAutomatedTaskName_shouldReturnDisableInactiveUserAccountsTaskName() {
         assertThat(automatedTask.getAutomatedTaskName())
             .isEqualTo(AutomatedTaskName.DISABLE_INACTIVE_USER_ACCOUNTS);
     }
