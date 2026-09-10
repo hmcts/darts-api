@@ -279,7 +279,8 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
                                     {
                                       "type": "AUTHORISATION_109",
                                       "title": "User is not authorised for this endpoint",
-                                      "status": 403
+                                       "status": 403,
+                                       "instance": "/admin/medias/marked-for-deletion"
                                     }
                                     """,
                                 mvcResult.getResponse().getContentAsString(),

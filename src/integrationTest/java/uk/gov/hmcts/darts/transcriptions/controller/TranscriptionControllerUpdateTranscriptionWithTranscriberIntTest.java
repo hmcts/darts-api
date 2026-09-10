@@ -147,7 +147,8 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json");
+        String expectedJson = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json")
+            .replace("$TRANSCRIPTION_ID", String.valueOf(-1));
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
@@ -167,7 +168,8 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
+        String expectedJson = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json")
+            .replace("$TRANSCRIPTION_ID", String.valueOf(transcriptionId + 1));
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -189,7 +191,12 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_105","title":"Transcription workflow action is not permitted","status":409}
+            {
+            "type":"TRANSCRIPTION_105",
+            "title":"Transcription workflow action is not permitted",
+            "status":409,
+            "instance":"/transcriptions/1"
+            }
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -217,7 +224,12 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+            {
+            "type":"AUTHORISATION_100",
+            "title":"User is not authorised for the associated courthouse",
+            "status":403,
+            "instance":"/transcriptions/1"
+            }
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 

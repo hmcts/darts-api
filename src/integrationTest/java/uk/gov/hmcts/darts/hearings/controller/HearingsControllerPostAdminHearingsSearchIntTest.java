@@ -119,7 +119,8 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/hearings/search"
             }
             """;
 
@@ -148,7 +149,8 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/hearings/search"
             }
             """;
 
@@ -209,7 +211,8 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/hearings/search"
             }
             """;
 
@@ -240,7 +243,8 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/hearings/search"
             }
             """;
 
@@ -273,7 +277,8 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/hearings/search"
             }
             """;
 
@@ -305,7 +310,8 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/hearings/search"
             }
             """;
 
@@ -338,7 +344,8 @@ class HearingsControllerPostAdminHearingsSearchIntTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/hearings/search"
             }
             """;
 
