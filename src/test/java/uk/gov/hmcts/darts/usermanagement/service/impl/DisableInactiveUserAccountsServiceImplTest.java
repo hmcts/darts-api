@@ -57,7 +57,7 @@ class DisableInactiveUserAccountsServiceImplTest {
     }
 
     @Test
-    void process_shouldDisableInactiveUsersAndRemoveThemFromSecurityGroups() {
+    void process_shouldDisableInactiveUsersAndUnassignSecurityGroups_whenInactiveUsersFound() {
         UserAccountEntity inactiveUser = userAccount(123);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
@@ -75,7 +75,7 @@ class DisableInactiveUserAccountsServiceImplTest {
     }
 
     @Test
-    void process_shouldRollbackAssignedTranscriptions_WhenInactiveUserIsTranscriber() {
+    void process_shouldRollbackAssignedTranscriptions_whenInactiveUserIsTranscriber() {
         UserAccountEntity inactiveUser = userAccount(123);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
@@ -91,7 +91,7 @@ class DisableInactiveUserAccountsServiceImplTest {
     }
 
     @Test
-    void process_shouldUseMinimumBatchSize_WhenBatchSizeIsLessThanOne() {
+    void process_shouldUseMinimumBatchSize_whenBatchSizeIsLessThanOne() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
         when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1)))
             .thenReturn(List.of());
@@ -103,7 +103,7 @@ class DisableInactiveUserAccountsServiceImplTest {
     }
 
     @Test
-    void process_shouldNotSave_WhenNoInactiveUsersAreFound() {
+    void process_shouldNotSaveUsers_whenNoInactiveUsersAreFound() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
         when(userAccountRepository.findInactiveUsersExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1000)))
             .thenReturn(List.of());
