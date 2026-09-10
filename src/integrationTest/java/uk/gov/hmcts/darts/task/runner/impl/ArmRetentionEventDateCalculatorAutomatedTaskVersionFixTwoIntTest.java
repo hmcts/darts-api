@@ -11,8 +11,8 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -43,10 +43,10 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
-@TestPropertySource(properties = {"darts.storage.arm-api.enable-arm-v5-2-upgrade=true"})
+@TestPropertySource(properties = {"darts.storage.arm-api.active-version=v5_2"})
 @Profile("in-memory-caching")
 @Import(InMemoryTestCache.class)
-class ArmRetentionEventDateCalculatorAutomatedTaskIntTest extends PostgresIntegrationBase {
+class ArmRetentionEventDateCalculatorAutomatedTaskVersionFixTwoIntTest extends PostgresIntegrationBase {
     private static final String BEARER_TOKEN = "bearer";
 
     private static final OffsetDateTime DOCUMENT_RETENTION_DATE_TIME =
@@ -65,9 +65,9 @@ class ArmRetentionEventDateCalculatorAutomatedTaskIntTest extends PostgresIntegr
     private ArmApiConfigurationProperties armApiConfigurationProperties;
 
     @MockitoBean
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
     @MockitoBean
-    private ArmAuthClient armAuthClient;
+    private ArmAuthClientFiveTwo armAuthClient;
 
     @Autowired
     private ArmRetentionEventDateCalculatorAutomatedTask armRetentionEventDateCalculatorAutomatedTask;

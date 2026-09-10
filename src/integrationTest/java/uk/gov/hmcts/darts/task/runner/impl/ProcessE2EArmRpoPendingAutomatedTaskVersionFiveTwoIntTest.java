@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
@@ -33,9 +33,9 @@ import static org.mockito.Mockito.when;
 @TestPropertySource(properties = {
     "darts.storage.arm-api.arm-storage-account-name=SOME ARM STORAGE ACCOUNT NAME",
     "darts.storage.arm-api.arm-service-entitlement=SOME ENTITLEMENT NAME",
-    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
+    "darts.storage.arm-api.active-version=v5_2"
 })
-class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBase {
+class ProcessE2EArmRpoPendingAutomatedTaskVersionFiveTwoIntTest extends PostgresIntegrationBase {
 
     @Autowired
     private ProcessE2EArmRpoPendingAutomatedTask task;
@@ -44,7 +44,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
     private ArmApiService armApiService;
 
     @MockitoBean
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
 
     private static final String BEARER_TOKEN = "SOME BEARER TOKEN";
     private static final String MATTER_ID = "SOME MATTER ID";

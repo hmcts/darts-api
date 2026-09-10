@@ -39,7 +39,7 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
     name = "arm-api-base-client",
     url = "${darts.storage.arm-api.version5-2.api.api-base-url}"
 )
-public interface ArmApiBaseClient {
+public interface ArmApiBaseClientFiveTwo {
 
     @PostMapping(value = "${darts.storage.arm-api.version5-2.api.update-metadata-path}",
         consumes = APPLICATION_JSON_VALUE,

@@ -123,7 +123,6 @@ java:
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
     GRACEFUL_SHUTDOWN_TIMEOUT: '35s'
-    ENABLE_ARM_V5_2_UPGRADE: false
     ARM_RPO_FEATURE_FLAG_LOGS_ENABLED: false
     DETS_TO_ARM_PUSH_FEATURE_FLAG_LOGS_ENABLED: false
     ARM_PULL_FEATURE_FLAG_LOGS_ENABLED: false
@@ -133,6 +132,7 @@ java:
     ARM_RPO_TOTAL_CATCHUP_MAX_HOURS_ENDING_POINT: 50
     ARM_DOWN_FOR_MAINTENANCE: false
     CLOSE_EVENT_HANDLER: StopAndCloseHandler
+    ARM_API_VERSION: v5_2
 
 function:
   scaleType: Job
@@ -254,10 +254,11 @@ function:
     ARM_RPO_POLL_DURATION: 4h
     AZCOPY_LOG_LEVEL: "--log-level=ERROR"
     AZCOPY_OUTPUT_LEVEL: "--output-level=essential"
-    ENABLE_ARM_V5_2_UPGRADE: true
     ARM_RPO_FEATURE_FLAG_LOGS_ENABLED: false
     DETS_TO_ARM_PUSH_FEATURE_FLAG_LOGS_ENABLED: false
     ARM_PULL_FEATURE_FLAG_LOGS_ENABLED: false
+    ARM_API_VERSION: v5_2
+
   secrets:
     DARTS_API_DB_CONNECTION_STRING:
       secretRef: darts-api-function-values
