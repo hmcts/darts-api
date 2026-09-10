@@ -468,7 +468,7 @@ dependencies {
   //database
   implementation 'org.postgresql:postgresql:42.7.13'
 
-  implementation 'uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE'
+  implementation 'uk.gov.service.notify:notifications-java-client:6.2.0-RELEASE'
 
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.6.1'
   implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.6.1'
