@@ -65,6 +65,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final AuthorisedUserPermissionsValidator userActivationPermissionsValidator;
     private final UserDeactivateNotLastInSuperAdminGroupValidator userNotLastSuperAdminValidator;
     private final TranscriptionService transcriptionService;
+    private final UserAccountSecurityGroupService userAccountSecurityGroupService;
     private final AuditApi auditApi;
     private final UserActivateValidator authoriseValidator;
     private final NotSameUserValidator notSameUserValidator;
@@ -207,7 +208,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 rolledBackTranscriptionsList =
                     transcriptionService.rollbackUserTranscriptions(userAccountEntity);
             }
-            unassignUserFromGroupsTheyArePartOf(userAccountEntity);
+            userAccountSecurityGroupService.unassignUserFromGroupsTheyArePartOf(userAccountEntity);
         }
         // set active status to new value if it is not null
         if (active != null) {
@@ -221,15 +222,6 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
 
         return rolledBackTranscriptionsList;
-    }
-
-    private void unassignUserFromGroupsTheyArePartOf(UserAccountEntity userAccount) {
-        Set<SecurityGroupEntity> groupEntities = userAccount.getSecurityGroupEntities();
-        userAccount.getSecurityGroupEntities().clear();
-        for (SecurityGroupEntity groupEntity : groupEntities) {
-            groupEntity.getUsers().remove(userAccount);
-            securityGroupRepository.save(groupEntity);
-        }
     }
 
     private void mapSecurityGroupsToUserEntity(List<Integer> securityGroups, UserAccountEntity userAccountEntity) {
