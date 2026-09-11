@@ -134,6 +134,8 @@ darts:
     handheld-audio-courtroom-numbers:
       - 199
       - 99
+      - 198
+      - 98
     merge-workspace: ${user.home}/audiotransform/merge
     outbounddeleter:
       last-accessed-deletion-day: 2
