@@ -35,7 +35,7 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
     private transient MockMvc mockMvc;
 
     @Test
-    void getSecurityRolesShouldSucceedAndReturnAllRoles() throws Exception {
+    void getSecurityRoles_shouldReturnAllRoles_whenUserIsAuthorised() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL)
@@ -136,10 +136,16 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                     "display_name": "Media in Perpetuity",
                     "display_state": true
                   },
-                                    {
+                  {
                     "id": 16,
                     "role_name": "JUDICIAL_CONDUCT",
                     "display_name": "Judicial Conduct",
+                    "display_state": true
+                  },
+                  {
+                    "id": 17,
+                    "role_name": "HMCTS_TRANSCRIPTION_HUB",
+                    "display_name": "HMCTS Transcription Hub",
                     "display_state": true
                   }
                 ]
@@ -148,7 +154,7 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
     }
 
     @Test
-    void getNonAdminSecurityRolesShouldThrowError() throws Exception {
+    void getSecurityRoles_shouldReturnForbidden_whenUserIsNotAuthorised() throws Exception {
 
         UserAccountEntity judgeUser = dartsDatabase.getUserAccountStub()
             .createJudgeUser();
