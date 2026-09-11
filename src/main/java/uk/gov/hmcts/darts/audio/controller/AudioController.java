@@ -115,7 +115,7 @@ public class AudioController implements AudioApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS, JUDICIAL_CONDUCT})
     public ResponseEntity<byte[]> preview(Long mediaId, String httpRangeList) {
         AudioPreview audioPreview = audioPreviewService.getOrCreateAudioPreview(mediaId);
         if (audioPreview.getStatus().equals(FAILED)) {
