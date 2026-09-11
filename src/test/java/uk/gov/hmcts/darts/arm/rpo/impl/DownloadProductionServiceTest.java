@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
@@ -43,6 +44,7 @@ import static org.mockito.Mockito.when;
 @TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=true"})
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.CloseResource")
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
 class DownloadProductionServiceTest {
 
     private static final Integer EXECUTION_ID = 1;
@@ -52,7 +54,6 @@ class DownloadProductionServiceTest {
     private ArmRpoService armRpoService;
     @Mock
     private ArmApiService armApiService;
-
     @Mock
     private ArmRpoDownloadProduction armRpoDownloadProduction;
 

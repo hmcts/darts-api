@@ -29,22 +29,22 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 
-/**
- * Post ARM version 5.2 implementation of the ArmClientService.
- * This implementation is activated when the property 'darts.storage.arm.arm-api.enable-arm-v5' is set to true.
- */
 @Component
-@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
+@ConditionalOnProperty(
+    prefix = "darts.storage.arm-api",
+    name = "active-version",
+    havingValue = "v5_3"
+)
 @AllArgsConstructor
 @SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.UseObjectForClearerAPI"})
-public class ArmClientServiceWrapper implements ArmClientService {
+public class ArmClientServiceFiveThree implements ArmClientService {
 
-    private final ArmAuthClient armAuthClient;
-    private final ArmApiBaseClient armApiBaseClient;
+    private final ArmAuthClientFiveTwo armAuthClient;
+    private final ArmApiBaseClientFiveTwo armApiBaseClient;
 
     @Override
     public ArmTokenResponse getToken(ArmTokenRequest armTokenRequest) {
