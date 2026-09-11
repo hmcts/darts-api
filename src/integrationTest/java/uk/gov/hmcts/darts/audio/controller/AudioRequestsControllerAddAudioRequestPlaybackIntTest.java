@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +42,7 @@ import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProse
 
 @AutoConfigureMockMvc
 @Slf4j
+@TestPropertySource(properties = {"darts.audio.max-handheld-audio-files=2"})
 class AudioRequestsControllerAddAudioRequestPlaybackIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests/playback");
@@ -177,6 +180,36 @@ class AudioRequestsControllerAddAudioRequestPlaybackIntTest extends IntegrationB
         mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_104"))
+            .andReturn();
+    }
+
+    @Test
+    void addAudioRequestPlayback_shouldThrowHandheldCourtRoomMedia() throws Exception {
+        var hearing = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            "198",
+            LocalDateTime.parse(HEARING_DATETIME)
+        );
+
+        var courtroom198Media1 = dartsDatabase.createMediaEntity(SOME_COURTHOUSE, "198", START_TIME, END_TIME, 1);
+        var courtroom198Media2 = dartsDatabase.createMediaEntity(SOME_COURTHOUSE, "198", START_TIME, END_TIME, 2);
+        var differentCourtroomMedia = dartsDatabase.createMediaEntity(SOME_COURTHOUSE, SOME_COURTROOM, START_TIME, END_TIME, 1);
+
+        hearing.addMedia(courtroom198Media1);
+        hearing.addMedia(courtroom198Media2);
+        hearing.addMedia(differentCourtroomMedia);
+        dartsPersistence.save(hearing);
+
+        var audioRequestDetails = createAudioRequestDetails(hearing);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(audioRequestDetails));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().is(413))
+            .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_107"))
             .andReturn();
     }
 
