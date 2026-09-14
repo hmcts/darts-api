@@ -8,5 +8,4 @@ public interface FeatureFlagLogApi {
 
     void logArmPull(String logMessage);
 
-    void logDetsCleanUp(String logMessage);
 }
