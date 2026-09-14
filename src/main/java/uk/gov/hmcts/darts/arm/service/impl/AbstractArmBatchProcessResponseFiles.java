@@ -56,7 +56,10 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAt
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_SUCCESS_STATUS_CODE;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_UPLOAD_FILE_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil.generateSuffix;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MISSING_RESPONSE;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
@@ -396,6 +399,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             ExternalObjectDirectoryEntity externalObjectDirectory =
                 getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
 
+            if (!isAwaitingArmResponse(externalObjectDirectory)) {
+                deleteStaleResponseFilesForRawDataFailedEod(externalObjectDirectory, armResponseBatchData);
+                return;
+            }
+
             OffsetDateTime minIngestionTime = timeHelper.currentOffsetDateTime().minus(
                 armDataManagementConfiguration.getArmMissingResponseDuration());
 
@@ -410,6 +418,29 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             }
         } catch (Exception e) {
             log.error(UNABLE_TO_UPDATE_EOD, e);
+        }
+    }
+
+    private boolean isAwaitingArmResponse(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        if (isNull(externalObjectDirectory) || isNull(externalObjectDirectory.getStatus())) {
+            return false;
+        }
+        ObjectRecordStatusEnum status = ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
+        return ARM_DROP_ZONE.equals(status) || ARM_PROCESSING_RESPONSE_FILES.equals(status);
+    }
+
+    private void deleteStaleResponseFilesForRawDataFailedEod(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                             ArmResponseBatchData armResponseBatchData) {
+        if (isNull(externalObjectDirectory) || isNull(externalObjectDirectory.getStatus())) {
+            return;
+        }
+        ObjectRecordStatusEnum status = ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
+        if (ARM_RAW_DATA_FAILED.equals(status)) {
+            List<String> responseBlobsToBeDeleted = deleteArmResponseFilesHelper.getResponseBlobsToBeDeleted(armResponseBatchData);
+            if (CollectionUtils.isNotEmpty(responseBlobsToBeDeleted)) {
+                log.info("Deleting stale ARM response files for EOD {} in status {}", externalObjectDirectory.getId(), status.getId());
+                deleteArmResponseFilesHelper.deleteResponseBlobs(responseBlobsToBeDeleted);
+            }
         }
     }
 
