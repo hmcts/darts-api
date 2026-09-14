@@ -13,7 +13,7 @@ module "postgresql_flexible" {
   pgsql_sku            = var.pgsqlSku
   pgsql_storage_mb     = var.pgsqlstoragemb
   auto_grow_enabled    = true
-  common_tags          = var.common_tags
+  common_tags          = merge(var.common_tags, var.extra_tags)
   admin_user_object_id = var.jenkins_AAD_objectId
   enable_qpi           = true
   pgsql_databases = [
