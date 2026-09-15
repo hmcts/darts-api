@@ -76,7 +76,7 @@ class ArmAuthClientIntTest extends IntegrationBaseWithWiremock {
 
         // Then
         assertEquals(
-            "[403 Forbidden] during [POST] to [http://localhost:" + wiremockPort + "/account/token] [ArmAuthClient#getToken(ArmTokenRequest)]: []",
+            "[403 Forbidden] during [POST] to [http://localhost:" + wiremockPort + "/account/token] [ArmAuthClientFiveTwo#getToken(ArmTokenRequest)]: []",
             exception.getMessage()
         );
     }
