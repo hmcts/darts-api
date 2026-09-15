@@ -327,17 +327,12 @@ darts:
           api-base-url: ${ARM_API_URL:}
           available-entitlement-profiles-path: /api/v3/ad_auth/get_available_profiles
           select-entitlement-profile-path: /api/v3/ad_auth/select_entitlement_profile/{profileId}
-          update-metadata-path: /v3/UpdateMetadata
-          download-data-path: /v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
           get-record-management-matter-path: /api/v3/a2z/v1/getRecordManagementMatter
-          get-storage-accounts-path: /v1/getStorageAccounts
           get-indexes-by-matter-id-path: /api/v3/a2z/v1/getIndexesByMatterId
-          get-master-index-field-by-record-class-schema-path: /v1/getMasterIndexFieldByRecordClassSchema
           get-profile-entitlements-path: /api/v3/a2z/v1/getProfileEntitlements/
           add-async-search-path: /api/v3/a2z/v1/addAsyncSearch
           save-background-search-path: /api/v3/a2z/v1/saveBackgroundSearch
           create-export-based-on-search-results-table-path: /api/v3/a2z/v1/createExportBasedOnSearchResultsTable
-          get-extended-searches-by-matter-path: /v1/getExtendedSearchesByMatter
           get-production-output-files-path: /api/v3/a2z/v1/getProductionOutputFiles
           remove-production-path: /api/v3/a2z/v1/removeProduction
           get-extended-productions-by-matter: /api/v3/a2z/v1/getExtendedProductionsByMatter
