@@ -17,7 +17,7 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    void shouldGetSecurityRoles() {
+    void getSecurityRoles_shouldReturnSecurityRoles_whenUserHasGlobalAccess() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-roles"))
             .get()
@@ -122,6 +122,12 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
                     "id": 16,
                     "role_name": "JUDICIAL_CONDUCT",
                     "display_name": "Judicial Conduct",
+                    "display_state": true
+                  },
+                  {
+                    "id": 17,
+                    "role_name": "HMCTS_TRANSCRIPTION_HUB",
+                    "display_name": "HMCTS Transcription Hub",
                     "display_state": true
                   }
                 ]
