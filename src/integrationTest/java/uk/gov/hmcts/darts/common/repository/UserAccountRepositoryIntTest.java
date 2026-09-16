@@ -247,12 +247,16 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findInactiveUsersExcludingRoles_shouldReturnEligibleUsers_whenInactiveUsersIncludeExcludedAccounts() {
+    void findInactiveUsersForCleanupExcludingRoles_shouldReturnEligibleUsers_whenInactiveUsersIncludeExcludedAccounts() {
         OffsetDateTime cutoffDateTime = OffsetDateTime.of(2026, 2, 14, 10, 5, 0, 0, ZoneOffset.UTC);
         final UserAccountEntity oldLastLoginUser = persistUser(
             "old.last.login@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, false);
         final UserAccountEntity oldNeverLoggedInUser = persistUser(
             "old.never.logged.in@example.net", cutoffDateTime.minusDays(1), null, true, false);
+        final UserAccountEntity disabledUserAssignedToGroup = persistUser(
+            "disabled.with.group@example.net", cutoffDateTime, cutoffDateTime, false, false);
+        dartsDatabase.addUserToGroup(disabledUserAssignedToGroup, SecurityGroupEnum.MEDIA_IN_PERPETUITY);
+
         persistUser("recent.last.login@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.plusDays(1), true, false);
         persistUser("inactive.user@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), false, false);
         persistUser("old.localhost.user@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, false);
@@ -264,14 +268,29 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
             "super.user@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, false);
         UserAccountEntity superAdmin = persistUser(
             "super.admin@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), true, false);
+        final UserAccountEntity recentDisabledUserAssignedToGroup = persistUser(
+            "recent.disabled.with.group@example.net", cutoffDateTime, cutoffDateTime.plusDays(1), false, false);
+        final UserAccountEntity localhostUserAssignedToGroup = persistUser(
+            "disabled.localhost.user@example.net", cutoffDateTime, cutoffDateTime, false, false);
+        final UserAccountEntity systemUserAssignedToGroup = persistUser(
+            "disabled.system.user@example.net", cutoffDateTime, cutoffDateTime, false, true);
+        final UserAccountEntity superUserAssignedToGroup = persistUser(
+            "disabled.super.user@example.net", cutoffDateTime, cutoffDateTime, false, false);
+        final UserAccountEntity superAdminAssignedToGroup = persistUser(
+            "disabled.super.admin@example.net", cutoffDateTime, cutoffDateTime, false, false);
         dartsDatabase.addUserToGroup(
             systemUserWithSystemRole,
             securityGroupRepository.findByGroupNameIgnoreCase("XHIBIT").orElseThrow()
         );
         dartsDatabase.addUserToGroup(superUser, SecurityGroupEnum.SUPER_USER);
         dartsDatabase.addUserToGroup(superAdmin, SecurityGroupEnum.SUPER_ADMIN);
+        dartsDatabase.addUserToGroup(recentDisabledUserAssignedToGroup, SecurityGroupEnum.MEDIA_IN_PERPETUITY);
+        dartsDatabase.addUserToGroup(localhostUserAssignedToGroup, SecurityGroupEnum.MEDIA_IN_PERPETUITY);
+        dartsDatabase.addUserToGroup(systemUserAssignedToGroup, SecurityGroupEnum.MEDIA_IN_PERPETUITY);
+        dartsDatabase.addUserToGroup(superUserAssignedToGroup, SecurityGroupEnum.SUPER_USER);
+        dartsDatabase.addUserToGroup(superAdminAssignedToGroup, SecurityGroupEnum.SUPER_ADMIN);
 
-        List<UserAccountEntity> users = userAccountRepository.findInactiveUsersExcludingRoles(
+        List<UserAccountEntity> users = userAccountRepository.findInactiveUsersForCleanupExcludingRoles(
             cutoffDateTime,
             Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId()),
             Limit.of(10)
@@ -281,7 +300,11 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
             .map(UserAccountEntity::getId)
             .toList();
 
-        assertThat(actualIds, containsInAnyOrder(oldLastLoginUser.getId(), oldNeverLoggedInUser.getId()));
+        assertThat(actualIds, containsInAnyOrder(
+            oldLastLoginUser.getId(),
+            oldNeverLoggedInUser.getId(),
+            disabledUserAssignedToGroup.getId()
+        ));
     }
 
     private UserAccountEntity persistUser(String emailAddress,
