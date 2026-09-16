@@ -10,13 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.SecurityPermissionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
@@ -33,7 +34,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
-class SecurityRoleRepositoryTest extends IntegrationBase {
+class SecurityRoleRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
     private SecurityRoleRepository securityRoleRepository;
@@ -54,15 +55,26 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
         assertEquals(17, securityRoleEntityList.size());
     }
 
+    @ParameterizedTest(name = "{0} should have permissions")
+    @MethodSource("rolesWithPermissions")
+    void findById_shouldReturnPermissions_whenRoleHasPermissions(SecurityRoleEnum securityRole) {
+        Set<SecurityPermissionEntity> securityPermissionEntities = getSecurityPermissionEntities(securityRole);
+        assertFalse(securityPermissionEntities.isEmpty());
+    }
+
     @ParameterizedTest(name = "{0} should have no permissions")
-    @MethodSource("rolesWithNoPermissions")
+    @MethodSource("rolesWithoutPermissions")
     void findById_shouldReturnNoPermissions_whenRoleHasNoPermissions(SecurityRoleEnum securityRole) {
-        SecurityRoleEntity securityRoleEntity = securityRoleRepository.findById(securityRole.getId()).orElseThrow();
-        final Set<SecurityPermissionEntity> securityPermissionEntities = securityRoleEntity.getSecurityPermissionEntities();
+        Set<SecurityPermissionEntity> securityPermissionEntities = getSecurityPermissionEntities(securityRole);
         assertTrue(securityPermissionEntities.isEmpty());
     }
 
-    private static Stream<Arguments> rolesWithNoPermissions() {
+    private Set<SecurityPermissionEntity> getSecurityPermissionEntities(SecurityRoleEnum securityRole) {
+        SecurityRoleEntity securityRoleEntity = securityRoleRepository.findById(securityRole.getId()).orElseThrow();
+        return securityRoleEntity.getSecurityPermissionEntities();
+    }
+
+    private static Stream<Arguments> rolesWithPermissions() {
         return Stream.of(
             Arguments.of(APPROVER),
             Arguments.of(REQUESTER),
@@ -75,7 +87,12 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
             Arguments.of(DAR_PC),
             Arguments.of(MID_TIER),
             Arguments.of(SUPER_ADMIN),
-            Arguments.of(SUPER_USER),
+            Arguments.of(SUPER_USER)
+        );
+    }
+
+    private static Stream<Arguments> rolesWithoutPermissions() {
+        return Stream.of(
             Arguments.of(JUDICIAL_CONDUCT),
             Arguments.of(HMCTS_TRANSCRIPTION_HUB)
         );
