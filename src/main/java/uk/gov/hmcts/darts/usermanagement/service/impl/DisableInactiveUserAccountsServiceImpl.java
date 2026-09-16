@@ -19,7 +19,7 @@ import java.util.Set;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
 @Service
 @Slf4j
@@ -43,10 +43,11 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
         int safeBatchSize = Math.max(batchSize, MINIMUM_BATCH_SIZE);
         OffsetDateTime cutoffDateTime = currentTimeHelper.currentOffsetDateTime().minus(inactivityPeriodLimit);
 
-        // System users are excluded in the repository query with isSystemUser = false.
+        // Excludes protected users and returns inactive accounts that are active, grouped, or still own transcriber work.
         List<UserAccountEntity> inactiveUsers = userAccountRepository.findInactiveUsersForCleanupExcludingRoles(
             cutoffDateTime,
             PRIVILEGED_USER_ROLE_IDS,
+            WITH_TRANSCRIBER.getId(),
             Limit.of(safeBatchSize)
         );
 
@@ -62,20 +63,10 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
     }
 
     private void processInactiveUser(UserAccountEntity userAccount) {
-        rollbackAssignedTranscriptionsIfTranscriber(userAccount);
+        transcriptionService.rollbackUserTranscriptions(userAccount);
         userAccountSecurityGroupService.unassignUserFromGroupsTheyArePartOf(userAccount);
         if (Boolean.TRUE.equals(userAccount.isActive())) {
             userAccount.setActive(false);
-        }
-    }
-
-    private void rollbackAssignedTranscriptionsIfTranscriber(UserAccountEntity userAccount) {
-        boolean isTranscriber = userAccountRepository
-            .findByRoleAndUserId(TRANSCRIBER.getId(), userAccount.getId())
-            .isPresent();
-
-        if (isTranscriber) {
-            transcriptionService.rollbackUserTranscriptions(userAccount);
         }
     }
 }

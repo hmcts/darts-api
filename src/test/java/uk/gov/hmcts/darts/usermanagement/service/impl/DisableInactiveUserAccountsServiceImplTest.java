@@ -16,7 +16,6 @@ import java.time.OffsetDateTime;
 import java.time.Period;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
 @ExtendWith(MockitoExtension.class)
 class DisableInactiveUserAccountsServiceImplTest {
@@ -61,28 +60,24 @@ class DisableInactiveUserAccountsServiceImplTest {
         UserAccountEntity inactiveUser = userAccount(123);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1000)))
+        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1000)))
             .thenReturn(List.of(inactiveUser));
-        when(userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), inactiveUser.getId()))
-            .thenReturn(Optional.empty());
 
         service.process(1000);
 
         assertThat(inactiveUser.isActive()).isFalse();
+        verify(transcriptionService).rollbackUserTranscriptions(inactiveUser);
         verify(userAccountSecurityGroupService).unassignUserFromGroupsTheyArePartOf(inactiveUser);
-        verify(transcriptionService, never()).rollbackUserTranscriptions(inactiveUser);
         verify(userAccountRepository).saveAll(List.of(inactiveUser));
     }
 
     @Test
-    void process_shouldRollbackAssignedTranscriptions_whenInactiveUserIsTranscriber() {
+    void process_shouldRollbackAssignedTranscriptions_whenInactiveUserFound() {
         UserAccountEntity inactiveUser = userAccount(123);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1000)))
+        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1000)))
             .thenReturn(List.of(inactiveUser));
-        when(userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), inactiveUser.getId()))
-            .thenReturn(Optional.of(inactiveUser));
 
         service.process(1000);
 
@@ -93,19 +88,19 @@ class DisableInactiveUserAccountsServiceImplTest {
     @Test
     void process_shouldUseMinimumBatchSize_whenBatchSizeIsLessThanOne() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1)))
+        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1)))
             .thenReturn(List.of());
 
         service.process(0);
 
-        verify(userAccountRepository).findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1));
+        verify(userAccountRepository).findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1));
         verify(userAccountRepository, never()).saveAll(List.of());
     }
 
     @Test
     void process_shouldNotSaveUsers_whenNoInactiveUsersAreFound() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1000)))
+        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1000)))
             .thenReturn(List.of());
 
         service.process(1000);
@@ -119,29 +114,25 @@ class DisableInactiveUserAccountsServiceImplTest {
         disabledUser.setActive(false);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1000)))
+        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1000)))
             .thenReturn(List.of(disabledUser));
-        when(userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), disabledUser.getId()))
-            .thenReturn(Optional.empty());
 
         service.process(1000);
 
         assertThat(disabledUser.isActive()).isFalse();
+        verify(transcriptionService).rollbackUserTranscriptions(disabledUser);
         verify(userAccountSecurityGroupService).unassignUserFromGroupsTheyArePartOf(disabledUser);
-        verify(transcriptionService, never()).rollbackUserTranscriptions(disabledUser);
         verify(userAccountRepository).saveAll(List.of(disabledUser));
     }
 
     @Test
-    void process_shouldRollbackAssignedTranscriptions_whenDisabledInactiveUserIsTranscriber() {
+    void process_shouldRollbackAssignedTranscriptions_whenDisabledInactiveUserFound() {
         UserAccountEntity disabledUser = userAccount(123);
         disabledUser.setActive(false);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, Limit.of(1000)))
+        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1000)))
             .thenReturn(List.of(disabledUser));
-        when(userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), disabledUser.getId()))
-            .thenReturn(Optional.of(disabledUser));
 
         service.process(1000);
 
