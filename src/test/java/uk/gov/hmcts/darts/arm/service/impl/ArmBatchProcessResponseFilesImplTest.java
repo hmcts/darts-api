@@ -587,6 +587,8 @@ class ArmBatchProcessResponseFilesImplTest {
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = mock(ExternalObjectDirectoryEntity.class);
         doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123L);
+        ObjectRecordStatusEntity armProcessingResponseFilesStatus = EodHelper.armProcessingResponseFilesStatus();
+        when(externalObjectDirectoryEntity.getStatus()).thenReturn(armProcessingResponseFilesStatus);
 
         OffsetDateTime currentTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentTime);
@@ -631,6 +633,8 @@ class ArmBatchProcessResponseFilesImplTest {
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = mock(ExternalObjectDirectoryEntity.class);
         doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123L);
+        ObjectRecordStatusEntity armProcessingResponseFilesStatus = EodHelper.armProcessingResponseFilesStatus();
+        when(externalObjectDirectoryEntity.getStatus()).thenReturn(armProcessingResponseFilesStatus);
 
         OffsetDateTime currentTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentTime);
@@ -653,6 +657,125 @@ class ArmBatchProcessResponseFilesImplTest {
             externalObjectDirectoryEntity, EodHelper.armDropZoneStatus(),
             userAccount
         );
+    }
+
+    @Test
+    void processBatchResponseFiles_shouldDeleteStaleUploadFileAndNotUpdateStatus_WhenEodIsArmRawDataFailed() {
+        // given
+        final BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor = mock(BatchInputUploadFileFilenameProcessor.class);
+        final UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        String uploadFileFilenameAndPath = "dropzone/DARTS/response/6a374f19a9ce7dc9cc480ea8d4eca0fb_12374f19a9ce7dc9cc480ea8d4eca0fb_1_uf.rsp";
+
+        ArmBatchResponses armBatchResponses = new ArmBatchResponses();
+        ArmResponseBatchData armResponseBatchData = ArmResponseBatchData.builder()
+            .externalObjectDirectoryId(EXTERNAL_OBJECT_DIRECTORY_ID)
+            .uploadFileFilenameProcessor(new UploadFileFilenameProcessor(uploadFileFilenameAndPath))
+            .build();
+        armBatchResponses.getArmBatchResponseMap().put(EXTERNAL_OBJECT_DIRECTORY_ID, armResponseBatchData);
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(EXTERNAL_OBJECT_DIRECTORY_ID);
+        externalObjectDirectoryEntity.setStatus(EodHelper.failedArmRawDataStatus());
+
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(EXTERNAL_OBJECT_DIRECTORY_ID);
+        when(deleteArmResponseFilesHelper.getResponseBlobsToBeDeleted(armResponseBatchData)).thenReturn(List.of(uploadFileFilenameAndPath));
+
+        // when
+        armBatchProcessResponseFiles.processBatchResponseFiles(batchUploadFileFilenameProcessor,
+                                                               armBatchResponses,
+                                                               userAccount);
+
+        // then
+        verify(deleteArmResponseFilesHelper).getResponseBlobsToBeDeleted(armResponseBatchData);
+        verify(deleteArmResponseFilesHelper).deleteResponseBlobs(List.of(uploadFileFilenameAndPath));
+        verify(armBatchProcessResponseFiles, never()).updateExternalObjectDirectoryStatus(any(), any(), any());
+    }
+
+    @Test
+    void processBatchResponseFiles_shouldDeleteStaleCreateRecordFileAndNotUpdateStatus_WhenEodIsArmRawDataFailed() {
+        // given
+        final BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor = mock(BatchInputUploadFileFilenameProcessor.class);
+        final UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        String createRecordFilenameAndPath = "dropzone/DARTS/response/6a374f19a9ce7dc9cc480ea8d4eca0fb_12374f19a9ce7dc9cc480ea8d4eca0fb_1_cr.rsp";
+
+        ArmBatchResponses armBatchResponses = new ArmBatchResponses();
+        ArmResponseBatchData armResponseBatchData = ArmResponseBatchData.builder()
+            .externalObjectDirectoryId(EXTERNAL_OBJECT_DIRECTORY_ID)
+            .createRecordFilenameProcessor(new CreateRecordFilenameProcessor(createRecordFilenameAndPath))
+            .build();
+        armBatchResponses.getArmBatchResponseMap().put(EXTERNAL_OBJECT_DIRECTORY_ID, armResponseBatchData);
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(EXTERNAL_OBJECT_DIRECTORY_ID);
+        externalObjectDirectoryEntity.setStatus(EodHelper.failedArmRawDataStatus());
+
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(EXTERNAL_OBJECT_DIRECTORY_ID);
+        when(deleteArmResponseFilesHelper.getResponseBlobsToBeDeleted(armResponseBatchData)).thenReturn(List.of(createRecordFilenameAndPath));
+
+        // when
+        armBatchProcessResponseFiles.processBatchResponseFiles(batchUploadFileFilenameProcessor,
+                                                               armBatchResponses,
+                                                               userAccount);
+
+        // then
+        verify(deleteArmResponseFilesHelper).getResponseBlobsToBeDeleted(armResponseBatchData);
+        verify(deleteArmResponseFilesHelper).deleteResponseBlobs(List.of(createRecordFilenameAndPath));
+        verify(armBatchProcessResponseFiles, never()).updateExternalObjectDirectoryStatus(any(), any(), any());
+    }
+
+    @Test
+    void processBatchResponseFiles_shouldNotUpdateStatusOrDeleteResponseFiles_WhenEodIsNull() {
+        // given
+        final BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor = mock(BatchInputUploadFileFilenameProcessor.class);
+        final UserAccountEntity userAccount = mock(UserAccountEntity.class);
+
+        ArmBatchResponses armBatchResponses = new ArmBatchResponses();
+        ArmResponseBatchData armResponseBatchData = ArmResponseBatchData.builder()
+            .externalObjectDirectoryId(EXTERNAL_OBJECT_DIRECTORY_ID)
+            .build();
+        armBatchResponses.getArmBatchResponseMap().put(EXTERNAL_OBJECT_DIRECTORY_ID, armResponseBatchData);
+
+        doReturn(null).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(EXTERNAL_OBJECT_DIRECTORY_ID);
+
+        // when
+        armBatchProcessResponseFiles.processBatchResponseFiles(batchUploadFileFilenameProcessor,
+                                                               armBatchResponses,
+                                                               userAccount);
+
+        // then
+        verify(deleteArmResponseFilesHelper, never()).getResponseBlobsToBeDeleted(any());
+        verify(deleteArmResponseFilesHelper, never()).deleteResponseBlobs(anyList());
+        verify(armBatchProcessResponseFiles, never()).updateExternalObjectDirectoryStatus(any(), any(), any());
+        verifyNoMoreInteractions(currentTimeHelper);
+    }
+
+    @Test
+    void processBatchResponseFiles_shouldNotUpdateStatusOrDeleteResponseFiles_WhenEodStatusIsNull() {
+        // given
+        final BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor = mock(BatchInputUploadFileFilenameProcessor.class);
+        final UserAccountEntity userAccount = mock(UserAccountEntity.class);
+
+        ArmBatchResponses armBatchResponses = new ArmBatchResponses();
+        ArmResponseBatchData armResponseBatchData = ArmResponseBatchData.builder()
+            .externalObjectDirectoryId(EXTERNAL_OBJECT_DIRECTORY_ID)
+            .build();
+        armBatchResponses.getArmBatchResponseMap().put(EXTERNAL_OBJECT_DIRECTORY_ID, armResponseBatchData);
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(EXTERNAL_OBJECT_DIRECTORY_ID);
+
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(EXTERNAL_OBJECT_DIRECTORY_ID);
+
+        // when
+        armBatchProcessResponseFiles.processBatchResponseFiles(batchUploadFileFilenameProcessor,
+                                                               armBatchResponses,
+                                                               userAccount);
+
+        // then
+        verify(deleteArmResponseFilesHelper, never()).getResponseBlobsToBeDeleted(any());
+        verify(deleteArmResponseFilesHelper, never()).deleteResponseBlobs(anyList());
+        verify(armBatchProcessResponseFiles, never()).updateExternalObjectDirectoryStatus(any(), any(), any());
+        verifyNoMoreInteractions(currentTimeHelper);
     }
 
     @Test
