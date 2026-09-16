@@ -724,6 +724,61 @@ class ArmBatchProcessResponseFilesImplTest {
     }
 
     @Test
+    void processBatchResponseFiles_shouldNotUpdateStatusOrDeleteResponseFiles_WhenEodIsNull() {
+        // given
+        final BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor = mock(BatchInputUploadFileFilenameProcessor.class);
+        final UserAccountEntity userAccount = mock(UserAccountEntity.class);
+
+        ArmBatchResponses armBatchResponses = new ArmBatchResponses();
+        ArmResponseBatchData armResponseBatchData = ArmResponseBatchData.builder()
+            .externalObjectDirectoryId(EXTERNAL_OBJECT_DIRECTORY_ID)
+            .build();
+        armBatchResponses.getArmBatchResponseMap().put(EXTERNAL_OBJECT_DIRECTORY_ID, armResponseBatchData);
+
+        doReturn(null).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(EXTERNAL_OBJECT_DIRECTORY_ID);
+
+        // when
+        armBatchProcessResponseFiles.processBatchResponseFiles(batchUploadFileFilenameProcessor,
+                                                               armBatchResponses,
+                                                               userAccount);
+
+        // then
+        verify(deleteArmResponseFilesHelper, never()).getResponseBlobsToBeDeleted(any());
+        verify(deleteArmResponseFilesHelper, never()).deleteResponseBlobs(anyList());
+        verify(armBatchProcessResponseFiles, never()).updateExternalObjectDirectoryStatus(any(), any(), any());
+        verifyNoMoreInteractions(currentTimeHelper);
+    }
+
+    @Test
+    void processBatchResponseFiles_shouldNotUpdateStatusOrDeleteResponseFiles_WhenEodStatusIsNull() {
+        // given
+        final BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor = mock(BatchInputUploadFileFilenameProcessor.class);
+        final UserAccountEntity userAccount = mock(UserAccountEntity.class);
+
+        ArmBatchResponses armBatchResponses = new ArmBatchResponses();
+        ArmResponseBatchData armResponseBatchData = ArmResponseBatchData.builder()
+            .externalObjectDirectoryId(EXTERNAL_OBJECT_DIRECTORY_ID)
+            .build();
+        armBatchResponses.getArmBatchResponseMap().put(EXTERNAL_OBJECT_DIRECTORY_ID, armResponseBatchData);
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(EXTERNAL_OBJECT_DIRECTORY_ID);
+
+        doReturn(externalObjectDirectoryEntity).when(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(EXTERNAL_OBJECT_DIRECTORY_ID);
+
+        // when
+        armBatchProcessResponseFiles.processBatchResponseFiles(batchUploadFileFilenameProcessor,
+                                                               armBatchResponses,
+                                                               userAccount);
+
+        // then
+        verify(deleteArmResponseFilesHelper, never()).getResponseBlobsToBeDeleted(any());
+        verify(deleteArmResponseFilesHelper, never()).deleteResponseBlobs(anyList());
+        verify(armBatchProcessResponseFiles, never()).updateExternalObjectDirectoryStatus(any(), any(), any());
+        verifyNoMoreInteractions(currentTimeHelper);
+    }
+
+    @Test
     void processResponseFiles_throwsInterruptedException() {
 
         // given
