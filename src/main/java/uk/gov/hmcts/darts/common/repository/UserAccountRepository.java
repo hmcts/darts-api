@@ -87,6 +87,13 @@ public interface UserAccountRepository extends
                 JOIN cleanupUser.securityGroupEntities cleanupSecurityGroup
                 WHERE cleanupUser = userAccount
             )
+            OR EXISTS (
+                SELECT assignedTranscriptionWorkflow
+                FROM TranscriptionWorkflowEntity assignedTranscriptionWorkflow
+                JOIN assignedTranscriptionWorkflow.transcription assignedTranscription
+                WHERE assignedTranscriptionWorkflow.workflowActor = userAccount
+                AND assignedTranscription.transcriptionStatus.id = :withTranscriberStatusId
+            )
         )
         AND userAccount.isSystemUser = false
         AND userAccount.emailAddress NOT ILIKE '%localhost%'
@@ -105,6 +112,7 @@ public interface UserAccountRepository extends
         """)
     List<UserAccountEntity> findInactiveUsersForCleanupExcludingRoles(@Param("cutoffDateTime") OffsetDateTime cutoffDateTime,
                                                                       @Param("excludedRoleIds") Set<Integer> excludedRoleIds,
+                                                                      @Param("withTranscriberStatusId") Integer withTranscriberStatusId,
                                                                       Limit limit);
 
     List<UserAccountEntity> findByIdInAndActive(List<Integer> userIds, Boolean active);
