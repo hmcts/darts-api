@@ -10,6 +10,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -28,6 +31,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserAccountRepositoryTest extends PostgresIntegrationBase {
@@ -201,6 +206,9 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
         final UserAccountEntity disabledUserAssignedToGroup = persistUser(
             "disabled.with.group@example.net", cutoffDateTime, cutoffDateTime, false, false);
         dartsDatabase.addUserToGroup(disabledUserAssignedToGroup, SecurityGroupEnum.MEDIA_IN_PERPETUITY);
+        final UserAccountEntity disabledUserAssignedTranscription = persistUser(
+            "disabled.with.transcription@example.net", cutoffDateTime, cutoffDateTime, false, false);
+        createWithTranscriberWorkflow(disabledUserAssignedTranscription, cutoffDateTime);
 
         persistUser("recent.last.login@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.plusDays(1), true, false);
         persistUser("inactive.user@example.net", cutoffDateTime.minusDays(1), cutoffDateTime.minusDays(1), false, false);
@@ -232,6 +240,7 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
         List<UserAccountEntity> users = userAccountRepository.findInactiveUsersForCleanupExcludingRoles(
             cutoffDateTime,
             Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId()),
+            WITH_TRANSCRIBER.getId(),
             Limit.of(10)
         );
 
@@ -242,8 +251,27 @@ class UserAccountRepositoryTest extends PostgresIntegrationBase {
         assertThat(actualIds, containsInAnyOrder(
             oldLastLoginUser.getId(),
             oldNeverLoggedInUser.getId(),
-            disabledUserAssignedToGroup.getId()
+            disabledUserAssignedToGroup.getId(),
+            disabledUserAssignedTranscription.getId()
         ));
+    }
+
+    private void createWithTranscriberWorkflow(UserAccountEntity workflowActor, OffsetDateTime workflowTimestamp) {
+        TranscriptionEntity transcription = PersistableFactory.getTranscriptionTestData()
+            .minimalRawTranscription(new TranscriptionStatusEntity(WITH_TRANSCRIBER.getId()));
+        transcription = dartsPersistence.save(transcription);
+
+        TranscriptionWorkflowEntity approvedWorkflow = PersistableFactory.getTranscriptionWorkflowTestData()
+            .workflowForTranscriptionWithStatus(transcription, APPROVED);
+        approvedWorkflow.setWorkflowActor(workflowActor);
+        approvedWorkflow.setWorkflowTimestamp(workflowTimestamp.minusMinutes(1));
+        dartsPersistence.save(approvedWorkflow);
+
+        TranscriptionWorkflowEntity withTranscriberWorkflow = PersistableFactory.getTranscriptionWorkflowTestData()
+            .workflowForTranscriptionWithStatus(transcription, WITH_TRANSCRIBER);
+        withTranscriberWorkflow.setWorkflowActor(workflowActor);
+        withTranscriberWorkflow.setWorkflowTimestamp(workflowTimestamp);
+        dartsPersistence.save(withTranscriberWorkflow);
     }
 
     @ParameterizedTest
