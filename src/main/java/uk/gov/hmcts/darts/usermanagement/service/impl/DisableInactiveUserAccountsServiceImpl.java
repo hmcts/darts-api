@@ -44,27 +44,29 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
         OffsetDateTime cutoffDateTime = currentTimeHelper.currentOffsetDateTime().minus(inactivityPeriodLimit);
 
         // System users are excluded in the repository query with isSystemUser = false.
-        List<UserAccountEntity> inactiveUsers = userAccountRepository.findInactiveUsersExcludingRoles(
+        List<UserAccountEntity> inactiveUsers = userAccountRepository.findInactiveUsersForCleanupExcludingRoles(
             cutoffDateTime,
             PRIVILEGED_USER_ROLE_IDS,
             Limit.of(safeBatchSize)
         );
 
         if (inactiveUsers.isEmpty()) {
-            log.info("No inactive user accounts found to disable");
+            log.info("No inactive user accounts found to process");
             return;
         }
 
-        inactiveUsers.forEach(this::disableAndRemoveFromSecurityGroups);
+        inactiveUsers.forEach(this::processInactiveUser);
         userAccountRepository.saveAll(inactiveUsers);
 
-        log.info("Disabled {} inactive user accounts", inactiveUsers.size());
+        log.info("Processed {} inactive user accounts", inactiveUsers.size());
     }
 
-    private void disableAndRemoveFromSecurityGroups(UserAccountEntity userAccount) {
+    private void processInactiveUser(UserAccountEntity userAccount) {
         rollbackAssignedTranscriptionsIfTranscriber(userAccount);
         userAccountSecurityGroupService.unassignUserFromGroupsTheyArePartOf(userAccount);
-        userAccount.setActive(false);
+        if (Boolean.TRUE.equals(userAccount.isActive())) {
+            userAccount.setActive(false);
+        }
     }
 
     private void rollbackAssignedTranscriptionsIfTranscriber(UserAccountEntity userAccount) {
