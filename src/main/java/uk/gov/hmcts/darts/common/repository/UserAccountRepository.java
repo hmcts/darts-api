@@ -79,7 +79,15 @@ public interface UserAccountRepository extends
     @Query("""
         SELECT DISTINCT userAccount
         FROM UserAccountEntity userAccount
-        WHERE userAccount.active = true
+        WHERE (
+            userAccount.active = true
+            OR EXISTS (
+                SELECT cleanupSecurityGroup
+                FROM UserAccountEntity cleanupUser
+                JOIN cleanupUser.securityGroupEntities cleanupSecurityGroup
+                WHERE cleanupUser = userAccount
+            )
+        )
         AND userAccount.isSystemUser = false
         AND userAccount.emailAddress NOT ILIKE '%localhost%'
         AND (
@@ -87,17 +95,17 @@ public interface UserAccountRepository extends
             OR (userAccount.lastLoginTime IS NULL AND userAccount.createdDateTime <= :cutoffDateTime)
         )
         AND NOT EXISTS (
-            SELECT securityGroup
+            SELECT excludedSecurityGroup
             FROM UserAccountEntity excludedUser
-            JOIN excludedUser.securityGroupEntities securityGroup
+            JOIN excludedUser.securityGroupEntities excludedSecurityGroup
             WHERE excludedUser = userAccount
-            AND securityGroup.securityRoleEntity.id IN :excludedRoleIds
+            AND excludedSecurityGroup.securityRoleEntity.id IN :excludedRoleIds
         )
         ORDER BY userAccount.id ASC
         """)
-    List<UserAccountEntity> findInactiveUsersExcludingRoles(@Param("cutoffDateTime") OffsetDateTime cutoffDateTime,
-                                                            @Param("excludedRoleIds") Set<Integer> excludedRoleIds,
-                                                            Limit limit);
+    List<UserAccountEntity> findInactiveUsersForCleanupExcludingRoles(@Param("cutoffDateTime") OffsetDateTime cutoffDateTime,
+                                                                      @Param("excludedRoleIds") Set<Integer> excludedRoleIds,
+                                                                      Limit limit);
 
     List<UserAccountEntity> findByIdInAndActive(List<Integer> userIds, Boolean active);
 
