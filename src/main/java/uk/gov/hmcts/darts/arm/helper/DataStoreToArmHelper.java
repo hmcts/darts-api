@@ -5,7 +5,6 @@ import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -47,8 +46,6 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 public class DataStoreToArmHelper {
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
-    private static final String SUBMISSION_FILE_SEPARATOR = "_";
-
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final LogApi logApi;
@@ -268,23 +265,23 @@ public class DataStoreToArmHelper {
             return true;
         } else {
             ExternalObjectDirectoryEntity armEod = batchItem.getArmEod();
-            String prefix = format("%d_", armEod.getId());
-            List<String> submissionBlobs = armDataManagementApi.listSubmissionBlobs(prefix);
+            String expectedBlobName = armDataManagementConfiguration.getFolders().getSubmission() + rawFilename;
+            List<String> submissionBlobs = armDataManagementApi.listSubmissionBlobs(rawFilename);
+            boolean expectedBlobExists = submissionBlobs != null
+                && submissionBlobs.contains(expectedBlobName);
 
-            if (CollectionUtils.isNotEmpty(submissionBlobs)) {
+            if (expectedBlobExists) {
                 batchItem.setRawFilePushSuccessful(true);
 
                 ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename);
                 batchItem.setArchiveRecord(archiveRecord);
                 updateExternalObjectDirectoryStatus(armEod, EodHelper.armRawDataPushedStatus(), userAccount);
-                int index = submissionBlobs.getFirst().lastIndexOf(SUBMISSION_FILE_SEPARATOR);
-                if (index != -1 && index + 1 < submissionBlobs.getFirst().length()) {
-                    Integer attempts = Integer.parseInt(submissionBlobs.getFirst().substring(index + 1));
-                    armEod.setTransferAttempts(attempts);
-                    externalObjectDirectoryRepository.saveAndFlush(armEod);
-                }
                 return false;
             } else {
+                if (submissionBlobs != null && !submissionBlobs.isEmpty()) {
+                    log.warn("Submission blob mismatch for EOD {}. Expected {}, found {}",
+                             armEod.getId(), expectedBlobName, submissionBlobs);
+                }
                 updateExternalObjectDirectoryStatusToFailed(armEod, EodHelper.failedArmRawDataStatus(), userAccount);
                 batchItem.setRawFilePushSuccessful(false);
                 batchItem.undoManifestFileChange();
