@@ -418,6 +418,16 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
+    public void closeUserTranscriptions(UserAccountEntity entity, String transcriptionComment) {
+        List<TranscriptionEntity> transcriptionWorkflowEntities = transcriptionWorkflowRepository
+            .findWorkflowForUserWithTranscriptionState(entity.getId(), WITH_TRANSCRIBER.getId());
+
+        for (TranscriptionEntity transcription : transcriptionWorkflowEntities) {
+            closeTranscription(transcription.getId(), transcriptionComment);
+        }
+    }
+
+    @Override
     public List<TranscriptionTypeResponse> getTranscriptionTypes() {
         return transcriptionResponseMapper.mapToTranscriptionTypeResponses(transcriptionTypeRepository.findAll());
     }
