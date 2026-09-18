@@ -32,6 +32,7 @@ class DisableInactiveUserAccountsServiceImplTest {
     private static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.of(2026, 8, 14, 10, 5, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime CUTOFF_DATE_TIME = CURRENT_DATE_TIME.minusMonths(6);
     private static final Set<Integer> EXCLUDED_ROLE_IDS = Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId());
+    private static final String OWNER_WAS_DISABLED_DUE_TO_INACTIVITY = "Owner was disabled due to inactivity";
 
     @Mock
     private UserAccountRepository userAccountRepository;
@@ -66,13 +67,13 @@ class DisableInactiveUserAccountsServiceImplTest {
         service.process(1000);
 
         assertThat(inactiveUser.isActive()).isFalse();
-        verify(transcriptionService).rollbackUserTranscriptions(inactiveUser);
+        verify(transcriptionService).closeUserTranscriptions(inactiveUser, OWNER_WAS_DISABLED_DUE_TO_INACTIVITY);
         verify(userAccountSecurityGroupService).unassignUserFromGroupsTheyArePartOf(inactiveUser);
         verify(userAccountRepository).saveAll(List.of(inactiveUser));
     }
 
     @Test
-    void process_shouldRollbackAssignedTranscriptions_whenInactiveUserFound() {
+    void process_shouldCloseAssignedTranscriptions_whenInactiveUserFound() {
         UserAccountEntity inactiveUser = userAccount(123);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
@@ -81,7 +82,7 @@ class DisableInactiveUserAccountsServiceImplTest {
 
         service.process(1000);
 
-        verify(transcriptionService).rollbackUserTranscriptions(inactiveUser);
+        verify(transcriptionService).closeUserTranscriptions(inactiveUser, OWNER_WAS_DISABLED_DUE_TO_INACTIVITY);
         verify(userAccountRepository).saveAll(List.of(inactiveUser));
     }
 
@@ -120,13 +121,13 @@ class DisableInactiveUserAccountsServiceImplTest {
         service.process(1000);
 
         assertThat(disabledUser.isActive()).isFalse();
-        verify(transcriptionService).rollbackUserTranscriptions(disabledUser);
+        verify(transcriptionService).closeUserTranscriptions(disabledUser, OWNER_WAS_DISABLED_DUE_TO_INACTIVITY);
         verify(userAccountSecurityGroupService).unassignUserFromGroupsTheyArePartOf(disabledUser);
         verify(userAccountRepository).saveAll(List.of(disabledUser));
     }
 
     @Test
-    void process_shouldRollbackAssignedTranscriptions_whenDisabledInactiveUserFound() {
+    void process_shouldCloseAssignedTranscriptions_whenDisabledInactiveUserFound() {
         UserAccountEntity disabledUser = userAccount(123);
         disabledUser.setActive(false);
 
@@ -137,7 +138,7 @@ class DisableInactiveUserAccountsServiceImplTest {
         service.process(1000);
 
         assertThat(disabledUser.isActive()).isFalse();
-        verify(transcriptionService).rollbackUserTranscriptions(disabledUser);
+        verify(transcriptionService).closeUserTranscriptions(disabledUser, OWNER_WAS_DISABLED_DUE_TO_INACTIVITY);
         verify(userAccountSecurityGroupService).unassignUserFromGroupsTheyArePartOf(disabledUser);
         verify(userAccountRepository).saveAll(List.of(disabledUser));
     }

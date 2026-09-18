@@ -29,6 +29,7 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
     @Value("${darts.automated.task.disable-inactive-user-accounts.inactivity-period-limit:P6M}")
     private Period inactivityPeriodLimit;
 
+    private static final String OWNER_WAS_DISABLED_DUE_TO_INACTIVITY = "Owner was disabled due to inactivity";
     private static final Set<Integer> PRIVILEGED_USER_ROLE_IDS = Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId());
     private static final int MINIMUM_BATCH_SIZE = 1;
 
@@ -63,7 +64,7 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
     }
 
     private void processInactiveUser(UserAccountEntity userAccount) {
-        transcriptionService.rollbackUserTranscriptions(userAccount);
+        transcriptionService.closeUserTranscriptions(userAccount, OWNER_WAS_DISABLED_DUE_TO_INACTIVITY);
         userAccountSecurityGroupService.unassignUserFromGroupsTheyArePartOf(userAccount);
         if (Boolean.TRUE.equals(userAccount.isActive())) {
             userAccount.setActive(false);

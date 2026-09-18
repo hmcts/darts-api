@@ -726,6 +726,27 @@ class TranscriptionServiceImplTest {
     }
 
     @Test
+    void closeUserTranscriptions_shouldCloseAssignedTranscriptions_whenUserHasWithTranscriberWork() {
+        transcriptionService = spy(transcriptionService);
+        UserAccountEntity entity = new UserAccountEntity();
+        entity.setId(123);
+        String transcriptionComment = "Owner was disabled due to inactivity";
+
+        Long transcriptionId = 1000L;
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(transcriptionId);
+
+        when(mockTranscriptionWorkflowRepository
+                 .findWorkflowForUserWithTranscriptionState(entity.getId(), TranscriptionStatusEnum.WITH_TRANSCRIBER.getId()))
+            .thenReturn(List.of(transcriptionEntity));
+        doNothing().when(transcriptionService).closeTranscription(transcriptionId, transcriptionComment);
+
+        transcriptionService.closeUserTranscriptions(entity, transcriptionComment);
+
+        verify(transcriptionService).closeTranscription(transcriptionId, transcriptionComment);
+    }
+
+    @Test
     void adminGetTranscriptionDocumentsMarkedForDeletionManualDeletionDisabled() {
         updateManualDeletion(false);
         DartsApiException dartsApiException = assertThrows(
