@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 
 import java.util.List;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public interface TranscriptionService {
 
     RequestTranscriptionResponse saveTranscriptionRequest(TranscriptionRequestDetails transcriptionRequestDetails,
@@ -70,6 +71,8 @@ public interface TranscriptionService {
                                                                  TranscriptionEntity transcription,
                                                                  TranscriptionStatusEntity transcriptionStatus,
                                                                  String workflowComment);
+
+    void closeUserTranscriptions(UserAccountEntity entity, String transcriptionComment);
 
     List<Long> rollbackUserTranscriptions(UserAccountEntity entity);
 
