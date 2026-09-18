@@ -14,6 +14,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     name = "arm-api-base-client-version5-3",
     url = "${darts.storage.arm-api.version5-3.api.api-base-url}"
 )
+@FunctionalInterface
 public interface ArmApiBaseClientFiveThree {
 
     @PostMapping(value = "${darts.storage.arm-api.version5-3.api.remove-production-path}",
