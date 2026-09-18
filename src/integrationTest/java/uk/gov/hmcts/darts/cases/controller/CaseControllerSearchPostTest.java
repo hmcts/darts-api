@@ -62,7 +62,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     private CourthouseEntity swanseaCourthouse;
     private CourthouseEntity myCourthouseWithDifferentDisplayName;
     private UserAccountEntity user;
-    
+
     @BeforeEach
     void setupData() {
         swanseaCourthouse = createCourthouseWithName("SWANSEA");
@@ -554,9 +554,11 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
         String expectedResponse = """
             {
+              "type": "about:blank",
               "status": 400,
               "title": "Bad Request",
-              "detail": "JSON parse error"
+              "detail": "JSON parse error",
+              "instance": "/cases/search"
             }
             """;
 
@@ -592,15 +594,13 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
         String expectedResponse = """
             {
-              "violations": [
-                {
-                  "field": "eventTextContains",
-                  "message": "size must be between 3 and 2000"
-                }
-              ],
-              "type": "https://zalando.github.io/problem/constraint-violation",
+              "type": "COMMON_104",
+              "title": "Invalid request",
               "status": 400,
-              "title": "Constraint Violation"
+              "instance": "/cases/search",
+              "properties": {
+                "eventTextContains": "size must be between 3 and 2000"
+              }
             }
             """;
         String actualResponse = response.getResponse().getContentAsString();

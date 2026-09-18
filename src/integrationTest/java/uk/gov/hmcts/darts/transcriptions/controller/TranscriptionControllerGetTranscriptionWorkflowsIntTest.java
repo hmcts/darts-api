@@ -163,7 +163,13 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = """
-            {"title":"Bad Request","status":400,"detail":"Required request parameter 'transcription_id' for method parameter type Long is not present"}
+            {
+              "type":"about:blank",
+              "title":"Bad Request",
+              "status":400,
+              "detail":"Required parameter 'transcription_id' is not present.",
+              "instance":"/admin/transcription-workflows"
+            }
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -180,7 +186,12 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
+            {
+            "type":"AUTHORISATION_109",
+            "title":"User is not authorised for this endpoint",
+            "status":403,
+            "instance":"/admin/transcription-workflows",
+            }
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
