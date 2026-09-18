@@ -12,9 +12,11 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
@@ -22,7 +24,7 @@ import uk.gov.hmcts.darts.arm.rpo.GetProfileEntitlementsService;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceFiveTwo;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -47,6 +49,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.CloseResource"})
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
 class GetProfileEntitlementsServiceTest {
 
     private static final Integer EXECUTION_ID = 1;
@@ -60,7 +63,11 @@ class GetProfileEntitlementsServiceTest {
 
     private ArmRpoUtil armRpoUtil;
     private ArmRpoService armRpoService;
-    private ArmRpoClient armRpoClient;
+    @Mock
+    private ArmAuthClientFiveTwo armAuthClient;
+    @Mock
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
+
 
     private ArmRpoHelperMocks armRpoHelperMocks;
     private ArgumentCaptor<ArmRpoExecutionDetailEntity> executionDetailCaptor;
@@ -68,7 +75,6 @@ class GetProfileEntitlementsServiceTest {
     @BeforeEach
     void beforeEach() {
         armRpoService = spy(ArmRpoService.class);
-        armRpoClient = mock(ArmRpoClient.class);
         executionDetailCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
 
         armRpoHelperMocks = new ArmRpoHelperMocks(); // Mocks are set via the default constructor call
@@ -77,7 +83,7 @@ class GetProfileEntitlementsServiceTest {
         armApiConfigurationProperties.setArmServiceEntitlement(ENTITLEMENT_NAME);
         armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
 
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        ArmClientService armClientService = new ArmClientServiceFiveTwo(armAuthClient, armApiBaseClient);
 
         getProfileEntitlementsService = new GetProfileEntitlementsServiceImpl(armClientService, armRpoService, armRpoUtil, armApiConfigurationProperties);
     }
@@ -123,7 +129,7 @@ class GetProfileEntitlementsServiceTest {
         //  Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
         EmptyRpoRequest emptyRpoRequest = EmptyRpoRequest.builder().build();
-        when(armRpoClient.getProfileEntitlementResponse(TOKEN, emptyRpoRequest))
+        when(armApiBaseClient.getProfileEntitlementResponse(TOKEN, emptyRpoRequest))
             .thenThrow(mock(FeignException.class));
 
         UserAccountEntity someUserAccount = new UserAccountEntity();
@@ -244,7 +250,7 @@ class GetProfileEntitlementsServiceTest {
             .reason("Unauthorized")
             .build();
         FeignException feign401 = FeignException.errorStatus("getProfileEntitlements", response);
-        when(armRpoClient.getProfileEntitlementResponse(eq(TOKEN), any(EmptyRpoRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.getProfileEntitlementResponse(eq(TOKEN), any(EmptyRpoRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -257,7 +263,7 @@ class GetProfileEntitlementsServiceTest {
         profileEntitlementResponse.setIsError(false);
         profileEntitlementResponse.setEntitlements(List.of(profileEntitlement));
 
-        when(armRpoClient.getProfileEntitlementResponse(eq("Bearer refreshed"), any(EmptyRpoRequest.class)))
+        when(armApiBaseClient.getProfileEntitlementResponse(eq("Bearer refreshed"), any(EmptyRpoRequest.class)))
             .thenReturn(profileEntitlementResponse);
 
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
@@ -292,12 +298,12 @@ class GetProfileEntitlementsServiceTest {
             .reason("Unauthorized")
             .build();
         FeignException feign401 = FeignException.errorStatus("getProfileEntitlements", response);
-        when(armRpoClient.getProfileEntitlementResponse(eq(TOKEN), any(EmptyRpoRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.getProfileEntitlementResponse(eq(TOKEN), any(EmptyRpoRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
-        when(armRpoClient.getProfileEntitlementResponse(eq("Bearer refreshed"), any(EmptyRpoRequest.class)))
+        when(armApiBaseClient.getProfileEntitlementResponse(eq("Bearer refreshed"), any(EmptyRpoRequest.class)))
             .thenThrow(feign401);
 
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
@@ -332,7 +338,7 @@ class GetProfileEntitlementsServiceTest {
             .reason("Forbidden")
             .build();
         FeignException feign403 = FeignException.errorStatus("getProfileEntitlements", response);
-        when(armRpoClient.getProfileEntitlementResponse(eq(TOKEN), any(EmptyRpoRequest.class))).thenThrow(feign403);
+        when(armApiBaseClient.getProfileEntitlementResponse(eq(TOKEN), any(EmptyRpoRequest.class))).thenThrow(feign403);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -345,7 +351,7 @@ class GetProfileEntitlementsServiceTest {
         profileEntitlementResponse.setIsError(false);
         profileEntitlementResponse.setEntitlements(List.of(profileEntitlement));
 
-        when(armRpoClient.getProfileEntitlementResponse(eq("Bearer refreshed"), any(EmptyRpoRequest.class)))
+        when(armApiBaseClient.getProfileEntitlementResponse(eq("Bearer refreshed"), any(EmptyRpoRequest.class)))
             .thenReturn(profileEntitlementResponse);
 
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
@@ -386,7 +392,7 @@ class GetProfileEntitlementsServiceTest {
         response.setStatus(200);
         response.setIsError(false);
         response.setEntitlements(profileEntitlements);
-        when(armRpoClient.getProfileEntitlementResponse(TOKEN, emptyRpoRequest))
+        when(armApiBaseClient.getProfileEntitlementResponse(TOKEN, emptyRpoRequest))
             .thenReturn(response);
     }
 

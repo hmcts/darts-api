@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
-import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,32 +24,43 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
 import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
+import uk.gov.hmcts.darts.arm.service.ArmRpoBacklogCatchupService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
-import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 
 @Isolated
 @TestPropertySource(properties = {
     "darts.storage.arm-api.active-version=v5_2"
 })
+@Slf4j
 @Profile("in-memory-caching")
 @Import(InMemoryTestCache.class)
-class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBase {
+class ArmRpoBacklogCatchupServiceVersionFiveTwoIntTest extends IntegrationBase {
+
+    private static final String ADD_ASYNC_SEARCH_RELATED_TASK_NAME = "ProcessE2EArmRpoPending";
 
     @MockitoBean
     private UserIdentity userIdentity;
@@ -59,10 +70,10 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
     private ArmAuthClientFiveTwo armAuthClient;
 
     @Autowired
-    private TriggerArmRpoSearchServiceImpl triggerArmRpoSearchServiceImpl;
+    private ArmRpoBacklogCatchupService armRpoBacklogCatchupService;
 
     @BeforeEach
-    void setUp() {
+    void setupData() {
         UserAccountEntity userAccountEntity = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
@@ -82,9 +93,25 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
     }
 
     @Test
-    void triggerArmRpoSearch_shouldCompleteSuccessfully() {
+    void performCatchup_withSuccessfulArmApiCalls_doesNotThrowException() {
+        OffsetDateTime lastModifiedDateTime = OffsetDateTime.of(2026, 1, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
-        // given
+        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_RPO_PENDING))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID().toString()).build();
+        armEod1.setCreateRecordProcessedTs(lastModifiedDateTime);
+        armEod1.setVerificationAttempts(1);
+        dartsPersistence.save(armEod1);
+
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+
+        var executionDetailEntity = createExecutionDetailEntity(userAccount);
+        dartsPersistence.save(executionDetailEntity);
+        var taskEntity = createArmAutomatedTaskEntity();
+        assertEquals(taskEntity.getRpoCsvStartHour(), 25);
+        assertEquals(taskEntity.getRpoCsvEndHour(), 49);
+
         RecordManagementMatterResponse recordManagementMatterResponse = getRecordManagementMatterResponse();
         when(armApiBaseClient.getRecordManagementMatter(anyString(), any()))
             .thenReturn(recordManagementMatterResponse);
@@ -102,58 +129,76 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
             .thenReturn(getSaveBackgroundSearchResponse());
 
         // when
-        triggerArmRpoSearchServiceImpl.triggerArmRpoSearch(Duration.of(1, ChronoUnit.SECONDS));
+        armRpoBacklogCatchupService.performCatchup(10, 50, 12, Duration.of(100, ChronoUnit.MILLIS));
 
         // then
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository()
             .findLatestByCreatedDateTimeDesc().orElseThrow();
+
+        ArmAutomatedTaskEntity taskEntityResult = dartsPersistence.getArmAutomatedTaskRepository()
+            .findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME).orElseThrow();
+        assertNotEquals(taskEntityResult.getRpoCsvStartHour(), 25);
+        assertNotEquals(taskEntityResult.getRpoCsvEndHour(), 49);
 
         assertNotNull(armRpoExecutionDetailEntity.getId());
         assertEquals(ArmRpoHelper.saveBackgroundSearchRpoState().getId(), armRpoExecutionDetailEntity.getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), armRpoExecutionDetailEntity.getArmRpoStatus().getId());
+
     }
 
     @Test
-    void triggerArmRpoSearch_shouldFail_when() {
+    void performCatchup_doesNothing_WhenOldestPendingEodIsTooNew() {
+        OffsetDateTime lastModifiedDateTime = OffsetDateTime.now().minusHours(49);
 
-        // given
-        RecordManagementMatterResponse recordManagementMatterResponse = getRecordManagementMatterResponse();
-        when(armApiBaseClient.getRecordManagementMatter(anyString(), any()))
-            .thenReturn(recordManagementMatterResponse);
-        when(armApiBaseClient.getIndexesByMatterId(anyString(), any()))
-            .thenReturn(getIndexesByMatterIdResponse());
-        when(armApiBaseClient.getStorageAccounts(anyString(), any()))
-            .thenReturn(getStorageAccounts());
-        when(armApiBaseClient.getProfileEntitlementResponse(anyString(), any()))
-            .thenReturn(getProfileEntitlementResponse());
-        when(armApiBaseClient.getMasterIndexFieldByRecordClassSchema(anyString(), any()))
-            .thenReturn(getMasterIndexFieldByRecordClassSchemaResponse("propertyName1", "ingestionDate"));
-        when(armApiBaseClient.addAsyncSearch(anyString(), any()))
-            .thenReturn(getAsyncSearchResponse());
+        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_RPO_PENDING))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID().toString()).build();
+        armEod1.setCreateRecordProcessedTs(lastModifiedDateTime);
+        armEod1.setVerificationAttempts(1);
+        dartsPersistence.save(armEod1);
 
-        String jsonResponse = "{\"status\":400,\"isError\":true,\"responseStatus\":1,\"message\":\"Search with no results cannot be saved\"}";
-        FeignException feignException = FeignException.errorStatus(
-            "saveBackgroundSearch",
-            feign.Response.builder()
-                .status(400)
-                .reason("Bad Request")
-                .request(feign.Request.create(feign.Request.HttpMethod.POST, "/saveBackgroundSearch", emptyMap(), null, null, null))
-                .body(jsonResponse, StandardCharsets.UTF_8)
-                .build()
-        );
-        when(armApiBaseClient.saveBackgroundSearch(anyString(), any()))
-            .thenThrow(feignException);
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+
+        var executionDetailEntity = createExecutionDetailEntity(userAccount);
+        dartsPersistence.save(executionDetailEntity);
+        var taskEntity = createArmAutomatedTaskEntity();
+        assertEquals(taskEntity.getRpoCsvStartHour(), 25);
+        assertEquals(taskEntity.getRpoCsvEndHour(), 49);
 
         // when
-        triggerArmRpoSearchServiceImpl.triggerArmRpoSearch(Duration.of(1, ChronoUnit.SECONDS));
+        armRpoBacklogCatchupService.performCatchup(10, 50, 12, Duration.of(100, ChronoUnit.MILLIS));
 
         // then
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository()
             .findLatestByCreatedDateTimeDesc().orElseThrow();
 
-        assertEquals(ArmRpoHelper.saveBackgroundSearchRpoState().getId(), armRpoExecutionDetailEntity.getArmRpoState().getId());
-        assertEquals(ArmRpoHelper.failedRpoStatus().getId(), armRpoExecutionDetailEntity.getArmRpoStatus().getId());
+        ArmAutomatedTaskEntity taskEntityResult = dartsPersistence.getArmAutomatedTaskRepository()
+            .findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME).orElseThrow();
+        assertEquals(taskEntityResult.getRpoCsvStartHour(), 25);
+        assertEquals(taskEntityResult.getRpoCsvEndHour(), 49);
 
+        assertNotNull(armRpoExecutionDetailEntity.getId());
+        assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), armRpoExecutionDetailEntity.getArmRpoState().getId());
+        assertEquals(ArmRpoHelper.completedRpoStatus().getId(), armRpoExecutionDetailEntity.getArmRpoStatus().getId());
+
+    }
+
+    private ArmAutomatedTaskEntity createArmAutomatedTaskEntity() {
+        ArmAutomatedTaskEntity taskEntity = dartsPersistence.getArmAutomatedTaskRepository()
+            .findByAutomatedTaskTaskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME).orElseThrow();
+        taskEntity.setRpoCsvStartHour(25);
+        taskEntity.setRpoCsvEndHour(49);
+        return dartsPersistence.getArmAutomatedTaskRepository().saveAndFlush(taskEntity);
+    }
+
+    private ArmRpoExecutionDetailEntity createExecutionDetailEntity(UserAccountEntity userAccount) {
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.removeProductionRpoState());
+        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
+        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
+        return armRpoExecutionDetailEntity;
     }
 
     private SaveBackgroundSearchResponse getSaveBackgroundSearchResponse() {
@@ -271,5 +316,4 @@ class TriggerArmRpoSearchServiceImplVersionFiveTwoIntTest extends IntegrationBas
             .expiresIn("3600")
             .build();
     }
-
 }
