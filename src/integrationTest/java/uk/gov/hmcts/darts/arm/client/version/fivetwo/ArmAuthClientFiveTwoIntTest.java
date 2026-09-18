@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestPropertySource(properties = {
     "darts.storage.arm-api.version5-2.authentication.auth-base-url=http://localhost:${wiremock.server.port}"
 })
-class ArmAuthClientIntTest extends IntegrationBaseWithWiremock {
+class ArmAuthClientFiveTwoIntTest extends IntegrationBaseWithWiremock {
     @Autowired
     private ArmAuthClientFiveTwo armAuthClient;
 

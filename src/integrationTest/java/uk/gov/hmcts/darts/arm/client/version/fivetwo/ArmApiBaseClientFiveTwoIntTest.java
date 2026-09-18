@@ -58,7 +58,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     "darts.storage.arm-api.version5-2.api.api-base-url=http://localhost:${wiremock.server.port}"
 })
 @Slf4j
-class ArmApiBaseClientIntTest extends IntegrationBaseWithWiremock {
+class ArmApiBaseClientFiveTwoIntTest extends IntegrationBaseWithWiremock {
 
     @Autowired
     private ArmApiBaseClientFiveTwo armApiBaseClient;
