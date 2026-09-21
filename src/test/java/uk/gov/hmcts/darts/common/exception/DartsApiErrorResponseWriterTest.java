@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 
@@ -40,10 +41,11 @@ class DartsApiErrorResponseWriterTest {
 
     @Test
     void givenInactiveUserException_whenErrorResponseWritten_thenWritesForbiddenProblemJson() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/secured-endpoint");
         MockHttpServletResponse response = new MockHttpServletResponse();
         DartsApiException exception = new DartsApiException(AuthorisationError.USER_NOT_ACTIVE);
 
-        DartsApiErrorResponseWriter.writeErrorResponse(response, objectMapper, exception);
+        DartsApiErrorResponseWriter.writeErrorResponse(request, response, objectMapper, exception);
 
         JsonNode responseBody = objectMapper.readTree(response.getContentAsString());
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
@@ -51,6 +53,7 @@ class DartsApiErrorResponseWriterTest {
         assertThat(responseBody.get("type").asText()).isEqualTo(AuthorisationError.USER_NOT_ACTIVE.getType());
         assertThat(responseBody.get("title").asText()).isEqualTo(AuthorisationError.USER_NOT_ACTIVE.getTitle());
         assertThat(responseBody.get("status").asInt()).isEqualTo(HttpStatus.FORBIDDEN.value());
+        assertThat(responseBody.get("instance").asText()).isEqualTo("/secured-endpoint");
     }
 
     @Test
@@ -82,4 +85,3 @@ class DartsApiErrorResponseWriterTest {
         assertThat(responseBody.get("detail").asText()).isEqualTo("Bad input");
     }
 }
-
