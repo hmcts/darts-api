@@ -418,6 +418,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
+    @Transactional
     public void closeUserTranscriptions(UserAccountEntity entity, String transcriptionComment) {
         List<TranscriptionEntity> transcriptionWorkflowEntities = transcriptionWorkflowRepository
             .findWorkflowForUserWithTranscriptionState(entity.getId(), WITH_TRANSCRIBER.getId());
