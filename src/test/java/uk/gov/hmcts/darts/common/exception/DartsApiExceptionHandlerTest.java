@@ -35,11 +35,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Slf4j
-class DartsApiTraitImplTest {
+class DartsApiExceptionHandlerTest {
 
     private static final String REQUEST_URI = "/validation-test";
 
-    private final ExposedDartsApiTraitImpl trait = new ExposedDartsApiTraitImpl();
+    private final ExposedDartsApiExceptionHandler exceptionHandler = new ExposedDartsApiExceptionHandler();
 
     @Test
     void givenMethodArgumentNotValidException_whenHandled_thenReturnsBadRequestProblemDetailWithValidationProperties()
@@ -48,12 +48,12 @@ class DartsApiTraitImplTest {
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(requestBody, "testRequest");
         bindingResult.addError(new FieldError("testRequest", "name", "size must be between 1 and 5"));
         MethodParameter methodParameter = new MethodParameter(
-            DartsApiTraitTestController.class.getDeclaredMethod("test", TestRequest.class),
+            DartsApiExceptionHandlerTestController.class.getDeclaredMethod("test", TestRequest.class),
             0
         );
         MethodArgumentNotValidException exception = new MethodArgumentNotValidException(methodParameter, bindingResult);
 
-        ResponseEntity<Object> response = trait.handleMethodArgumentNotValid(
+        ResponseEntity<Object> response = exceptionHandler.handleMethodArgumentNotValid(
             exception,
             HttpHeaders.EMPTY,
             HttpStatus.BAD_REQUEST,
@@ -74,7 +74,7 @@ class DartsApiTraitImplTest {
     void givenHandlerMethodValidationException_whenHandled_thenReturnsBadRequestProblemDetailWithValidationProperties()
         throws NoSuchMethodException {
         StaticMessageSource messageSource = new StaticMessageSource();
-        trait.setMessageSource(messageSource);
+        exceptionHandler.setMessageSource(messageSource);
 
         MethodParameter methodParameter = mock(MethodParameter.class);
         when(methodParameter.getParameterName()).thenReturn("name");
@@ -92,13 +92,13 @@ class DartsApiTraitImplTest {
             (error, sourceType) -> null
         );
         MethodValidationResult methodValidationResult = MethodValidationResult.create(
-            new DartsApiTraitTestController(),
-            DartsApiTraitTestController.class.getDeclaredMethod("test", TestRequest.class),
+            new DartsApiExceptionHandlerTestController(),
+            DartsApiExceptionHandlerTestController.class.getDeclaredMethod("test", TestRequest.class),
             List.of(validationResult)
         );
         HandlerMethodValidationException exception = new HandlerMethodValidationException(methodValidationResult);
 
-        ResponseEntity<Object> response = trait.handleHandlerMethodValidationException(
+        ResponseEntity<Object> response = exceptionHandler.handleHandlerMethodValidationException(
             exception,
             HttpHeaders.EMPTY,
             HttpStatus.BAD_REQUEST,
@@ -126,7 +126,7 @@ class DartsApiTraitImplTest {
 
         ConstraintViolationException exception = new ConstraintViolationException(Set.of(constraintViolation));
 
-        ResponseEntity<Object> response = trait.handleConstraintViolationException(exception, webRequest());
+        ResponseEntity<Object> response = exceptionHandler.handleConstraintViolationException(exception, webRequest());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isInstanceOfSatisfying(ProblemDetail.class, problemDetail -> {
@@ -142,7 +142,7 @@ class DartsApiTraitImplTest {
     void givenHttpMessageNotReadableException_whenHandled_thenReturnsBadRequestProblemDetailWithJsonParseDetail() {
         HttpMessageNotReadableException exception = new HttpMessageNotReadableException("Original parser message");
 
-        ResponseEntity<Object> response = trait.handleHttpMessageNotReadable(
+        ResponseEntity<Object> response = exceptionHandler.handleHttpMessageNotReadable(
             exception,
             HttpHeaders.EMPTY,
             HttpStatus.BAD_REQUEST,
@@ -163,7 +163,7 @@ class DartsApiTraitImplTest {
     void givenMaxUploadSizeExceededException_whenHandled_thenConvertsSpringPayloadToBadRequestProblemDetail() {
         MaxUploadSizeExceededException exception = new MaxUploadSizeExceededException(1024L);
 
-        ResponseEntity<Object> response = trait.handleMaxUploadSizeExceededException(
+        ResponseEntity<Object> response = exceptionHandler.handleMaxUploadSizeExceededException(
             exception,
             HttpHeaders.EMPTY,
             HttpStatus.PAYLOAD_TOO_LARGE,
@@ -181,7 +181,7 @@ class DartsApiTraitImplTest {
     void givenWebRequestWithoutNativeRequest_whenHandled_thenReturnsProblemDetailWithoutInstance() {
         HttpMessageNotReadableException exception = new HttpMessageNotReadableException("Original parser message");
 
-        ResponseEntity<Object> response = trait.handleHttpMessageNotReadable(
+        ResponseEntity<Object> response = exceptionHandler.handleHttpMessageNotReadable(
             exception,
             HttpHeaders.EMPTY,
             HttpStatus.BAD_REQUEST,
@@ -197,7 +197,7 @@ class DartsApiTraitImplTest {
         NativeWebRequest request = mock(NativeWebRequest.class);
         RuntimeException exception = new RuntimeException("Something failed");
 
-        ResponseEntity<ProblemDetail> response = trait.handleRuntimeException(exception, request);
+        ResponseEntity<ProblemDetail> response = exceptionHandler.handleRuntimeException(exception, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody()).satisfies(problemDetail -> assertThat(problemDetail.getInstance()).isNull());
@@ -207,7 +207,7 @@ class DartsApiTraitImplTest {
     void givenRuntimeException_whenHandled_thenReturnsInternalServerErrorProblemDetail() {
         RuntimeException exception = new RuntimeException("Something failed");
 
-        ResponseEntity<ProblemDetail> response = trait.handleRuntimeException(exception, webRequest());
+        ResponseEntity<ProblemDetail> response = exceptionHandler.handleRuntimeException(exception, webRequest());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody()).satisfies(problemDetail -> {
@@ -226,13 +226,13 @@ class DartsApiTraitImplTest {
     private record TestRequest(String name) {
     }
 
-    private static final class DartsApiTraitTestController {
+    private static final class DartsApiExceptionHandlerTestController {
         void test(TestRequest request) {
             log.debug("Test method called with request: " + request);
         }
     }
 
-    private static final class ExposedDartsApiTraitImpl extends DartsApiTraitImpl {
+    private static final class ExposedDartsApiExceptionHandler extends DartsApiExceptionHandler {
         @Override
         public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
                                                                    HttpHeaders headers,
@@ -266,3 +266,4 @@ class DartsApiTraitImplTest {
         }
     }
 }
+
