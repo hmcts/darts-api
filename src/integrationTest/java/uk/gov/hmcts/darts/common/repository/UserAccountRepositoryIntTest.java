@@ -63,27 +63,24 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
 
     @BeforeEach
     void setUp() {
-        UserAccountEntity user1 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
+        userAccountEntity1 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
             .emailAddress("some.user.email@example.net")
             .build()
             .getEntity();
-        dartsPersistence.save(user1);
-        userAccountEntity1 = user1;
+        dartsPersistence.save(userAccountEntity1);
 
-        UserAccountEntity user2 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
+        userAccountEntity2 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
             .emailAddress("some.user.email-2@example.net")
             .build()
             .getEntity();
-        dartsPersistence.save(user2);
-        userAccountEntity2 = user2;
+        dartsPersistence.save(userAccountEntity2);
 
-        UserAccountEntity user3 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
+        userAccountEntity3 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
             .emailAddress("some.user.email-3@example.net")
             .isSystemUser(true)
             .build()
             .getEntity();
-        dartsPersistence.save(user3);
-        userAccountEntity3 = user3;
+        dartsPersistence.save(userAccountEntity3);
     }
 
     @Test
