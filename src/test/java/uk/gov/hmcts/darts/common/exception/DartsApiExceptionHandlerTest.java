@@ -116,6 +116,44 @@ class DartsApiExceptionHandlerTest {
     }
 
     @Test
+    void givenHandlerMethodValidationExceptionWithUnnamedParameter_whenHandled_thenReturnsBadRequestProblemDetailWithFallbackValidationProperty()
+        throws NoSuchMethodException {
+        StaticMessageSource messageSource = new StaticMessageSource();
+        exceptionHandler.setMessageSource(messageSource);
+
+        MethodParameter methodParameter = mock(MethodParameter.class);
+        when(methodParameter.getParameterName()).thenReturn(null);
+        when(methodParameter.getParameterIndex()).thenReturn(0);
+
+        ParameterValidationResult validationResult = new ParameterValidationResult(
+            methodParameter,
+            "too long",
+            List.of(new DefaultMessageSourceResolvable(new String[]{"name.too.long"}, "must be shorter")),
+            null,
+            null,
+            null,
+            (error, sourceType) -> null
+        );
+        MethodValidationResult methodValidationResult = MethodValidationResult.create(
+            new DartsApiExceptionHandlerTestController(),
+            DartsApiExceptionHandlerTestController.class.getDeclaredMethod("test", TestRequest.class),
+            List.of(validationResult)
+        );
+        HandlerMethodValidationException exception = new HandlerMethodValidationException(methodValidationResult);
+
+        ResponseEntity<Object> response = exceptionHandler.handleHandlerMethodValidationException(
+            exception,
+            HttpHeaders.EMPTY,
+            HttpStatus.BAD_REQUEST,
+            webRequest()
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isInstanceOfSatisfying(ProblemDetail.class, problemDetail ->
+            assertThat(problemDetail.getProperties()).containsEntry("arg0", "must be shorter"));
+    }
+
+    @Test
     void givenConstraintViolationException_whenHandled_thenReturnsBadRequestProblemDetailWithViolationProperties() {
         Path propertyPath = mock(Path.class);
         when(propertyPath.toString()).thenReturn("request.name");
@@ -266,4 +304,3 @@ class DartsApiExceptionHandlerTest {
         }
     }
 }
-

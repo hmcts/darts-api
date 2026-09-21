@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.common.exception;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -25,8 +24,6 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -43,8 +40,7 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
             LOGGER.error("A darts exception occurred", exception);
         }
 
-        var problemDetail = DartsApiProblemDetailFactory.createProblemDetail(exception);
-        problemDetail.setInstance(getRequestUri(request));
+        var problemDetail = DartsApiProblemDetailFactory.createProblemDetail(exception, request);
         return new ResponseEntity<>(problemDetail, exception.getError().getHttpStatus());
     }
 
@@ -53,7 +49,7 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode status,
                                                                   WebRequest request) {
-        ProblemDetail problemDetail = createConstraintViolationProblemDetail(request);
+        ProblemDetail problemDetail = DartsApiProblemDetailFactory.createConstraintViolationProblemDetail(request);
 
         for (FieldError fieldError : exception.getFieldErrors()) {
             problemDetail.setProperty(fieldError.getField(), fieldError.getDefaultMessage());
@@ -67,17 +63,20 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
                                                                             HttpHeaders headers,
                                                                             HttpStatusCode status,
                                                                             WebRequest request) {
-        ProblemDetail problemDetail = createConstraintViolationProblemDetail(request);
+        ProblemDetail problemDetail = DartsApiProblemDetailFactory.createConstraintViolationProblemDetail(request);
         Locale locale = LocaleContextHolder.getLocale();
 
         for (ParameterValidationResult validationResult : exception.getParameterValidationResults()) {
             String parameterName = validationResult.getMethodParameter().getParameterName();
+            if (parameterName == null || parameterName.isBlank()) {
+                parameterName = "arg" + validationResult.getMethodParameter().getParameterIndex();
+            }
             List<String> messages = validationResult.getResolvableErrors()
                 .stream()
                 .map(error -> getMessageSource().getMessage(error, locale))
                 .toList();
 
-            if (!messages.isEmpty() && parameterName != null) {
+            if (!messages.isEmpty()) {
                 problemDetail.setProperty(parameterName, String.join(", ", messages));
             }
         }
@@ -88,7 +87,7 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException exception,
                                                                         NativeWebRequest request) {
-        ProblemDetail problemDetail = createConstraintViolationProblemDetail(request);
+        ProblemDetail problemDetail = DartsApiProblemDetailFactory.createConstraintViolationProblemDetail(request);
 
         for (ConstraintViolation<?> constraintViolation : exception.getConstraintViolations()) {
             problemDetail.setProperty(constraintViolation.getPropertyPath().toString(), constraintViolation.getMessage());
@@ -104,7 +103,7 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   WebRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, JSON_PARSE_ERROR_DETAIL);
         problemDetail.setTitle(HttpStatus.BAD_REQUEST.getReasonPhrase());
-        problemDetail.setInstance(getRequestUri(request));
+        DartsApiProblemDetailFactory.setInstance(problemDetail, request);
 
         return handleExceptionInternal(exception, problemDetail, headers, HttpStatus.BAD_REQUEST, request);
     }
@@ -116,7 +115,7 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
                                                                           WebRequest request) {
         ProblemDetail problemDetail = exception.getBody();
         problemDetail.setStatus(HttpStatus.BAD_REQUEST);
-        problemDetail.setInstance(getRequestUri(request));
+        DartsApiProblemDetailFactory.setInstance(problemDetail, request);
 
         return handleExceptionInternal(exception, problemDetail, headers, HttpStatus.BAD_REQUEST, request);
     }
@@ -127,33 +126,9 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
         problemDetail.setTitle(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-        problemDetail.setInstance(getRequestUri(request));
+        DartsApiProblemDetailFactory.setInstance(problemDetail, request);
 
         return new ResponseEntity<>(problemDetail, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    private static ProblemDetail createConstraintViolationProblemDetail(WebRequest request) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(CommonApiError.BAD_REQUEST.getHttpStatus());
-        problemDetail.setType(URI.create(CommonApiError.BAD_REQUEST.getType()));
-        problemDetail.setTitle(CommonApiError.BAD_REQUEST.getTitle());
-        problemDetail.setInstance(getRequestUri(request));
-        problemDetail.setProperties(new HashMap<>());
-        return problemDetail;
-    }
-
-    private static URI getRequestUri(WebRequest request) {
-        if (request instanceof NativeWebRequest nativeWebRequest) {
-            return getNativeRequestUri(nativeWebRequest);
-        }
-        return null;
-    }
-
-    private static URI getNativeRequestUri(NativeWebRequest request) {
-        HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
-        if (servletRequest == null) {
-            return null;
-        }
-        return URI.create(servletRequest.getRequestURI());
     }
 
     private static boolean shouldLogException(DartsApiException exception) {
@@ -161,4 +136,3 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
         return error.shouldLogException() && error.getHttpStatus() != HttpStatus.UNPROCESSABLE_ENTITY;
     }
 }
-
