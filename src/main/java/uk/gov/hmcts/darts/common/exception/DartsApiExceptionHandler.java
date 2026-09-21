@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.common.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -30,9 +32,21 @@ import java.util.Locale;
 
 @ControllerAdvice
 @EnableAutoConfiguration(exclude = ErrorMvcAutoConfiguration.class)
-public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements DartsApiTrait {
+public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DartsApiExceptionHandler.class);
     private static final String JSON_PARSE_ERROR_DETAIL = "JSON parse error";
+
+    @ExceptionHandler
+    public ResponseEntity<ProblemDetail> handleDartsApiException(DartsApiException exception, NativeWebRequest request) {
+        if (shouldLogException(exception)) {
+            LOGGER.error("A darts exception occurred", exception);
+        }
+
+        var problemDetail = DartsApiProblemDetailFactory.createProblemDetail(exception);
+        problemDetail.setInstance(getRequestUri(request));
+        return new ResponseEntity<>(problemDetail, exception.getError().getHttpStatus());
+    }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
@@ -109,7 +123,7 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
 
     @ExceptionHandler(RuntimeException.class)
     protected ResponseEntity<ProblemDetail> handleRuntimeException(RuntimeException exception, NativeWebRequest request) {
-        DARTS_API_EXCEPTION_LOGGER.error("An unexpected exception occurred", exception);
+        LOGGER.error("An unexpected exception occurred", exception);
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
         problemDetail.setTitle(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
@@ -141,4 +155,10 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
         }
         return URI.create(servletRequest.getRequestURI());
     }
+
+    private static boolean shouldLogException(DartsApiException exception) {
+        DartsApiError error = exception.getError();
+        return error.shouldLogException() && error.getHttpStatus() != HttpStatus.UNPROCESSABLE_ENTITY;
+    }
 }
+
