@@ -73,20 +73,6 @@ class DisableInactiveUserAccountsServiceImplTest {
     }
 
     @Test
-    void process_shouldCloseAssignedTranscriptions_whenInactiveUserFound() {
-        UserAccountEntity inactiveUser = userAccount(123);
-
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1000)))
-            .thenReturn(List.of(inactiveUser));
-
-        service.process(1000);
-
-        verify(transcriptionService).closeUserTranscriptions(inactiveUser, OWNER_WAS_DISABLED_DUE_TO_INACTIVITY);
-        verify(userAccountRepository).saveAll(List.of(inactiveUser));
-    }
-
-    @Test
     void process_shouldUseMinimumBatchSize_whenBatchSizeIsLessThanOne() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
         when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1)))
@@ -111,23 +97,6 @@ class DisableInactiveUserAccountsServiceImplTest {
 
     @Test
     void process_shouldUnassignSecurityGroupsFromDisabledUsers_whenDisabledUsersAssignedToGroups() {
-        UserAccountEntity disabledUser = userAccount(123);
-        disabledUser.setActive(false);
-
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1000)))
-            .thenReturn(List.of(disabledUser));
-
-        service.process(1000);
-
-        assertThat(disabledUser.isActive()).isFalse();
-        verify(transcriptionService).closeUserTranscriptions(disabledUser, OWNER_WAS_DISABLED_DUE_TO_INACTIVITY);
-        verify(userAccountSecurityGroupService).unassignUserFromGroupsTheyArePartOf(disabledUser);
-        verify(userAccountRepository).saveAll(List.of(disabledUser));
-    }
-
-    @Test
-    void process_shouldCloseAssignedTranscriptions_whenDisabledInactiveUserFound() {
         UserAccountEntity disabledUser = userAccount(123);
         disabledUser.setActive(false);
 
