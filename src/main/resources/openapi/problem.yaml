@@ -31,7 +31,6 @@ properties:
       A URI reference that identifies the specific occurrence of the problem.
   properties:
     type: object
-    additionalProperties:
-      type: object
+    additionalProperties: {}
     description: |
       Additional problem-specific values.
