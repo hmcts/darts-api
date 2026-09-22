@@ -728,9 +728,14 @@ class TranscriptionServiceImplTest {
     @Test
     void closeUserTranscriptions_shouldCloseAssignedTranscriptions_whenUserHasWithTranscriberWork() {
         transcriptionService = spy(transcriptionService);
+
         UserAccountEntity entity = new UserAccountEntity();
         entity.setId(123);
         String transcriptionComment = "Owner was disabled due to inactivity";
+
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
+        updateTranscription.setWorkflowComment(transcriptionComment);
+        updateTranscription.setTranscriptionStatusId(7);
 
         Long transcriptionId = 1000L;
         TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
@@ -739,11 +744,10 @@ class TranscriptionServiceImplTest {
         when(mockTranscriptionWorkflowRepository
                  .findWorkflowForUserWithTranscriptionState(entity.getId(), TranscriptionStatusEnum.WITH_TRANSCRIBER.getId()))
             .thenReturn(List.of(transcriptionEntity));
-        doNothing().when(transcriptionService).closeTranscription(transcriptionId, transcriptionComment);
 
         transcriptionService.closeUserTranscriptions(entity, transcriptionComment);
 
-        verify(transcriptionService).closeTranscription(transcriptionId, transcriptionComment);
+        verify(transcriptionService).updateTranscription(transcriptionId, updateTranscription, false);
     }
 
     @Test

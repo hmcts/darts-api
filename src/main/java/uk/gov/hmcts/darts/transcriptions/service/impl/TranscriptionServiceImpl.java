@@ -404,8 +404,21 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    @SuppressWarnings("java:S6809")
     public void closeTranscription(Long transcriptionId, String transcriptionComment) {
+        closeTranscriptionInternal(transcriptionId, transcriptionComment);
+    }
+
+    @Override
+    public void closeUserTranscriptions(UserAccountEntity entity, String transcriptionComment) {
+        List<TranscriptionEntity> transcriptions = transcriptionWorkflowRepository
+            .findWorkflowForUserWithTranscriptionState(entity.getId(), WITH_TRANSCRIBER.getId());
+
+        for (TranscriptionEntity transcription : transcriptions) {
+            closeTranscriptionInternal(transcription.getId(), transcriptionComment);
+        }
+    }
+
+    private void closeTranscriptionInternal(Long transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
             updateTranscription.setTranscriptionStatusId(CLOSED.getId());
@@ -414,17 +427,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             log.debug("Closed off transcription {}", transcriptionId);
         } catch (Exception e) {
             log.error("Unable to close transcription {}", transcriptionId, e);
-        }
-    }
-
-    @Override
-    @Transactional
-    public void closeUserTranscriptions(UserAccountEntity entity, String transcriptionComment) {
-        List<TranscriptionEntity> transcriptionWorkflowEntities = transcriptionWorkflowRepository
-            .findWorkflowForUserWithTranscriptionState(entity.getId(), WITH_TRANSCRIBER.getId());
-
-        for (TranscriptionEntity transcription : transcriptionWorkflowEntities) {
-            closeTranscription(transcription.getId(), transcriptionComment);
         }
     }
 
