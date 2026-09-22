@@ -187,5 +187,4 @@ class CasesFunctionalTest extends FunctionalTest {
 
         assertEquals(200, getCaseResponse.statusCode());
     }
-
 }
