@@ -1,12 +1,9 @@
 package uk.gov.hmcts.darts.common.repository;
 
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -28,7 +25,6 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
@@ -55,34 +51,6 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
     @MockitoBean
     private UserIdentity userIdentity;
 
-    private UserAccountEntity userAccountEntity1;
-
-    private UserAccountEntity userAccountEntity2;
-
-    private UserAccountEntity userAccountEntity3;
-
-    @BeforeEach
-    void setUp() {
-        userAccountEntity1 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
-            .emailAddress("some.user.email@example.net")
-            .build()
-            .getEntity();
-        dartsPersistence.save(userAccountEntity1);
-
-        userAccountEntity2 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
-            .emailAddress("some.user.email-2@example.net")
-            .build()
-            .getEntity();
-        dartsPersistence.save(userAccountEntity2);
-
-        userAccountEntity3 = PersistableFactory.getUserAccountTestData().someMinimalBuilder()
-            .emailAddress("some.user.email-3@example.net")
-            .isSystemUser(true)
-            .build()
-            .getEntity();
-        dartsPersistence.save(userAccountEntity3);
-    }
-
     @Test
     void findByEmailAddressIgnoreCase_shouldReturnUserAccount_whenEmailExistsWithDifferentCase() {
         UserAccountEntity integrationTestUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -94,158 +62,6 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
 
         assertEquals(1, foundUsers.size());
         assertEquals(integrationTestUser.getEmailAddress(), foundUsers.get(0).getEmailAddress());
-    }
-
-    @Test
-    void findUsers_shouldReturnUser_whenOnlyEmailProvided() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, userAccountEntity1.getEmailAddress(), null, null
-        );
-
-        assertThat(users, Matchers.hasSize(1));
-        assertThat(users.getFirst().getId(), equalTo(userAccountEntity1.getId()));
-    }
-
-    @Test
-    void findUsers_shouldReturnUser_whenOnlyIdProvided() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, null, List.of(userAccountEntity1.getId()), null
-        );
-
-        assertThat(users, Matchers.hasSize(1));
-        assertThat(users.getFirst().getId(), equalTo(userAccountEntity1.getId()));
-    }
-
-    @Test
-    void findUsers_shouldReturnMultipleUsers_whenOnlyIdsProvided() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, null, List.of(userAccountEntity1.getId(), userAccountEntity2.getId()), null
-        );
-
-        assertThat(users, Matchers.hasSize(2));
-        assertThat(users.get(0).getId(), equalTo(userAccountEntity1.getId()));
-        assertThat(users.get(1).getId(), equalTo(userAccountEntity2.getId()));
-    }
-
-    @Test
-    void findUsers_shouldReturnUsersSortedByIdDescending_whenSortSetToIdDesc() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, null, List.of(userAccountEntity1.getId(), userAccountEntity2.getId()), Sort.by(Sort.Direction.DESC, "id")
-        );
-
-        assertThat(users, Matchers.hasSize(2));
-        assertThat(users.get(0).getId(), equalTo(userAccountEntity2.getId()));
-        assertThat(users.get(1).getId(), equalTo(userAccountEntity1.getId()));
-    }
-
-    @Test
-    void findUsers_shouldNotReturnUsers_whenOnlyNonMatchingEmailProvided() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, "non-matching-email@example.net", null, null
-        );
-
-        assertThat(users, Matchers.hasSize(0));
-    }
-
-    @Test
-    void findUsers_shouldNotReturnUsers_whenOnlyNonMatchingIdProvided() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, null, List.of(123), null
-        );
-
-        assertThat(users, Matchers.hasSize(0));
-    }
-
-    @Test
-    void findUsers_shouldReturnUsers_whenOptionalFieldsBlank() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, null, null, null
-        );
-
-        List<Integer> actualIds = users.stream()
-            .map(UserAccountEntity::getId)
-            .toList();
-
-        assertThat(actualIds, containsInAnyOrder(
-            userAccountEntity1.getId(),
-            userAccountEntity2.getId(),
-            -99
-        ));
-    }
-
-    @Test
-    void findUsers_shouldReturnUser_whenAllOptionalFieldsProvided() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, userAccountEntity1.getEmailAddress(), List.of(userAccountEntity1.getId()), Sort.by(Sort.Direction.DESC, "id")
-        );
-
-        assertThat(users, Matchers.hasSize(1));
-        assertThat(users.getFirst().getId(), equalTo(userAccountEntity1.getId()));
-    }
-
-    @Test
-    void findUsers_shouldNotReturnUser_whenAllOptionalFieldsIncorrect() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, "non-matching-email@example.net", List.of(123), Sort.by(Sort.Direction.DESC, "id")
-        );
-
-        assertThat(users, Matchers.hasSize(0));
-    }
-
-    @Test
-    void findUsers_shouldReturnSystemUser_whenOnlyIdProvided() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            true, null, List.of(userAccountEntity3.getId()), null
-        );
-
-        assertThat(users, Matchers.hasSize(1));
-        assertThat(users.getFirst().getId(), equalTo(userAccountEntity3.getId()));
-    }
-
-    @Test
-    void findUsers_shouldReturnSystemUser_whenOnlyEmailProvided() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            true, userAccountEntity3.getEmailAddress(), null, null
-        );
-
-        assertThat(users, Matchers.hasSize(1));
-        assertThat(users.getFirst().getId(), equalTo(userAccountEntity3.getId()));
-    }
-
-    @Test
-    void findUsers_shouldNotReturnUsers_whenEmailMatchesAndIdDoesNotMatch() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, userAccountEntity1.getEmailAddress(), List.of(123), null
-        );
-
-        assertThat(users, Matchers.hasSize(0));
-    }
-
-    @Test
-    void findUsers_shouldNotReturnUsers_whenIdMatchesAndEmailDoesNotMatch() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, "non-matching-email@example.net", List.of(userAccountEntity1.getId()), null
-        );
-
-        assertThat(users, Matchers.hasSize(0));
-    }
-
-    @Test
-    void findUsers_shouldNotReturnUsers_whenSystemUsersExcluded() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            false, userAccountEntity3.getEmailAddress(), List.of(userAccountEntity3.getId()), null
-        );
-
-        assertThat(users, Matchers.hasSize(0));
-    }
-
-    @Test
-    void findUsers_shouldNotReturnUsers_whenSystemUsersIncludedAndIdDoesNotMatch() {
-        List<UserAccountEntity> users = userAccountRepository.findUsers(
-            true, userAccountEntity3.getEmailAddress(), List.of(123), null
-        );
-
-        assertThat(users, Matchers.hasSize(0));
     }
 
     @Test

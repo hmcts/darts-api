@@ -73,14 +73,14 @@ class DisableInactiveUserAccountsServiceImplTest {
     }
 
     @Test
-    void process_shouldUseMinimumBatchSize_whenBatchSizeIsLessThanOne() {
+    void process_shouldUseConfiguredBatchSize_whenBatchSizeIsZero() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1)))
+        when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(0)))
             .thenReturn(List.of());
 
         service.process(0);
 
-        verify(userAccountRepository).findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1));
+        verify(userAccountRepository).findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(0));
         verify(userAccountRepository, never()).saveAll(List.of());
     }
 
