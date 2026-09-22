@@ -31,7 +31,6 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
 
     private static final String OWNER_WAS_DISABLED_DUE_TO_INACTIVITY = "Owner was disabled due to inactivity";
     private static final Set<Integer> PRIVILEGED_USER_ROLE_IDS = Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId());
-    private static final int MINIMUM_BATCH_SIZE = 1;
 
     private final UserAccountRepository userAccountRepository;
     private final UserAccountSecurityGroupService userAccountSecurityGroupService;
@@ -41,7 +40,6 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
     @Override
     @Transactional
     public void process(int batchSize) {
-        int safeBatchSize = Math.max(batchSize, MINIMUM_BATCH_SIZE);
         OffsetDateTime cutoffDateTime = currentTimeHelper.currentOffsetDateTime().minus(inactivityPeriodLimit);
 
         // Excludes protected users and returns inactive accounts that are active, grouped, or still own transcriber work.
@@ -49,7 +47,7 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
             cutoffDateTime,
             PRIVILEGED_USER_ROLE_IDS,
             WITH_TRANSCRIBER.getId(),
-            Limit.of(safeBatchSize)
+            Limit.of(batchSize)
         );
 
         if (inactiveUsers.isEmpty()) {
