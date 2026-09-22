@@ -1,14 +1,19 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
@@ -37,7 +42,6 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
-import uk.gov.hmcts.darts.util.LogUtil;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -66,7 +70,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
+@ExtendWith(MockitoExtension.class)
+@Execution(ExecutionMode.SAME_THREAD)
 class AudioUploadServiceImplTest {
 
     public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);
@@ -644,23 +649,54 @@ class AudioUploadServiceImplTest {
     }
 
     @Test
-    void deleteUploadedAudio_whenValidDataIsProvided_shouldDeleteUploadedAudio(CapturedOutput output) throws AzureDeleteBlobException {
+    void deleteUploadedAudio_whenValidDataIsProvided_shouldDeleteUploadedAudio() throws AzureDeleteBlobException {
+        ListAppender<ILoggingEvent> logAppender = addLogAppender();
         String externalLocation = UUID.randomUUID().toString();
-        audioService.deleteUploadedAudio(externalLocation);
-        verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
-        assertThat(output)
-            .doesNotContain("Failed to delete blob");
+        try {
+            audioService.deleteUploadedAudio(externalLocation);
+
+            verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
+            assertThat(logAppender.list)
+                .noneMatch(event -> event.getFormattedMessage().contains("Failed to delete blob"));
+        } finally {
+            removeLogAppender(logAppender);
+        }
     }
 
     @Test
-    void deleteUploadedAudio_whenAnExceptionOccurs_shouldLogAndConsume(CapturedOutput output) throws AzureDeleteBlobException {
+    void deleteUploadedAudio_whenAnExceptionOccurs_shouldLogAndConsume() throws AzureDeleteBlobException {
         AzureDeleteBlobException exception = new AzureDeleteBlobException("Failed to delete blob");
         doThrow(exception).when(dataManagementApi).deleteBlobDataFromInboundContainer(any());
+        ListAppender<ILoggingEvent> logAppender = addLogAppender();
 
         String externalLocation = UUID.randomUUID().toString();
-        audioService.deleteUploadedAudio(externalLocation);
-        verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
-        LogUtil.assertOutputHasMessage(output, "Failed to delete blob", 5);
-        LogUtil.assertOutputHasMessage(output, "Failed to delete blob data from inbound container", 5);
+        try {
+            audioService.deleteUploadedAudio(externalLocation);
+
+            verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
+            assertThat(logAppender.list)
+                .anySatisfy(event -> {
+                    assertThat(event.getLevel()).isEqualTo(Level.ERROR);
+                    assertThat(event.getFormattedMessage()).isEqualTo("Failed to delete blob data from inbound container");
+                    assertThat(event.getThrowableProxy().getMessage()).isEqualTo("Failed to delete blob");
+                });
+        } finally {
+            removeLogAppender(logAppender);
+        }
+    }
+
+    private static ListAppender<ILoggingEvent> addLogAppender() {
+        Logger logger = (Logger) LoggerFactory.getLogger(AudioUploadServiceImpl.class);
+        ListAppender<ILoggingEvent> logAppender = new ListAppender<>();
+        logAppender.setContext(logger.getLoggerContext());
+        logAppender.start();
+        logger.addAppender(logAppender);
+        return logAppender;
+    }
+
+    private static void removeLogAppender(ListAppender<ILoggingEvent> logAppender) {
+        Logger logger = (Logger) LoggerFactory.getLogger(AudioUploadServiceImpl.class);
+        logger.detachAppender(logAppender);
+        logAppender.stop();
     }
 }
