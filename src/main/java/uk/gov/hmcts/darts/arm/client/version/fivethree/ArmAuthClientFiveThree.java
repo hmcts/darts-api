@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @FeignClient(
-    name = "arm-auth-client",
+    name = "arm-auth-client-version5-3",
     url = "${darts.storage.arm-api.version5-3.authentication.auth-base-url}"
 )
 @FunctionalInterface
