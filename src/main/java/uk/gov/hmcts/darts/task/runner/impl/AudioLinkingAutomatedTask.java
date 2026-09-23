@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,6 +91,8 @@ public class AudioLinkingAutomatedTask
         private final UserIdentity userIdentity;
 
         @Transactional
+        @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")//Required to handle interrupted exceptions
+        @SneakyThrows
         public void processEvent(Long eveId) {
             log.info("Attempting to link media for event with eveId {}", eveId);
             try {
@@ -107,6 +110,9 @@ public class AudioLinkingAutomatedTask
                 eventService.saveEvent(event);
             } catch (Exception e) {
                 log.error("Error attempting to link media for event with eveId {}", eveId, e);
+                if (e instanceof InterruptedException) {
+                    throw e;
+                }
             }
         }
     }
