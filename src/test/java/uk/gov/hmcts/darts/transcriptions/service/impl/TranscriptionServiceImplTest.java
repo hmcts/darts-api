@@ -940,4 +940,5 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionLinkedCaseEntity.getTranscription()).isEqualTo(mockTranscription);
         assertThat(transcriptionLinkedCaseEntity.getCourtCase()).isEqualTo(mockCourtCase);
     }
+
 }
