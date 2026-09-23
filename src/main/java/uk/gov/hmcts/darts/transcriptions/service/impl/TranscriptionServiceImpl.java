@@ -749,5 +749,4 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionStatus.setDisplayName(transcriptionStatusEntity.getDisplayName());
         return transcriptionStatus;
     }
-
 }
