@@ -67,5 +67,7 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
         if (Boolean.TRUE.equals(userAccount.isActive())) {
             userAccount.setActive(false);
         }
+        // Any user that has been inactive for the specified period will be made INACTIVE, removed from any groups and their transcriptions will be closed.
+        log.info("User account {} has been disabled or cleaned up due to inactivity", userAccount.getId());
     }
 }
