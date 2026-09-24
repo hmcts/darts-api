@@ -183,7 +183,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
 
                 if (dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, rawFilename, userAccount)) {
                     pushRawDataAndCreateArchiveRecordIfSuccess(batchItem, rawFilename, userAccount, objectStateRecord);
-                } else if (dataStoreToArmHelper.shouldAddEntryToManifestFile(batchItem)) {
+                } else if (batchItem.getArchiveRecord() == null && dataStoreToArmHelper.shouldAddEntryToManifestFile(batchItem)) {
                     batchItem.setArchiveRecord(archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename));
                 }
             } catch (Exception e) {
