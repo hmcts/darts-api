@@ -68,6 +68,13 @@ darts:
     trim-workspace: ${java.io.tmpdir}/audiotransform/trim
     re-encode-workspace: ${java.io.tmpdir}/audiotransform/encode
     temp-blob-workspace: ${java.io.tmpdir}/audiotransform/tempworkspace
+
+    handheld-audio-courtroom-numbers:
+      - 199
+      - 99
+      - 198
+      - 98
+    max-handheld-audio-files: 10
   transformation:
     service:
       audio:
