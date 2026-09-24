@@ -377,8 +377,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setTransferAttempts(2));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         var armEodMedia1 = externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
-        String armEodMedia1RawFilename = format("%d_%d_2", armEodMedia1.getId(), medias.get(1).getId());
-        when(armDataManagementApi.listSubmissionBlobs(armEodMedia1RawFilename))
+        String armEodMedia1RawFilename = format("%d_%d_1", armEodMedia1.getId(), medias.get(1).getId());
+        when(armDataManagementApi.listSubmissionBlobs(armEodMedia1.getId() + "_"))
             .thenReturn(List.of("DARTS/submission/" + armEodMedia1RawFilename));
 
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);
@@ -389,8 +389,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), ARM_INGESTION, ARM, eod -> eod.setTransferAttempts(1));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
         var armEodMedia5 = externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_RAW_DATA_PUSHED, ARM, eod -> eod.setTransferAttempts(1));
-        String armEodMedia5RawFilename = format("%d_%d_2", armEodMedia5.getId(), medias.get(5).getId());
-        when(armDataManagementApi.listSubmissionBlobs(armEodMedia5RawFilename))
+        String armEodMedia5RawFilename = format("%d_%d_1", armEodMedia5.getId(), medias.get(5).getId());
+        when(armDataManagementApi.listSubmissionBlobs(armEodMedia5.getId() + "_"))
             .thenReturn(List.of("DARTS/submission/" + armEodMedia5RawFilename));
 
         //when
@@ -425,8 +425,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(manifestFileContent.lines().count()).isEqualTo(8);
         assertThat(manifestFileContent).contains(
             format("_%d_", medias.getFirst().getId()),
-            format("_%d_", medias.get(1).getId())
+            format("_%d_", medias.get(1).getId()),
+            "\"dz_file_name\":\"" + armEodMedia1RawFilename
         );
+        assertThat(manifestFileContent).doesNotContain(format("\"dz_file_name\":\"%d_%d_2", armEodMedia1.getId(), medias.get(1).getId()));
         assertThat(manifestFileContent).doesNotContain(format("_%d_", medias.get(2).getId()));
     }
 
