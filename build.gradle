@@ -470,8 +470,8 @@ dependencies {
 
   implementation 'uk.gov.service.notify:notifications-java-client:6.2.1-RELEASE'
 
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.6.1'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.6.1'
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.6.3'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.6.3'
 
   implementation group: 'io.vavr', name: 'vavr', version: '1.0.1'
 
