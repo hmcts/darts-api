@@ -13,20 +13,21 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @UtilityClass
 public class AdminCasesSearchResponseMapper {
 
-    public List<AdminCasesSearchResponseItem> mapResponse(List<CourtCaseEntity> cases) {
+    public List<AdminCasesSearchResponseItem> mapResponse(List<CourtCaseEntity> cases, Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId) {
         List<AdminCasesSearchResponseItem> results = new ArrayList<>();
         for (CourtCaseEntity courtCase : cases) {
-            results.add(map(courtCase));
+            results.add(map(courtCase, linkedCasesByCaseId));
         }
         return results;
     }
 
-    private AdminCasesSearchResponseItem map(CourtCaseEntity courtCase) {
+    private AdminCasesSearchResponseItem map(CourtCaseEntity courtCase, Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId) {
         AdminCasesSearchResponseItem responseItem = new AdminCasesSearchResponseItem();
         responseItem.setId(courtCase.getId());
         responseItem.setCaseNumber(courtCase.getCaseNumber());
@@ -36,6 +37,10 @@ public class AdminCasesSearchResponseMapper {
         responseItem.setDefendants(courtCase.getDefendantStringList());
         responseItem.isDataAnonymised(courtCase.isDataAnonymised());
         responseItem.dataAnonymisedAt(courtCase.getDataAnonymisedTs());
+        List<CourtCaseEntity> linkedCases = linkedCasesByCaseId.getOrDefault(courtCase.getId(), List.of());
+        if (!linkedCases.isEmpty()) {
+            responseItem.setLinkedCases(AdvancedSearchResponseMapper.mapToAdvancedSearchResultLinkedCase(linkedCases));
+        }
 
         return responseItem;
     }

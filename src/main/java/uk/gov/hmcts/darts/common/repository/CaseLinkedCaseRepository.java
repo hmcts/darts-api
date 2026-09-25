@@ -22,4 +22,14 @@ public interface CaseLinkedCaseRepository extends JpaRepository<CaseLinkedCaseEn
         """)
     List<CaseLinkedCaseEntity> findByCourtCase(@Param("courtCase") CourtCaseEntity courtCase);
 
+    @Query("""
+        SELECT clc
+        FROM CaseLinkedCaseEntity clc
+        JOIN FETCH clc.courtCase1
+        JOIN FETCH clc.courtCase2
+        WHERE clc.courtCase1.id IN :caseIds
+        OR clc.courtCase2.id IN :caseIds
+        """)
+    List<CaseLinkedCaseEntity> findByCourtCaseIdIn(@Param("caseIds") List<Integer> caseIds);
+
 }

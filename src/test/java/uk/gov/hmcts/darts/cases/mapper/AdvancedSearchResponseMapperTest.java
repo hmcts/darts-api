@@ -9,6 +9,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
@@ -18,7 +19,9 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
@@ -38,7 +41,7 @@ class AdvancedSearchResponseMapperTest {
     @Test
     void empty() {
         List<HearingEntity> hearings = new ArrayList<>();
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings);
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, Map.of());
         assertEquals(0, result.size());
     }
 
@@ -51,13 +54,64 @@ class AdvancedSearchResponseMapperTest {
         courtCase.setDataAnonymisedTs(OffsetDateTime.parse("2024-01-01T00:00:00Z"));
 
         hearings.add(hearing);
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings);
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, Map.of());
 
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/AdvancedSearchResponseMapperTest/one/expectedResponse.json");
         compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void mapResponse_shouldReturnLinkedCases_whenOneCaseAndOneLinkedCase() {
+        HearingEntity hearing = CommonTestDataUtil.createHearing(TEST_1, LocalTime.NOON);
+        CourtCaseEntity courtCase = hearing.getCourtCase();
+        CourtCaseEntity linkedCase = CommonTestDataUtil.createCaseWithId("linked-case", 202);
+
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(
+            List.of(hearing),
+            Map.of(courtCase.getId(), List.of(linkedCase))
+        );
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getLinkedCases()).hasSize(1);
+        assertThat(result.getFirst().getLinkedCases().getFirst().getCaseId()).isEqualTo(202);
+        assertThat(result.getFirst().getLinkedCases().getFirst().getCaseNumber()).isEqualTo("linked-case");
+        assertThat(result.getFirst().getLinkedCases().getFirst().getCourthouse()).isEqualTo("case_courthouse");
+        assertThat(result.getFirst().getLinkedCases().getFirst().getDefendants())
+            .containsExactly("defendant_linked-case_1", "defendant_linked-case_2");
+        assertThat(result.getFirst().getLinkedCases().getFirst().getJudges()).containsExactly("Judge_1", "Judge_2");
+    }
+
+    @Test
+    void mapResponse_shouldReturnLinkedCases_whenMultipleCasesLinkedToDifferentCases() {
+        CourtCaseEntity courtCase1 = CommonTestDataUtil.createCaseWithId("case-1", 101);
+        CourtCaseEntity courtCase2 = CommonTestDataUtil.createCaseWithId("case-2", 102);
+        CourtCaseEntity linkedCase1 = CommonTestDataUtil.createCaseWithId("linked-case-1", 201);
+        CourtCaseEntity linkedCase2 = CommonTestDataUtil.createCaseWithId("linked-case-2", 202);
+        CourtCaseEntity linkedCase3 = CommonTestDataUtil.createCaseWithId("linked-case-3", 203);
+
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(
+            List.of(
+                CommonTestDataUtil.createHearing(courtCase1, CommonTestDataUtil.createCourtroom("1"), LocalDate.of(2023, 6, 20), LocalTime.NOON),
+                CommonTestDataUtil.createHearing(courtCase2, CommonTestDataUtil.createCourtroom("2"), LocalDate.of(2023, 6, 21), LocalTime.NOON)
+            ),
+            Map.of(
+                courtCase1.getId(), List.of(linkedCase1, linkedCase2),
+                courtCase2.getId(), List.of(linkedCase3)
+            )
+        );
+
+        assertThat(result).hasSize(2);
+        assertThat(result.getFirst().getCaseId()).isEqualTo(101);
+        assertThat(result.getFirst().getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseId())
+            .containsExactly(201, 202);
+        assertThat(result.get(1).getCaseId()).isEqualTo(102);
+        assertThat(result.get(1).getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseId())
+            .containsExactly(203);
     }
 
     @Test
@@ -83,7 +137,7 @@ class AdvancedSearchResponseMapperTest {
         List<HearingEntity> hearings = new ArrayList<>();
         hearings.add(hearing1);
         hearings.add(hearing2);
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings);
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, Map.of());
 
         String actualResponse = objectMapper.writeValueAsString(result);
 
@@ -144,7 +198,7 @@ class AdvancedSearchResponseMapperTest {
         hearings.add(hearing2);
         hearings.add(hearing3);
         hearings.add(hearing4);
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings);
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, Map.of());
 
         String actualResponse = objectMapper.writeValueAsString(result);
 

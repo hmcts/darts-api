@@ -25,12 +25,7 @@ class CaseLinkedCaseRepositoryIntTest extends PostgresIntegrationBase {
         CourtCaseEntity courtCase1 = createCourtCase(CASE_NUMBER_1);
         CourtCaseEntity courtCase2 = createCourtCase(CASE_NUMBER_2);
 
-        CaseLinkedCaseEntity linkedCase = new CaseLinkedCaseEntity();
-        linkedCase.setCourtCase1(courtCase1);
-        linkedCase.setCourtCase2(courtCase2);
-        linkedCase.setCreatedById(0);
-        linkedCase.setLastModifiedById(0);
-        linkedCase = caseLinkedCaseRepository.saveAndFlush(linkedCase);
+        CaseLinkedCaseEntity linkedCase = createLinkedCase(courtCase1, courtCase2);
         clearEntityManagerCache();
 
         // when
@@ -46,9 +41,45 @@ class CaseLinkedCaseRepositoryIntTest extends PostgresIntegrationBase {
             .containsExactly(linkedCase.getId());
     }
 
+    @Test
+    void findByCourtCaseIdIn_shouldReturnLinkedCasesForAllMatchingCaseIds() {
+        // given
+        CourtCaseEntity courtCase1 = createCourtCase(CASE_NUMBER_1);
+        CourtCaseEntity courtCase2 = createCourtCase(CASE_NUMBER_2);
+        CourtCaseEntity courtCase3 = createCourtCase("CASE-3");
+        CourtCaseEntity courtCase4 = createCourtCase("CASE-4");
+        CourtCaseEntity courtCase5 = createCourtCase("CASE-5");
+
+        CaseLinkedCaseEntity linkedCase1 = createLinkedCase(courtCase1, courtCase2);
+        CaseLinkedCaseEntity linkedCase2 = createLinkedCase(courtCase3, courtCase1);
+        CaseLinkedCaseEntity linkedCase3 = createLinkedCase(courtCase4, courtCase5);
+        clearEntityManagerCache();
+
+        // when
+        List<CaseLinkedCaseEntity> linkedCases = caseLinkedCaseRepository.findByCourtCaseIdIn(List.of(
+            courtCase1.getId(),
+            courtCase2.getId(),
+            courtCase3.getId()
+        ));
+
+        // then
+        assertThat(linkedCases)
+            .extracting(CaseLinkedCaseEntity::getId)
+            .containsExactlyInAnyOrder(linkedCase1.getId(), linkedCase2.getId())
+            .doesNotContain(linkedCase3.getId());
+    }
+
     private CourtCaseEntity createCourtCase(String caseNumber) {
         CourtCaseEntity courtCase = PersistableFactory.getCourtCaseTestData().caseWithCaseNumber(caseNumber);
         return dartsPersistence.save(courtCase);
     }
-}
 
+    private CaseLinkedCaseEntity createLinkedCase(CourtCaseEntity courtCase1, CourtCaseEntity courtCase2) {
+        CaseLinkedCaseEntity linkedCase = new CaseLinkedCaseEntity();
+        linkedCase.setCourtCase1(courtCase1);
+        linkedCase.setCourtCase2(courtCase2);
+        linkedCase.setCreatedById(0);
+        linkedCase.setLastModifiedById(0);
+        return caseLinkedCaseRepository.saveAndFlush(linkedCase);
+    }
+}
