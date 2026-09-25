@@ -42,6 +42,8 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static java.time.ZoneOffset.UTC;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCaseRetention;
@@ -234,6 +236,22 @@ class CasesMapperTest {
     }
 
     @Test
+    void mapToSingleCase_shouldReturnLinkedCases_whenLinkedCasesProvided() {
+        CourtCaseEntity caseEntity = CommonTestDataUtil.createCaseWithId("Case00001", 1);
+        CourtCaseEntity linkedCase1 = CommonTestDataUtil.createCaseWithId("LinkedCase1", 2);
+        CourtCaseEntity linkedCase2 = CommonTestDataUtil.createCaseWithId("LinkedCase2", 3);
+
+        SingleCase singleCase = caseMapper.mapToSingleCase(caseEntity, List.of(linkedCase1, linkedCase2));
+
+        assertThat(singleCase.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseId(), linkedCase -> linkedCase.getCaseNumber())
+            .containsExactlyInAnyOrder(
+                tuple(2, "LinkedCase1"),
+                tuple(3, "LinkedCase2")
+            );
+    }
+
+    @Test
     void mapToAdminSingleCaseResponseItem_WithCaseOpenNullReportingRestrictions() throws IOException {
         // Given
         CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("Test house");
@@ -289,6 +307,22 @@ class CasesMapperTest {
             .replace("<created_by>", String.valueOf(courtCase.getCreatedById()))
             .replace("<last_modified_by>", String.valueOf(courtCase.getLastModifiedById()));
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void mapToAdminSingleCaseResponseItem_shouldReturnLinkedCases_whenLinkedCasesProvided() {
+        CourtCaseEntity caseEntity = CommonTestDataUtil.createCaseWithId("Case00001", 1);
+        CourtCaseEntity linkedCase1 = CommonTestDataUtil.createCaseWithId("LinkedCase1", 2);
+        CourtCaseEntity linkedCase2 = CommonTestDataUtil.createCaseWithId("LinkedCase2", 3);
+
+        AdminSingleCaseResponseItem responseItem = caseMapper.mapToAdminSingleCaseResponseItem(caseEntity, List.of(linkedCase1, linkedCase2));
+
+        assertThat(responseItem.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseId(), linkedCase -> linkedCase.getCaseNumber())
+            .containsExactlyInAnyOrder(
+                tuple(2, "LinkedCase1"),
+                tuple(3, "LinkedCase2")
+            );
     }
 
     @Test

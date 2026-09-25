@@ -97,13 +97,6 @@ public class AdvancedSearchResponseMapper {
         AdvancedSearchResultLinkedCase advancedSearchResultLinkedCase = new AdvancedSearchResultLinkedCase();
         advancedSearchResultLinkedCase.setCaseId(linkedCase.getId());
         advancedSearchResultLinkedCase.setCaseNumber(linkedCase.getCaseNumber());
-        advancedSearchResultLinkedCase.setCourthouse(linkedCase.getCourthouse().getDisplayName());
-        advancedSearchResultLinkedCase.setDefendants(linkedCase.getDefendantStringList());
-        advancedSearchResultLinkedCase.setJudges(linkedCase.getJudgeStringList());
-        EventHandlerEntity reportingRestrictions = linkedCase.getReportingRestrictions();
-        if (reportingRestrictions != null) {
-            advancedSearchResultLinkedCase.setReportingRestriction(reportingRestrictions.getEventName());
-        }
         return advancedSearchResultLinkedCase;
     }
 
