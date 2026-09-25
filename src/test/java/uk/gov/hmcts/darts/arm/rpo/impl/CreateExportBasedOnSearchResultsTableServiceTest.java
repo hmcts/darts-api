@@ -10,8 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
@@ -19,7 +21,7 @@ import uk.gov.hmcts.darts.arm.rpo.CreateExportBasedOnSearchResultsTableService;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceFiveTwo;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -48,6 +50,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.CloseResource"})
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
 class CreateExportBasedOnSearchResultsTableServiceTest {
 
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
@@ -55,7 +58,9 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     private static final Integer EXECUTION_ID = 1;
 
     @Mock
-    private ArmRpoClient armRpoClient;
+    private ArmAuthClientFiveTwo armAuthClient;
+    @Mock
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
     @Mock
     private ArmApiService armApiService;
     @Mock
@@ -82,7 +87,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
 
         armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
 
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        ArmClientService armClientService = new ArmClientServiceFiveTwo(armAuthClient, armApiBaseClient);
 
         createExportBasedOnSearchResultsTableCheckService = new CreateExportBasedOnSearchResultsTableServiceImpl(
             armClientService, armRpoService, armRpoUtil, currentTimeHelper, objectMapper);
@@ -101,7 +106,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     void createExportBasedOnSearchResultsTable_Success() {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(200, false, 0);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -124,7 +129,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     void createExportBasedOnSearchResultsTable_ReturnsInProgress() {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -144,7 +149,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     void createExportBasedOnSearchResultsTable_ReturnsInProgress_WithPollingCreatedTimestampInRange() {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now());
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
@@ -166,7 +171,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     void createExportBasedOnSearchResultsTable_ThrowsException_WhenPollingCreatedTimestampOutOfRange() {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 2);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         armRpoExecutionDetailEntity.setPollingCreatedAt(OffsetDateTime.now().minusHours(5));
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
@@ -192,7 +197,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("400", false, "2"));
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -213,7 +218,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus200IsErrorTrueResponseStatusZero() {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(200, true, 0);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -239,7 +244,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("200", true, "0"));
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -264,7 +269,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus400IsErrorTrueResponseStatusZero() {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, true, 0);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -290,7 +295,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("200", true, "0"));
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -315,7 +320,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus400IsErrorFalseResponseStatusZero() {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(400, false, 0);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -341,7 +346,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("200", true, "0"));
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -366,7 +371,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     void createExportBasedOnSearchResultsTable_ThrowsException_WithStatus500IsErrorFalseResponseStatus500() {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = createResponse(500, false, 500);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -392,7 +397,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("500", true, "0"));
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -440,7 +445,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
     @Test
     void createExportBasedOnSearchResultsTable_ThrowsException_WhenClientThrowsFeignException() {
         // given
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(FeignException.class);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(FeignException.class);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -466,7 +471,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(getFeignResponseAsString("500", true, "500"));
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -492,7 +497,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn(null);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -518,7 +523,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn("");
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -544,7 +549,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn("{");
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -570,7 +575,7 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
         // given
         FeignException feignException = mock(FeignException.class);
         when(feignException.contentUTF8()).thenReturn("{}");
-        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(feignException);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -601,13 +606,13 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             .reason("Unauthorised")
             .build();
         FeignException feign401 = FeignException.errorStatus("createExportBasedOnSearchResultsTable", response);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("token"), any())).thenThrow(feign401);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(eq("token"), any())).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
         var createExportBasedOnSearchResultsTableResponse = createResponse(200, false, 0);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("Bearer refreshed"), any())).thenReturn(createExportBasedOnSearchResultsTableResponse);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(eq("Bearer refreshed"), any())).thenReturn(createExportBasedOnSearchResultsTableResponse);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -636,13 +641,13 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             .reason("Forbidden")
             .build();
         FeignException feign403 = FeignException.errorStatus("createExportBasedOnSearchResultsTable", response);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("token"), any())).thenThrow(feign403);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(eq("token"), any())).thenThrow(feign403);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
         var createExportBasedOnSearchResultsTableResponse = createResponse(200, false, 0);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("Bearer refreshed"), any())).thenReturn(createExportBasedOnSearchResultsTableResponse);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(eq("Bearer refreshed"), any())).thenReturn(createExportBasedOnSearchResultsTableResponse);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
@@ -671,12 +676,12 @@ class CreateExportBasedOnSearchResultsTableServiceTest {
             .reason("Unauthorised")
             .build();
         FeignException feign401 = FeignException.errorStatus("createExportBasedOnSearchResultsTable", response);
-        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("token"), any())).thenThrow(feign401);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(eq("token"), any())).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
-        when(armRpoClient.createExportBasedOnSearchResultsTable(eq("Bearer refreshed"), any())).thenThrow(feign401);
+        when(armApiBaseClient.createExportBasedOnSearchResultsTable(eq("Bearer refreshed"), any())).thenThrow(feign401);
         List<MasterIndexFieldByRecordClassSchema> headerColumns = createHeaderColumns();
 
         // when
