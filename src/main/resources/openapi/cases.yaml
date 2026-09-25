@@ -857,10 +857,40 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/advancedSearchResultHearing'
+        linked_cases:
+          type: array
+          items:
+            $ref: '#/components/schemas/advancedSearchResultLinkedCase'
         is_data_anonymised:
           $ref: '#/components/schemas/IsDataAnonymised'
         data_anonymised_at:
           $ref: '#/components/schemas/DataAnonymisedAt'
+    advancedSearchResultLinkedCase:
+      type: object
+      properties:
+        case_id:
+          type: integer
+          example: 1
+          description: Unique case identifier, used internally by DARTS.
+        case_number:
+          type: string
+          example: C20220620001
+          description: 'Case Number'
+        courthouse:
+          type: string
+          example: SWANSEA
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        reporting_restriction:
+          type: string
+          example: "Section 4(2) of the Contempt of Court Act 1981"
+          description: 'Any reporting restrictions associated with the case.'
     advancedSearchResultHearing:
       type: object
       properties:
@@ -1020,6 +1050,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/defendant'
+        linked_cases:
+          type: array
+          items:
+            $ref: '#/components/schemas/advancedSearchResultLinkedCase'
         is_data_anonymised:
           $ref: '#/components/schemas/IsDataAnonymised'
         data_anonymised_at:
