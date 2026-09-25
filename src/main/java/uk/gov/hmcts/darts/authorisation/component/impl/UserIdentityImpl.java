@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authentication.component.DartsJwt;
+import uk.gov.hmcts.darts.authentication.config.marketplace.CpMarketplaceAuthConfigurationProperties;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.util.EmailAddressFromTokenUtil;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -32,6 +33,7 @@ public class UserIdentityImpl implements UserIdentity {
 
     private final UserAccountRepository userAccountRepository;
     private final UserRolesCourthousesRepository userRolesCourthousesRepository;
+    private final CpMarketplaceAuthConfigurationProperties cpMarketplaceAuthConfigurationProperties;
 
     private String getGuidFromToken(Jwt token) {
         if (token != null) {
@@ -62,6 +64,10 @@ public class UserIdentityImpl implements UserIdentity {
 
     @Override
     public Optional<UserAccountEntity> getUserAccountOptional(Jwt jwt) {
+        if (isCpMarketplaceToken(jwt)) {
+            return getCpMarketplaceServiceAccount();
+        }
+
         String guid = getGuidFromToken(jwt);
 
         Optional<UserAccountEntity> userAccount = Optional.ofNullable(guid)
@@ -73,15 +79,7 @@ public class UserIdentityImpl implements UserIdentity {
         }
 
         String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
-        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(emailAddressFromToken);
-
-        var activeUserAccount = userAccounts.stream().filter(UserAccountEntity::isActive).findFirst();
-        if (activeUserAccount.isPresent()) {
-            return activeUserAccount;
-        }
-
-        // return remaining inactive user account if no active user account found, else empty optional
-        return userAccounts.stream().findFirst();
+        return getUserAccountForEmailAddress(emailAddressFromToken);
     }
 
     @Override
@@ -101,7 +99,9 @@ public class UserIdentityImpl implements UserIdentity {
         String guid = getGuidFromToken(jwt);
 
         try {
-            if (jwt != null) {
+            if (isCpMarketplaceToken(jwt)) {
+                emailAddress = getCpMarketplaceServiceAccountEmail().orElse(null);
+            } else if (jwt != null) {
                 emailAddress = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
             }
         } catch (IllegalStateException e) {
@@ -137,5 +137,34 @@ public class UserIdentityImpl implements UserIdentity {
             return Optional.ofNullable(dartsJwt.getUserId());
         }
         return Optional.empty();
+    }
+
+    private Optional<UserAccountEntity> getCpMarketplaceServiceAccount() {
+        return getCpMarketplaceServiceAccountEmail()
+            .flatMap(this::getUserAccountForEmailAddress);
+    }
+
+    private Optional<String> getCpMarketplaceServiceAccountEmail() {
+        return Optional.ofNullable(cpMarketplaceAuthConfigurationProperties.getServiceAccountEmail())
+            .filter(StringUtils::isNotBlank);
+    }
+
+    private boolean isCpMarketplaceToken(Jwt jwt) {
+        return jwt != null
+            && cpMarketplaceAuthConfigurationProperties.isEnabled()
+            && jwt.getIssuer() != null
+            && cpMarketplaceAuthConfigurationProperties.getIssuerUri().equals(jwt.getIssuer().toString());
+    }
+
+    private Optional<UserAccountEntity> getUserAccountForEmailAddress(String emailAddress) {
+        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress);
+
+        var activeUserAccount = userAccounts.stream().filter(UserAccountEntity::isActive).findFirst();
+        if (activeUserAccount.isPresent()) {
+            return activeUserAccount;
+        }
+
+        // return remaining inactive user account if no active user account found, else empty optional
+        return userAccounts.stream().findFirst();
     }
 }

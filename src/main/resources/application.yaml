@@ -112,6 +112,18 @@ spring:
             loggerLevel: ${FEIGN_LOG_LEVEL:none}
 
 darts:
+  authentication:
+    marketplace:
+      cp:
+        enabled: ${DARTS_MARKETPLACE_CP_AUTH_ENABLED:false}
+        issuer-uri: ${DARTS_MARKETPLACE_CP_AUTH_ISSUER_URI:}
+        jwk-set-uri: ${DARTS_MARKETPLACE_CP_AUTH_JWK_SET_URI:}
+        audience: ${DARTS_MARKETPLACE_CP_AUTH_AUDIENCE:}
+        identity-claim: ${DARTS_MARKETPLACE_CP_AUTH_IDENTITY_CLAIM:}
+        expected-identity: ${DARTS_MARKETPLACE_CP_AUTH_EXPECTED_IDENTITY:}
+        role-claim: ${DARTS_MARKETPLACE_CP_AUTH_ROLE_CLAIM:}
+        expected-role: ${DARTS_MARKETPLACE_CP_AUTH_EXPECTED_ROLE:}
+        service-account-email: ${DARTS_MARKETPLACE_CP_AUTH_SERVICE_ACCOUNT_EMAIL:}
   async:
     enabled: true
   shutdown:

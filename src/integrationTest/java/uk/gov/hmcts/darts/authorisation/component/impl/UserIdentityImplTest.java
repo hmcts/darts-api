@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.authorisation.component.impl;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import uk.gov.hmcts.darts.authentication.component.DartsJwt;
+import uk.gov.hmcts.darts.authentication.config.marketplace.CpMarketplaceAuthConfigurationProperties;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -38,10 +40,20 @@ class UserIdentityImplTest extends IntegrationBase {
     @Autowired
     private AuthorisationStub authorisationStub;
 
+    @Autowired
+    private CpMarketplaceAuthConfigurationProperties cpMarketplaceAuthConfigurationProperties;
+
 
     @BeforeEach
     void beforeEach() {
         authorisationStub.givenTestSchema();
+    }
+
+    @AfterEach
+    void afterEach() {
+        cpMarketplaceAuthConfigurationProperties.setEnabled(false);
+        cpMarketplaceAuthConfigurationProperties.setIssuerUri(null);
+        cpMarketplaceAuthConfigurationProperties.setServiceAccountEmail(null);
     }
 
     @Test
@@ -113,6 +125,45 @@ class UserIdentityImplTest extends IntegrationBase {
             .claim("emails", List.of(email))
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        Optional<UserAccountEntity> userAccountEntity = userIdentity.getUserAccountOptional(jwt);
+
+        assertTrue(userAccountEntity.isEmpty());
+    }
+
+    @Test
+    void getUserAccountOptional_whenCpMarketplaceToken_shouldReturnConfiguredServiceAccount() {
+        String issuer = "https://marketplace.example.test";
+        String serviceAccountEmail = "integrationtest.user@example.com";
+        cpMarketplaceAuthConfigurationProperties.setEnabled(true);
+        cpMarketplaceAuthConfigurationProperties.setIssuerUri(issuer);
+        cpMarketplaceAuthConfigurationProperties.setServiceAccountEmail(serviceAccountEmail);
+
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .issuer(issuer)
+            .claim("sub", UUID.randomUUID().toString())
+            .build();
+
+        Optional<UserAccountEntity> userAccountEntity = userIdentity.getUserAccountOptional(jwt);
+
+        assertTrue(userAccountEntity.isPresent());
+        assertEquals(serviceAccountEmail, userAccountEntity.get().getEmailAddress());
+    }
+
+    @Test
+    void getUserAccountOptional_whenCpMarketplaceTokenServiceAccountNotFound_shouldNotFallBackToTokenEmail() {
+        String issuer = "https://marketplace.example.test";
+        cpMarketplaceAuthConfigurationProperties.setEnabled(true);
+        cpMarketplaceAuthConfigurationProperties.setIssuerUri(issuer);
+        cpMarketplaceAuthConfigurationProperties.setServiceAccountEmail("unknown.integrationtest.user@example.com");
+
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .issuer(issuer)
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("emails", List.of("integrationtest.user@example.com"))
+            .build();
 
         Optional<UserAccountEntity> userAccountEntity = userIdentity.getUserAccountOptional(jwt);
 

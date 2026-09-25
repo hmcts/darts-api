@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -17,7 +18,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -28,18 +32,19 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtIss
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.OncePerRequestFilter;
 import uk.gov.hmcts.darts.authentication.component.DartsJwt;
-import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
 import uk.gov.hmcts.darts.authentication.config.DefaultAuthConfigurationPropertiesStrategy;
 import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderConfigurationProperties;
+import uk.gov.hmcts.darts.authentication.config.marketplace.CpMarketplaceAuthConfigurationProperties;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiTrait;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,6 +64,7 @@ public class SecurityConfig {
     private final ExternalAuthProviderConfigurationProperties externalAuthProviderConfigurationProperties;
     private final InternalAuthConfigurationProperties internalAuthConfigurationProperties;
     private final InternalAuthProviderConfigurationProperties internalAuthProviderConfigurationProperties;
+    private final CpMarketplaceAuthConfigurationProperties cpMarketplaceAuthConfigurationProperties;
     private final UserIdentity userIdentity;
     private final JwtDecoder jwtDecoder;
     private static final String TOKEN_BEARER_PREFIX = "Bearer";
@@ -118,14 +124,22 @@ public class SecurityConfig {
     }
 
     private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() {
-        Map<String, AuthenticationManager> authenticationManagers = Map.ofEntries(
-            createAuthenticationEntry(externalAuthConfigurationProperties.getIssuerUri()),
-            createAuthenticationEntry(internalAuthConfigurationProperties.getIssuerUri())
-        );
+        Map<String, AuthenticationManager> authenticationManagers = new HashMap<>();
+        authenticationManagers.put(externalAuthConfigurationProperties.getIssuerUri(),
+                                   createAuthenticationManager(externalAuthConfigurationProperties.getIssuerUri()));
+        authenticationManagers.put(internalAuthConfigurationProperties.getIssuerUri(),
+                                   createAuthenticationManager(internalAuthConfigurationProperties.getIssuerUri()));
+
+        if (cpMarketplaceAuthConfigurationProperties.isEnabled()) {
+            validateCpMarketplaceConfiguration();
+            authenticationManagers.put(cpMarketplaceAuthConfigurationProperties.getIssuerUri(),
+                                       createAuthenticationManager(cpMarketplaceAuthConfigurationProperties.getIssuerUri()));
+        }
+
         return new JwtIssuerAuthenticationManagerResolver(authenticationManagers::get);
     }
 
-    private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer) {
+    private AuthenticationManager createAuthenticationManager(String issuer) {
         var jwtDecoder = getNimbusJwtDecoder(issuer);
 
         //Use a custom JWT decoder so that we can add the user id to the JWT without modifying the underlying JWT
@@ -142,10 +156,60 @@ public class SecurityConfig {
             }
         };
 
-        OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefaultWithIssuer(issuer);
+        OAuth2TokenValidator<Jwt> jwtValidator = createJwtValidator(issuer);
         jwtDecoder.setJwtValidator(jwtValidator);
         var authenticationProvider = new JwtAuthenticationProvider(dartsJwtDecoder);
-        return Map.entry(issuer, authenticationProvider::authenticate);
+        return authenticationProvider::authenticate;
+    }
+
+    private OAuth2TokenValidator<Jwt> createJwtValidator(String issuer) {
+        OAuth2TokenValidator<Jwt> defaultValidator = JwtValidators.createDefaultWithIssuer(issuer);
+
+        if (!isCpMarketplaceIssuer(issuer)) {
+            return defaultValidator;
+        }
+
+        return new DelegatingOAuth2TokenValidator<>(
+            defaultValidator,
+            jwt -> jwt.getAudience().contains(cpMarketplaceAuthConfigurationProperties.getAudience())
+                ? OAuth2TokenValidatorResult.success()
+                : OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "The aud claim is not valid", null)),
+            requiredClaimValidator(cpMarketplaceAuthConfigurationProperties.getIdentityClaim(),
+                                   cpMarketplaceAuthConfigurationProperties.getExpectedIdentity()),
+            requiredClaimValidator(cpMarketplaceAuthConfigurationProperties.getRoleClaim(),
+                                   cpMarketplaceAuthConfigurationProperties.getExpectedRole())
+        );
+    }
+
+    private OAuth2TokenValidator<Jwt> requiredClaimValidator(String claimName, String expectedValue) {
+        return jwt -> claimContainsExpectedValue(jwt.getClaim(claimName), expectedValue)
+            ? OAuth2TokenValidatorResult.success()
+            : OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "The " + claimName + " claim is not valid", null));
+    }
+
+    private boolean claimContainsExpectedValue(Object claimValue, String expectedValue) {
+        if (claimValue instanceof String claimString) {
+            return expectedValue.equals(claimString);
+        }
+        if (claimValue instanceof Collection<?> claimCollection) {
+            return claimCollection.contains(expectedValue);
+        }
+        return false;
+    }
+
+    private void validateCpMarketplaceConfiguration() {
+        if (StringUtils.isAnyBlank(
+            cpMarketplaceAuthConfigurationProperties.getIssuerUri(),
+            cpMarketplaceAuthConfigurationProperties.getJwkSetUri(),
+            cpMarketplaceAuthConfigurationProperties.getAudience(),
+            cpMarketplaceAuthConfigurationProperties.getIdentityClaim(),
+            cpMarketplaceAuthConfigurationProperties.getExpectedIdentity(),
+            cpMarketplaceAuthConfigurationProperties.getRoleClaim(),
+            cpMarketplaceAuthConfigurationProperties.getExpectedRole(),
+            cpMarketplaceAuthConfigurationProperties.getServiceAccountEmail()
+        )) {
+            throw new IllegalStateException("CP Marketplace authentication is enabled but required configuration is missing");
+        }
     }
 
     private final class AuthorisationTokenExistenceFilter extends OncePerRequestFilter {
@@ -221,21 +285,28 @@ public class SecurityConfig {
             return decoderMap.get(issuer);
         }
 
-        AuthProviderConfigurationProperties authProviderConfig = getAuthProviderConfig(issuer);
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(authProviderConfig.getJwkSetUri())
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(getJwkSetUri(issuer))
             .jwsAlgorithm(SignatureAlgorithm.RS256)
             .build();
         decoderMap.put(issuer, decoder);
         return decoder;
     }
 
-    private AuthProviderConfigurationProperties getAuthProviderConfig(String issuer) {
+    private String getJwkSetUri(String issuer) {
         if (issuer.equals(externalAuthConfigurationProperties.getIssuerUri())) {
-            return externalAuthProviderConfigurationProperties;
+            return externalAuthProviderConfigurationProperties.getJwkSetUri();
         }
         if (issuer.equals(internalAuthConfigurationProperties.getIssuerUri())) {
-            return internalAuthProviderConfigurationProperties;
+            return internalAuthProviderConfigurationProperties.getJwkSetUri();
+        }
+        if (isCpMarketplaceIssuer(issuer)) {
+            return cpMarketplaceAuthConfigurationProperties.getJwkSetUri();
         }
         throw new IllegalArgumentException("Issuer not found");
+    }
+
+    private boolean isCpMarketplaceIssuer(String issuer) {
+        return cpMarketplaceAuthConfigurationProperties.isEnabled()
+            && issuer.equals(cpMarketplaceAuthConfigurationProperties.getIssuerUri());
     }
 }
