@@ -139,7 +139,8 @@ public class CaseServiceImpl implements CaseService {
         if (caseEntity.getHearings().stream().noneMatch(HearingEntity::getHearingIsActual)) {
             throw new DartsApiException(CaseApiError.HEARINGS_NOT_ACTUAL);
         }
-        return casesMapper.mapToSingleCase(caseEntity);
+        List<CourtCaseEntity> linkedCases = getLinkedCases(caseId);
+        return casesMapper.mapToSingleCase(caseEntity, linkedCases);
     }
 
     @Override
@@ -235,6 +236,18 @@ public class CaseServiceImpl implements CaseService {
             && caseIdSet.contains(courtCase.getId());
     }
 
+    private List<CourtCaseEntity> getLinkedCases(Integer caseId) {
+        List<CaseLinkedCaseEntity> linkedCaseEntities = caseLinkedCaseRepository.findByCourtCaseIdIn(List.of(caseId));
+        if (linkedCaseEntities == null) {
+            return List.of();
+        }
+        Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId = getLinkedCasesByCaseId(
+            List.of(caseId),
+            linkedCaseEntities
+        );
+        return linkedCasesByCaseId.getOrDefault(caseId, List.of());
+    }
+
     @Transactional
     @Override
     public PaginatedList<Event> getEventsByCaseId(Integer caseId, PaginationDto<Event> paginationDto) {
@@ -326,7 +339,8 @@ public class CaseServiceImpl implements CaseService {
     @Transactional(readOnly = true)
     public AdminSingleCaseResponseItem adminGetCaseById(Integer caseId) {
         CourtCaseEntity caseEntity = getCourtCaseById(caseId);
-        return casesMapper.mapToAdminSingleCaseResponseItem(caseEntity);
+        List<CourtCaseEntity> linkedCases = getLinkedCases(caseId);
+        return casesMapper.mapToAdminSingleCaseResponseItem(caseEntity, linkedCases);
     }
 
 }
