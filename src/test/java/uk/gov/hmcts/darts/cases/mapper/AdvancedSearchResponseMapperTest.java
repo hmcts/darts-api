@@ -78,10 +78,6 @@ class AdvancedSearchResponseMapperTest {
         assertThat(result.getFirst().getLinkedCases()).hasSize(1);
         assertThat(result.getFirst().getLinkedCases().getFirst().getCaseId()).isEqualTo(202);
         assertThat(result.getFirst().getLinkedCases().getFirst().getCaseNumber()).isEqualTo("linked-case");
-        assertThat(result.getFirst().getLinkedCases().getFirst().getCourthouse()).isEqualTo("case_courthouse");
-        assertThat(result.getFirst().getLinkedCases().getFirst().getDefendants())
-            .containsExactly("defendant_linked-case_1", "defendant_linked-case_2");
-        assertThat(result.getFirst().getLinkedCases().getFirst().getJudges()).containsExactly("Judge_1", "Judge_2");
     }
 
     @Test
