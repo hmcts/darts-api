@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.history.RevisionRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -16,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
+@SuppressWarnings("PMD.TooManyMethods")//Repository class so low complexity in this case
 public interface UserAccountRepository extends
     RevisionRepository<UserAccountEntity, Integer, Long>,
     JpaRepository<UserAccountEntity, Integer>,
@@ -72,6 +75,45 @@ public interface UserAccountRepository extends
         WHERE id = :userId
         """)
     void updateLastLoginTime(Integer userId, OffsetDateTime now);
+
+    @Query("""
+        SELECT DISTINCT userAccount
+        FROM UserAccountEntity userAccount
+        WHERE (
+            userAccount.active = true
+            OR EXISTS (
+                SELECT cleanupSecurityGroup
+                FROM UserAccountEntity cleanupUser
+                JOIN cleanupUser.securityGroupEntities cleanupSecurityGroup
+                WHERE cleanupUser = userAccount
+            )
+            OR EXISTS (
+                SELECT assignedTranscriptionWorkflow
+                FROM TranscriptionWorkflowEntity assignedTranscriptionWorkflow
+                JOIN assignedTranscriptionWorkflow.transcription assignedTranscription
+                WHERE assignedTranscriptionWorkflow.workflowActor = userAccount
+                AND assignedTranscription.transcriptionStatus.id = :withTranscriberStatusId
+            )
+        )
+        AND userAccount.isSystemUser = false
+        AND userAccount.emailAddress NOT ILIKE '%localhost%'
+        AND (
+            userAccount.lastLoginTime <= :cutoffDateTime
+            OR (userAccount.lastLoginTime IS NULL AND userAccount.createdDateTime <= :cutoffDateTime)
+        )
+        AND NOT EXISTS (
+            SELECT excludedSecurityGroup
+            FROM UserAccountEntity excludedUser
+            JOIN excludedUser.securityGroupEntities excludedSecurityGroup
+            WHERE excludedUser = userAccount
+            AND excludedSecurityGroup.securityRoleEntity.id IN :excludedRoleIds
+        )
+        ORDER BY userAccount.id ASC
+        """)
+    List<UserAccountEntity> findInactiveUsersForCleanupExcludingRoles(@Param("cutoffDateTime") OffsetDateTime cutoffDateTime,
+                                                                      @Param("excludedRoleIds") Set<Integer> excludedRoleIds,
+                                                                      @Param("withTranscriberStatusId") Integer withTranscriberStatusId,
+                                                                      Limit limit);
 
     List<UserAccountEntity> findByIdInAndActive(List<Integer> userIds, Boolean active);
 
