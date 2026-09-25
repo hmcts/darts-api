@@ -806,6 +806,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/defence'
+        linked_cases:
+          type: array
+          items:
+            $ref: '#/components/schemas/advancedSearchResultLinkedCase'
         reporting_restrictions:
           $ref: './common.yaml#/components/schemas/reporting_restrictions'
         retain_until_date_time:
@@ -857,10 +861,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/advancedSearchResultHearing'
+        linked_cases:
+          type: array
+          items:
+            $ref: '#/components/schemas/advancedSearchResultLinkedCase'
         is_data_anonymised:
           $ref: '#/components/schemas/IsDataAnonymised'
         data_anonymised_at:
           $ref: '#/components/schemas/DataAnonymisedAt'
+    advancedSearchResultLinkedCase:
+      type: object
+      properties:
+        case_id:
+          type: integer
+          example: 1
+          description: Unique case identifier, used internally by DARTS.
+        case_number:
+          type: string
+          example: C20220620001
+          description: 'Case Number'
     advancedSearchResultHearing:
       type: object
       properties:
@@ -1020,6 +1039,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/defendant'
+        linked_cases:
+          type: array
+          items:
+            $ref: '#/components/schemas/advancedSearchResultLinkedCase'
         is_data_anonymised:
           $ref: '#/components/schemas/IsDataAnonymised'
         data_anonymised_at:
@@ -1111,6 +1134,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/defence'
+        linked_cases:
+          type: array
+          items:
+            $ref: '#/components/schemas/advancedSearchResultLinkedCase'
         reporting_restrictions:
           $ref: './common.yaml#/components/schemas/reporting_restrictions'
         retain_until_date_time:
