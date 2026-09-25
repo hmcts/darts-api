@@ -10,6 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
+import uk.gov.hmcts.darts.common.entity.CaseLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -29,6 +30,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
@@ -266,6 +268,34 @@ class CaseServiceAdminSearchIntTest extends IntegrationBase {
     }
 
     @Test
+    void adminCaseSearch_shouldReturnLinkedCases_whenMultipleCasesLinkedToDifferentCases() {
+        CourtCaseEntity linkedSearchCase1 = getCourtCase("Case1");
+        CourtCaseEntity linkedSearchCase2 = getCourtCase("Case2");
+        CourtCaseEntity linkedSearchCase3 = getCourtCase("Case3");
+        dartsDatabase.save(createLinkedCase(linkedSearchCase1, linkedSearchCase2));
+        dartsDatabase.save(createLinkedCase(linkedSearchCase3, linkedSearchCase1));
+
+        AdminCasesSearchRequest request = new AdminCasesSearchRequest();
+        request.setCaseNumber("Case");
+
+        List<AdminCasesSearchResponseItem> resultList = service.adminCaseSearch(request);
+
+        AdminCasesSearchResponseItem linkedCase1 = getResultByCaseNumber(resultList, "Case1");
+        AdminCasesSearchResponseItem linkedCase2 = getResultByCaseNumber(resultList, "Case2");
+        AdminCasesSearchResponseItem linkedCase3 = getResultByCaseNumber(resultList, "Case3");
+
+        assertThat(linkedCase1.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber())
+            .containsExactlyInAnyOrder("Case2", "Case3");
+        assertThat(linkedCase2.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber())
+            .containsExactly("Case1");
+        assertThat(linkedCase3.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber())
+            .containsExactly("Case1");
+    }
+
+    @Test
     void maxResults() {
         courtCaseStub.createCasesWithHearings(25, 1, 1);
         AdminCasesSearchRequest request = new AdminCasesSearchRequest();
@@ -277,6 +307,28 @@ class CaseServiceAdminSearchIntTest extends IntegrationBase {
 
         assertEquals(CaseApiError.TOO_MANY_RESULTS, exception.getError());
 
+    }
+
+    private CaseLinkedCaseEntity createLinkedCase(CourtCaseEntity courtCase1, CourtCaseEntity courtCase2) {
+        CaseLinkedCaseEntity linkedCase = new CaseLinkedCaseEntity();
+        linkedCase.setCourtCase1(courtCase1);
+        linkedCase.setCourtCase2(courtCase2);
+        linkedCase.setCreatedById(0);
+        linkedCase.setLastModifiedById(0);
+        return linkedCase;
+    }
+
+    private CourtCaseEntity getCourtCase(String caseNumber) {
+        return dartsDatabase.getCaseRepository()
+            .findByCaseNumberAndCourthouse_CourthouseName(caseNumber, "SWANSEA")
+            .orElseThrow();
+    }
+
+    private AdminCasesSearchResponseItem getResultByCaseNumber(List<AdminCasesSearchResponseItem> resultList, String caseNumber) {
+        return resultList.stream()
+            .filter(result -> result.getCaseNumber().equals(caseNumber))
+            .findFirst()
+            .orElseThrow();
     }
 
     private static void compareJson(String actualResponse, String expectedResponse) {
