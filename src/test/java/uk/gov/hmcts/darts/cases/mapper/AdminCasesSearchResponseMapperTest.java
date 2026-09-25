@@ -13,6 +13,9 @@ import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class AdminCasesSearchResponseMapperTest {
 
@@ -27,7 +30,7 @@ class AdminCasesSearchResponseMapperTest {
     }
 
     @Test
-    void happyPath() throws JsonProcessingException {
+    void mapResponse_shouldMapCases_whenLinkedCasesEmpty() throws JsonProcessingException {
         CourtCaseEntity case1 = CommonTestDataUtil.createCaseWithId("case1", 101);
         CommonTestDataUtil.createHearingsForCase(case1, 1, 2);
         CourtCaseEntity case2 = CommonTestDataUtil.createCaseWithId("case2", 102);
@@ -37,7 +40,7 @@ class AdminCasesSearchResponseMapperTest {
         case3.setDataAnonymisedTs(OffsetDateTime.parse("2024-01-01T00:00:00Z"));
         CommonTestDataUtil.createHearingsForCase(case3, 3, 4);
 
-        List<AdminCasesSearchResponseItem> result = AdminCasesSearchResponseMapper.mapResponse(List.of(case1, case2, case3));
+        List<AdminCasesSearchResponseItem> result = AdminCasesSearchResponseMapper.mapResponse(List.of(case1, case2, case3), Map.of());
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = """
@@ -129,5 +132,33 @@ class AdminCasesSearchResponseMapperTest {
 
     }
 
+    @Test
+    void mapResponse_shouldReturnLinkedCases_whenMultipleCasesLinkedToDifferentCases() {
+        CourtCaseEntity case1 = CommonTestDataUtil.createCaseWithId("case1", 101);
+        CommonTestDataUtil.createHearingsForCase(case1, 1, 2);
+        CourtCaseEntity case2 = CommonTestDataUtil.createCaseWithId("case2", 102);
+        CommonTestDataUtil.createHearingsForCase(case2, 2, 3);
+        CourtCaseEntity linkedCase1 = CommonTestDataUtil.createCaseWithId("linkedCase1", 201);
+        CourtCaseEntity linkedCase2 = CommonTestDataUtil.createCaseWithId("linkedCase2", 202);
+        CourtCaseEntity linkedCase3 = CommonTestDataUtil.createCaseWithId("linkedCase3", 203);
+
+        List<AdminCasesSearchResponseItem> result = AdminCasesSearchResponseMapper.mapResponse(
+            List.of(case1, case2),
+            Map.of(
+                case1.getId(), List.of(linkedCase1, linkedCase2),
+                case2.getId(), List.of(linkedCase3)
+            )
+        );
+
+        AdminCasesSearchResponseItem mappedCase1 = result.getFirst();
+        AdminCasesSearchResponseItem mappedCase2 = result.get(1);
+
+        assertThat(mappedCase1.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber())
+            .containsExactlyInAnyOrder("linkedCase1", "linkedCase2");
+        assertThat(mappedCase2.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber())
+            .containsExactly("linkedCase3");
+    }
 
 }
