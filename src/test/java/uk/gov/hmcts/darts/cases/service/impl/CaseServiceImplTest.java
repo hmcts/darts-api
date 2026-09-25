@@ -41,6 +41,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
+import uk.gov.hmcts.darts.common.repository.CaseLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -95,6 +96,9 @@ class CaseServiceImplTest {
     private CaseRepository caseRepository;
 
     @Mock
+    private CaseLinkedCaseRepository caseLinkedCaseRepository;
+
+    @Mock
     private HearingRepository hearingRepository;
 
     @Mock
@@ -140,6 +144,7 @@ class CaseServiceImplTest {
         caseService = new CaseServiceImpl(
             casesMapper,
             annotationMapper,
+            caseLinkedCaseRepository,
             hearingRepository,
             eventRepository,
             caseRepository,
