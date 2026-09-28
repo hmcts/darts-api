@@ -411,8 +411,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    public void closeTranscription(Long transcriptionId, String transcriptionComment) {
-        closeTranscriptionInternal(transcriptionId, transcriptionComment);
+    public boolean closeTranscription(Long transcriptionId, String transcriptionComment) {
+        return closeTranscriptionInternal(transcriptionId, transcriptionComment);
     }
 
     @Override
