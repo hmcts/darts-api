@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -15,10 +16,13 @@ import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.AMEND_TRANSCRIPTION_WORKFLOW;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
@@ -63,7 +67,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void closeTranscriptionWithOldRequestedStatusReturnsClosedStatus() {
+    void closeTranscriptions_shouldCloseTranscription_whenRequestedStatusIsOld() {
         TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
             setupData();
             TranscriptionTypeEntity transcriptionType = dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES);
@@ -94,7 +98,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void closeTranscriptionWithNewRequestedStatusRemainsUnchanged() {
+    void closeTranscriptions_shouldLeaveTranscriptionUnchanged_whenRequestedStatusIsNew() {
         TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
             setupData();
             TranscriptionTypeEntity transcriptionType = dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES);
@@ -118,7 +122,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void closeTranscriptionWithOldAwaitingAuthorisationStatusReturnsClosedStatus() {
+    void closeTranscriptions_shouldCloseTranscription_whenAwaitingAuthorisationStatusIsOld() {
         TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
             setupData();
             TranscriptionTypeEntity transcriptionType = dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES);
@@ -150,7 +154,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void closeTranscriptionWithOldApprovedStatusReturnsClosedStatus() {
+    void closeTranscriptions_shouldCloseTranscription_whenApprovedStatusIsOld() {
         TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
             setupData();
 
@@ -181,7 +185,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void closeTranscriptionWithOldRejectedStatusRemainsUnchanged() {
+    void closeTranscriptions_shouldLeaveTranscriptionUnchanged_whenRejectedStatusIsOld() {
         TranscriptionTypeEntity transcriptionType = dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES);
         TranscriptionStatusEntity rejectedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REJECTED);
         TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
@@ -210,8 +214,8 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void closeTranscriptionWithOldWithTranscriberStatusReturnsClosedStatus() {
-        TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
+    void closeTranscriptions_shouldCloseTranscriptionsAndRecordOneAudit_whenWithTranscriberStatusIsOld() {
+        List<TranscriptionEntity> transcriptions = transactionalUtil.executeInTransaction(() -> {
             setupData();
             TranscriptionTypeEntity transcriptionType = dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES);
             TranscriptionStatusEntity withTranscriberTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(WITH_TRANSCRIBER);
@@ -220,28 +224,34 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
                 .createAndSaveTranscriptionEntity(hearing, transcriptionType, withTranscriberTranscriptionStatus,
                                                   Optional.of(transcriptionUrgency), systemUser);
-
+            TranscriptionEntity secondTranscription = dartsDatabase.getTranscriptionStub()
+                .createAndSaveTranscriptionEntity(hearing, transcriptionType, withTranscriberTranscriptionStatus,
+                                                  Optional.of(transcriptionUrgency), systemUser);
 
             assertEquals(WITH_TRANSCRIBER.getId(), transcription.getTranscriptionStatus().getId());
             transcription.setCreatedDateTime(CREATED_DATE);
-            return dartsDatabase.save(transcription);
+            secondTranscription.setCreatedDateTime(CREATED_DATE);
+            return List.of(dartsDatabase.save(transcription), dartsDatabase.save(secondTranscription));
         });
-        dartsDatabase.updateCreatedBy(transcriptionEntity, CREATED_DATE);
-        final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
-            .findById(transcriptionEntity.getId()).orElseThrow();
-        assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
+        transcriptions.forEach(transcription -> dartsDatabase.updateCreatedBy(transcription, CREATED_DATE));
 
         transcriptionsProcessor.closeTranscriptions(1000);
 
         transactionalUtil.executeInTransaction(() -> {
-            final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-                .findById(transcriptionEntity.getId()).orElseThrow();
-            assertEquals(CLOSED.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
+            transcriptions.forEach(transcription -> {
+                final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
+                    .findById(transcription.getId()).orElseThrow();
+                assertEquals(CLOSED.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
+            });
+            List<AuditEntity> workflowAudits = dartsDatabase.findAudits().stream()
+                .filter(audit -> AMEND_TRANSCRIPTION_WORKFLOW.getId().equals(audit.getAuditActivity().getId()))
+                .toList();
+            assertThat(workflowAudits).hasSize(1);
         });
     }
 
     @Test
-    void closeTranscriptionWithOldCompleteStatusRemainsUnchanged() {
+    void closeTranscriptions_shouldLeaveTranscriptionUnchanged_whenCompleteStatusIsOld() {
         TranscriptionTypeEntity transcriptionType = dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES);
         TranscriptionStatusEntity completeTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(COMPLETE);
         TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
@@ -270,7 +280,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void closeTranscriptionWithOldClosedStatusRemainsUnchanged() {
+    void closeTranscriptions_shouldLeaveTranscriptionUnchanged_whenClosedStatusIsOld() {
         TranscriptionEntity transcriptionEntity = transactionalUtil.executeInTransaction(() -> {
             setupData();
             TranscriptionTypeEntity transcriptionType = dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES);
