@@ -286,7 +286,7 @@ public class DataStoreToArmHelper {
     private Optional<String> getArchiveRecordRawFilename(ExternalObjectDirectoryEntity armEod, String rawFilename, List<String> submissionBlobs) {
         String prefix = format("%d_", armEod.getId());
         if (CollectionUtils.isEmpty(submissionBlobs)) {
-            log.debug("No submission blobs found for EOD {} with prefix {}", armEod.getId(), prefix);
+            log.info("No submission blobs found for EOD {} with prefix {}", armEod.getId(), prefix);
             return Optional.empty();
         }
 
