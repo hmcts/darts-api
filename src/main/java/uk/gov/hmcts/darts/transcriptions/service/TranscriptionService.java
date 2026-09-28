@@ -61,7 +61,7 @@ public interface TranscriptionService {
 
     List<TranscriptionStatus> getTranscriptionStatuses();
 
-    void closeTranscription(Long transcriptionId, String transcriptionComment);
+    boolean closeTranscription(Long transcriptionId, String transcriptionComment);
 
     List<TranscriptionDocumentEntity> getAllCaseTranscriptionDocuments(Integer caseId);
 
