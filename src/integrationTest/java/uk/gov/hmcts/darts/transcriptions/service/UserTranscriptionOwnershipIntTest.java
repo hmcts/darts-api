@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.transcriptions.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
@@ -16,9 +17,11 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.AMEND_TRANSCRIPTION_WORKFLOW;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
@@ -64,6 +67,8 @@ class UserTranscriptionOwnershipIntTest extends IntegrationBase {
             .findById(transcription.getId())
             .orElseThrow();
         assertEquals(WITH_TRANSCRIBER.getId(), reloadedTranscription.getTranscriptionStatus().getId());
+        assertThat(dartsDatabase.findAudits())
+            .noneMatch(audit -> AMEND_TRANSCRIPTION_WORKFLOW.getId().equals(audit.getAuditActivity().getId()));
     }
 
     @Test
@@ -79,6 +84,12 @@ class UserTranscriptionOwnershipIntTest extends IntegrationBase {
             .findById(transcription.getId())
             .orElseThrow();
         assertEquals(CLOSED.getId(), reloadedTranscription.getTranscriptionStatus().getId());
+
+        AuditEntity workflowAudit = dartsDatabase.findAudits().stream()
+            .filter(audit -> AMEND_TRANSCRIPTION_WORKFLOW.getId().equals(audit.getAuditActivity().getId()))
+            .findFirst()
+            .orElseThrow();
+        assertThat(workflowAudit.getAdditionalData()).isNull();
     }
 
     @Test

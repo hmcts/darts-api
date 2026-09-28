@@ -7,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -22,6 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.DEACTIVATE_USER;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_USERS_GROUP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
@@ -42,6 +46,8 @@ class DisableInactiveUserAccountsServiceImplTest {
     private CurrentTimeHelper currentTimeHelper;
     @Mock
     private TranscriptionService transcriptionService;
+    @Mock
+    private AuditApi auditApi;
 
     private DisableInactiveUserAccountsServiceImpl service;
 
@@ -51,7 +57,8 @@ class DisableInactiveUserAccountsServiceImplTest {
             userAccountRepository,
             userAccountSecurityGroupService,
             currentTimeHelper,
-            transcriptionService
+            transcriptionService,
+            auditApi
         );
         ReflectionTestUtils.setField(service, "inactivityPeriodLimit", Period.ofMonths(6));
     }
@@ -59,6 +66,7 @@ class DisableInactiveUserAccountsServiceImplTest {
     @Test
     void process_shouldDisableInactiveUsersAndUnassignSecurityGroups_whenInactiveUsersFound() {
         UserAccountEntity inactiveUser = userAccount(123);
+        inactiveUser.getSecurityGroupEntities().add(new SecurityGroupEntity());
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
         when(userAccountRepository.findInactiveUsersForCleanupExcludingRoles(CUTOFF_DATE_TIME, EXCLUDED_ROLE_IDS, WITH_TRANSCRIBER.getId(), Limit.of(1000)))
@@ -67,6 +75,8 @@ class DisableInactiveUserAccountsServiceImplTest {
         service.process(1000);
 
         assertThat(inactiveUser.isActive()).isFalse();
+        verify(auditApi).record(DEACTIVATE_USER);
+        verify(auditApi).record(UPDATE_USERS_GROUP);
         verify(transcriptionService).closeUserTranscriptions(inactiveUser, OWNER_WAS_DISABLED_DUE_TO_INACTIVITY);
         verify(userAccountSecurityGroupService).unassignUserFromGroupsTheyArePartOf(inactiveUser);
         verify(userAccountRepository).saveAll(List.of(inactiveUser));
@@ -107,6 +117,7 @@ class DisableInactiveUserAccountsServiceImplTest {
         service.process(1000);
 
         assertThat(disabledUser.isActive()).isFalse();
+        verify(auditApi, never()).record(DEACTIVATE_USER);
         verify(transcriptionService).closeUserTranscriptions(disabledUser, OWNER_WAS_DISABLED_DUE_TO_INACTIVITY);
         verify(userAccountSecurityGroupService).unassignUserFromGroupsTheyArePartOf(disabledUser);
         verify(userAccountRepository).saveAll(List.of(disabledUser));
