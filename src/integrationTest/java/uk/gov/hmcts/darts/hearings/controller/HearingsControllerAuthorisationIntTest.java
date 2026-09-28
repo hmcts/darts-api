@@ -51,7 +51,7 @@ class HearingsControllerAuthorisationIntTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {
         "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
     }, mode = INCLUDE)
-    void allowsRolesWithGlobalHearingAccess(SecurityRoleEnum role) throws Exception {
+    void hearingEndpoints_shouldAllowAccess_whenRoleHasConfiguredGlobalHearingAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(get("/hearings/{hearing_id}", hearing.getId())).andExpect(status().isOk());
@@ -63,7 +63,7 @@ class HearingsControllerAuthorisationIntTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {
         "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
     }, mode = EXCLUDE)
-    void forbidsRolesWithoutGlobalHearingAccess(SecurityRoleEnum role) throws Exception {
+    void hearingEndpoints_shouldForbidAccess_whenRoleLacksConfiguredGlobalHearingAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(get("/hearings/{hearing_id}", hearing.getId())).andExpect(status().isForbidden());
