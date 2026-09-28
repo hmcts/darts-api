@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -17,6 +18,8 @@ import java.time.Period;
 import java.util.List;
 import java.util.Set;
 
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.DEACTIVATE_USER;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_USERS_GROUP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
@@ -36,6 +39,7 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
     private final UserAccountSecurityGroupService userAccountSecurityGroupService;
     private final CurrentTimeHelper currentTimeHelper;
     private final TranscriptionService transcriptionService;
+    private final AuditApi auditApi;
 
     @Override
     @Transactional
@@ -61,13 +65,25 @@ public class DisableInactiveUserAccountsServiceImpl implements DisableInactiveUs
         log.info("Processed {} inactive user accounts", inactiveUsers.size());
     }
 
+    /**
+     * Processes an inactive user account by closing their transcriptions, unassigning them from groups, and deactivating the account.
+     *
+     * @param userAccount the inactive user account to process
+     */
     private void processInactiveUser(UserAccountEntity userAccount) {
         transcriptionService.closeUserTranscriptions(userAccount, OWNER_WAS_DISABLED_DUE_TO_INACTIVITY);
+        if (!userAccount.getSecurityGroupEntities().isEmpty()) {
+            auditApi.record(UPDATE_USERS_GROUP);
+        }
+
         userAccountSecurityGroupService.unassignUserFromGroupsTheyArePartOf(userAccount);
         if (Boolean.TRUE.equals(userAccount.isActive())) {
+            auditApi.record(DEACTIVATE_USER);
             userAccount.setActive(false);
         }
-        // Any user that has been inactive for the specified period will be made INACTIVE, removed from any groups and their transcriptions will be closed.
+
         log.info("User account {} has been disabled or cleaned up due to inactivity", userAccount.getId());
+        // Remove this comment and the debug log following testing for this change.
+        log.debug("User with email account {} has been disabled or cleaned up due to inactivity", userAccount.getEmailAddress());
     }
 }
