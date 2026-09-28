@@ -368,3 +368,76 @@ function:
       sslmode: "require"
       query: "SELECT count(*) FROM darts.media_request WHERE mer_id = ( SELECT mer_id FROM darts.media_request WHERE request_status = 'OPEN' ORDER BY created_ts LIMIT 1 )"
       targetQueryValue: "0.9"
+
+audioIngestion:
+  enabled: ${DEV_ENABLE_AUDIO_INGESTION_KEDA}
+
+  scaleType: Job
+  image: ${IMAGE_NAME}
+  aadIdentityName: darts
+
+  pollingInterval: 30
+  minReplicaCount: 0
+  maxReplicaCount: 5
+  scalingStrategy: accurate
+
+  devmemoryRequests: 500Mi
+  devcpuRequests: 500m
+  devmemoryLimits: 4Gi
+  devcpuLimits: 4
+
+  global:
+    enableKeyVaults: true
+
+  keyVaults:
+    "darts":
+      secrets:
+        - name: api-POSTGRES-SCHEMA
+          alias: DARTS_API_DB_SCHEMA
+
+  environment:
+    DARTS_API_DB_HOST: "darts-modernisation-dev.postgres.database.azure.com"
+    DARTS_API_DB_NAME: "pr-${CHANGE_ID}-darts"
+    DARTS_API_DB_USERNAME: "hmcts"
+
+    AUDIO_INGESTION_MODE: true
+    ATS_MODE: false
+    API_MODE: false
+    AUTOMATED_TASK_MODE: false
+
+    POSTGRES_SSL_MODE: require
+    RUN_DB_MIGRATION_ON_STARTUP: false
+
+    AUDIO_INGESTION_BATCH_SIZE: 5
+    AUDIO_INGESTION_PROCESSING_TIMEOUT: 2m
+    AUDIO_INGESTION_TEMPORARY_FAILURE_MODE: NONE
+
+  secrets:
+    DARTS_API_DB_PASSWORD:
+      secretRef: "postgres"
+      key: PASSWORD
+      disabled: false
+
+  job:
+    activeDeadlineSeconds: 1800
+    parallelism: 1
+    completions: 1
+
+  triggers:
+    - type: "postgres"
+      userName: "hmcts"
+      passwordFromEnv: "DARTS_API_DB_PASSWORD"
+      dbName: "pr-${CHANGE_ID}-darts"
+      host: "darts-modernisation-dev.postgres.database.azure.com"
+      port: "5432"
+      sslmode: "require"
+      query: >
+        SELECT COUNT(*)
+        FROM darts.audio_ingestion
+        WHERE status = 'NEW'
+           OR (
+             status = 'PROCESSING'
+             AND claimed_at <
+                 CURRENT_TIMESTAMP - INTERVAL '2 minutes'
+           )
+      targetQueryValue: "5"
