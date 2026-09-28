@@ -39,7 +39,7 @@ class AudioControllerAuthorisationIntTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {
         "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
     }, mode = INCLUDE)
-    void allowsRolesWithGlobalAudioAccess(SecurityRoleEnum role) throws Exception {
+    void audioEndpoint_shouldAllowAccess_whenRoleHasConfiguredGlobalAudioAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(get("/audio/hearings/{hearing_id}/audios", hearing.getId()))
@@ -50,7 +50,7 @@ class AudioControllerAuthorisationIntTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {
         "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
     }, mode = EXCLUDE)
-    void forbidsRolesWithoutGlobalAudioAccess(SecurityRoleEnum role) throws Exception {
+    void audioEndpoint_shouldForbidAccess_whenRoleLacksConfiguredGlobalAudioAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(get("/audio/hearings/{hearing_id}/audios", hearing.getId()))

@@ -59,7 +59,8 @@ class TranscriptionControllerAuthorisationIntTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {
         "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "JUDICIAL_CONDUCT"
     }, mode = INCLUDE)
-    void allowsRolesWithGlobalTranscriptionAccess(SecurityRoleEnum role) throws Exception {
+    void transcriptionEndpoints_shouldAllowAccess_whenRoleHasConfiguredGlobalTranscriptionAccess(SecurityRoleEnum role)
+        throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         when(transcriptionService.downloadTranscript(anyLong())).thenReturn(downloadResponse());
 
@@ -72,7 +73,8 @@ class TranscriptionControllerAuthorisationIntTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {
         "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
     }, mode = EXCLUDE)
-    void forbidsRolesWithoutGlobalTranscriptionAccess(SecurityRoleEnum role) throws Exception {
+    void transcriptionEndpoints_shouldForbidAccess_whenRoleLacksConfiguredGlobalTranscriptionAccess(SecurityRoleEnum role)
+        throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(get("/transcriptions/{transcription_id}", transcription.getId())).andExpect(status().isForbidden());
@@ -81,7 +83,7 @@ class TranscriptionControllerAuthorisationIntTest extends IntegrationBase {
     }
 
     @Test
-    void allowsDartsRoleToGetTranscriptionButForbidsDocumentDownload() throws Exception {
+    void transcriptionEndpoints_shouldAllowDetailsButForbidDocumentDownload_whenUserHasGlobalDartsRole() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.DARTS);
 
         mockMvc.perform(get("/transcriptions/{transcription_id}", transcription.getId())).andExpect(status().isOk());

@@ -50,7 +50,7 @@ class CaseControllerAuthorisationIntTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {
         "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
     }, mode = INCLUDE)
-    void allowsRolesWithGlobalCaseAccess(SecurityRoleEnum role) throws Exception {
+    void caseEndpoints_shouldAllowAccess_whenRoleHasConfiguredGlobalCaseAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(get("/cases/{case_id}", hearing.getCourtCase().getId())).andExpect(status().isOk());
@@ -65,7 +65,7 @@ class CaseControllerAuthorisationIntTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {
         "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
     }, mode = EXCLUDE)
-    void forbidsRolesWithoutGlobalCaseAccess(SecurityRoleEnum role) throws Exception {
+    void caseEndpoints_shouldForbidAccess_whenRoleLacksConfiguredGlobalCaseAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(get("/cases/{case_id}", hearing.getCourtCase().getId())).andExpect(status().isForbidden());
