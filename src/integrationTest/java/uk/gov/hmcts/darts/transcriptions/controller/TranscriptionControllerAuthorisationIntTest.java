@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ class TranscriptionControllerAuthorisationIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {
-        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
+        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "JUDICIAL_CONDUCT"
     }, mode = INCLUDE)
     void allowsRolesWithGlobalTranscriptionAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
@@ -69,12 +70,21 @@ class TranscriptionControllerAuthorisationIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {
-        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "JUDICIAL_CONDUCT"
+        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
     }, mode = EXCLUDE)
     void forbidsRolesWithoutGlobalTranscriptionAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(get("/transcriptions/{transcription_id}", transcription.getId())).andExpect(status().isForbidden());
+        mockMvc.perform(get("/transcriptions/{transcription_id}/document", transcription.getId()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void allowsDartsRoleToGetTranscriptionButForbidsDocumentDownload() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.DARTS);
+
+        mockMvc.perform(get("/transcriptions/{transcription_id}", transcription.getId())).andExpect(status().isOk());
         mockMvc.perform(get("/transcriptions/{transcription_id}/document", transcription.getId()))
             .andExpect(status().isForbidden());
     }
