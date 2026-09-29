@@ -10,9 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.envers.AuditTable;
 import uk.gov.hmcts.darts.audio.enums.AudioIngestionStatus;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 
 import java.time.OffsetDateTime;
@@ -21,40 +19,34 @@ import java.time.OffsetDateTime;
 @Table(name = AudioIngestionEntity.TABLE_NAME)
 @Getter
 @Setter
-@AuditTable("audio_ingestion")
-public class AudioIngestionEntity extends CreatedModifiedBaseEntity implements HasIntegerId {
+public class AudioIngestionEntity implements HasIntegerId {
 
-    public static final String ID_COLUMN_NAME = "id";
-    public static final String SOURCE_FULL_FILE_NAME = "source_full_filename";
-    public static final String SOURCE_LAST_MODIFIED_TS = "source_last_modified_ts";
-    public static final String STATUS = "status";
-    public static final String CLAIM_OWNER = "claim_owner";
-    public static final String CLAIMED_AT = "claimed_at";
-    public static final String ERROR = "error";
-    public static final String CREATED_TS = "created_ts";
     public static final String TABLE_NAME = "audio_ingestion";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = ID_COLUMN_NAME)
+    @Column(name = "id")
     private Integer id;
 
-    @Column(name = SOURCE_FULL_FILE_NAME, nullable = false, unique = true)
+    @Column(name = "source_full_filename", nullable = false)
     private String sourceFullFilename;
 
-    @Column(name = SOURCE_LAST_MODIFIED_TS, nullable = false)
+    @Column(name = "source_last_modified_ts", nullable = false)
     private OffsetDateTime sourceLastModifiedTs;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = STATUS, nullable = false)
+    @Column(name = "status", nullable = false)
     private AudioIngestionStatus status;
 
-    @Column(name = CLAIM_OWNER)
+    @Column(name = "claim_owner")
     private String claimOwner;
 
-    @Column(name = CLAIMED_AT)
+    @Column(name = "claimed_at")
     private OffsetDateTime claimedAt;
 
-    @Column(name = ERROR)
+    @Column(name = "error")
     private String error;
+
+    @Column(name = "created_ts", nullable = false)
+    private OffsetDateTime createdTs;
 }
