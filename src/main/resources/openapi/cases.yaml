@@ -879,6 +879,7 @@ components:
         case_number:
           type: string
           example: C20220620001
+          maxLength: 32
           description: 'Case Number'
     advancedSearchResultHearing:
       type: object
