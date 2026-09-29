@@ -123,13 +123,12 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
 
     List<Long> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                              ExternalLocationTypeEntity armLocation, int maxResultSize) {
-        ObjectRecordStatusEntity armRawStatusFailed = EodHelper.failedArmRawDataStatus();
-        ObjectRecordStatusEntity armManifestFailed = EodHelper.failedArmManifestFileStatus();
-
-        List<ObjectRecordStatusEntity> failedArmStatuses = List.of(armRawStatusFailed, armManifestFailed);
+        List<ObjectRecordStatusEntity> statusEntityList = List.of(
+            EodHelper.failedArmRawDataStatus(), EodHelper.failedArmManifestFileStatus(),
+            EodHelper.armIngestionStatus(), EodHelper.armRawDataPushedStatus());
 
         var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(
-            failedArmStatuses,
+            statusEntityList,
             armLocation,
             armDataManagementConfiguration.getMaxRetryAttempts(),
             Limit.of(maxResultSize)
@@ -167,6 +166,9 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                     dataStoreToArmHelper.updateArmEodToArmIngestionStatus(
                         currentEod, batchItem, batchItems, archiveRecordsFileName, userAccount, EodHelper.detsLocation());
                     objectStateRecord = getObjectStateRecordEntity(armEod);
+                    if (nonNull(armEod.getId())) {
+                        objectStateRecord.setArmEodId(armEod.getId());
+                    }
                     // Reset the failed status from previous attempt
                     objectStateRecord.setObjectStatus(null);
                     objectStateRecordRepository.save(objectStateRecord);
