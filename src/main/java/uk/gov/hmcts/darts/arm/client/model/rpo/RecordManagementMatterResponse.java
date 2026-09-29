@@ -30,8 +30,7 @@ public class RecordManagementMatterResponse extends BaseRpoResponse {
         private String matterId;
         private String name;
         private boolean isQuickSearch;
-        // These tests read our OpenAPI YAML directly and do not need springdoc.
-        // Exclude springdoc's Swagger jars from the test runtime to avoid duplicate Swagger classes.
+        // Keep the JSON property name exact despite Java/Lombok boolean accessor naming conventions.
         @Getter(onMethod_ = @JsonProperty("isUsedForRM"))
         @Setter(onMethod_ = @JsonProperty("isUsedForRM"))
         @JsonProperty("isUsedForRM")
