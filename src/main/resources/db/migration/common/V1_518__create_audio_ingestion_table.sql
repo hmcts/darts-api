@@ -1,4 +1,4 @@
-CREATE TABLE darts.audio_ingestion (
+CREATE TABLE audio_ingestion (
     id BIGSERIAL PRIMARY KEY,
     source_full_filename VARCHAR(1000) NOT NULL,
     source_last_modified_ts TIMESTAMPTZ NOT NULL,
