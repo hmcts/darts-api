@@ -4,9 +4,6 @@ import com.atlassian.oai.validator.OpenApiInteractionValidator;
 import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.SimpleRequest;
 import com.atlassian.oai.validator.report.ValidationReport;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-import java.math.BigInteger;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -17,6 +14,9 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.JsonNodeFac
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gov.hmcts.darts.util.ValidationConstants;
 
+import java.math.BigInteger;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
