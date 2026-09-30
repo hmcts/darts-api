@@ -434,7 +434,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             log.debug("Closed off transcription {}", transcriptionId);
         } catch (Exception e) {
             log.error("Unable to close transcription {}", transcriptionId, e);
-            return;
         }
     }
 
