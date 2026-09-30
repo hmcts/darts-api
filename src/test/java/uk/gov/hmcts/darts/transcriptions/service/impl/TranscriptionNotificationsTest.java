@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ACCEPT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUTHORISE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CLOSED_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REJECT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REJECTION_REASON;
@@ -85,7 +86,7 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
-    void notifyRequesterWithEmptyTemplateMap() {
+    void notifyRequestor_shouldScheduleNotificationWithEmptyTemplateValues_whenTemplateMapIsNotProvided() {
         transcriptionNotifications.notifyRequestor(transcriptionEntity, TRANSCRIPTION_AVAILABLE.toString());
 
         verify(notificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
@@ -98,7 +99,7 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
-    void notifyRequesterWithTemplateMap() {
+    void notifyRequestor_shouldIncludeTemplateValues_whenTemplateMapIsProvided() {
         var reason = "Rejection reason";
         Map<String, String> templateParams = new HashMap<>();
         templateParams.put(REJECTION_REASON, reason);
@@ -116,7 +117,7 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
-    void notifyApprovers() {
+    void notifyApprovers_shouldScheduleNotificationForApprovers_whenApproversAreFound() {
         var approver1 = new UserAccountEntity();
         approver1.setEmailAddress("approver1@example.com");
         var approver2 = new UserAccountEntity();
@@ -144,7 +145,7 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
-    void notifyTranscriptionCompanyForCourthouse() {
+    void notifyTranscriptionCompanyForCourthouse_shouldScheduleNotification_whenTranscribersAreFound() {
         mockTranscribers();
 
         transcriptionNotifications.notifyTranscriptionCompanyForCourthouse(caseEntity);
@@ -159,14 +160,14 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
-    void notifyTranscriptionCompanyForCourthouseNoTranscribers() {
+    void notifyTranscriptionCompanyForCourthouse_shouldNotScheduleNotification_whenNoTranscribersAreFound() {
         when(authorisationApi.getUsersWithRoleAtCourthouse(SecurityRoleEnum.TRANSCRIBER, courthouseEntity)).thenReturn(List.of());
         transcriptionNotifications.notifyTranscriptionCompanyForCourthouse(caseEntity);
         verifyNoInteractions(notificationApi);
     }
 
     @Test
-    void handleNotificationsAndAuditApproved() {
+    void handleNotificationsAndAudit_shouldNotifyTranscribersAndRequestorAndRecordAuthorisation_whenStatusIsApproved() {
         mockTranscribers();
         var approver = new UserAccountEntity();
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
@@ -192,7 +193,7 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
-    void handleNotificationsAndAuditRejected() {
+    void handleNotificationsAndAudit_shouldNotifyRequestorAndRecordRejection_whenStatusIsRejected() {
         var rejecter = new UserAccountEntity();
         var reason = "Rejected";
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
@@ -215,7 +216,7 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
-    void handleNotificationsAndAuditWithTranscriber() {
+    void handleNotificationsAndAudit_shouldRecordAcceptance_whenStatusIsWithTranscriber() {
         var transcriber = new UserAccountEntity();
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
         transcriptionStatusEntity.setId(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId());
@@ -228,7 +229,20 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
-    void handleNotificationsAndAuditComplete() {
+    void handleNotificationsAndAudit_shouldRecordClosureWithoutNotification_whenStatusIsClosed() {
+        var user = new UserAccountEntity();
+        var transcriptionStatusEntity = new TranscriptionStatusEntity();
+        transcriptionStatusEntity.setId(TranscriptionStatusEnum.CLOSED.getId());
+        var updateTranscription = new UpdateTranscriptionRequest();
+
+        transcriptionNotifications.handleNotificationsAndAudit(user, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
+
+        verify(auditApi).record(CLOSED_TRANSCRIPTION, user, caseEntity);
+        verifyNoInteractions(notificationApi);
+    }
+
+    @Test
+    void handleNotificationsAndAudit_shouldNotifyRequestorAndRecordCompletion_whenStatusIsComplete() {
         var transcriber = new UserAccountEntity();
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
         transcriptionStatusEntity.setId(TranscriptionStatusEnum.COMPLETE.getId());
@@ -247,7 +261,7 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
-    void handleNotificationsAndAuditApprovedIsNotManual() {
+    void handleNotificationsAndAudit_shouldRecordAuthorisationWithoutNotification_whenApprovedTranscriptionIsNotManual() {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(false);
         var transcriber = new UserAccountEntity();
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
@@ -263,7 +277,7 @@ class TranscriptionNotificationsTest {
 
 
     @Test
-    void handleNotificationsAndAuditRejectedIsNotManual() {
+    void handleNotificationsAndAudit_shouldRecordRejectionWithoutNotification_whenRejectedTranscriptionIsNotManual() {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(false);
         var transcriber = new UserAccountEntity();
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
@@ -278,7 +292,7 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
-    void handleNotificationsAndAuditCompleteIsNotManual() {
+    void handleNotificationsAndAudit_shouldRecordCompletionWithoutNotification_whenCompletedTranscriptionIsNotManual() {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(false);
         var transcriber = new UserAccountEntity();
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
