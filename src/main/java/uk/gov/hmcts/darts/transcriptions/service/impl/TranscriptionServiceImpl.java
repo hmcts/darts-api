@@ -411,8 +411,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    public boolean closeTranscription(Long transcriptionId, String transcriptionComment) {
-        return closeTranscriptionInternal(transcriptionId, transcriptionComment);
+    public void closeTranscription(Long transcriptionId, String transcriptionComment) {
+        closeTranscriptionInternal(transcriptionId, transcriptionComment);
     }
 
     @Override
@@ -421,30 +421,23 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         List<TranscriptionEntity> transcriptions = transcriptionWorkflowRepository
             .findWorkflowForUserWithTranscriptionState(entity.getId(), WITH_TRANSCRIBER.getId());
 
-        boolean transcriptionClosed = false;
         for (TranscriptionEntity transcription : transcriptions) {
-            if (closeTranscriptionInternal(transcription.getId(), transcriptionComment)) {
-                transcriptionClosed = true;
-            }
-        }
-
-        if (transcriptionClosed) {
-            auditApi.record(AMEND_TRANSCRIPTION_WORKFLOW);
+            closeTranscriptionInternal(transcription.getId(), transcriptionComment);
         }
     }
 
-    private boolean closeTranscriptionInternal(Long transcriptionId, String transcriptionComment) {
+    private void closeTranscriptionInternal(Long transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
             updateTranscription.setTranscriptionStatusId(CLOSED.getId());
             updateTranscription.setWorkflowComment(transcriptionComment);
             updateTranscriptionInternal(transcriptionId, updateTranscription, false);
             log.debug("Closed off transcription {}", transcriptionId);
-            return true;
         } catch (Exception e) {
             log.error("Unable to close transcription {}", transcriptionId, e);
-            return false;
+            return;
         }
+        auditApi.record(AMEND_TRANSCRIPTION_WORKFLOW);
     }
 
     @Override
