@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.AMEND_TRANSCRIPTION_WORKFLOW;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
 
 public final class TranscriptionUpdateAuditActivityProvider implements AuditActivityProvider {
 
@@ -34,6 +35,9 @@ public final class TranscriptionUpdateAuditActivityProvider implements AuditActi
     }
 
     private boolean isWorkflowStatusTransitioning(TranscriptionEntity entity, UpdateTranscriptionRequest patch) {
+        if (CLOSED.getId().equals(patch.getTranscriptionStatusId())) {
+            return false;
+        }
         var latestWorkflow = entity.getLatestTranscriptionWorkflow();
 
         return latestWorkflow.isEmpty()

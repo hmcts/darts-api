@@ -89,7 +89,6 @@ import static java.lang.Boolean.TRUE;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.AMEND_TRANSCRIPTION_WORKFLOW;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
@@ -437,7 +436,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             log.error("Unable to close transcription {}", transcriptionId, e);
             return;
         }
-        auditApi.record(AMEND_TRANSCRIPTION_WORKFLOW);
     }
 
     @Override

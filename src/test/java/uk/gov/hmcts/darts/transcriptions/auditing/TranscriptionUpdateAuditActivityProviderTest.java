@@ -8,12 +8,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.AMEND_TRANSCRIPTION_WORKFLOW;
 import static uk.gov.hmcts.darts.transcriptions.auditing.TranscriptionUpdateAuditActivityProvider.auditActivitiesFor;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
 class TranscriptionUpdateAuditActivityProviderTest {
 
     @Test
-    void detectsForwardTransitionOfWorkflowStatus() {
+    void auditActivitiesFor_shouldRecordAmendment_whenWorkflowStatusMovesForward() {
         var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscriptionWithStatus(transcription, REQUESTED);
         var updateTranscription = new UpdateTranscriptionRequest().transcriptionStatusId(APPROVED.getId());
@@ -24,7 +25,7 @@ class TranscriptionUpdateAuditActivityProviderTest {
     }
 
     @Test
-    void detectsBackwardTransitionOfWorkflowStatus() {
+    void auditActivitiesFor_shouldRecordAmendment_whenWorkflowStatusMovesBackward() {
         var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscriptionWithStatus(transcription, APPROVED);
         var updateTranscription = new UpdateTranscriptionRequest().transcriptionStatusId(REQUESTED.getId());
@@ -35,10 +36,21 @@ class TranscriptionUpdateAuditActivityProviderTest {
     }
 
     @Test
-    void doesntDetectTransitionWhenUpdatingToSameStatus() {
+    void auditActivitiesFor_shouldNotRecordAmendment_whenWorkflowStatusIsUnchanged() {
         var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscriptionWithStatus(transcription, REQUESTED);
         var updateTranscription = new UpdateTranscriptionRequest().transcriptionStatusId(REQUESTED.getId());
+
+        var auditActivityProvider = auditActivitiesFor(transcription, updateTranscription);
+
+        assertThat(auditActivityProvider.getAuditActivities()).isEmpty();
+    }
+
+    @Test
+    void auditActivitiesFor_shouldNotRecordAmendment_whenWorkflowStatusIsClosed() {
+        var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+        PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscriptionWithStatus(transcription, APPROVED);
+        var updateTranscription = new UpdateTranscriptionRequest().transcriptionStatusId(CLOSED.getId());
 
         var auditActivityProvider = auditActivitiesFor(transcription, updateTranscription);
 

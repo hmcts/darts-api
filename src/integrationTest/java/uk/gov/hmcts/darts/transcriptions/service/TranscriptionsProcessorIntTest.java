@@ -22,7 +22,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.AMEND_TRANSCRIPTION_WORKFLOW;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CLOSED_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
@@ -244,7 +244,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
                 assertEquals(CLOSED.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
             });
             List<AuditEntity> workflowAudits = dartsDatabase.findAudits().stream()
-                .filter(audit -> AMEND_TRANSCRIPTION_WORKFLOW.getId().equals(audit.getAuditActivity().getId()))
+                .filter(audit -> CLOSED_TRANSCRIPTION.getId().equals(audit.getAuditActivity().getId()))
                 .toList();
             assertThat(workflowAudits).hasSize(transcriptions.size());
         });
