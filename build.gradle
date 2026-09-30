@@ -55,6 +55,8 @@ def swaggerList = []
 def dir = new File("$rootDir/src/main/resources/openapi/".toString())
 
 
+import org.flywaydb.gradle.task.FlywayCleanTask
+import org.flywaydb.gradle.task.FlywayMigrateTask
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 import java.nio.file.Files
@@ -76,7 +78,7 @@ swaggerList.each { swaggerFile ->
   tasks.register(taskName.toString(), GenerateTask) { GenerateTask task ->
     task.generatorName.set("spring")
     task.inputSpec.set("$rootDir/src/main/resources/openapi/${apiName}.yaml".toString())
-    task.outputDir.set("$buildDir/generated/openapi".toString())
+    task.outputDir.set(getLayout().getBuildDirectory().dir("generated/openapi").toString())
     task.apiPackage.set("uk.gov.hmcts.darts.".toString() + "${apiName}" + ".http.api")
     task.modelPackage.set("uk.gov.hmcts.darts.".toString() + "${apiName}" + ".model")
     //    https://openapi-generator.tech/docs/generators/java/#config-options
@@ -239,7 +241,7 @@ checkstyle {
 
 pmd {
   toolVersion = "7.16.0"
-  reportsDir = file("$project.buildDir/reports/pmd")
+  reportsDir = file(getLayout().getBuildDirectory().dir("reports/pmd"))
   // https://github.com/pmd/pmd/issues/876
   ruleSets = []
 }
@@ -337,8 +339,12 @@ tasks.jacocoTestCoverageVerification {
   }
 }
 
-project.tasks['sonarqube'].dependsOn jacocoTestReport
-project.tasks['check'].finalizedBy integration
+project.tasks.named('sonarqube').configure { task ->
+  task.dependsOn jacocoTestReport
+}
+project.tasks.named('check').configure { task ->
+  task.finalizedBy integration
+}
 
 jacocoTestReport.dependsOn check
 jacocoTestCoverageVerification.dependsOn jacocoTestReport
@@ -383,10 +389,9 @@ dependencyCheck {
   failBuildOnCVSS = 0
   suppressionFile = 'config/owasp/suppressions.xml'
 
-  analyzers {
-    // Disable scanning of .NET related binaries
-    assemblyEnabled = false
-  }
+  // Disable scanning of .NET related binaries
+  analyzers.assemblyEnabled(false)
+
   skipConfigurations = [
       "compileOnly",
       "pmd",
@@ -603,13 +608,13 @@ flyway {
 }
 
 // this can be run to clean the DB down allowing from a fresh migration from scratch
-tasks.register('cleanPostgresDatabase', org.flywaydb.gradle.task.FlywayCleanTask) {
+tasks.register('cleanPostgresDatabase', FlywayCleanTask) {
   if (project.hasProperty("dburl")) {
     url = "jdbc:postgresql://${dburl}"
   }
 }
 
-tasks.register('migratePostgresDatabase', org.flywaydb.gradle.task.FlywayMigrateTask) {
+tasks.register('migratePostgresDatabase', FlywayMigrateTask) {
   dependsOn processResources
   baselineOnMigrate = true
   if (project.hasProperty("dburl")) {
@@ -627,9 +632,7 @@ artifacts.add('openapispecifications', openapiJar)
 
 publishing {
   publications {
-    maven(MavenPublication) {
-      artifact openapiJar
-    }
+    create('maven', MavenPublication).artifact(openapiJar)
   }
 
   repositories {
@@ -655,7 +658,7 @@ tasks.register('updateOpenSpecificationsWithVersion') {
       def fileName = file.getName()
       def contents = Files.readString(file.toPath())
 
-      def response = contents.replace("\044{version}", version)
+      def response = contents.replace('${version}', version.toString())
       File newOASFile = layout.buildDirectory.dir("processedSpecs").get().asFile;
 
       newOASFile.mkdirs();
@@ -673,7 +676,7 @@ tasks.register('updateOpenSpecificationsWithVersion') {
   }
 }
 
-task runAllStyleChecks {
+tasks.register('runAllStyleChecks') {
   dependsOn 'checkstyleMain'
   dependsOn 'checkstyleTest'
   dependsOn 'checkstyleIntegrationTest'
