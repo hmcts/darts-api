@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.AMEND_TRANSCRIPTION_WORKFLOW;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CLOSED_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
@@ -68,7 +68,7 @@ class UserTranscriptionOwnershipIntTest extends IntegrationBase {
             .orElseThrow();
         assertEquals(WITH_TRANSCRIBER.getId(), reloadedTranscription.getTranscriptionStatus().getId());
         assertThat(dartsDatabase.findAudits())
-            .noneMatch(audit -> AMEND_TRANSCRIPTION_WORKFLOW.getId().equals(audit.getAuditActivity().getId()));
+            .noneMatch(audit -> CLOSED_TRANSCRIPTION.getId().equals(audit.getAuditActivity().getId()));
     }
 
     @Test
@@ -91,7 +91,7 @@ class UserTranscriptionOwnershipIntTest extends IntegrationBase {
         assertEquals(CLOSED.getId(), reloadedSecondTranscription.getTranscriptionStatus().getId());
 
         List<AuditEntity> workflowAudits = dartsDatabase.findAudits().stream()
-            .filter(audit -> AMEND_TRANSCRIPTION_WORKFLOW.getId().equals(audit.getAuditActivity().getId()))
+            .filter(audit -> CLOSED_TRANSCRIPTION.getId().equals(audit.getAuditActivity().getId()))
             .toList();
         assertThat(workflowAudits).hasSize(2);
         assertThat(workflowAudits).allSatisfy(workflowAudit -> assertThat(workflowAudit.getAdditionalData()).isNull());
