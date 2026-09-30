@@ -389,12 +389,6 @@ audioIngestion:
   global:
     enableKeyVaults: true
 
-  keyVaults:
-    "darts":
-      secrets:
-        - name: api-POSTGRES-SCHEMA
-          alias: DARTS_API_DB_SCHEMA
-
   environment:
     DARTS_API_DB_HOST: "darts-modernisation-dev.postgres.database.azure.com"
     DARTS_API_DB_NAME: "pr-${CHANGE_ID}-darts"
@@ -431,13 +425,5 @@ audioIngestion:
       host: "darts-modernisation-dev.postgres.database.azure.com"
       port: "5432"
       sslmode: "require"
-      query: >
-        SELECT COUNT(*)
-        FROM darts.audio_ingestion
-        WHERE status = 'NEW'
-           OR (
-             status = 'PROCESSING'
-             AND claimed_at <
-                 CURRENT_TIMESTAMP - INTERVAL '2 minutes'
-           )
+      query: "SELECT COUNT(*) FROM darts.audio_ingestion WHERE status = 'NEW' OR (status = 'PROCESSING' AND claimed_at < CURRENT_TIMESTAMP - INTERVAL '2 minutes')"
       targetQueryValue: "5"
