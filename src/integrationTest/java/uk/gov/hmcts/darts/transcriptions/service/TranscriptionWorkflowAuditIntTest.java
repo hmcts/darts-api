@@ -23,6 +23,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.data.history.RevisionMetadata.RevisionType.INSERT;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.AMEND_TRANSCRIPTION_WORKFLOW;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CLOSED_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
@@ -49,7 +51,7 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
     }
 
     @Test
-    void updateTranscriptionAdmin_ShouldAudit_WhenTranscriptionsWorkflowsAreTransitioned() {
+    void updateTranscriptionAdmin_shouldRecordClosedTranscription_whenWorkflowTransitionsToClosed() {
         var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var transcriptionRequestDetails = createTranscriptionRequestDetailsWithDefaults();
         var createTranscriptionResponse = transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, false);
@@ -59,9 +61,15 @@ class TranscriptionWorkflowAuditIntTest extends IntegrationBase {
             new UpdateTranscriptionRequest().transcriptionStatusId(7).workflowComment("new comment"),
             true);
         transactionalUtil.executeInTransaction(() -> {
-            var auditActivity = findAuditActivity("Amend Transcription Workflow", dartsDatabase.findAudits());
+            List<AuditEntity> audits = dartsDatabase.findAudits();
+            var auditActivity = findAuditActivity("Closed Transcription", audits);
             assertThat(auditActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
             assertThat(auditActivity.getCourtCase().getId()).isEqualTo(transcriptionRequestDetails.getCaseId());
+            assertThat(audits)
+                .noneMatch(audit -> AMEND_TRANSCRIPTION_WORKFLOW.getId().equals(audit.getAuditActivity().getId()));
+            assertThat(audits)
+                .filteredOn(audit -> CLOSED_TRANSCRIPTION.getId().equals(audit.getAuditActivity().getId()))
+                .hasSize(1);
 
             var transcriptionWorkflowRevisions = dartsDatabase.findTranscriptionWorkflowRevisionsFor(createTranscriptionResponse.getTranscriptionId());
             assertThat(transcriptionWorkflowRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
