@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
@@ -16,7 +15,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.util.Objects.isNull;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.AMEND_TRANSCRIPTION_WORKFLOW;
 
 @RequiredArgsConstructor
 @Service
@@ -29,7 +27,6 @@ public class TranscriptionsProcessorImpl implements TranscriptionsProcessor {
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionService transcriptionService;
     private final CurrentTimeHelper currentTimeHelper;
-    private final AuditApi auditApi;
 
     @Override
     public void closeTranscriptions(Integer batchSize) {
@@ -47,15 +44,8 @@ public class TranscriptionsProcessorImpl implements TranscriptionsProcessor {
                 log.debug("No transcriptions to be closed off");
             } else {
                 log.info("Number of transcriptions to be closed off: {} out of a batch size {}", transcriptionsToBeClosed.size(), batchSize);
-                boolean transcriptionClosed = false;
                 for (Long transcriptionToBeClosed : transcriptionsToBeClosed) {
-                    if (transcriptionService.closeTranscription(transcriptionToBeClosed, AUTOMATICALLY_CLOSED_TRANSCRIPTION)) {
-                        transcriptionClosed = true;
-                    }
-                }
-
-                if (transcriptionClosed) {
-                    auditApi.record(AMEND_TRANSCRIPTION_WORKFLOW);
+                    transcriptionService.closeTranscription(transcriptionToBeClosed, AUTOMATICALLY_CLOSED_TRANSCRIPTION);
                 }
             }
         } catch (Exception e) {

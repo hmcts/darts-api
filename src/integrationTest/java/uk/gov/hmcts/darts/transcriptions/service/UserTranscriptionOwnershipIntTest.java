@@ -72,10 +72,11 @@ class UserTranscriptionOwnershipIntTest extends IntegrationBase {
     }
 
     @Test
-    void closeUserTranscriptions_shouldCloseWork_whenUserIsLatestTranscriber() {
+    void closeUserTranscriptions_shouldCloseWorkAndAuditEachTranscription_whenUserIsLatestTranscriber() {
         UserAccountEntity previousOwner = createTranscriber("previous-owner");
         UserAccountEntity currentOwner = createTranscriber("current-owner");
         TranscriptionEntity transcription = createTranscriptionWithAssignmentHistory_lastUserIsCurrentOwner(currentOwner, previousOwner);
+        TranscriptionEntity secondTranscription = createTranscriptionWithAssignmentHistory_lastUserIsCurrentOwner(currentOwner, previousOwner);
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         transcriptionService.closeUserTranscriptions(previousOwner, "Owner was disabled due to inactivity");
@@ -84,12 +85,16 @@ class UserTranscriptionOwnershipIntTest extends IntegrationBase {
             .findById(transcription.getId())
             .orElseThrow();
         assertEquals(CLOSED.getId(), reloadedTranscription.getTranscriptionStatus().getId());
-
-        AuditEntity workflowAudit = dartsDatabase.findAudits().stream()
-            .filter(audit -> AMEND_TRANSCRIPTION_WORKFLOW.getId().equals(audit.getAuditActivity().getId()))
-            .findFirst()
+        TranscriptionEntity reloadedSecondTranscription = dartsDatabase.getTranscriptionRepository()
+            .findById(secondTranscription.getId())
             .orElseThrow();
-        assertThat(workflowAudit.getAdditionalData()).isNull();
+        assertEquals(CLOSED.getId(), reloadedSecondTranscription.getTranscriptionStatus().getId());
+
+        List<AuditEntity> workflowAudits = dartsDatabase.findAudits().stream()
+            .filter(audit -> AMEND_TRANSCRIPTION_WORKFLOW.getId().equals(audit.getAuditActivity().getId()))
+            .toList();
+        assertThat(workflowAudits).hasSize(2);
+        assertThat(workflowAudits).allSatisfy(workflowAudit -> assertThat(workflowAudit.getAdditionalData()).isNull());
     }
 
     @Test

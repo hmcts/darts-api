@@ -214,7 +214,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void closeTranscriptions_shouldCloseTranscriptionsAndRecordOneAudit_whenWithTranscriberStatusIsOld() {
+    void closeTranscriptions_shouldCloseTranscriptionsAndRecordAuditPerTranscription_whenWithTranscriberStatusIsOld() {
         List<TranscriptionEntity> transcriptions = transactionalUtil.executeInTransaction(() -> {
             setupData();
             TranscriptionTypeEntity transcriptionType = dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES);
@@ -246,7 +246,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             List<AuditEntity> workflowAudits = dartsDatabase.findAudits().stream()
                 .filter(audit -> AMEND_TRANSCRIPTION_WORKFLOW.getId().equals(audit.getAuditActivity().getId()))
                 .toList();
-            assertThat(workflowAudits).hasSize(1);
+            assertThat(workflowAudits).hasSize(transcriptions.size());
         });
     }
 
