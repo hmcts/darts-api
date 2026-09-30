@@ -65,6 +65,7 @@ public interface AudioIngestionRepository extends JpaRepository<AudioIngestionEn
           AND status = 'PROCESSING'
           AND claim_owner = :claimOwner
         """, nativeQuery = true)
+
     int markAsFailed(
         Long id,
         String claimOwner,

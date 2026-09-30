@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.audio.service.AudioIngestionService;
 import uk.gov.hmcts.darts.common.repository.AudioIngestionRepository;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public class AudioIngestionServiceImpl implements AudioIngestionService {
             claimOwner
         );
         OffsetDateTime cutoff =
-            OffsetDateTime.now().minus(config.getProcessingTimeout());
+            OffsetDateTime.now(ZoneOffset.UTC).minus(config.getProcessingTimeout());
 
 
         List<Long> claimedIds =
