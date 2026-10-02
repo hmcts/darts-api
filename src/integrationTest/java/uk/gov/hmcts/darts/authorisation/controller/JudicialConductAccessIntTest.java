@@ -90,7 +90,7 @@ class JudicialConductAccessIntTest extends IntegrationBase {
     }
 
     @Test
-    void caseEndpoints_shouldAllowAccess_whenUserHasGlobalJudicialConductRole() throws Exception {
+    void caseEndpoints_shouldAllowAccess_whenUserHasGlobalAccess() throws Exception {
         Integer caseId = hearing.getCourtCase().getId();
 
         mockMvc.perform(get("/cases/{case_id}", caseId))
@@ -113,7 +113,7 @@ class JudicialConductAccessIntTest extends IntegrationBase {
     }
 
     @Test
-    void hearingAndAudioEndpoints_shouldAllowAccess_whenUserHasGlobalJudicialConductRole() throws Exception {
+    void hearingAndAudioEndpoints_shouldAllowAccess_whenUserHasGlobalAccess() throws Exception {
         Integer hearingId = hearing.getId();
 
         mockMvc.perform(get("/hearings/{hearingId}", hearingId))
@@ -130,7 +130,7 @@ class JudicialConductAccessIntTest extends IntegrationBase {
     }
 
     @Test
-    void annotationEndpoints_shouldForbidAccess_whenUserHasGlobalJudicialConductRole() throws Exception {
+    void annotationEndpoints_shouldForbidAccess_whenUserHasGlobalAccess() throws Exception {
         mockMvc.perform(get("/cases/{case_id}/annotations", hearing.getCourtCase().getId()))
             .andExpect(status().isForbidden());
 
@@ -139,7 +139,7 @@ class JudicialConductAccessIntTest extends IntegrationBase {
     }
 
     @Test
-    void judicialConductUserRequest_shouldAccessPlaybackAudioAcrossAllCourts_whenGlobalAccessIsAuthorised() throws Exception {
+    void playbackRequest_shouldAccessAudioAcrossAllCourts_whenGlobalAccessIsAuthorised() throws Exception {
         when(audioPreviewService.getOrCreateAudioPreview(mediaId))
             .thenReturn(new AudioPreview(mediaId, READY, "preview audio".getBytes(StandardCharsets.UTF_8)));
 
@@ -161,7 +161,7 @@ class JudicialConductAccessIntTest extends IntegrationBase {
     }
 
     @Test
-    void judicialConductUserRequest_shouldManagePlaybackAudioAcrossAllCourts_whenGlobalAccessIsAuthorised() throws Exception {
+    void playbackRequest_shouldManageAudioAcrossAllCourts_whenGlobalAccessIsAuthorised() throws Exception {
         mockMvc.perform(patch("/audio-requests/transformed_media/{transformed_media_id}", playbackTransformedMediaId))
             .andExpect(status().isNoContent());
 
