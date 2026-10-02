@@ -188,7 +188,7 @@ class CaseServiceImplTest {
         courtCase.setHearings(List.of(hearing));
         CourtCaseEntity linkedCase = CommonTestDataUtil.createCaseWithId("LinkedCase1", 202);
         when(caseRepository.findById(101)).thenReturn(Optional.of(courtCase));
-        when(caseLinkedCaseRepository.findByCourtCaseIdIn(List.of(101))).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
+        when(caseLinkedCaseRepository.findByCourtCase(courtCase)).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
 
         SingleCase result = caseService.getCasesById(101);
 
@@ -562,7 +562,7 @@ class CaseServiceImplTest {
         CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 101);
         CourtCaseEntity linkedCase = CommonTestDataUtil.createCaseWithId("LinkedCase1", 202);
         when(caseRepository.findById(101)).thenReturn(Optional.of(courtCase));
-        when(caseLinkedCaseRepository.findByCourtCaseIdIn(List.of(101))).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
+        when(caseLinkedCaseRepository.findByCourtCase(courtCase)).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
 
         AdminSingleCaseResponseItem result = caseService.adminGetCaseById(101);
 

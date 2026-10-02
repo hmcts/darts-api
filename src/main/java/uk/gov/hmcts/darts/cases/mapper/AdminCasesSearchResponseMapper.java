@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.cases.model.CourthouseResponseObject;
 import uk.gov.hmcts.darts.cases.model.CourtroomResponseObject;
+import uk.gov.hmcts.darts.common.entity.CaseLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -13,21 +14,20 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @UtilityClass
 public class AdminCasesSearchResponseMapper {
 
-    public List<AdminCasesSearchResponseItem> mapResponse(List<CourtCaseEntity> cases, Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId) {
+    public List<AdminCasesSearchResponseItem> mapResponse(List<CourtCaseEntity> cases, List<CaseLinkedCaseEntity> linkedCaseEntities) {
         List<AdminCasesSearchResponseItem> results = new ArrayList<>();
         for (CourtCaseEntity courtCase : cases) {
-            results.add(map(courtCase, linkedCasesByCaseId));
+            results.add(map(courtCase, linkedCaseEntities));
         }
         return results;
     }
 
-    private AdminCasesSearchResponseItem map(CourtCaseEntity courtCase, Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId) {
+    private AdminCasesSearchResponseItem map(CourtCaseEntity courtCase, List<CaseLinkedCaseEntity> linkedCaseEntities) {
         AdminCasesSearchResponseItem responseItem = new AdminCasesSearchResponseItem();
         responseItem.setId(courtCase.getId());
         responseItem.setCaseNumber(courtCase.getCaseNumber());
@@ -37,7 +37,7 @@ public class AdminCasesSearchResponseMapper {
         responseItem.setDefendants(courtCase.getDefendantStringList());
         responseItem.isDataAnonymised(courtCase.isDataAnonymised());
         responseItem.dataAnonymisedAt(courtCase.getDataAnonymisedTs());
-        List<CourtCaseEntity> linkedCases = linkedCasesByCaseId.getOrDefault(courtCase.getId(), List.of());
+        List<CourtCaseEntity> linkedCases = LinkedCaseMapper.mapLinkedCases(courtCase, linkedCaseEntities);
         if (!linkedCases.isEmpty()) {
             responseItem.setLinkedCases(AdvancedSearchResponseMapper.mapToAdvancedSearchResultLinkedCase(linkedCases));
         }

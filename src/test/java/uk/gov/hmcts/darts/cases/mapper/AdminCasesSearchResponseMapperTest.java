@@ -8,12 +8,12 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.entity.CaseLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,7 +40,7 @@ class AdminCasesSearchResponseMapperTest {
         case3.setDataAnonymisedTs(OffsetDateTime.parse("2024-01-01T00:00:00Z"));
         CommonTestDataUtil.createHearingsForCase(case3, 3, 4);
 
-        List<AdminCasesSearchResponseItem> result = AdminCasesSearchResponseMapper.mapResponse(List.of(case1, case2, case3), Map.of());
+        List<AdminCasesSearchResponseItem> result = AdminCasesSearchResponseMapper.mapResponse(List.of(case1, case2, case3), List.of());
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = """
@@ -144,9 +144,10 @@ class AdminCasesSearchResponseMapperTest {
 
         List<AdminCasesSearchResponseItem> result = AdminCasesSearchResponseMapper.mapResponse(
             List.of(case1, case2),
-            Map.of(
-                case1.getId(), List.of(linkedCase1, linkedCase2),
-                case2.getId(), List.of(linkedCase3)
+            List.of(
+                createLinkedCase(case1, linkedCase1),
+                createLinkedCase(case1, linkedCase2),
+                createLinkedCase(linkedCase3, case2)
             )
         );
 
@@ -159,6 +160,13 @@ class AdminCasesSearchResponseMapperTest {
         assertThat(mappedCase2.getLinkedCases())
             .extracting(linkedCase -> linkedCase.getCaseNumber())
             .containsExactly("linkedCase3");
+    }
+
+    private static CaseLinkedCaseEntity createLinkedCase(CourtCaseEntity courtCase, CourtCaseEntity linkedCase) {
+        CaseLinkedCaseEntity linkedCaseEntity = new CaseLinkedCaseEntity();
+        linkedCaseEntity.setCourtCase1(courtCase);
+        linkedCaseEntity.setCourtCase2(linkedCase);
+        return linkedCaseEntity;
     }
 
 }
