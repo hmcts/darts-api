@@ -143,7 +143,8 @@ class HearingsControllerAdminGetHearingIntTest extends IntegrationBase {
             {
               "type": "HEARING_100",
               "title": "The requested hearing cannot be found",
-              "status": 404
+              "status": 404,
+              "instance": "/admin/hearings/-1"
             }
             """;
 
@@ -175,8 +176,8 @@ class HearingsControllerAdminGetHearingIntTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
-            """;
+            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403,"instance":"/admin/hearings/%s"}
+            """.formatted(hearing.getId());
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 }

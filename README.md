@@ -5,10 +5,9 @@
 * To View the embedded Swagger UI in Github Pages: https://hmcts.github.io/darts-api/
 * The settings for the repository uses the master branch for Github Pages.
 * Use the top bar to "Select a definition" e.g. Transcriptions
-* The `darts-api/index.html` file should be updated to include any new OAS definitions in the urls parameter under
-  SwaggerUIBundle.
-* The application [swagger-ui](http://localhost:4550/swagger-ui/index.html) can be used for "Try it out" functionality
-  using the Authorization Button Padlock and presenting a valid access token (JWT).
+* The `darts-api/index.html` file should be updated to include any new OAS definitions in the urls parameter under SwaggerUIBundle.
+* The application [swagger-ui](http://localhost:4550/swagger-ui/index.html) can be used for "Try it out" functionality using the Authorization Button Padlock
+  and presenting a valid access token (JWT).
 
 # Building and deploying the application
 
@@ -20,8 +19,8 @@
 
 ### Environment variables
 
-To run the functional tests locally, you must set the following environment variables on your machine.
-The required value of each variable is stored in Azure Key Vault as a Secret.
+To run the functional tests locally, you must set the following environment variables on your machine. The required value of each variable is stored in Azure
+Key Vault as a Secret.
 
 | Environment Variable Name                | Corresponding Azure Key Vault Secret Name |
 |------------------------------------------|-------------------------------------------|
@@ -94,8 +93,8 @@ az keyvault secret show --name GovukNotifyTestApiKey --vault-name darts-stg
 and inspect the `"value"` field of the response.
 
 Alternatively, you can log into the [Azure home page](https://portal.azure.com/#home), and navigate to
-`Key Vault -> darts-stg -> Secrets`. Note in your Portal Settings you must have the `CJS Common Platform` directory
-active for the secrets to be visible.
+
+`Key Vault -> darts-stg -> Secrets`. Note in your Portal Settings you must have the `CJS Common Platform` directory active for the secrets to be visible.
 
 > Note: there is also a convenient script for exporting all these secret values from the key-vault, ensure you have the Azure CLI, `az`, installed and have
 > run `az login`.
@@ -108,8 +107,8 @@ active for the secrets to be visible.
 > source bin/secrets-stg-environment.sh
 >```
 
-Once you have obtained the values, set the environment variables on your system. E.g. On Mac, you may run this command
-in the terminal, replacing `<<env var name>>` and `<<secret value>>` as necessary:
+Once you have obtained the values, set the environment variables on your system. E.g. On Mac, you may run this command in the terminal, replacing
+`<<env var name>>` and `<<secret value>>` as necessary:
 
 ```
 launchctl setenv <<env var name>> <<secret value>>
@@ -160,8 +159,8 @@ export ARM_STORAGE_ACCOUNT_NAME=
 
 ### Storage Account
 
-Some functional tests require a storage account to complete. Locally, this can be achieved by installing and running the
-Azurite open-source emulator which provides a free local environment for testing any Azure Blob, Queue or Table storage.
+Some functional tests require a storage account to complete. Locally, this can be achieved by installing and running the Azurite open-source emulator which
+provides a free local environment for testing any Azure Blob, Queue or Table storage.
 
 #### Install Azurite
 
@@ -173,8 +172,7 @@ docker pull mcr.microsoft.com/azure-storage/azurite
 
 #### Run Azurite
 
-The following command runs the Azurite Docker image. The -p 10000:10000 parameter redirects requests from host machine's
-port 10000 to the Docker instance.
+The following command runs the Azurite Docker image. The -p 10000:10000 parameter redirects requests from host machine's port 10000 to the Docker instance.
 
 ```bash
 docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 \
@@ -191,8 +189,8 @@ brew install ffmpeg
 
 #### Connection String Configuration
 
-The application obtains the connection string from the key vault. However, locally the default Azurite account details
-are required. Therefore, you will need to add its connection string as an environment variable .
+The application obtains the connection string from the key vault. However, locally the default Azurite account details are required. Therefore, you will need to
+add its connection string as an environment variable .
 
 Environment Variable Name: AZURE_STORAGE_CONNECTION_STRING
 
@@ -221,8 +219,7 @@ A local jacoco coverage report can be generated using the following command:-
   ./gradlew jacocoTestReport
 ```
 
-The report will be available under ./build/jacocoHtml/index.html. The report incorporates both unit test
-and integration test coverage
+The report will be available under ./build/jacocoHtml/index.html. The report incorporates both unit test and integration test coverage
 
 ### Running the application locally in docker (without darts-gateway & darts-stub-services)
 
@@ -245,10 +242,8 @@ Run the distribution (created in `build/install/darts-api` directory) by executi
 
 ```
 
-This will start the API container exposing the application's port
-(set to `4550` in this template app). It will also start a postgres container
-and run any new flyway migrations. If you need to start from a clean database
-you will need to delete the docker volume `darts-api_darts-db`
+This will start the API container exposing the application's port (set to `4550` in this template app). It will also start a postgres container and run any new
+flyway migrations. If you need to start from a clean database you will need to delete the docker volume `darts-api_darts-db`
 
 In order to test if the application is up, you can call its health endpoint:
 
@@ -264,8 +259,8 @@ You should get a response similar to this:
 
 ### Running the application in docker with darts-gateway & darts-stub-services
 
-Currently, to run the full suite of services we need to check out and build the darts-gateway
-and darts-stub-services. A convenience script has been added `./bin/dcup` to automate this.
+Currently, to run the full suite of services we need to check out and build the darts-gateway and darts-stub-services. A convenience script has been added
+`./bin/dcup` to automate this.
 
 To run all services use:
 
@@ -311,9 +306,8 @@ For more information:
 ./bin/run-in-docker.sh -h
 ```
 
-Script includes bare minimum environment variables necessary to start api instance. Whenever any variable is changed or
-any other script regarding docker image/container build, the suggested way to ensure all is cleaned up properly is by
-this command:
+Script includes bare minimum environment variables necessary to start api instance. Whenever any variable is changed or any other script regarding docker
+image/container build, the suggested way to ensure all is cleaned up properly is by this command:
 
 ```bash
 docker-compose rm
@@ -331,8 +325,8 @@ There is no need to remove postgres and java or similar core images.
 
 ## Spring Profiles
 
-The following Spring Profiles are defined. "External Components" are defined as any service upon which the application
-is dependent, such as database servers, web services etc.
+The following Spring Profiles are defined. "External Components" are defined as any service upon which the application is dependent, such as database servers,
+web services etc.
 
 | Profile          | Config Location                                                | Purpose                                                                                        | External Components                                                                                                                                                                                                               |
 |------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -349,30 +343,27 @@ https://docs.spring.io/spring-framework/reference/integration/scheduling.html#sc
 
 ## Functional testing
 
-The functional tests module is run by default in the dev and staging environments. Unlike the integration tests the
-functional tests will hit the deployed darts-api and postgres database. This requires some management of the data
-created by these tests. To this end the following conventions should be used:
+The functional tests module is run by default in the dev and staging environments. Unlike the integration tests the functional tests will hit the deployed
+darts-api and postgres database. This requires some management of the data created by these tests. To this end the following conventions should be used:
 
-- If a courthouse needs to pre-exist for a functional test it can be created from within the tests
-  using `/functional-tests/courthouse/{courthouse_name}/courtroom/{courtroom_name}`. The courthouse_name must be
-  prefixed with `FUNC-`. This data will be cleaned after the test has executed.
-- If a case needs to pre-exist for a functional test then however it is created the case_number should also pre-fixed
-  with `FUNC-`. There is a random case_number generator that will provide case_numbers with this prefix. These cases and
-  their associated hearings and events will be cleaned up automatically after the test has executed.
+- If a courthouse needs to pre-exist for a functional test it can be created from within the tests using
+  `/functional-tests/courthouse/{courthouse_name}/courtroom/{courtroom_name}`. The courthouse_name must be prefixed with `FUNC-`. This data will be cleaned
+  after the test has executed.
+- If a case needs to pre-exist for a functional test then however it is created the case_number should also pre-fixed with `FUNC-`. There is a random
+  case_number generator that will provide case_numbers with this prefix. These cases and their associated hearings and events will be cleaned up automatically
+  after the test has executed.
 
 ## Caching
 
-Redis has been configured as the default caching provider. When running docker-compose with the local configuration a
-Redis container will be started. If starting the darts-api from Intellij or the command line you have the following
-options:
+Redis has been configured as the default caching provider. When running docker-compose with the local configuration a Redis container will be started. If
+starting the darts-api from Intellij or the command line you have the following options:
 
 1. Follow instructions under 'Running the application locally'
 
-2. Alternatively the darts-api can be run using a simple in-memory cache by starting the application with the
-   profile `in-memory-caching`.
+2. Alternatively the darts-api can be run using a simple in-memory cache by starting the application with the profile `in-memory-caching`.
 
-To view the cache - when running against local Redis - Intellij has a free plugin called `Redis Helper`. However, if you
-want to view the cache in staging the plugin doesn't support SSL. Instead, install:
+To view the cache - when running against local Redis - Intellij has a free plugin called `Redis Helper`. However, if you want to view the cache in staging the
+plugin doesn't support SSL. Instead, install:
 
 ```bash
 brew install --cask another-redis-desktop-manager
