@@ -5,29 +5,29 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResultHearing;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResultLinkedCase;
+import uk.gov.hmcts.darts.common.entity.CaseLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @UtilityClass
 public class AdvancedSearchResponseMapper {
 
-    public List<AdvancedSearchResult> mapResponse(List<HearingEntity> hearings, Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId) {
+    public List<AdvancedSearchResult> mapResponse(List<HearingEntity> hearings, List<CaseLinkedCaseEntity> linkedCaseEntities) {
         List<AdvancedSearchResult> advancedSearchResults = new ArrayList<>();
         for (HearingEntity hearing : hearings) {
-            addHearingToResultList(advancedSearchResults, hearing, linkedCasesByCaseId);
+            addHearingToResultList(advancedSearchResults, hearing, linkedCaseEntities);
         }
         return advancedSearchResults;
     }
 
     private void addHearingToResultList(List<AdvancedSearchResult> advancedSearchResults,
                                         HearingEntity hearing,
-                                        Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId) {
+                                        List<CaseLinkedCaseEntity> linkedCaseEntities) {
         //check to see if caseId record is already in the response and add the hearing to it.
         for (AdvancedSearchResult advancedSearchResult : advancedSearchResults) {
             if (hearing.getCourtCase().getId().equals(advancedSearchResult.getCaseId())) {
@@ -37,10 +37,10 @@ public class AdvancedSearchResponseMapper {
             }
         }
         //case not already in response, so add it.
-        advancedSearchResults.add(mapToAdvancedSearchResult(hearing, linkedCasesByCaseId));
+        advancedSearchResults.add(mapToAdvancedSearchResult(hearing, linkedCaseEntities));
     }
 
-    public AdvancedSearchResult mapToAdvancedSearchResult(HearingEntity hearing, Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId) {
+    public AdvancedSearchResult mapToAdvancedSearchResult(HearingEntity hearing, List<CaseLinkedCaseEntity> linkedCaseEntities) {
         AdvancedSearchResult advancedSearchResult = new AdvancedSearchResult();
         CourtCaseEntity courtCase = hearing.getCourtCase();
         advancedSearchResult.setCaseId(courtCase.getId());
@@ -50,7 +50,7 @@ public class AdvancedSearchResponseMapper {
         advancedSearchResult.setJudges(courtCase.getJudgeStringList());
         advancedSearchResult.setIsDataAnonymised(courtCase.isDataAnonymised());
         advancedSearchResult.setDataAnonymisedAt(courtCase.getDataAnonymisedTs());
-        List<CourtCaseEntity> linkedCases = linkedCasesByCaseId.getOrDefault(courtCase.getId(), List.of());
+        List<CourtCaseEntity> linkedCases = LinkedCaseMapper.mapLinkedCases(courtCase, linkedCaseEntities);
         if (!linkedCases.isEmpty()) {
             advancedSearchResult.setLinkedCases(mapToAdvancedSearchResultLinkedCase(linkedCases));
         }
