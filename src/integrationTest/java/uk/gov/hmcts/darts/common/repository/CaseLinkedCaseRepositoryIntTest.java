@@ -15,6 +15,9 @@ class CaseLinkedCaseRepositoryIntTest extends PostgresIntegrationBase {
 
     private static final String CASE_NUMBER_1 = "CASE-1";
     private static final String CASE_NUMBER_2 = "CASE-2";
+    private static final String CASE_NUMBER_3 = "CASE-3";
+    private static final String CASE_NUMBER_4 = "CASE-4";
+    private static final String CASE_NUMBER_5 = "CASE-5";
 
     @Autowired
     private CaseLinkedCaseRepository caseLinkedCaseRepository;
@@ -42,13 +45,13 @@ class CaseLinkedCaseRepositoryIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findByCourtCaseIdIn_shouldReturnLinkedCasesForAllMatchingCaseIds() {
+    void findByCourtCaseIn_shouldReturnLinkedCasesForAllMatchingCases() {
         // given
         CourtCaseEntity courtCase1 = createCourtCase(CASE_NUMBER_1);
         CourtCaseEntity courtCase2 = createCourtCase(CASE_NUMBER_2);
-        CourtCaseEntity courtCase3 = createCourtCase("CASE-3");
-        CourtCaseEntity courtCase4 = createCourtCase("CASE-4");
-        CourtCaseEntity courtCase5 = createCourtCase("CASE-5");
+        CourtCaseEntity courtCase3 = createCourtCase(CASE_NUMBER_3);
+        CourtCaseEntity courtCase4 = createCourtCase(CASE_NUMBER_4);
+        CourtCaseEntity courtCase5 = createCourtCase(CASE_NUMBER_5);
 
         CaseLinkedCaseEntity linkedCase1 = createLinkedCase(courtCase1, courtCase2);
         CaseLinkedCaseEntity linkedCase2 = createLinkedCase(courtCase3, courtCase1);
@@ -56,11 +59,7 @@ class CaseLinkedCaseRepositoryIntTest extends PostgresIntegrationBase {
         clearEntityManagerCache();
 
         // when
-        List<CaseLinkedCaseEntity> linkedCases = caseLinkedCaseRepository.findByCourtCaseIdIn(List.of(
-            courtCase1.getId(),
-            courtCase2.getId(),
-            courtCase3.getId()
-        ));
+        List<CaseLinkedCaseEntity> linkedCases = caseLinkedCaseRepository.findByCourtCaseIn(List.of(courtCase1, courtCase2, courtCase3));
 
         // then
         assertThat(linkedCases)
