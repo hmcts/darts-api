@@ -302,20 +302,24 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
     void findAllByEventStatusAndNotCourtrooms_shouldReturnSingleEvent_withOneValidEvent() {
         // given
         EventEntity eventWithCourtroomToBeExcluded = PersistableFactory.getEventTestData().someMinimal();
+        EventEntity eventWithCourtroomToBeExcluded2 = PersistableFactory.getEventTestData().someMinimal();
         EventEntity eventWithCourtroomToBeIncluded = PersistableFactory.getEventTestData().someMinimal();
         EventEntity eventWithDifferentEventStatus = PersistableFactory.getEventTestData().someMinimal();
 
         eventWithCourtroomToBeExcluded.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
+        eventWithCourtroomToBeExcluded2.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         eventWithCourtroomToBeIncluded.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         eventWithDifferentEventStatus.setEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_HERITAGE.getStatusNumber());
 
         eventWithCourtroomToBeExcluded = dartsPersistence.save(eventWithCourtroomToBeExcluded);
+        eventWithCourtroomToBeExcluded2.getCourtroom().setName("98");
+        dartsPersistence.save(eventWithCourtroomToBeExcluded2);
         eventWithCourtroomToBeIncluded = dartsPersistence.save(eventWithCourtroomToBeIncluded);
 
         // when
         List<Long> events = eventRepository.findAllByEventStatusAndNotCourtrooms(
             EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
-            List.of(eventWithCourtroomToBeExcluded.getCourtroom().getName()),
+            List.of(eventWithCourtroomToBeExcluded.getCourtroom().getName(), "199", "99", "198", "98"),
             Limit.of(5));
 
         // then
