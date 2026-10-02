@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.cases.mapper.CaseTranscriptionMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
+import uk.gov.hmcts.darts.cases.mapper.LinkedCaseMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
@@ -57,12 +58,10 @@ import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -139,8 +138,7 @@ public class CaseServiceImpl implements CaseService {
         if (caseEntity.getHearings().stream().noneMatch(HearingEntity::getHearingIsActual)) {
             throw new DartsApiException(CaseApiError.HEARINGS_NOT_ACTUAL);
         }
-        List<CourtCaseEntity> linkedCases = getLinkedCases(caseId);
-        return casesMapper.mapToSingleCase(caseEntity, linkedCases);
+        return casesMapper.mapToSingleCase(caseEntity, getLinkedCases(caseEntity));
     }
 
     @Override
@@ -191,61 +189,30 @@ public class CaseServiceImpl implements CaseService {
             return new ArrayList<>();
         }
         List<HearingEntity> hearings = hearingRepository.findByIsActualCaseIds(caseIds);
-        List<CaseLinkedCaseEntity> linkedCaseEntities = caseLinkedCaseRepository.findByCourtCaseIdIn(caseIds);
-        Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId = getLinkedCasesByCaseId(caseIds, linkedCaseEntities);
-
-        return AdvancedSearchResponseMapper.mapResponse(hearings, linkedCasesByCaseId);
+        List<CourtCaseEntity> courtCases = getCourtCases(hearings);
+        List<CaseLinkedCaseEntity> linkedCaseEntities = getLinkedCasesByCaseIds(courtCases);
+        return AdvancedSearchResponseMapper.mapResponse(hearings, linkedCaseEntities);
     }
 
-    private Map<Integer, List<CourtCaseEntity>> getLinkedCasesByCaseId(List<Integer> caseIds, List<CaseLinkedCaseEntity> linkedCaseEntities) {
-        Set<Integer> caseIdSet = new HashSet<>(caseIds);
-        Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId = new HashMap<>();
-
-        for (CaseLinkedCaseEntity linkedCaseEntity : linkedCaseEntities) {
-            //  Assume the current case can appear on either side of case_linked_case, so check both directions.
-            addLinkedCase(linkedCasesByCaseId, caseIdSet, linkedCaseEntity.getCourtCase1(), linkedCaseEntity.getCourtCase2());
-            addLinkedCase(linkedCasesByCaseId, caseIdSet, linkedCaseEntity.getCourtCase2(), linkedCaseEntity.getCourtCase1());
+    private List<CourtCaseEntity> getCourtCases(List<HearingEntity> hearings) {
+        Map<Integer, CourtCaseEntity> courtCasesById = new LinkedHashMap<>();
+        for (HearingEntity hearing : hearings) {
+            CourtCaseEntity courtCase = hearing.getCourtCase();
+            courtCasesById.putIfAbsent(courtCase.getId(), courtCase);
         }
-
-        return linkedCasesByCaseId;
+        return new ArrayList<>(courtCasesById.values());
     }
 
-    private void addLinkedCase(Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId,
-                               Set<Integer> caseIdSet,
-                               CourtCaseEntity courtCase,
-                               CourtCaseEntity linkedCase) {
-        if (!isSearchResultCaseWithLinkedCase(caseIdSet, courtCase, linkedCase)) {
-            return;
-        }
-
-        Integer courtCaseId = courtCase.getId();
-        // Rebuild and put the list back so the map update is explicit for each linked case.
-        List<CourtCaseEntity> linkedCases = linkedCasesByCaseId.get(courtCaseId);
-        if (linkedCases == null) {
-            linkedCases = new ArrayList<>();
-        } else {
-            linkedCases = new ArrayList<>(linkedCases);
-        }
-        linkedCases.add(linkedCase);
-        linkedCasesByCaseId.put(courtCaseId, linkedCases);
-    }
-
-    private boolean isSearchResultCaseWithLinkedCase(Set<Integer> caseIdSet, CourtCaseEntity courtCase, CourtCaseEntity linkedCase) {
-        return courtCase != null
-            && linkedCase != null
-            && caseIdSet.contains(courtCase.getId());
-    }
-
-    private List<CourtCaseEntity> getLinkedCases(Integer caseId) {
-        List<CaseLinkedCaseEntity> linkedCaseEntities = caseLinkedCaseRepository.findByCourtCaseIdIn(List.of(caseId));
-        if (linkedCaseEntities == null) {
+    private List<CaseLinkedCaseEntity> getLinkedCasesByCaseIds(List<CourtCaseEntity> courtCases) {
+        if (courtCases.isEmpty()) {
             return List.of();
         }
-        Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId = getLinkedCasesByCaseId(
-            List.of(caseId),
-            linkedCaseEntities
-        );
-        return linkedCasesByCaseId.getOrDefault(caseId, List.of());
+
+        return caseLinkedCaseRepository.findByCourtCaseIn(courtCases);
+    }
+
+    private List<CourtCaseEntity> getLinkedCases(CourtCaseEntity courtCase) {
+        return LinkedCaseMapper.mapLinkedCases(courtCase, caseLinkedCaseRepository.findByCourtCase(courtCase));
     }
 
     @Transactional
@@ -324,10 +291,8 @@ public class CaseServiceImpl implements CaseService {
             return new ArrayList<>();
         }
         List<CourtCaseEntity> matchingCases = caseRepository.findAllWithIdMatchingOneOf(matchingCaseIds);
-        List<CaseLinkedCaseEntity> linkedCaseEntities = caseLinkedCaseRepository.findByCourtCaseIdIn(matchingCaseIds);
-        Map<Integer, List<CourtCaseEntity>> linkedCasesByCaseId = getLinkedCasesByCaseId(matchingCaseIds, linkedCaseEntities);
-
-        return AdminCasesSearchResponseMapper.mapResponse(matchingCases, linkedCasesByCaseId);
+        List<CaseLinkedCaseEntity> linkedCaseEntities = getLinkedCasesByCaseIds(matchingCases);
+        return AdminCasesSearchResponseMapper.mapResponse(matchingCases, linkedCaseEntities);
     }
 
     @Override
@@ -339,8 +304,7 @@ public class CaseServiceImpl implements CaseService {
     @Transactional(readOnly = true)
     public AdminSingleCaseResponseItem adminGetCaseById(Integer caseId) {
         CourtCaseEntity caseEntity = getCourtCaseById(caseId);
-        List<CourtCaseEntity> linkedCases = getLinkedCases(caseId);
-        return casesMapper.mapToAdminSingleCaseResponseItem(caseEntity, linkedCases);
+        return casesMapper.mapToAdminSingleCaseResponseItem(caseEntity, getLinkedCases(caseEntity));
     }
 
 }
