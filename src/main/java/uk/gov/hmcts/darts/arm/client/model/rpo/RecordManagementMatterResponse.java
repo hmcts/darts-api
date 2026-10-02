@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.OffsetDateTime;
@@ -28,6 +30,9 @@ public class RecordManagementMatterResponse extends BaseRpoResponse {
         private String matterId;
         private String name;
         private boolean isQuickSearch;
+        // Keep the JSON property name exact despite Java/Lombok boolean accessor naming conventions.
+        @Getter(onMethod_ = @JsonProperty("isUsedForRM"))
+        @Setter(onMethod_ = @JsonProperty("isUsedForRM"))
         @JsonProperty("isUsedForRM")
         private boolean isUsedForRm;
         private String description;

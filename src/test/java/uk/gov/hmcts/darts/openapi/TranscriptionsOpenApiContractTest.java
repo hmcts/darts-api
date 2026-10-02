@@ -39,8 +39,8 @@ class TranscriptionsOpenApiContractTest {
         ValidationReport report = VALIDATOR.validateRequest(request);
 
         assertTrue(report.getMessages().stream()
-            .anyMatch(m -> m.getMessage().contains("Numeric instance is lower than the required " +
-                                                       "minimum (minimum: 1, found: -123)")));
+            .anyMatch(m -> m.getMessage().contains("minimum value of 1")),
+            () -> "Expected a minimum-value validation error but got " + report.getMessages());
     }
 
     @Test
@@ -53,11 +53,9 @@ class TranscriptionsOpenApiContractTest {
 
         ValidationReport report = VALIDATOR.validateRequest(request);
 
-        String expectedSubstring = "Numeric instance is greater than the required maximum (maximum: "
-            + maxTranscriptionId + ", found: " + exceededTranscriptionId + ")";
-
         assertTrue(
-            report.getMessages().stream().anyMatch(m -> m.getMessage().equals(expectedSubstring))
+            report.getMessages().stream().anyMatch(m -> m.getMessage().contains("maximum value of " + maxTranscriptionId)),
+            () -> "Expected a maximum-value validation error for " + exceededTranscriptionId + " but got " + report.getMessages()
         );
     }
 
@@ -103,27 +101,27 @@ class TranscriptionsOpenApiContractTest {
                 arguments(
                     "transcription id is required",
                     patchRequestBody(body -> body.remove("transcription_id")),
-                    "Object has missing required properties"
+                    "required property 'transcription_id' not found"
                 ),
                 arguments(
-                    "transcription id exceeds minLength",
+                    "transcription id is below minimum",
                     patchRequestBody(body -> body.set("transcription_id", JsonNodeFactory.instance.numberNode(BigInteger.ZERO))),
-                    "Numeric instance is lower than the required minimum"
+                    "minimum value of 1"
                 ),
                 arguments(
-                    "transcription id exceeds maxLength",
+                    "transcription id exceeds maximum",
                     patchRequestBody(body -> body.set("transcription_id", JsonNodeFactory.instance.numberNode(new BigInteger("9223372036854775808")))),
-                    "Numeric instance is greater than the required maximum"
+                    "maximum value of 9223372036854775807"
                 ),
                 arguments(
                     "transcription id is NaN",
                     patchRequestBody(body -> body.put("transcription_id", "not-a-number")),
-                    "Instance type (string) does not match any allowed primitive type"
+                    "string found, integer expected"
                 ),
                 arguments(
                     "hide request from requestor is not a boolean",
                     patchRequestBody(body -> body.put("hide_request_from_requestor", "true")),
-                    "Instance type (string) does not match any allowed primitive type"
+                    "string found, boolean expected"
                 )
             );
         }
