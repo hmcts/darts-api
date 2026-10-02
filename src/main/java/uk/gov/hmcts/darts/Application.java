@@ -50,6 +50,10 @@ public class Application implements CommandLineRunner {
             log.info("ATS_MODE found, closing instance");
             System.exit(0);//Let the shutdown hooks do its job
         }
+        if (System.getenv("AUDIO_INGESTION_MODE") != null) {
+            log.info("AUDIO_INGESTION_MODE found, closing instance");
+            System.exit(0);//Let the shutdown hooks do its job
+        }
     }
 
     @Override
@@ -57,6 +61,10 @@ public class Application implements CommandLineRunner {
         if (System.getenv("ATS_MODE") != null) {
             log.info("ATS_MODE activated");
             audioApi.handleKedaInvocationForMediaRequests();
+        }
+        if (System.getenv("AUDIO_INGESTION_MODE") != null) {
+            log.info("AUDIO_INGESTION_MODE activated");
+            audioApi.handleKedaInvocationForAudioIngestion();
         }
     }
 

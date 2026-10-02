@@ -87,6 +87,7 @@ def determineDevEnvironmentDeployment() {
   env.AUTOMATED_TASK_MODE = true
 
   env.DEV_ENABLE_DARTS_KEDA = false
+  env.DEV_ENABLE_AUDIO_INGESTION_KEDA = false
 
   echo "1 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"
   echo "1 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
@@ -95,6 +96,8 @@ def determineDevEnvironmentDeployment() {
   echo "1 - env.DEV_DARTS_GATEWAY_URL: ${env.DEV_DARTS_GATEWAY_URL}"
 
   echo "1 - env.DEV_ENABLE_DARTS_KEDA: ${env.DEV_ENABLE_DARTS_KEDA}"
+  echo "1 - env.DEV_ENABLE_AUDIO_INGESTION_KEDA: ${env.DEV_ENABLE_AUDIO_INGESTION_KEDA}"
+
 
 
   def githubApi = new GithubAPI(this)
@@ -132,10 +135,14 @@ def determineDevEnvironmentDeployment() {
         echo "Deploying DARTS gateway (${env.DEV_DARTS_GATEWAY_IMAGE_SUFFIX}) instance in PR environment"
       }
 
-      //Gateway
+      //ATS KEDA
       if (label ==~ /enable_darts_ats_keda.*/) {
         env.DEV_ENABLE_DARTS_KEDA = true
         echo "DARTS KEDA enabled in PR environment"
+      }
+      if (label ==~ /enable_darts_audio_ingestion_keda.*/) {
+        env.DEV_ENABLE_AUDIO_INGESTION_KEDA = true
+        echo "DARTS KEDA enabled in PR environment for Audio Ingestion"
       }
     }
   }
@@ -145,6 +152,7 @@ def determineDevEnvironmentDeployment() {
   echo "2 - env.DEV_ENABLE_DARTS_GATEWAY: ${env.DEV_ENABLE_DARTS_GATEWAY}"
   echo "2 - env.DEV_DARTS_GATEWAY_URL: ${env.DEV_DARTS_GATEWAY_URL}"
   echo "2 - env.DEV_ENABLE_DARTS_KEDA: ${env.DEV_ENABLE_DARTS_KEDA}"
+  echo "2 - env.DEV_ENABLE_AUDIO_INGESTION_KEDA: ${env.DEV_ENABLE_AUDIO_INGESTION_KEDA}"
 }
 
 GradleBuilder builder = new GradleBuilder(this, product)
