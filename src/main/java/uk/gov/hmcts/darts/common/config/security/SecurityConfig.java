@@ -112,7 +112,6 @@ public class SecurityConfig {
         return httpSecurity
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
-            .csrf().disable()
             .formLogin().disable()
             .logout().disable();
     }
