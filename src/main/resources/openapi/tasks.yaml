@@ -46,6 +46,66 @@ paths:
         '404':
           $ref: '#/components/responses/AutomatedTaskNotFound'
 
+  /admin/automated-tasks/{task_id}/edit-cron-expression:
+    patch:
+      tags:
+        - Tasks
+      operationId: patchAutomatedTaskCronExpression
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        $ref: '#/components/requestBodies/AutomatedTaskCronExpressionPatch'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '404':
+          description: Not Found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+    post:
+      tags:
+        - Tasks
+      operationId: postAutomatedTaskCronExpression
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        $ref: '#/components/requestBodies/AutomatedTaskCronExpressionPost'
+      responses:
+        '200':
+          $ref: '#/components/responses/AutomatedTaskCronExpression'
+        '400':
+          description: Bad Request
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '404':
+          description: Not Found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
   /admin/automated-tasks/{task_id}/run:
     post:
@@ -67,6 +127,13 @@ paths:
 ########################################################################################################################
 
 components:
+  parameters:
+    TaskId:
+      in: path
+      name: task_id
+      required: true
+      schema:
+        type: integer
 
   requestBodies:
     AutomatedTaskPatchRequest:
@@ -75,6 +142,19 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AutomatedTaskPatch'
+    AutomatedTaskCronExpressionPatch:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AutomatedTaskCronExpressionPatchRequest'
+    AutomatedTaskCronExpressionPost:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AutomatedTaskCronExpressionPostRequest'
+
   responses:
     AutomatedTasksResponse:
       description: 'Success'
@@ -110,8 +190,37 @@ components:
             type: "AUTOMATED_TASK_101"
             title: "Automated task is already running"
             status: 409
+    AutomatedTaskCronExpression:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AutomatedTaskCronExpressionScheduleResponse'
 
   schemas:
+    AutomatedTaskCronExpressionPatchRequest:
+      type: object
+      properties:
+        cron_expression:
+          $ref: '#/components/schemas/CronExpression'
+    AutomatedTaskCronExpressionPostRequest:
+      type: object
+      properties:
+        cron_expression:
+          $ref: '#/components/schemas/CronExpression'
+    AutomatedTaskCronExpressionScheduleResponse:
+      type: object
+      properties:
+        execution_number:
+          type: string
+          minLength: 1
+          maxLength: 256
+          pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
+        scheduled_at:
+          type: string
+          format: date-time
     AutomatedTaskPatch:
       type: object
       properties:
@@ -119,7 +228,6 @@ components:
           $ref: '#/components/schemas/IsActive'
         batch_size:
           type: integer
-
         rpo_csv_start_hour:
           type: integer
         rpo_csv_end_hour:
@@ -130,8 +238,6 @@ components:
         arm_replay_end_ts:
           type: string
           format: date-time
-
-
     AutomatedTaskSummary:
       type: object
       properties:
@@ -174,7 +280,6 @@ components:
           type: string
       allOf:
         - $ref: '#/components/schemas/AutomatedTaskSummary'
-
     AutomatedTaskId:
       type: integer
     AutomatedTaskName:
@@ -189,6 +294,7 @@ components:
       type: string
       minLength: 1
       maxLength: 256
+      pattern: '^[A-Za-z0-9*?,/\#@ -]+$'
     IsActive:
       type: boolean
     BatchSize:
@@ -205,7 +311,6 @@ components:
       format: date-time
     LastModifiedBy:
       type: integer
-
     AutomatedTaskErrorCode:
       type: string
       enum:
@@ -213,8 +318,16 @@ components:
         - "AUTOMATED_TASK_101"
         - "AUTOMATED_TASK_102"
         - "AUTOMATED_TASK_103"
-      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED, INCORRECT_AUTOMATED_TASK_TYPE ]
-
+        - "AUTOMATED_TASK_104"
+        - "AUTOMATED_TASK_105"
+      x-enum-varnames: [
+        AUTOMATED_TASK_NOT_FOUND,
+        AUTOMATED_TASK_ALREADY_RUNNING,
+        AUTOMATED_TASK_NOT_CONFIGURED,
+        INCORRECT_AUTOMATED_TASK_TYPE,
+        AUTOMATED_TASK_CRON_EXPRESSION_INVALID,
+        AUTOMATED_TASK_CRON_EXPRESSION_NOT_EDITABLE
+      ]
     AutomatedTaskTitleErrors:
       type: string
       enum:
@@ -222,11 +335,13 @@ components:
         - "The automated task is already running"
         - "The automated task has not been initialized correctly on application start up and can not be run manually."
         - "The automated task type is incorrect"
-      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED, INCORRECT_AUTOMATED_TASK_TYPE ]
-  parameters:
-    TaskId:
-      in: path
-      name: task_id
-      required: true
-      schema:
-        type: integer
+        - "The automated task cron expression is invalid"
+        - "The automated task cron expression is not editable"
+      x-enum-varnames: [
+        AUTOMATED_TASK_NOT_FOUND,
+        AUTOMATED_TASK_ALREADY_RUNNING,
+        AUTOMATED_TASK_NOT_CONFIGURED,
+        INCORRECT_AUTOMATED_TASK_TYPE,
+        AUTOMATED_TASK_CRON_EXPRESSION_INVALID,
+        AUTOMATED_TASK_CRON_EXPRESSION_NOT_EDITABLE
+      ]
