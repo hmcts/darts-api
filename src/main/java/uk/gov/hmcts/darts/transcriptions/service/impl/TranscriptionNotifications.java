@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ACCEPT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUTHORISE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CLOSED_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REJECT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UNFULFILLED_TRANSCRIPTION;
@@ -87,6 +88,7 @@ public class TranscriptionNotifications {
                 }
                 auditApi.record(UNFULFILLED_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
+            case CLOSED -> auditApi.record(CLOSED_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             default -> {
                 // Do nothing for unmatched status
             }
