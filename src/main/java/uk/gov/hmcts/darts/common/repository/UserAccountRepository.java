@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-@SuppressWarnings("PMD.TooManyMethods")//Repository class so low complexity in this case
+@SuppressWarnings("PMD.TooManyMethods")
 public interface UserAccountRepository extends
     RevisionRepository<UserAccountEntity, Integer, Long>,
     JpaRepository<UserAccountEntity, Integer>,
