@@ -190,7 +190,7 @@ public class CaseServiceImpl implements CaseService {
         }
         List<HearingEntity> hearings = hearingRepository.findByIsActualCaseIds(caseIds);
         List<CourtCaseEntity> courtCases = getCourtCases(hearings);
-        List<CaseLinkedCaseEntity> linkedCaseEntities = getLinkedCasesByCaseIds(courtCases);
+        List<CaseLinkedCaseEntity> linkedCaseEntities = getLinkedCasesByCourtCases(courtCases);
         return AdvancedSearchResponseMapper.mapResponse(hearings, linkedCaseEntities);
     }
 
@@ -203,7 +203,7 @@ public class CaseServiceImpl implements CaseService {
         return new ArrayList<>(courtCasesById.values());
     }
 
-    private List<CaseLinkedCaseEntity> getLinkedCasesByCaseIds(List<CourtCaseEntity> courtCases) {
+    private List<CaseLinkedCaseEntity> getLinkedCasesByCourtCases(List<CourtCaseEntity> courtCases) {
         if (courtCases.isEmpty()) {
             return List.of();
         }
@@ -291,7 +291,7 @@ public class CaseServiceImpl implements CaseService {
             return new ArrayList<>();
         }
         List<CourtCaseEntity> matchingCases = caseRepository.findAllWithIdMatchingOneOf(matchingCaseIds);
-        List<CaseLinkedCaseEntity> linkedCaseEntities = getLinkedCasesByCaseIds(matchingCases);
+        List<CaseLinkedCaseEntity> linkedCaseEntities = getLinkedCasesByCourtCases(matchingCases);
         return AdminCasesSearchResponseMapper.mapResponse(matchingCases, linkedCaseEntities);
     }
 
