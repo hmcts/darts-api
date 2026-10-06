@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.retention.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -176,12 +178,14 @@ class CloseCaseWithRetentionServiceImplTest {
         verify(retentionPolicyTypeRepository, never()).getReferenceById(any());
     }
 
-    @Test
-    void closeCaseAndSetRetention_shouldNotOverridePolicy_whenNonNotGuiltyEventIsBeforeVariableRetention() {
+    @ParameterizedTest
+    @EnumSource(value = RetentionPolicyEnum.class, names = "NOT_GUILTY", mode = EnumSource.Mode.EXCLUDE)
+    void closeCaseAndSetRetention_shouldNotOverridePolicy_whenPolicyIsNotNotGuiltyAndEventIsBeforeVariableRetention(
+        RetentionPolicyEnum retentionPolicyEnum) {
         OffsetDateTime eventTime = OffsetDateTime.of(2023, 10, 8, 23, 59, 59, 0, ZoneOffset.UTC);
 
         DartsEventRetentionPolicy retentionPolicy = new DartsEventRetentionPolicy();
-        retentionPolicy.setCaseRetentionFixedPolicy(RetentionPolicyEnum.NON_CUSTODIAL.getPolicyKey());
+        retentionPolicy.setCaseRetentionFixedPolicy(retentionPolicyEnum.getPolicyKey());
         dartsEvent.setDateTime(eventTime);
         dartsEvent.setRetentionPolicy(retentionPolicy);
 
