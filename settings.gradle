@@ -1,3 +1,16 @@
+pluginManagement {
+  repositories {
+    mavenLocal()
+    if (!System.getenv('GITHUB_ACTIONS')) {
+      maven { url = 'https://artifactory.platform.hmcts.net/artifactory/maven-remotes' }
+    }
+    gradlePluginPortal()
+    maven { url = 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1' }
+    maven { url = 'https://repo.spring.io/milesone/' }
+    mavenCentral()
+  }
+}
+
 plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.10.0'
 }
