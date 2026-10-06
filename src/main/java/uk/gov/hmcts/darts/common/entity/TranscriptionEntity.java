@@ -152,6 +152,10 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity implements Ha
     private List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
 
     @NotAudited
+    @OneToMany(mappedBy = TranscriptionLinkedCaseEntity_.TRANSCRIPTION)
+    private List<TranscriptionLinkedCaseEntity> transcriptionLinkedCaseEntities = new ArrayList<>();
+
+    @NotAudited
     @Column(name = "transcription_object_name")
     private String transcriptionObjectName;
 

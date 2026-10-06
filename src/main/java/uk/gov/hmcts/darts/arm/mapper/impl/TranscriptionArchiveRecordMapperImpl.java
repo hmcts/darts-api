@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 
@@ -25,6 +26,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -201,17 +203,36 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
 
     private String getCaseNumbers(TranscriptionDocumentEntity transcriptionDocumentEntity) {
         List<CourtCaseEntity> cases = transcriptionDocumentEntity.getTranscription().getAssociatedCourtCases();
-        if (cases.isEmpty()) {
-            return null;
-        } else if (cases.size() == 1) {
-            return cases.getFirst().getCaseNumber();
-        } else {
-            List<String> caseNumbers = cases
+        List<String> caseNumbers = cases
+            .stream()
+            .map(CourtCaseEntity::getCaseNumber)
+            .filter(Objects::nonNull)
+            .toList();
+
+        if (caseNumbers.isEmpty()) {
+            caseNumbers = transcriptionDocumentEntity.getTranscription()
+                .getTranscriptionLinkedCaseEntities()
                 .stream()
-                .map(CourtCaseEntity::getCaseNumber)
+                .map(this::getCaseNumber)
+                .filter(Objects::nonNull)
+                .distinct()
                 .toList();
-            return caseListToString(caseNumbers);
         }
+
+        if (caseNumbers.isEmpty()) {
+            return null;
+        } else if (caseNumbers.size() == 1) {
+            return caseNumbers.getFirst();
+        }
+
+        return caseListToString(caseNumbers);
+    }
+
+    private String getCaseNumber(TranscriptionLinkedCaseEntity transcriptionLinkedCase) {
+        if (nonNull(transcriptionLinkedCase.getCourtCase())) {
+            return transcriptionLinkedCase.getCourtCase().getCaseNumber();
+        }
+        return transcriptionLinkedCase.getCaseNumber();
     }
 
     private String caseListToString(List<String> caseNumberList) {
@@ -332,11 +353,28 @@ public class TranscriptionArchiveRecordMapperImpl extends BaseArchiveRecordMappe
             && nonNull(transcriptionDocument.getTranscription().getHearing().getCourtroom())
             && nonNull(transcriptionDocument.getTranscription().getHearing().getCourtroom().getCourthouse())) {
             courthouse = transcriptionDocument.getTranscription().getHearing().getCourtroom().getCourthouse().getDisplayName();
-        } else if (nonNull(transcriptionDocument.getTranscription().getCourtCase().getCourthouse())
+        } else if (nonNull(transcriptionDocument.getTranscription().getCourtCase())
             && nonNull(transcriptionDocument.getTranscription().getCourtCase().getCourthouse())) {
             courthouse = transcriptionDocument.getTranscription().getCourtCase().getCourthouse().getDisplayName();
+        } else if (CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getTranscriptionLinkedCaseEntities())) {
+            courthouse = getCourthouse(transcriptionDocument.getTranscription().getTranscriptionLinkedCaseEntities());
         }
         return courthouse;
+    }
+
+    private static String getCourthouse(List<TranscriptionLinkedCaseEntity> transcriptionLinkedCaseEntities) {
+        return transcriptionLinkedCaseEntities.stream()
+            .map(TranscriptionArchiveRecordMapperImpl::getCourthouse)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+    }
+
+    private static String getCourthouse(TranscriptionLinkedCaseEntity transcriptionLinkedCase) {
+        if (nonNull(transcriptionLinkedCase.getCourtCase()) && nonNull(transcriptionLinkedCase.getCourtCase().getCourthouse())) {
+            return transcriptionLinkedCase.getCourtCase().getCourthouse().getDisplayName();
+        }
+        return transcriptionLinkedCase.getCourthouseName();
     }
 
     private Long mapToLong(String key, TranscriptionDocumentEntity transcriptionDocument) {

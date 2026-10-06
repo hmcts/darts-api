@@ -14,11 +14,13 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -146,6 +148,68 @@ class TranscriptionArchiveRecordMapperImplTest {
         assertNotNull(result.getUploadNewFileRecord());
 
         assertMetadataWithAllProperties(result.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata());
+    }
+
+    @Test
+    void mapToTranscriptionArchiveRecord_ShouldUseTranscriptionLinkedCase_WhenTranscriptionHasNoHearingOrCourtCaseLinks() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
+        when(armDataManagementConfiguration.getRegion()).thenReturn("region");
+        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/transcription-record.properties");
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("Transcription");
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setDisplayName("Swansea Crown Court");
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseNumber("T20240001");
+        courtCase.setCourthouse(courthouse);
+        transcriptionEntity.setHearings(Set.of());
+        transcriptionEntity.setCourtCases(Set.of());
+        transcriptionEntity.setTranscriptionLinkedCaseEntities(List.of(TranscriptionLinkedCaseEntity.builder()
+                                                                           .transcription(transcriptionEntity)
+                                                                           .courtCase(courtCase)
+                                                                           .build()));
+
+        // when
+        TranscriptionArchiveRecord result = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, "rawFilename");
+
+        // then
+        RecordMetadata metadata = result.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata();
+        assertEquals("T20240001", metadata.getBf002());
+        assertEquals("Swansea Crown Court", metadata.getBf019());
+    }
+
+    @Test
+    void mapToTranscriptionArchiveRecord_ShouldUseTranscriptionLinkedCaseValues_WhenLinkedCaseHasNoCourtCaseEntity() {
+        // given
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        when(armDataManagementConfiguration.getPublisher()).thenReturn("publisher");
+        when(armDataManagementConfiguration.getRegion()).thenReturn("region");
+        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/transcription-record.properties");
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("Transcription");
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+
+        transcriptionEntity.setHearings(Set.of());
+        transcriptionEntity.setCourtCases(Set.of());
+        transcriptionEntity.setTranscriptionLinkedCaseEntities(List.of(TranscriptionLinkedCaseEntity.builder()
+                                                                           .transcription(transcriptionEntity)
+                                                                           .courthouseName("SWANSEA")
+                                                                           .caseNumber("T20240002")
+                                                                           .build()));
+
+        // when
+        TranscriptionArchiveRecord result = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, "rawFilename");
+
+        // then
+        RecordMetadata metadata = result.getTranscriptionCreateArchiveRecordOperation().getRecordMetadata();
+        assertEquals("T20240002", metadata.getBf002());
+        assertEquals("SWANSEA", metadata.getBf019());
     }
 
     private void assertMetadataSuccess(RecordMetadata metadata) {
