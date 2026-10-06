@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
+import uk.gov.hmcts.darts.cases.service.CaseLinkedCaseService;
 import uk.gov.hmcts.darts.common.entity.CaseLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -42,7 +43,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
-import uk.gov.hmcts.darts.common.repository.CaseLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -97,7 +97,7 @@ class CaseServiceImplTest {
     private CaseRepository caseRepository;
 
     @Mock
-    private CaseLinkedCaseRepository caseLinkedCaseRepository;
+    private CaseLinkedCaseService caseLinkedCaseService;
 
     @Mock
     private HearingRepository hearingRepository;
@@ -145,7 +145,7 @@ class CaseServiceImplTest {
         caseService = new CaseServiceImpl(
             casesMapper,
             annotationMapper,
-            caseLinkedCaseRepository,
+            caseLinkedCaseService,
             hearingRepository,
             eventRepository,
             caseRepository,
@@ -168,6 +168,7 @@ class CaseServiceImplTest {
         CourtCaseEntity courtCaseEntity = hearings.getFirst().getCourtCase();
         courtCaseEntity.setHearings(hearings);
         when(caseRepository.findById(any())).thenReturn(Optional.of(courtCaseEntity));
+        when(caseLinkedCaseService.getLinkedCases(courtCaseEntity)).thenReturn(List.of());
 
         SingleCase result = caseService.getCasesById(101);
 
@@ -188,7 +189,7 @@ class CaseServiceImplTest {
         courtCase.setHearings(List.of(hearing));
         CourtCaseEntity linkedCase = CommonTestDataUtil.createCaseWithId("LinkedCase1", 202);
         when(caseRepository.findById(101)).thenReturn(Optional.of(courtCase));
-        when(caseLinkedCaseRepository.findByCourtCase(courtCase)).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
+        when(caseLinkedCaseService.getLinkedCases(courtCase)).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
 
         SingleCase result = caseService.getCasesById(101);
 
@@ -537,6 +538,7 @@ class CaseServiceImplTest {
         courtCaseEntity.setHearings(hearings);
 
         when(caseRepository.findById(1)).thenReturn(Optional.of(courtCaseEntity));
+        when(caseLinkedCaseService.getLinkedCases(courtCaseEntity)).thenReturn(List.of());
 
         // when
         AdminSingleCaseResponseItem result = caseService.adminGetCaseById(1);
@@ -562,7 +564,7 @@ class CaseServiceImplTest {
         CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 101);
         CourtCaseEntity linkedCase = CommonTestDataUtil.createCaseWithId("LinkedCase1", 202);
         when(caseRepository.findById(101)).thenReturn(Optional.of(courtCase));
-        when(caseLinkedCaseRepository.findByCourtCase(courtCase)).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
+        when(caseLinkedCaseService.getLinkedCases(courtCase)).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
 
         AdminSingleCaseResponseItem result = caseService.adminGetCaseById(101);
 
