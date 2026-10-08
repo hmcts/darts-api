@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -100,13 +101,13 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
         case10.setCaseNumber("case10");
 
         CourtCaseEntity linkedSearchCase1 = PersistableFactory.getCourtCaseTestData().createCaseAt(linkedCasesCourthouse);
-        linkedSearchCase1.setCaseNumber("LinkedAlpha");
+        linkedSearchCase1.setCaseNumber("LinkedCase1");
 
         CourtCaseEntity linkedSearchCase2 = PersistableFactory.getCourtCaseTestData().createCaseAt(linkedCasesCourthouse);
-        linkedSearchCase2.setCaseNumber("LinkedBeta");
+        linkedSearchCase2.setCaseNumber("LinkedCase2");
 
         CourtCaseEntity linkedSearchCase3 = PersistableFactory.getCourtCaseTestData().createCaseAt(linkedCasesCourthouse);
-        linkedSearchCase3.setCaseNumber("LinkedGamma");
+        linkedSearchCase3.setCaseNumber("LinkedCase3");
 
         JudgeEntity judge = createJudgeWithName("aJudge");
         CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
@@ -246,7 +247,7 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
     @Test
     void advancedSearch_shouldReturnLinkedCases_whenOneCaseAndOneLinkedCase() {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber("LinkedBeta")
+            .caseNumber("LinkedCase2")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, linkedCasesCourthouse);
@@ -254,10 +255,13 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
 
         assertThat(resultList).hasSize(1);
-        assertThat(resultList.getFirst().getCaseNumber()).isEqualTo("LinkedBeta");
+        assertThat(resultList.getFirst().getCaseNumber()).isEqualTo("LinkedCase2");
         assertThat(resultList.getFirst().getLinkedCases())
             .extracting(linkedCase -> linkedCase.getCaseNumber())
-            .containsExactly("LinkedAlpha");
+            .containsExactly("LinkedCase1");
+        assertThat(resultList.getFirst().getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getActiveLink())
+            .containsExactly(true);
     }
 
     @Test
@@ -271,20 +275,53 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
 
-        AdvancedSearchResult linkedCase1 = getResultByCaseNumber(resultList, "LinkedAlpha");
-        AdvancedSearchResult linkedCase2 = getResultByCaseNumber(resultList, "LinkedBeta");
-        AdvancedSearchResult linkedCase3 = getResultByCaseNumber(resultList, "LinkedGamma");
+        AdvancedSearchResult linkedCase1 = getResultByCaseNumber(resultList, "LinkedCase1");
+        AdvancedSearchResult linkedCase2 = getResultByCaseNumber(resultList, "LinkedCase2");
+        AdvancedSearchResult linkedCase3 = getResultByCaseNumber(resultList, "LinkedCase3");
 
         assertThat(resultList).hasSize(3);
         assertThat(linkedCase1.getLinkedCases())
             .extracting(linkedCase -> linkedCase.getCaseNumber())
-            .containsExactlyInAnyOrder("LinkedBeta", "LinkedGamma");
+            .containsExactlyInAnyOrder("LinkedCase2", "LinkedCase3");
+        assertThat(linkedCase1.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getActiveLink())
+            .containsOnly(true);
         assertThat(linkedCase2.getLinkedCases())
             .extracting(linkedCase -> linkedCase.getCaseNumber())
-            .containsExactly("LinkedAlpha");
+            .containsExactly("LinkedCase1");
+        assertThat(linkedCase2.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getActiveLink())
+            .containsExactly(true);
         assertThat(linkedCase3.getLinkedCases())
             .extracting(linkedCase -> linkedCase.getCaseNumber())
-            .containsExactly("LinkedAlpha");
+            .containsExactly("LinkedCase1");
+        assertThat(linkedCase3.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getActiveLink())
+            .containsExactly(true);
+    }
+
+    @Test
+    void advancedSearch_shouldReturnLinkedCasesWithActiveLinkFalse_whenUserDoesNotHaveAccessToSomeLinkedCases() {
+        CourtCaseEntity linkedSearchCase = getCourtCase("LinkedCase1", "CARDIFF");
+        CourtCaseEntity inaccessibleLinkedCase = getCourtCase("Case9", "LONDON");
+        dartsDatabase.save(createLinkedCase(linkedSearchCase, inaccessibleLinkedCase));
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .caseNumber("LinkedCase1")
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, linkedCasesCourthouse);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+
+        assertThat(resultList).hasSize(1);
+        assertThat(resultList.getFirst().getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber(), linkedCase -> linkedCase.getActiveLink())
+            .containsExactlyInAnyOrder(
+                tuple("LinkedCase2", true),
+                tuple("LinkedCase3", true),
+                tuple("Case9", false)
+            );
     }
 
     @Test
@@ -576,6 +613,12 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
         return resultList.stream()
             .filter(result -> caseNumber.equals(result.getCaseNumber()))
             .findFirst()
+            .orElseThrow();
+    }
+
+    private CourtCaseEntity getCourtCase(String caseNumber, String courthouseName) {
+        return dartsDatabase.getCaseRepository()
+            .findByCaseNumberAndCourthouse_CourthouseName(caseNumber, courthouseName)
             .orElseThrow();
     }
 

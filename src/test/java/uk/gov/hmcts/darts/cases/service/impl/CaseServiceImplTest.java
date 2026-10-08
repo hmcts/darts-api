@@ -70,6 +70,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -190,12 +191,13 @@ class CaseServiceImplTest {
         CourtCaseEntity linkedCase = CommonTestDataUtil.createCaseWithId("LinkedCase1", 202);
         when(caseRepository.findById(101)).thenReturn(Optional.of(courtCase));
         when(caseLinkedCaseService.getLinkedCases(courtCase)).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(linkedCase.getCourthouse().getId()));
 
         SingleCase result = caseService.getCasesById(101);
 
         assertThat(result.getLinkedCases())
-            .extracting(linkedCaseResult -> linkedCaseResult.getCaseNumber())
-            .containsExactly("LinkedCase1");
+            .extracting(linkedCaseResult -> linkedCaseResult.getCaseNumber(), linkedCaseResult -> linkedCaseResult.getActiveLink())
+            .containsExactly(tuple("LinkedCase1", true));
     }
 
     @Test
@@ -565,12 +567,13 @@ class CaseServiceImplTest {
         CourtCaseEntity linkedCase = CommonTestDataUtil.createCaseWithId("LinkedCase1", 202);
         when(caseRepository.findById(101)).thenReturn(Optional.of(courtCase));
         when(caseLinkedCaseService.getLinkedCases(courtCase)).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of());
 
         AdminSingleCaseResponseItem result = caseService.adminGetCaseById(101);
 
         assertThat(result.getLinkedCases())
-            .extracting(linkedCaseResult -> linkedCaseResult.getCaseNumber())
-            .containsExactly("LinkedCase1");
+            .extracting(linkedCaseResult -> linkedCaseResult.getCaseNumber(), linkedCaseResult -> linkedCaseResult.getActiveLink())
+            .containsExactly(tuple("LinkedCase1", false));
     }
 
     @Test
