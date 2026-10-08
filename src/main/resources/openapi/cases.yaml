@@ -809,7 +809,7 @@ components:
         linked_cases:
           type: array
           items:
-            $ref: '#/components/schemas/advancedSearchResultLinkedCase'
+            $ref: '#/components/schemas/linkedCase'
         reporting_restrictions:
           $ref: './common.yaml#/components/schemas/reporting_restrictions'
         retain_until_date_time:
@@ -864,12 +864,12 @@ components:
         linked_cases:
           type: array
           items:
-            $ref: '#/components/schemas/advancedSearchResultLinkedCase'
+            $ref: '#/components/schemas/linkedCase'
         is_data_anonymised:
           $ref: '#/components/schemas/IsDataAnonymised'
         data_anonymised_at:
           $ref: '#/components/schemas/DataAnonymisedAt'
-    advancedSearchResultLinkedCase:
+    linkedCase:
       type: object
       properties:
         case_id:
@@ -881,6 +881,9 @@ components:
           example: C20220620001
           maxLength: 32
           description: 'Case Number'
+        active_link:
+          type: boolean
+          description: 'Indicates whether the requesting user has access to open the linked case.'
     advancedSearchResultHearing:
       type: object
       properties:
@@ -1043,7 +1046,7 @@ components:
         linked_cases:
           type: array
           items:
-            $ref: '#/components/schemas/advancedSearchResultLinkedCase'
+            $ref: '#/components/schemas/linkedCase'
         is_data_anonymised:
           $ref: '#/components/schemas/IsDataAnonymised'
         data_anonymised_at:
@@ -1138,7 +1141,7 @@ components:
         linked_cases:
           type: array
           items:
-            $ref: '#/components/schemas/advancedSearchResultLinkedCase'
+            $ref: '#/components/schemas/linkedCase'
         reporting_restrictions:
           $ref: './common.yaml#/components/schemas/reporting_restrictions'
         retain_until_date_time:
