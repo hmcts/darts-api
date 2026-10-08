@@ -264,7 +264,7 @@ public class DataStoreToArmHelper {
 
     public boolean shouldPushRawDataToArm(ArmBatchItem batchItem, String rawFilename, UserAccountEntity userAccount) {
 
-        if (equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus(), EodHelper.failedArmRawDataStatus())) {
+        if (equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus())) {
             return true;
         }
 
