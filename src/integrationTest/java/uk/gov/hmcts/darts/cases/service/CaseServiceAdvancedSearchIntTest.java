@@ -101,13 +101,13 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
         case10.setCaseNumber("case10");
 
         CourtCaseEntity linkedSearchCase1 = PersistableFactory.getCourtCaseTestData().createCaseAt(linkedCasesCourthouse);
-        linkedSearchCase1.setCaseNumber("LinkedCase1");
+        linkedSearchCase1.setCaseNumber("LinkedCase01");
 
         CourtCaseEntity linkedSearchCase2 = PersistableFactory.getCourtCaseTestData().createCaseAt(linkedCasesCourthouse);
-        linkedSearchCase2.setCaseNumber("LinkedCase2");
+        linkedSearchCase2.setCaseNumber("LinkedCase02");
 
         CourtCaseEntity linkedSearchCase3 = PersistableFactory.getCourtCaseTestData().createCaseAt(linkedCasesCourthouse);
-        linkedSearchCase3.setCaseNumber("LinkedCase3");
+        linkedSearchCase3.setCaseNumber("LinkedCase03");
 
         JudgeEntity judge = createJudgeWithName("aJudge");
         CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
@@ -247,7 +247,7 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
     @Test
     void advancedSearch_shouldReturnLinkedCases_whenOneCaseAndOneLinkedCase() {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber("LinkedCase2")
+            .caseNumber("LinkedCase02")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, linkedCasesCourthouse);
@@ -255,10 +255,10 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
 
         assertThat(resultList).hasSize(1);
-        assertThat(resultList.getFirst().getCaseNumber()).isEqualTo("LinkedCase2");
+        assertThat(resultList.getFirst().getCaseNumber()).isEqualTo("LinkedCase02");
         assertThat(resultList.getFirst().getLinkedCases())
             .extracting(linkedCase -> linkedCase.getCaseNumber())
-            .containsExactly("LinkedCase1");
+            .containsExactly("LinkedCase01");
         assertThat(resultList.getFirst().getLinkedCases())
             .extracting(linkedCase -> linkedCase.getActiveLink())
             .containsExactly(true);
@@ -275,26 +275,26 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
 
-        AdvancedSearchResult linkedCase1 = getResultByCaseNumber(resultList, "LinkedCase1");
-        AdvancedSearchResult linkedCase2 = getResultByCaseNumber(resultList, "LinkedCase2");
-        AdvancedSearchResult linkedCase3 = getResultByCaseNumber(resultList, "LinkedCase3");
+        AdvancedSearchResult linkedCase1 = getResultByCaseNumber(resultList, "LinkedCase01");
+        AdvancedSearchResult linkedCase2 = getResultByCaseNumber(resultList, "LinkedCase02");
+        AdvancedSearchResult linkedCase3 = getResultByCaseNumber(resultList, "LinkedCase03");
 
         assertThat(resultList).hasSize(3);
         assertThat(linkedCase1.getLinkedCases())
             .extracting(linkedCase -> linkedCase.getCaseNumber())
-            .containsExactlyInAnyOrder("LinkedCase2", "LinkedCase3");
+            .containsExactlyInAnyOrder("LinkedCase02", "LinkedCase03");
         assertThat(linkedCase1.getLinkedCases())
             .extracting(linkedCase -> linkedCase.getActiveLink())
             .containsOnly(true);
         assertThat(linkedCase2.getLinkedCases())
             .extracting(linkedCase -> linkedCase.getCaseNumber())
-            .containsExactly("LinkedCase1");
+            .containsExactly("LinkedCase01");
         assertThat(linkedCase2.getLinkedCases())
             .extracting(linkedCase -> linkedCase.getActiveLink())
             .containsExactly(true);
         assertThat(linkedCase3.getLinkedCases())
             .extracting(linkedCase -> linkedCase.getCaseNumber())
-            .containsExactly("LinkedCase1");
+            .containsExactly("LinkedCase01");
         assertThat(linkedCase3.getLinkedCases())
             .extracting(linkedCase -> linkedCase.getActiveLink())
             .containsExactly(true);
@@ -302,12 +302,12 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
 
     @Test
     void advancedSearch_shouldReturnLinkedCasesWithActiveLinkFalse_whenUserDoesNotHaveAccessToSomeLinkedCases() {
-        CourtCaseEntity linkedSearchCase = getCourtCase("LinkedCase1", "CARDIFF");
+        CourtCaseEntity linkedSearchCase = getCourtCase("LinkedCase01", "CARDIFF");
         CourtCaseEntity inaccessibleLinkedCase = getCourtCase("Case9", "LONDON");
         dartsDatabase.save(createLinkedCase(linkedSearchCase, inaccessibleLinkedCase));
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber("LinkedCase1")
+            .caseNumber("LinkedCase01")
             .build();
 
         setupUserAccountSecurityGroup(APPROVER, linkedCasesCourthouse);
@@ -318,8 +318,8 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
         assertThat(resultList.getFirst().getLinkedCases())
             .extracting(linkedCase -> linkedCase.getCaseNumber(), linkedCase -> linkedCase.getActiveLink())
             .containsExactlyInAnyOrder(
-                tuple("LinkedCase2", true),
-                tuple("LinkedCase3", true),
+                tuple("LinkedCase02", true),
+                tuple("LinkedCase03", true),
                 tuple("Case9", false)
             );
     }
