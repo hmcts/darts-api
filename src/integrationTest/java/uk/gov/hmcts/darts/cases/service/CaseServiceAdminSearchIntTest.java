@@ -40,6 +40,7 @@ import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefend
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
 import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getCourtCaseTestData;
+import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
 @TestPropertySource(properties = {
@@ -166,6 +167,7 @@ class CaseServiceAdminSearchIntTest extends IntegrationBase {
         EventEntity event4a = createEventWith("eventName", "event4a", hearing4a, OffsetDateTime.now());
         EventEntity event5b = createEventWith("eventName", "event5b", hearing5b, OffsetDateTime.now());
         dartsDatabase.saveAll(event4a, event5b);
+        givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
     }
 

@@ -20,8 +20,10 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
@@ -41,7 +43,7 @@ class AdvancedSearchResponseMapperTest {
     @Test
     void empty() {
         List<HearingEntity> hearings = new ArrayList<>();
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of());
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of(), Set.of());
         assertEquals(0, result.size());
     }
 
@@ -54,7 +56,7 @@ class AdvancedSearchResponseMapperTest {
         courtCase.setDataAnonymisedTs(OffsetDateTime.parse("2024-01-01T00:00:00Z"));
 
         hearings.add(hearing);
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of());
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of(), Set.of());
 
         String actualResponse = objectMapper.writeValueAsString(result);
 
@@ -71,13 +73,15 @@ class AdvancedSearchResponseMapperTest {
 
         List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(
             List.of(hearing),
-            List.of(createLinkedCase(courtCase, linkedCase))
+            List.of(createLinkedCase(courtCase, linkedCase)),
+            Set.of(linkedCase.getCourthouse().getId())
         );
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getLinkedCases()).hasSize(1);
         assertThat(result.getFirst().getLinkedCases().getFirst().getCaseId()).isEqualTo(202);
         assertThat(result.getFirst().getLinkedCases().getFirst().getCaseNumber()).isEqualTo("linked-case");
+        assertThat(result.getFirst().getLinkedCases().getFirst().getActiveLink()).isTrue();
     }
 
     @Test
@@ -87,6 +91,7 @@ class AdvancedSearchResponseMapperTest {
         CourtCaseEntity linkedCase1 = CommonTestDataUtil.createCaseWithId("linked-case-1", 201);
         CourtCaseEntity linkedCase2 = CommonTestDataUtil.createCaseWithId("linked-case-2", 202);
         CourtCaseEntity linkedCase3 = CommonTestDataUtil.createCaseWithId("linked-case-3", 203);
+        linkedCase2.getCourthouse().setId(1002);
 
         List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(
             List.of(
@@ -97,18 +102,19 @@ class AdvancedSearchResponseMapperTest {
                 createLinkedCase(courtCase1, linkedCase1),
                 createLinkedCase(courtCase1, linkedCase2),
                 createLinkedCase(linkedCase3, courtCase2)
-            )
+            ),
+            Set.of(1001)
         );
 
         assertThat(result).hasSize(2);
         assertThat(result.getFirst().getCaseId()).isEqualTo(101);
         assertThat(result.getFirst().getLinkedCases())
-            .extracting(linkedCase -> linkedCase.getCaseId())
-            .containsExactly(201, 202);
+            .extracting(linkedCase -> linkedCase.getCaseId(), linkedCase -> linkedCase.getActiveLink())
+            .containsExactly(tuple(201, true), tuple(202, false));
         assertThat(result.get(1).getCaseId()).isEqualTo(102);
         assertThat(result.get(1).getLinkedCases())
-            .extracting(linkedCase -> linkedCase.getCaseId())
-            .containsExactly(203);
+            .extracting(linkedCase -> linkedCase.getCaseId(), linkedCase -> linkedCase.getActiveLink())
+            .containsExactly(tuple(203, true));
     }
 
     @Test
@@ -134,7 +140,7 @@ class AdvancedSearchResponseMapperTest {
         List<HearingEntity> hearings = new ArrayList<>();
         hearings.add(hearing1);
         hearings.add(hearing2);
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of());
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of(), Set.of());
 
         String actualResponse = objectMapper.writeValueAsString(result);
 
@@ -195,7 +201,7 @@ class AdvancedSearchResponseMapperTest {
         hearings.add(hearing2);
         hearings.add(hearing3);
         hearings.add(hearing4);
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of());
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of(), Set.of());
 
         String actualResponse = objectMapper.writeValueAsString(result);
 
