@@ -58,10 +58,12 @@ import uk.gov.hmcts.darts.util.pagination.PaginatedList;
 import uk.gov.hmcts.darts.util.pagination.PaginationDto;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -139,7 +141,7 @@ public class CaseServiceImpl implements CaseService {
             throw new DartsApiException(CaseApiError.HEARINGS_NOT_ACTUAL);
         }
         List<CourtCaseEntity> linkedCases = LinkedCaseMapper.mapLinkedCases(caseEntity, caseLinkedCaseService.getLinkedCases(caseEntity));
-        return casesMapper.mapToSingleCase(caseEntity, linkedCases);
+        return casesMapper.mapToSingleCase(caseEntity, linkedCases, getCourthouseIdsUserHasAccessTo());
     }
 
     @Override
@@ -192,7 +194,7 @@ public class CaseServiceImpl implements CaseService {
         List<HearingEntity> hearings = hearingRepository.findByIsActualCaseIds(caseIds);
         List<CourtCaseEntity> courtCases = getCourtCases(hearings);
         List<CaseLinkedCaseEntity> linkedCaseEntities = caseLinkedCaseService.getLinkedCasesByCourtCases(courtCases);
-        return AdvancedSearchResponseMapper.mapResponse(hearings, linkedCaseEntities);
+        return AdvancedSearchResponseMapper.mapResponse(hearings, linkedCaseEntities, getCourthouseIdsUserHasAccessTo());
     }
 
     private List<CourtCaseEntity> getCourtCases(List<HearingEntity> hearings) {
@@ -281,7 +283,7 @@ public class CaseServiceImpl implements CaseService {
         }
         List<CourtCaseEntity> matchingCases = caseRepository.findAllWithIdMatchingOneOf(matchingCaseIds);
         List<CaseLinkedCaseEntity> linkedCaseEntities = caseLinkedCaseService.getLinkedCasesByCourtCases(matchingCases);
-        return AdminCasesSearchResponseMapper.mapResponse(matchingCases, linkedCaseEntities);
+        return AdminCasesSearchResponseMapper.mapResponse(matchingCases, linkedCaseEntities, getCourthouseIdsUserHasAccessTo());
     }
 
     @Override
@@ -294,7 +296,15 @@ public class CaseServiceImpl implements CaseService {
     public AdminSingleCaseResponseItem adminGetCaseById(Integer caseId) {
         CourtCaseEntity caseEntity = getCourtCaseById(caseId);
         List<CourtCaseEntity> linkedCases = LinkedCaseMapper.mapLinkedCases(caseEntity, caseLinkedCaseService.getLinkedCases(caseEntity));
-        return casesMapper.mapToAdminSingleCaseResponseItem(caseEntity, linkedCases);
+        return casesMapper.mapToAdminSingleCaseResponseItem(caseEntity, linkedCases, getCourthouseIdsUserHasAccessTo());
+    }
+
+    private Set<Integer> getCourthouseIdsUserHasAccessTo() {
+        List<Integer> courthouseIds = authorisationApi.getListOfCourthouseIdsUserHasAccessTo();
+        if (courthouseIds == null) {
+            return Set.of();
+        }
+        return new HashSet<>(courthouseIds);
     }
 
 }
