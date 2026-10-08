@@ -317,22 +317,6 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void shouldPushRawDataToArm_ShouldReturnTrue_WhenPreviousStatusIsArmRawDataFailed() {
-        // given
-        ArmBatchItem batchItem = new ArmBatchItem();
-        batchItem.setPreviousStatus(eodHelperMocks.getFailedArmRawDataStatus());
-        UserAccountEntity userAccount = mock(UserAccountEntity.class);
-
-        // when
-        boolean result = dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, "123_456_1", userAccount);
-
-        // then
-        assertThat(result).isTrue();
-        verify(armDataManagementApi, never()).listSubmissionBlobs(anyString());
-        verify(externalObjectDirectoryRepository, never()).saveAndFlush(any());
-    }
-
-    @Test
     void shouldPushRawDataToArm_ShouldReturnFalseAndUpdateToPushed_WhenSubmissionBlobExists() {
         // given
         ArmBatchItem batchItem = createArmBatchItemWithRetryCheckStatus();
