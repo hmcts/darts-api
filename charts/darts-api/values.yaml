@@ -261,6 +261,11 @@ audioIngestion:
     AUDIO_INGESTION_PROCESSING_TIMEOUT: 15m
     AUDIO_INGESTION_TEMPORARY_FAILURE_MODE: NONE
 
+    ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    ARM_AUTH_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    ARM_API_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+
+
 function:
   scaleType: Job
   image: 'hmctsprod.azurecr.io/darts/api:latest'
