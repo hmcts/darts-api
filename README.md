@@ -215,14 +215,15 @@ To build the project execute the following command:
 
 ### Jacoco Coverage Report
 
-A local jacoco coverage report can be generated using the following command:-
+A local jacoco coverage report can be generated after running unit tests, integration tests, and static analysis:
 
 ```bash
-  ./gradlew jacocoTestReport
+  ./gradlew check jacocoTestReport
 ```
 
 The report will be available under ./build/jacocoHtml/index.html. The report incorporates both unit test
-and integration test coverage
+and integration test coverage. `jacocoTestReport` consumes existing test execution data and does not run tests.
+After a test run, use `./gradlew jacocoTestReport` to regenerate coverage without rerunning failed tests.
 
 ### Running the application locally in docker (without darts-gateway & darts-stub-services)
 
