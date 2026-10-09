@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.RandomUtils;
 import org.springframework.util.unit.DataSize;
-import org.testcontainers.shaded.org.apache.commons.lang3.RandomUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -75,7 +75,7 @@ public final class DataGenerator {
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         byteArrayOutputStream.writeBytes(signatureBytes);
 
-        byte[] randomisedBytes = RandomUtils.nextBytes(contentSize);
+        byte[] randomisedBytes = RandomUtils.insecure().randomBytes(contentSize);
         byteArrayOutputStream.writeBytes(randomisedBytes);
 
         return byteArrayOutputStream.toByteArray();
