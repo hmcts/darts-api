@@ -122,7 +122,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
                 if (dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, rawFilename, userAccount)) {
                     pushRawDataAndCreateArchiveRecordIfSuccess(batchItem, rawFilename, userAccount);
-                } else if (shouldAddEntryToManifestFile(batchItem)) {
+                } else if (batchItem.getArchiveRecord() == null && shouldAddEntryToManifestFile(batchItem)) {
                     batchItem.setArchiveRecord(archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename));
                 }
             } catch (Exception e) {
