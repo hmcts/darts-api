@@ -210,6 +210,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Transactional
     public UpdateTranscriptionResponse updateTranscription(Long transcriptionId,
                                                            UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection) {
+        return updateTranscriptionInternal(transcriptionId, updateTranscription, allowSelfApprovalOrRejection);
+    }
+
+    private UpdateTranscriptionResponse updateTranscriptionInternal(Long transcriptionId,
+                                                                    UpdateTranscriptionRequest updateTranscription,
+                                                                    Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
         final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
@@ -404,13 +410,27 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    @SuppressWarnings("java:S6809")
     public void closeTranscription(Long transcriptionId, String transcriptionComment) {
+        closeTranscriptionInternal(transcriptionId, transcriptionComment);
+    }
+
+    @Override
+    @Transactional
+    public void closeUserTranscriptions(UserAccountEntity entity, String transcriptionComment) {
+        List<TranscriptionEntity> transcriptions = transcriptionWorkflowRepository
+            .findWorkflowForUserWithTranscriptionState(entity.getId(), WITH_TRANSCRIBER.getId());
+
+        for (TranscriptionEntity transcription : transcriptions) {
+            closeTranscriptionInternal(transcription.getId(), transcriptionComment);
+        }
+    }
+
+    private void closeTranscriptionInternal(Long transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
             updateTranscription.setTranscriptionStatusId(CLOSED.getId());
             updateTranscription.setWorkflowComment(transcriptionComment);
-            updateTranscription(transcriptionId, updateTranscription, false);
+            updateTranscriptionInternal(transcriptionId, updateTranscription, false);
             log.debug("Closed off transcription {}", transcriptionId);
         } catch (Exception e) {
             log.error("Unable to close transcription {}", transcriptionId, e);
@@ -736,5 +756,4 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionStatus.setDisplayName(transcriptionStatusEntity.getDisplayName());
         return transcriptionStatus;
     }
-
 }

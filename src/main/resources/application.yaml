@@ -444,6 +444,12 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
+      disable-inactive-user-accounts:
+        system-user-email: system_DisableInactiveUserAccountsAutomatedTask@hmcts.net
+        inactivity-period-limit: P6M
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT45M
       clean-up-dets-data:
         system-user-email: systemCleanUpDetsDataAutomatedTask@hmcts.net
         lock:
