@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.retention.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
+import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
@@ -46,6 +49,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CloseCaseWithRetentionServiceImplTest {
 
+    private static final OffsetDateTime DEFAULT_VARIABLE_RETENTION_START_TIMESTAMP = OffsetDateTime.of(2023, 10, 9, 0, 0, 0, 0, ZoneOffset.UTC);
+
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
     @Mock
@@ -56,6 +61,8 @@ class CloseCaseWithRetentionServiceImplTest {
     private RetentionApi retentionApi;
     @Mock
     private CaseRepository caseRepository;
+    @Mock
+    private RetentionPolicyTypeRepository retentionPolicyTypeRepository;
 
     private CloseCaseWithRetentionServiceImpl service;
 
@@ -98,10 +105,99 @@ class CloseCaseWithRetentionServiceImplTest {
             .thenReturn(caseManagementRetention);
 
         service = new CloseCaseWithRetentionServiceImpl(caseRetentionRepository, caseManagementRetentionService,
-                                                        authorisationApi, retentionApi, caseRepository);
+                                                        authorisationApi, retentionApi, caseRepository, retentionPolicyTypeRepository);
         ReflectionTestUtils.setField(service, "overridableFixedPolicyKeys",
                                      List.of("OVERRIDABLE_POLICY"));
+        ReflectionTestUtils.setField(service, "variableRetentionStartTimestamp", DEFAULT_VARIABLE_RETENTION_START_TIMESTAMP);
 
+    }
+
+    @Test
+    void closeCaseAndSetRetention_shouldUseLegacyStandardPolicyForCaseRetention_whenNotGuiltyEventIsBeforeVariableRetention() {
+        OffsetDateTime eventTime = OffsetDateTime.of(2023, 10, 8, 23, 59, 59, 0, ZoneOffset.UTC);
+        RetentionPolicyTypeEntity legacyStandardPolicyType = new RetentionPolicyTypeEntity();
+        legacyStandardPolicyType.setId(2);
+        legacyStandardPolicyType.setFixedPolicyKey(RetentionPolicyEnum.LEGACY_STANDARD.getPolicyKey());
+
+        DartsEventRetentionPolicy retentionPolicy = new DartsEventRetentionPolicy();
+        retentionPolicy.setCaseRetentionFixedPolicy(RetentionPolicyEnum.NOT_GUILTY.getPolicyKey());
+        dartsEvent.setDateTime(eventTime);
+        dartsEvent.setRetentionPolicy(retentionPolicy);
+
+        when(retentionPolicyTypeRepository.getReferenceById(2)).thenReturn(legacyStandardPolicyType);
+        when(caseRetentionRepository.findLatestPendingRetention(courtCase)).thenReturn(Optional.empty());
+        when(retentionApi.applyPolicyStringToDate(eq(LocalDate.of(2023, 10, 9)), eq(null), eq(legacyStandardPolicyType)))
+            .thenReturn(LocalDate.of(2030, 10, 8));
+
+        service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
+
+        verify(caseRetentionRepository).save(caseRetentionCaptor.capture());
+        CaseRetentionEntity saved = caseRetentionCaptor.getValue();
+        assertThat(caseManagementRetention.getRetentionPolicyTypeEntity()).isSameAs(retentionPolicyType);
+        assertThat(saved.getRetentionPolicyType()).isSameAs(legacyStandardPolicyType);
+    }
+
+    @Test
+    void closeCaseAndSetRetention_shouldNotOverridePolicy_whenNotGuiltyEventIsAtVariableRetentionStartDate() {
+        OffsetDateTime eventTime = OffsetDateTime.of(2023, 10, 9, 0, 0, 0, 0, ZoneOffset.UTC);
+
+        DartsEventRetentionPolicy retentionPolicy = new DartsEventRetentionPolicy();
+        retentionPolicy.setCaseRetentionFixedPolicy(RetentionPolicyEnum.NOT_GUILTY.getPolicyKey());
+        dartsEvent.setDateTime(eventTime);
+        dartsEvent.setRetentionPolicy(retentionPolicy);
+
+        when(caseRetentionRepository.findLatestPendingRetention(courtCase)).thenReturn(Optional.empty());
+        when(retentionApi.applyPolicyStringToDate(eq(LocalDate.of(2023, 10, 9)), eq(null), eq(retentionPolicyType)))
+            .thenReturn(LocalDate.of(2024, 10, 9));
+
+        service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
+
+        verify(caseRetentionRepository).save(caseRetentionCaptor.capture());
+        assertThat(caseRetentionCaptor.getValue().getRetentionPolicyType()).isSameAs(retentionPolicyType);
+        verify(retentionPolicyTypeRepository, never()).getReferenceById(any());
+    }
+
+    @Test
+    void closeCaseAndSetRetention_shouldUseConfiguredVariableRetentionStartTimestamp_whenDeterminingLegacyPolicy() {
+        ReflectionTestUtils.setField(service, "variableRetentionStartTimestamp", OffsetDateTime.of(2023, 10, 1, 0, 0, 0, 0, ZoneOffset.UTC));
+        OffsetDateTime eventTime = OffsetDateTime.of(2023, 10, 8, 23, 59, 59, 0, ZoneOffset.UTC);
+
+        DartsEventRetentionPolicy retentionPolicy = new DartsEventRetentionPolicy();
+        retentionPolicy.setCaseRetentionFixedPolicy(RetentionPolicyEnum.NOT_GUILTY.getPolicyKey());
+        dartsEvent.setDateTime(eventTime);
+        dartsEvent.setRetentionPolicy(retentionPolicy);
+
+        when(caseRetentionRepository.findLatestPendingRetention(courtCase)).thenReturn(Optional.empty());
+        when(retentionApi.applyPolicyStringToDate(eq(LocalDate.of(2023, 10, 9)), eq(null), eq(retentionPolicyType)))
+            .thenReturn(LocalDate.of(2024, 10, 9));
+
+        service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
+
+        verify(caseRetentionRepository).save(caseRetentionCaptor.capture());
+        assertThat(caseRetentionCaptor.getValue().getRetentionPolicyType()).isSameAs(retentionPolicyType);
+        verify(retentionPolicyTypeRepository, never()).getReferenceById(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = RetentionPolicyEnum.class, names = "NOT_GUILTY", mode = EnumSource.Mode.EXCLUDE)
+    void closeCaseAndSetRetention_shouldNotOverridePolicy_whenPolicyIsNotNotGuiltyAndEventIsBeforeVariableRetention(
+        RetentionPolicyEnum retentionPolicyEnum) {
+        OffsetDateTime eventTime = OffsetDateTime.of(2023, 10, 8, 23, 59, 59, 0, ZoneOffset.UTC);
+
+        DartsEventRetentionPolicy retentionPolicy = new DartsEventRetentionPolicy();
+        retentionPolicy.setCaseRetentionFixedPolicy(retentionPolicyEnum.getPolicyKey());
+        dartsEvent.setDateTime(eventTime);
+        dartsEvent.setRetentionPolicy(retentionPolicy);
+
+        when(caseRetentionRepository.findLatestPendingRetention(courtCase)).thenReturn(Optional.empty());
+        when(retentionApi.applyPolicyStringToDate(eq(LocalDate.of(2023, 10, 9)), eq(null), eq(retentionPolicyType)))
+            .thenReturn(LocalDate.of(2030, 10, 8));
+
+        service.closeCaseAndSetRetention(dartsEvent, hearingAndEvent, courtCase);
+
+        verify(caseRetentionRepository).save(caseRetentionCaptor.capture());
+        assertThat(caseRetentionCaptor.getValue().getRetentionPolicyType()).isSameAs(retentionPolicyType);
+        verify(retentionPolicyTypeRepository, never()).getReferenceById(any());
     }
 
     @Test

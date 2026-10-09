@@ -214,6 +214,7 @@ darts:
         transcription_request_unfulfilled: c19da6f7-9304-445a-9f30-3827f7c74103
   retention:
     overridable-fixed-policy-keys: 3
+    variable-retention-start-timestamp: ${VARIABLE_RETENTION_START_TIMESTAMP:2023-10-09T00:00:00Z}
     close-open-cases-older-than-period: ${CLOSE_OPEN_CASES_OLDER_THAN_PERIOD:P6Y}
     close-event-handler: ${CLOSE_EVENT_HANDLER:StopAndCloseHandler}
     max-retention-retries: 3
