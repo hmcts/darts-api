@@ -80,7 +80,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "display_name": "ACME Transcription Services",
                            "security_role_id": 4
                          }
-                           """);
+                         """);
 
         MvcResult result = mockMvc.perform(request)
             .andExpect(status().isCreated())
@@ -121,7 +121,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "display_name": "ACME Transcription Services",
                            "security_role_id": 5
                          }
-                           """);
+                         """);
 
         MvcResult result = mockMvc.perform(request)
             .andExpect(status().isCreated())
@@ -163,7 +163,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "description": "A test group",
                            "security_role_id": 4
                          }
-                           """);
+                         """);
 
         MvcResult result = mockMvc.perform(request)
             .andExpect(status().isCreated())
@@ -202,7 +202,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "name": "ACME",
                            "security_role_id": 4
                          }
-                           """);
+                         """);
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest());
@@ -219,7 +219,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "display_name": "Weyland Transcription Services",
                            "security_role_id": 4
                          }
-                           """);
+                         """);
         MvcResult initialResponse = mockMvc.perform(requestForInitialGroup)
             .andExpect(status().isCreated())
             .andReturn();
@@ -233,11 +233,14 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "display_name": "Trying to create a group whose name already exists",
                            "security_role_id": 4
                          }
-                           """);
+                         """);
         mockMvc.perform(requestForDuplicateGroup)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_105"))
-            .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")));
+            .andExpect(jsonPath("$.title").value("Duplicate security group names are not permitted"))
+            .andExpect(jsonPath("$.status").value(409))
+            .andExpect(jsonPath("$.instance").value("/admin/security-groups"))
+            .andExpect(jsonPath("$.properties.existing_group_id").value(initialSecurityGroup.get("id")));
     }
 
     @Test
@@ -251,7 +254,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "display_name": "Weyland Transcription Services",
                            "security_role_id": 4
                          }
-                           """);
+                         """);
         MvcResult initialResponse = mockMvc.perform(requestForInitialGroup)
             .andExpect(status().isCreated())
             .andReturn();
@@ -265,12 +268,14 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "display_name": "Weyland Transcription Services",
                            "security_role_id": 4
                          }
-                           """);
+                         """);
         mockMvc.perform(requestForDuplicateGroup)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_107"))
-            .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")))
-            .andExpect(jsonPath("$.detail").value("Attempt to create group with a display name that already exists"));
+            .andExpect(jsonPath("$.title").value("Duplicate security group display name are not permitted"))
+            .andExpect(jsonPath("$.status").value(409))
+            .andExpect(jsonPath("$.instance").value("/admin/security-groups"))
+            .andExpect(jsonPath("$.properties.existing_group_id").value(initialSecurityGroup.get("id")));
     }
 
     @Test
@@ -284,7 +289,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "display_name": "ACME Transcription Services",
                            "security_role_id": 4
                          }
-                           """);
+                         """);
         mockMvc.perform(request)
             .andExpect(status().isForbidden());
     }
@@ -299,7 +304,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "name": "ACME",
                            "display_name": "ACME Transcription Services"
                          }
-                           """);
+                         """);
         mockMvc.perform(request)
             .andExpect(status().isBadRequest());
     }
@@ -315,7 +320,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "display_name": "ACME Transcription Services",
                            "security_role_id": 3
                          }
-                           """);
+                         """);
         mockMvc.perform(request)
             .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_106"))

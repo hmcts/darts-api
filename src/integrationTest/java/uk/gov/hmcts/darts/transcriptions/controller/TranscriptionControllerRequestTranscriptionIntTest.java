@@ -101,7 +101,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             {
               "type": "TRANSCRIPTION_100",
               "title": "Failed to validate transcription request",
-              "status": 422
+              "status": 422,
+              "instance": "/transcriptions",
             }""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
@@ -227,7 +228,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
-            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId().intValue())));
+            .andExpect(jsonPath("$.properties.duplicate_transcription_id", is(dupeTranscription.getId().intValue())));
     }
 
     @Test
@@ -253,7 +254,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
-            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId().intValue())));
+            .andExpect(jsonPath("$.title", is("A transcription already exists with these properties")))
+            .andExpect(jsonPath("$.properties.duplicate_transcription_id", is(dupeTranscription.getId().intValue())));
     }
 
 
@@ -282,18 +284,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertFailedTranscription110Error(actualJson);
 
         assertAudit(0);
-    }
-
-
-    private void assertFailedTranscription110Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "TRANSCRIPTION_110",
-              "title": "Transcription could not be requested, no audio",
-              "status": 404
-            }
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -407,17 +397,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertFailedAuthentication107Error(actualJson);
 
         assertAudit(0);
-    }
-
-    private void assertFailedAuthentication107Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "AUTHORISATION_107",
-              "title": "Failed to check authorisation",
-              "status": 403
-            }
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @ParameterizedTest
@@ -563,29 +542,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertAudit(0);
     }
 
-    private void assertHearingNotFound404Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "HEARING_100",
-              "title": "The requested hearing cannot be found",
-              "status": 404
-            }
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
-    }
-
-    private void assertCaseNotFound404Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "CASE_104",
-              "title": "The requested case cannot be found",
-              "status": 404
-            }
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
     @Test
     void transcriptionRequestWithInvalidCaseIdShouldThrowException() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
@@ -647,5 +603,54 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         transcriptionRequestDetails.setStartDateTime(startDateTime);
         transcriptionRequestDetails.setEndDateTime(endDateTime);
         return transcriptionRequestDetails;
+    }
+
+    private void assertHearingNotFound404Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "HEARING_100",
+              "title": "The requested hearing cannot be found",
+              "status": 404,
+              "instance": "/transcriptions"
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+
+    }
+
+    private void assertCaseNotFound404Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "CASE_104",
+              "title": "The requested case cannot be found",
+              "status": 404,
+              "instance": "/transcriptions"
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    private void assertFailedTranscription110Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "TRANSCRIPTION_110",
+              "title": "Transcription could not be requested, no audio",
+              "status": 404,
+              "instance": "/transcriptions"
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    private void assertFailedAuthentication107Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "AUTHORISATION_107",
+              "title": "Failed to check authorisation",
+              "status": 403,
+              "instance": "/transcriptions"
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 }
