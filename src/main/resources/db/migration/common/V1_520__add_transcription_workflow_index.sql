@@ -1,1 +1,0 @@
-CREATE  INDEX IF NOT EXISTS trw_tra_trs_workflow_ts_idx ON darts.transcription_workflow (tra_id, trs_id, workflow_ts);
