@@ -150,7 +150,10 @@ class ArmMissingResponseCleanupImplTest {
         armMissingResponseCleanup.setResponseCleaned(userAccount, externalObjectDirectory);
 
         verify(externalObjectDirectory).setStatus(armRawDataFailedObjectRecordStatus);
-        verify(externalObjectDirectory).setTransferAttempts(0);
+        verify(externalObjectDirectory).setTransferAttempts(1);
+        verify(externalObjectDirectory).setDataIngestionTs(null);
+        verify(externalObjectDirectory).setInputUploadProcessedTs(null);
+        verify(externalObjectDirectory).setCreateRecordProcessedTs(null);
         verify(externalObjectDirectory).setResponseCleaned(true);
         verify(externalObjectDirectory).setLastModifiedBy(userAccount);
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectory);

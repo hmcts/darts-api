@@ -60,7 +60,10 @@ public class ArmMissingResponseCleanupImpl extends BatchCleanupArmResponseFilesS
     @Override
     protected void setResponseCleaned(UserAccountEntity userAccount, ExternalObjectDirectoryEntity externalObjectDirectory) {
         externalObjectDirectory.setStatus(armRawDataFailed);
-        externalObjectDirectory.setTransferAttempts(0);
+        externalObjectDirectory.setTransferAttempts(1);
+        externalObjectDirectory.setDataIngestionTs(null);
+        externalObjectDirectory.setInputUploadProcessedTs(null);
+        externalObjectDirectory.setCreateRecordProcessedTs(null);
         super.setResponseCleaned(userAccount, externalObjectDirectory);
     }
 }
