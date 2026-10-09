@@ -29,6 +29,8 @@ import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
+import uk.gov.hmcts.darts.cases.service.CaseLinkedCaseService;
+import uk.gov.hmcts.darts.common.entity.CaseLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -68,6 +70,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -93,6 +96,9 @@ class CaseServiceImplTest {
 
     @Mock
     private CaseRepository caseRepository;
+
+    @Mock
+    private CaseLinkedCaseService caseLinkedCaseService;
 
     @Mock
     private HearingRepository hearingRepository;
@@ -140,6 +146,7 @@ class CaseServiceImplTest {
         caseService = new CaseServiceImpl(
             casesMapper,
             annotationMapper,
+            caseLinkedCaseService,
             hearingRepository,
             eventRepository,
             caseRepository,
@@ -162,6 +169,7 @@ class CaseServiceImplTest {
         CourtCaseEntity courtCaseEntity = hearings.getFirst().getCourtCase();
         courtCaseEntity.setHearings(hearings);
         when(caseRepository.findById(any())).thenReturn(Optional.of(courtCaseEntity));
+        when(caseLinkedCaseService.getLinkedCases(courtCaseEntity)).thenReturn(List.of());
 
         SingleCase result = caseService.getCasesById(101);
 
@@ -171,6 +179,25 @@ class CaseServiceImplTest {
             "Tests/cases/CaseServiceTest/GetCasesById/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
+    }
+
+    @Test
+    void getCasesById_ReturnsLinkedCases() {
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 101);
+        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse(SWANSEA);
+        CourtroomEntity courtroom = CommonTestDataUtil.createCourtroom(courthouse, "1");
+        HearingEntity hearing = CommonTestDataUtil.createHearing(courtCase, courtroom, LocalDate.of(2023, Month.JULY, 7), true);
+        courtCase.setHearings(List.of(hearing));
+        CourtCaseEntity linkedCase = CommonTestDataUtil.createCaseWithId("LinkedCase1", 202);
+        when(caseRepository.findById(101)).thenReturn(Optional.of(courtCase));
+        when(caseLinkedCaseService.getLinkedCases(courtCase)).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(linkedCase.getCourthouse().getId()));
+
+        SingleCase result = caseService.getCasesById(101);
+
+        assertThat(result.getLinkedCases())
+            .extracting(linkedCaseResult -> linkedCaseResult.getCaseNumber(), linkedCaseResult -> linkedCaseResult.getActiveLink())
+            .containsExactly(tuple("LinkedCase1", true));
     }
 
     @Test
@@ -513,6 +540,7 @@ class CaseServiceImplTest {
         courtCaseEntity.setHearings(hearings);
 
         when(caseRepository.findById(1)).thenReturn(Optional.of(courtCaseEntity));
+        when(caseLinkedCaseService.getLinkedCases(courtCaseEntity)).thenReturn(List.of());
 
         // when
         AdminSingleCaseResponseItem result = caseService.adminGetCaseById(1);
@@ -534,6 +562,21 @@ class CaseServiceImplTest {
     }
 
     @Test
+    void adminGetCaseById_ShouldReturnLinkedCases_WhenCaseExists() {
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCaseWithId("Case00001", 101);
+        CourtCaseEntity linkedCase = CommonTestDataUtil.createCaseWithId("LinkedCase1", 202);
+        when(caseRepository.findById(101)).thenReturn(Optional.of(courtCase));
+        when(caseLinkedCaseService.getLinkedCases(courtCase)).thenReturn(List.of(createLinkedCase(courtCase, linkedCase)));
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of());
+
+        AdminSingleCaseResponseItem result = caseService.adminGetCaseById(101);
+
+        assertThat(result.getLinkedCases())
+            .extracting(linkedCaseResult -> linkedCaseResult.getCaseNumber(), linkedCaseResult -> linkedCaseResult.getActiveLink())
+            .containsExactly(tuple("LinkedCase1", false));
+    }
+
+    @Test
     void adminGetCaseById_ShouldThrowException_WhenCaseDoesNotExist() {
         // given
         when(caseRepository.findById(1)).thenReturn(Optional.empty());
@@ -545,6 +588,13 @@ class CaseServiceImplTest {
         assertEquals("CASE_104", exception.getError().getErrorTypeNumeric());
         assertEquals("The requested case cannot be found", exception.getMessage());
         verify(caseRepository, times(1)).findById(1);
+    }
+
+    private CaseLinkedCaseEntity createLinkedCase(CourtCaseEntity courtCase, CourtCaseEntity linkedCase) {
+        CaseLinkedCaseEntity linkedCaseEntity = new CaseLinkedCaseEntity();
+        linkedCaseEntity.setCourtCase1(courtCase);
+        linkedCaseEntity.setCourtCase2(linkedCase);
+        return linkedCaseEntity;
     }
 
     @Test

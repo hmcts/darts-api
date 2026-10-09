@@ -37,6 +37,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static java.util.Comparator.comparing;
@@ -129,6 +130,16 @@ public class CasesMapper {
 
     @Transactional
     public SingleCase mapToSingleCase(CourtCaseEntity caseEntity) {
+        return mapToSingleCase(caseEntity, List.of());
+    }
+
+    @Transactional
+    public SingleCase mapToSingleCase(CourtCaseEntity caseEntity, List<CourtCaseEntity> linkedCases) {
+        return mapToSingleCase(caseEntity, linkedCases, Set.of());
+    }
+
+    @Transactional
+    public SingleCase mapToSingleCase(CourtCaseEntity caseEntity, List<CourtCaseEntity> linkedCases, Set<Integer> courthouseIdsUserHasAccessTo) {
         SingleCase singleCase = new SingleCase();
 
         Optional<CaseRetentionEntity> caseRetentionOptional = caseRetentionRepository
@@ -156,6 +167,9 @@ public class CasesMapper {
         singleCase.setJudges(caseEntity.getJudgeStringList());
         singleCase.setIsDataAnonymised(caseEntity.isDataAnonymised());
         singleCase.setDataAnonymisedAt(caseEntity.getDataAnonymisedTs());
+        if (!linkedCases.isEmpty()) {
+            singleCase.setLinkedCases(AdvancedSearchResponseMapper.mapToLinkedCase(linkedCases, courthouseIdsUserHasAccessTo));
+        }
 
         var reportingRestrictions = hearingReportingRestrictionsRepository.findAllByCaseId(caseEntity.getId()).stream()
             .map(this::toReportingRestriction)
@@ -172,6 +186,16 @@ public class CasesMapper {
     }
 
     public AdminSingleCaseResponseItem mapToAdminSingleCaseResponseItem(CourtCaseEntity courtCase) {
+        return mapToAdminSingleCaseResponseItem(courtCase, List.of());
+    }
+
+    public AdminSingleCaseResponseItem mapToAdminSingleCaseResponseItem(CourtCaseEntity courtCase, List<CourtCaseEntity> linkedCases) {
+        return mapToAdminSingleCaseResponseItem(courtCase, linkedCases, Set.of());
+    }
+
+    public AdminSingleCaseResponseItem mapToAdminSingleCaseResponseItem(CourtCaseEntity courtCase,
+                                                                        List<CourtCaseEntity> linkedCases,
+                                                                        Set<Integer> courthouseIdsUserHasAccessTo) {
         AdminSingleCaseResponseItem adminCase = new AdminSingleCaseResponseItem();
 
         populateRetentionDetails(courtCase, adminCase);
@@ -183,6 +207,9 @@ public class CasesMapper {
         adminCase.setJudges(courtCase.getJudgeStringList());
         adminCase.setProsecutors(courtCase.getProsecutorsStringList());
         adminCase.setDefenders(courtCase.getDefenceStringList());
+        if (!linkedCases.isEmpty()) {
+            adminCase.setLinkedCases(AdvancedSearchResponseMapper.mapToLinkedCase(linkedCases, courthouseIdsUserHasAccessTo));
+        }
         populateReportingRestrictions(courtCase, adminCase);
 
         adminCase.caseClosedDateTime(courtCase.getCaseClosedTimestamp());
