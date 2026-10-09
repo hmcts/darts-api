@@ -13,7 +13,7 @@ plugins {
   id 'io.spring.dependency-management' version '1.1.7'
   id 'org.springframework.boot' version '3.5.16'
   id 'org.owasp.dependencycheck' version '12.2.2'
-  id 'io.github.ben-manes.versions' version '0.64.0'
+  id 'io.github.ben-manes.versions' version '0.65.0'
   id 'org.sonarqube' version '6.3.1.5724'
   id "io.freefair.lombok" version "8.14"
   id "org.openapi.generator" version "7.13.0"
@@ -469,7 +469,7 @@ dependencies {
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.16.0'
 
   //database
-  implementation 'org.postgresql:postgresql:42.7.13'
+  implementation 'org.postgresql:postgresql:42.7.14'
 
   implementation 'uk.gov.service.notify:notifications-java-client:6.2.1-RELEASE'
 
@@ -496,11 +496,11 @@ dependencies {
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
-  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.15'
+  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.17'
 
   testImplementation 'org.testcontainers:postgresql:1.21.4'
   testImplementation 'com.h2database:h2:2.5.252'
-  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.13'
+  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.14'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
@@ -529,7 +529,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.2.18.Final') {
+    dependencySet(group: 'io.netty', version: '4.2.19.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
