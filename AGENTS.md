@@ -11,7 +11,8 @@
 - `**/config`: Spring configuration.
 - `**/util`: shared helpers (check before adding new utilities).
 
-Flyway migrations live under `src/main/resources/db/migration/common` and `src/main/resources/db/migration/postgres`.
+Core Flyway migrations live under `src/main/resources/db/migration/common` and `src/main/resources/db/migration/postgres`; profile-specific overlays live under
+`src/main/resources/db/migration/dev`, `src/main/resources/db/migration/local`, and `src/main/resources/db/migration/h2`.
 Reference-only production manual data fixes live under `src/main/resources/db/reference/manual-data-fixes`; do not treat them as Flyway migrations.
 
 OpenAPI specs live under `src/main/resources/openapi`. They are processed + versioned into `build/processedSpecs/` and server stubs are generated into
@@ -26,7 +27,13 @@ Tests are split across Gradle source sets:
 - `src/functionalTest/java`
 - `src/smokeTest/java`
 
+Each source set has a matching resources directory (`src/test/resources`, `src/testCommon/resources`, `src/integrationTest/resources`,
+`src/functionalTest/resources`, `src/smokeTest/resources`) for profile YAML, WireMock data, and suite-specific fixtures.
 Shared test data helpers and entity builders live under `src/testCommon/java/uk/gov/hmcts/darts/test/common`; prefer extending these over duplicating setup.
+
+Automated task framework code lives under `src/main/java/uk/gov/hmcts/darts/task`: task names in `task/api/AutomatedTaskName`, config classes in
+`task/config`, and lockable runners in `task/runner/impl`. Reusable agent workflows live under `skills/`; use
+`skills/automated-task-generator/automated-task-generator.md` when adding a new automated task.
 
 Operational assets stay in `charts/`, `config/`, and `infrastructure/`. Helper scripts live under `bin/`. Docker Compose files live in the repository root.
 
@@ -108,6 +115,10 @@ with `Service`, `Controller`, or `Repository`.
 
 For DTO/entity mapping, prefer existing MapStruct mappers under `**/mapper` with `@Mapper(componentModel = "spring")` over hand-written conversion logic.
 
+For external HTTP integrations, follow the existing Spring Cloud OpenFeign client pattern under `**/client` (for example
+`event/client/DartsGatewayClient.java`, `common/service/bankholidays/BankHolidaysApi.java`, and `arm/client/version/**`) rather than creating ad-hoc
+HTTP clients.
+
 Agents must consult the active Checkstyle profile (`config/checkstyle/checkstyle.xml`) and the JetBrains scheme (`.idea/codeStyles/project.xml`) when generating
 code so formatting, imports, and annotations align with what CI enforces.
 
@@ -166,6 +177,9 @@ Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` an
   bespoke database tables or UI-only mappings unless the Tech Decisions Register says otherwise.
 - When unsure, check the DARTS Confluence Tech Decision Register (TD.* links) and raise deviations early so code review can flag anything “off piste.”
 - Mention applicable TDR IDs in PR descriptions when implementing or diverging from a decision.
+- Automated tasks use the DARTS `AbstractLockableAutomatedTask` pattern with ShedLock-backed locking. Keep runners thin (scheduling, lock/batch lookup, and
+  delegation), put business logic in the owning domain service, and keep `application.yaml` `darts.automated.task.<task-name>.system-user-email` / `lock.*`
+  aligned with the Flyway `automated_task` and `user_account` rows.
 
 ## Definition of Done – Code Quality & Best Practice
 
