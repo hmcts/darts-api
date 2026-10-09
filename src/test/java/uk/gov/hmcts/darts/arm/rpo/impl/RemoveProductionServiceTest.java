@@ -11,15 +11,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceFiveTwo;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -41,13 +43,17 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.CloseResource"})
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
 class RemoveProductionServiceTest {
 
     private static final Integer EXECUTION_ID = 1;
     private static final String BEARER_TOKEN = "token";
 
     @Mock
-    private ArmRpoClient armRpoClient;
+    private ArmAuthClientFiveTwo armAuthClient;
+    @Mock
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
+
     @Mock
     private ArmApiService armApiService;
     @Mock
@@ -73,7 +79,7 @@ class RemoveProductionServiceTest {
         userAccount = new UserAccountEntity();
         armRpoExecutionDetailEntityArgumentCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
         armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        ArmClientService armClientService = new ArmClientServiceFiveTwo(armAuthClient, armApiBaseClient);
         removeProductionService = new RemoveProductionServiceImpl(armClientService, armRpoService, armRpoUtil);
     }
 
@@ -86,7 +92,7 @@ class RemoveProductionServiceTest {
 
         armRpoExecutionDetailEntity.setProductionId("123");
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.removeProduction(anyString(), any(RemoveProductionRequest.class))).thenReturn(response);
+        when(armApiBaseClient.removeProduction(anyString(), any(RemoveProductionRequest.class))).thenReturn(response);
 
         // when
         removeProductionService.removeProduction(BEARER_TOKEN, EXECUTION_ID, userAccount);
@@ -104,7 +110,7 @@ class RemoveProductionServiceTest {
     void removeProduction_ThrowsFeignException() {
         // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.removeProduction(anyString(), any(RemoveProductionRequest.class))).thenThrow(FeignException.class);
+        when(armApiBaseClient.removeProduction(anyString(), any(RemoveProductionRequest.class))).thenThrow(FeignException.class);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> removeProductionService.removeProduction("token", 1, userAccount));
@@ -124,7 +130,7 @@ class RemoveProductionServiceTest {
     void removeProduction_WithNullResponse() {
         // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.removeProduction(anyString(), any(RemoveProductionRequest.class))).thenReturn(null);
+        when(armApiBaseClient.removeProduction(anyString(), any(RemoveProductionRequest.class))).thenReturn(null);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> removeProductionService.removeProduction("token", 1, userAccount));
@@ -151,7 +157,7 @@ class RemoveProductionServiceTest {
         FeignException feign401 = FeignException.errorStatus("removeProduction", response);
 
         // First call throws 401
-        when(armRpoClient.removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -159,7 +165,7 @@ class RemoveProductionServiceTest {
         RemoveProductionResponse removeProductionResponse = new RemoveProductionResponse();
         removeProductionResponse.setStatus(200);
         removeProductionResponse.setIsError(false);
-        when(armRpoClient.removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class))).thenReturn(removeProductionResponse);
+        when(armApiBaseClient.removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class))).thenReturn(removeProductionResponse);
 
         armRpoExecutionDetailEntity.setProductionId("123");
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
@@ -168,9 +174,9 @@ class RemoveProductionServiceTest {
         removeProductionService.removeProduction(BEARER_TOKEN, 1, userAccount);
 
         // then
-        verify(armRpoClient).removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class));
+        verify(armApiBaseClient).removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class));
         verify(armRpoUtil).retryGetBearerToken(anyString());
-        verify(armRpoClient).removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class));
+        verify(armApiBaseClient).removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class));
 
     }
 
@@ -185,12 +191,12 @@ class RemoveProductionServiceTest {
         FeignException feign401 = FeignException.errorStatus("removeProduction", response);
 
         // First call throws 401
-        when(armRpoClient.removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class))).thenThrow(feign401);
 
         // armRpoUtil should be asked for a new token
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
 
-        when(armRpoClient.removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class))).thenThrow(feign401);
+        when(armApiBaseClient.removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class))).thenThrow(feign401);
 
         armRpoExecutionDetailEntity.setProductionId("123");
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
@@ -201,9 +207,9 @@ class RemoveProductionServiceTest {
 
         // then
         assertThat(exception.getMessage(), containsString("Unauthorized"));
-        verify(armRpoClient).removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class));
+        verify(armApiBaseClient).removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class));
         verify(armRpoUtil).retryGetBearerToken(anyString());
-        verify(armRpoClient).removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class));
+        verify(armApiBaseClient).removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class));
 
     }
 
@@ -217,7 +223,7 @@ class RemoveProductionServiceTest {
             .build();
         FeignException feign403 = FeignException.errorStatus("removeProduction", response);
 
-        when(armRpoClient.removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class)))
+        when(armApiBaseClient.removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class)))
             .thenThrow(feign403);
 
         doReturn("Bearer refreshed").when(armRpoUtil).retryGetBearerToken(anyString());
@@ -225,7 +231,7 @@ class RemoveProductionServiceTest {
         RemoveProductionResponse removeProductionResponse = new RemoveProductionResponse();
         removeProductionResponse.setStatus(200);
         removeProductionResponse.setIsError(false);
-        when(armRpoClient.removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class)))
+        when(armApiBaseClient.removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class)))
             .thenReturn(removeProductionResponse);
 
         armRpoExecutionDetailEntity.setProductionId("123");
@@ -235,9 +241,9 @@ class RemoveProductionServiceTest {
         removeProductionService.removeProduction(BEARER_TOKEN, 1, userAccount);
 
         // then
-        verify(armRpoClient).removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class));
+        verify(armApiBaseClient).removeProduction(eq(BEARER_TOKEN), any(RemoveProductionRequest.class));
         verify(armRpoUtil).retryGetBearerToken("removeProduction");
-        verify(armRpoClient).removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class));
+        verify(armApiBaseClient).removeProduction(eq("Bearer refreshed"), any(RemoveProductionRequest.class));
     }
 
     @AfterEach
