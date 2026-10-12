@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
 import uk.gov.hmcts.darts.tasks.http.api.TasksApi;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPatchRequest;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionPostRequest;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskCronExpressionScheduleResponse;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
@@ -55,5 +58,22 @@ public class AutomatedTasksController implements TasksApi {
         var automatedTask = adminAutomatedTaskService.updateAutomatedTask(taskId, automatedTaskPatch);
         return new ResponseEntity<>(automatedTask, HttpStatus.OK);
     }
-}
 
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, securityRoles = {SUPER_ADMIN}, globalAccessSecurityRoles = {SUPER_ADMIN})
+    @Override
+    public ResponseEntity<Void> patchAutomatedTaskCronExpression(
+        Integer taskId, AutomatedTaskCronExpressionPatchRequest automatedTaskCronExpressionPatchRequest) {
+        adminAutomatedTaskService.updateAutomatedTaskCronExpressionSchedule(taskId, automatedTaskCronExpressionPatchRequest);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, securityRoles = {SUPER_ADMIN}, globalAccessSecurityRoles = {SUPER_ADMIN})
+    @Override
+    public ResponseEntity<List<AutomatedTaskCronExpressionScheduleResponse>> postAutomatedTaskCronExpression(
+        Integer taskId, AutomatedTaskCronExpressionPostRequest automatedTaskCronExpressionPostRequest) {
+        var automatedTask = adminAutomatedTaskService.getAutomatedTaskCronExpressionSchedule(taskId, automatedTaskCronExpressionPostRequest);
+        return new ResponseEntity<>(automatedTask, HttpStatus.OK);
+    }
+}
