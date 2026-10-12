@@ -291,6 +291,7 @@ def coverageExclusions = [
 
 jacocoTestReport {
   executionData(test, integration)
+  mustRunAfter test, integration
   reports {
     xml.required = true
     csv.required = false
@@ -335,9 +336,9 @@ tasks.jacocoTestCoverageVerification {
 }
 
 project.tasks['sonarqube'].dependsOn jacocoTestReport
-project.tasks['check'].finalizedBy integration
+project.tasks['check'].dependsOn integration
 
-jacocoTestReport.dependsOn check
+// Reporting consumes existing execution data without rerunning failed tests in Jenkins.
 jacocoTestCoverageVerification.dependsOn jacocoTestReport
 
 sonarqube {
