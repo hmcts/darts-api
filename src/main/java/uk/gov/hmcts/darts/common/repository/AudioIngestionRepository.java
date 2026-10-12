@@ -71,4 +71,14 @@ public interface AudioIngestionRepository extends JpaRepository<AudioIngestionEn
         String claimOwner,
         String error
     );
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+        DELETE FROM darts.audio_ingestion
+        WHERE id = :id
+          AND status = 'PROCESSING'
+          AND claim_owner = :claimOwner
+        """, nativeQuery = true)
+    int deleteProcessed(Long id, String claimOwner);
 }

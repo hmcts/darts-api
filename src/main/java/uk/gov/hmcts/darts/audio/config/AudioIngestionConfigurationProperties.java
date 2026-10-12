@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.enums.AudioIngestionTemporaryFailureMode;
 
 import java.time.Duration;
 
@@ -15,7 +16,8 @@ public class AudioIngestionConfigurationProperties {
 
     private int batchSize = 5;
 
-    private Duration processingTimeout = Duration.ofMinutes(15);
+    private Duration processingTimeout = Duration.ofMinutes(10);
 
-    private String temporaryFailureMode = "NONE";
+    private AudioIngestionTemporaryFailureMode temporaryFailureMode =
+        AudioIngestionTemporaryFailureMode.NONE;
 }

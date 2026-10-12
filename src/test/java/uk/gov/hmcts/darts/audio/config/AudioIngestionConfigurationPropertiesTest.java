@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.config;
 
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.darts.common.enums.AudioIngestionTemporaryFailureMode;
 
 import java.time.Duration;
 
@@ -15,8 +16,8 @@ class AudioIngestionConfigurationPropertiesTest {
 
         assertThat(properties.getBatchSize()).isEqualTo(5);
         assertThat(properties.getProcessingTimeout())
-            .isEqualTo(Duration.ofMinutes(15));
+            .isEqualTo(Duration.ofMinutes(10));
         assertThat(properties.getTemporaryFailureMode())
-            .isEqualTo("NONE");
+            .isEqualTo(AudioIngestionTemporaryFailureMode.NONE);
     }
 }

@@ -259,7 +259,7 @@ audioIngestion:
     RUN_DB_MIGRATION_ON_STARTUP: false
 
     AUDIO_INGESTION_BATCH_SIZE: 5
-    AUDIO_INGESTION_PROCESSING_TIMEOUT: 15m
+    AUDIO_INGESTION_PROCESSING_TIMEOUT: 10m
     AUDIO_INGESTION_TEMPORARY_FAILURE_MODE: NONE
 
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
