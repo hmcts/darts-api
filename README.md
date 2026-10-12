@@ -213,6 +213,21 @@ To build the project execute the following command:
   ./gradlew build
 ```
 
+### Integration tests
+
+Run all integration tests with:
+
+```bash
+  ./gradlew integration
+```
+
+The suite is split by database implementation. These commands are intended for separate CI jobs:
+
+```bash
+  ./gradlew integrationH2
+  ./gradlew integrationPostgres
+```
+
 ### Jacoco Coverage Report
 
 A local jacoco coverage report can be generated using the following command:-

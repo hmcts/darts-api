@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils;
 
+import org.junit.jupiter.api.Tag;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -12,6 +13,7 @@ import org.testcontainers.utility.DockerImageName;
  * Base class for integration tests running against a containerized Postgres with Testcontainers.
  */
 @SpringBootTest
+@Tag("postgres")
 @ActiveProfiles({"intTest", "in-memory-caching"})
 @Import(IntegrationTestConfiguration.class)
 public class PostgresIntegrationBase extends TestBase {
