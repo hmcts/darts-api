@@ -2,19 +2,19 @@ package uk.gov.hmcts.darts.test.common;
 
 
 import org.apache.tika.Tika;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.util.unit.DataSize;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DataGeneratorTest {
+class DataGeneratorTest {
 
     @Test
-    public void shouldProduceAValidMP2() throws IOException {
+    void shouldProduceAValidMP2() throws IOException {
         Path audioFile = DataGenerator.createUniqueFile(DataSize.ofBytes(100), DataGenerator.FileType.MP2);
 
         assertEquals(100, audioFile.toFile().length());
@@ -22,7 +22,7 @@ public class DataGeneratorTest {
     }
 
     @Test
-    public void shouldProduceAValidMP3() throws IOException {
+    void shouldProduceAValidMP3() throws IOException {
         Path uniqueAudioFile = DataGenerator.createUniqueFile(DataSize.ofBytes(100), DataGenerator.FileType.MP3);
 
         assertEquals(100, uniqueAudioFile.toFile().length());
@@ -30,7 +30,7 @@ public class DataGeneratorTest {
     }
 
     @Test
-    public void showThrowExceptionIfDesiredLengthIsTooSmall() {
+    void showThrowExceptionIfDesiredLengthIsTooSmall() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
             DataGenerator.createUniqueFile(DataSize.ofBytes(1), DataGenerator.FileType.MP2)
         );
