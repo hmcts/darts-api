@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.testutils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -71,7 +70,6 @@ import java.util.Optional;
  */
 @SpringBootTest()
 @Slf4j
-@Tag("h2")
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 @Import(IntegrationTestConfiguration.class)
 public class IntegrationBase extends TestBase {

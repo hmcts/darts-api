@@ -222,31 +222,12 @@ tasks.register('functional', Test) {
   classpath = sourceSets.functionalTest.runtimeClasspath
 }
 
-tasks.register('integrationH2', Test) {
-  description = "Runs H2-backed integration tests"
+tasks.register('integration', Test) {
+  description = "Runs all integration tests"
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
   maxParallelForks = 3
-  useJUnitPlatform {
-    includeTags 'h2'
-  }
-}
-
-tasks.register('integrationPostgres', Test) {
-  description = "Runs PostgreSQL-backed integration tests"
-  group = "Verification"
-  testClassesDirs = sourceSets.integrationTest.output.classesDirs
-  classpath = sourceSets.integrationTest.runtimeClasspath
-  useJUnitPlatform {
-    includeTags 'postgres'
-  }
-}
-
-tasks.register('integration') {
-  description = "Runs all integration tests"
-  group = "Verification"
-  dependsOn tasks.named('integrationH2'), tasks.named('integrationPostgres')
 }
 
 tasks.register('smoke', Test) {
@@ -315,7 +296,7 @@ def coverageExclusions = [
 ]
 
 jacocoTestReport {
-  executionData(test, integrationH2, integrationPostgres)
+  executionData(test, integration)
   reports {
     xml.required = true
     csv.required = false
