@@ -3,7 +3,7 @@ spring:
     openfeign:
       httpclient:
         # WireMock is recreated between cached integration-test contexts; do not reuse a stale socket.
-        time-to-live: 5000
+        time-to-live: 1
         time-to-live-unit: MILLISECONDS
   data-management:
     retention-period:
