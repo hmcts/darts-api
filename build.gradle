@@ -227,7 +227,7 @@ tasks.register('integrationH2', Test) {
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
-  maxParallelForks = 2
+  maxParallelForks = 3
   useJUnitPlatform {
     includeTags 'h2'
   }
