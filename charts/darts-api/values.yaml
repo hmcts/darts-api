@@ -143,7 +143,7 @@ audioIngestion:
 
   aadIdentityName: darts
 
-  pollingInterval: 300
+  pollingInterval: 120
 
   minReplicaCount: 0
   maxReplicaCount: 5

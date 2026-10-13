@@ -377,7 +377,7 @@ audioIngestion:
   image: ${IMAGE_NAME}
   aadIdentityName: darts
 
-  pollingInterval: 30
+  pollingInterval: 120
   minReplicaCount: 0
   maxReplicaCount: 5
   scalingStrategy: accurate
