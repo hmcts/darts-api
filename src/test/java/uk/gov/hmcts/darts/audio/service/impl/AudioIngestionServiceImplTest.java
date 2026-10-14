@@ -155,6 +155,9 @@ class AudioIngestionServiceImplTest {
                 createItem(5)
             ));
 
+        when(audioIngestionRepository.getTemporaryFailureCount())
+            .thenReturn(5);
+
         audioIngestionService.process();
 
         verify(audioIngestionRepository, never())
@@ -184,6 +187,9 @@ class AudioIngestionServiceImplTest {
                 createItem(4),
                 createItem(5)
             ));
+
+        when(audioIngestionRepository.getTemporaryFailureCount())
+            .thenReturn(2);
 
         audioIngestionService.process();
 
