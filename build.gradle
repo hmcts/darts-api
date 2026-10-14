@@ -222,12 +222,82 @@ tasks.register('functional', Test) {
   classpath = sourceSets.functionalTest.runtimeClasspath
 }
 
-tasks.register('integration', Test) {
-  description = "Runs all integration tests"
+def integrationRunCount = 60
+def integrationTestRuns = []
+
+(1..integrationRunCount).each { runNumber ->
+  def taskName = "integrationRun${runNumber}"
+  def testResultsDirectory = runNumber == 1
+      ? layout.buildDirectory.dir("test-results/integration")
+      : layout.buildDirectory.dir("test-results/integration-repeat/run-${runNumber}")
+  def htmlReportDirectory = runNumber == 1
+      ? layout.buildDirectory.dir("reports/tests/integration")
+      : layout.buildDirectory.dir("reports/tests/integration-repeat/run-${runNumber}")
+
+  def integrationTestRun = tasks.register(taskName, Test) {
+    description = "Runs integration tests (run ${runNumber} of ${integrationRunCount})"
+    group = "Verification"
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    maxParallelForks = 3
+    ignoreFailures = true
+
+    // A stability run must execute rather than reusing a prior task result or build-cache entry.
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
+
+    reports.junitXml.outputLocation.set(testResultsDirectory)
+    reports.html.outputLocation.set(htmlReportDirectory)
+    binaryResultsDirectory.set(testResultsDirectory.map { it.dir("binary") })
+  }
+  integrationTestRuns << integrationTestRun
+}
+
+integrationTestRuns.eachWithIndex { integrationTestRun, index ->
+  if (index > 0) {
+    integrationTestRun.configure {
+      mustRunAfter(integrationTestRuns[index - 1])
+    }
+  }
+}
+
+def verifyIntegrationRuns = tasks.register('verifyIntegrationRuns') {
+  description = "Fails the build if any repeated integration-test run failed"
   group = "Verification"
-  testClassesDirs = sourceSets.integrationTest.output.classesDirs
-  classpath = sourceSets.integrationTest.runtimeClasspath
-  maxParallelForks = 3
+  dependsOn(integrationTestRuns)
+
+  doLast {
+    def failedTests = 0
+    def missingResults = []
+
+    (1..integrationRunCount).each { runNumber ->
+      def testResultsDirectory = runNumber == 1
+          ? layout.buildDirectory.dir("test-results/integration").get().asFile
+          : layout.buildDirectory.dir("test-results/integration-repeat/run-${runNumber}").get().asFile
+      def resultFiles = fileTree(testResultsDirectory) {
+        include "TEST-*.xml"
+      }.files
+
+      if (resultFiles.isEmpty()) {
+        missingResults << runNumber
+      } else {
+        resultFiles.each { resultFile ->
+          def testSuite = new XmlSlurper().parse(resultFile)
+          failedTests += testSuite.@failures.toInteger() + testSuite.@errors.toInteger()
+        }
+      }
+    }
+
+    if (!missingResults.isEmpty() || failedTests > 0) {
+      throw new GradleException("Integration stability check failed: ${failedTests} failed test(s); missing result(s) for run(s): ${missingResults}")
+    }
+  }
+}
+
+tasks.register('integration') {
+  description = "Runs the integration-test stability check (${integrationRunCount} runs)"
+  group = "Verification"
+  dependsOn(verifyIntegrationRuns)
 }
 
 tasks.register('smoke', Test) {
@@ -296,7 +366,7 @@ def coverageExclusions = [
 ]
 
 jacocoTestReport {
-  executionData(test, integration)
+  executionData(test, integrationTestRuns[0])
   reports {
     xml.required = true
     csv.required = false
