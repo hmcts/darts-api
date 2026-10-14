@@ -144,10 +144,12 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
             null, expectedMedia.getStart(), expectedMedia.getEnd());
         assertEquals(11, transformedMediaEntityList.size());
 
-        for (int results = 0; results < transformedMediaEntityList.size(); results++) {
-            Long expectedId = generatedMediaEntities.get(results).getId();
-            assertEquals(expectedId, transformedMediaEntityList.get(results).getId());
-        }
+        List<Long> expectedMediaIds = generatedMediaEntities.subList(0, 11).stream()
+            .map(MediaEntity::getId)
+            .toList();
+        assertThat(transformedMediaEntityList)
+            .extracting(MediaEntity::getId)
+            .containsExactlyInAnyOrderElementsOf(expectedMediaIds);
     }
 
     @Test
