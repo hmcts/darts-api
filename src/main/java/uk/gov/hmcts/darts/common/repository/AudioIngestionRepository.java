@@ -81,4 +81,11 @@ public interface AudioIngestionRepository extends JpaRepository<AudioIngestionEn
           AND claim_owner = :claimOwner
         """, nativeQuery = true)
     int deleteProcessed(Long id, String claimOwner);
+
+    @Query(value = """
+    SELECT temporary_failure_count
+    FROM darts.audio_ingestion_spike_config
+    WHERE id = 1
+    """, nativeQuery = true)
+    int getTemporaryFailureCount();
 }

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.config.AudioIngestionConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.AudioIngestionEntity;
 import uk.gov.hmcts.darts.audio.service.AudioIngestionService;
-import uk.gov.hmcts.darts.common.enums.AudioIngestionTemporaryFailureMode;
 import uk.gov.hmcts.darts.common.repository.AudioIngestionRepository;
 
 import java.time.OffsetDateTime;
@@ -18,6 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class AudioIngestionServiceImpl implements AudioIngestionService {
+
     private final AudioIngestionRepository audioIngestionRepository;
     private final AudioIngestionConfigurationProperties config;
 
@@ -25,21 +25,14 @@ public class AudioIngestionServiceImpl implements AudioIngestionService {
     public void process() {
         String claimOwner = getClaimOwner();
 
-        log.info(
-            "Starting external audio ingestion job. claimOwner={}",
-            claimOwner
+        OffsetDateTime cutoff = OffsetDateTime.now(ZoneOffset.UTC)
+            .minus(config.getProcessingTimeout());
+
+        List<Long> claimedIds = audioIngestionRepository.claimForProcessing(
+            claimOwner,
+            cutoff,
+            config.getBatchSize()
         );
-
-        OffsetDateTime cutoff =
-            OffsetDateTime.now(ZoneOffset.UTC)
-                .minus(config.getProcessingTimeout());
-
-        List<Long> claimedIds =
-            audioIngestionRepository.claimForProcessing(
-                claimOwner,
-                cutoff,
-                config.getBatchSize()
-            );
 
         if (claimedIds.isEmpty()) {
             log.info(
@@ -49,49 +42,53 @@ public class AudioIngestionServiceImpl implements AudioIngestionService {
             return;
         }
 
+        int temporaryFailureCount =
+            audioIngestionRepository.getTemporaryFailureCount();
+
         List<AudioIngestionEntity> claimedItems =
             audioIngestionRepository.findAllById(claimedIds);
 
         log.info(
             "External audio ingestion job claimed {} items. "
-                + "claimOwner={}, ids={}",
-            claimedItems.size(),
+                + "claimOwner={}, ids={}, temporaryFailureCount={}",
+            claimedIds.size(),
             claimOwner,
-            claimedIds
+            claimedIds,
+            temporaryFailureCount
         );
 
-        processItems(claimedItems, claimOwner);
+        processItems(
+            claimedItems,
+            claimOwner,
+            temporaryFailureCount
+        );
     }
 
     private void processItems(
         List<AudioIngestionEntity> claimedItems,
-        String claimOwner
+        String claimOwner,
+        int temporaryFailureCount
     ) {
-        AudioIngestionTemporaryFailureMode failureMode =
-            config.getTemporaryFailureMode();
+        int failuresRemaining = temporaryFailureCount;
 
-        for (int index = 0; index < claimedItems.size(); index++) {
-            AudioIngestionEntity item = claimedItems.get(index);
-
+        for (AudioIngestionEntity item : claimedItems) {
             log.info(
-                "Would process external audio item. "
+                "Processing external audio item. "
                     + "claimOwner={}, id={}, sourceFullFilename={}",
                 claimOwner,
                 item.getId(),
                 item.getSourceFullFilename()
             );
 
-            if (shouldTemporarilyFail(failureMode, index)) {
+            if (failuresRemaining > 0) {
                 log.warn(
                     "Simulating temporary failure for external audio item. "
-                        + "claimOwner={}, id={}, sourceFullFilename={}",
+                        + "claimOwner={}, id={}. Item remains PROCESSING for retry.",
                     claimOwner,
-                    item.getId(),
-                    item.getSourceFullFilename()
+                    item.getId()
                 );
 
-                // Intentionally leave the item in PROCESSING.
-                // It becomes eligible again after processingTimeout.
+                failuresRemaining--;
                 continue;
             }
 
@@ -101,23 +98,12 @@ public class AudioIngestionServiceImpl implements AudioIngestionService {
             );
 
             log.info(
-                "Successfully simulated processing external audio item. "
+                "Successfully processed external audio item. "
                     + "claimOwner={}, id={}",
                 claimOwner,
                 item.getId()
             );
         }
-    }
-
-    private boolean shouldTemporarilyFail(
-        AudioIngestionTemporaryFailureMode failureMode,
-        int index
-    ) {
-        return switch (failureMode) {
-            case ALL -> true;
-            case FIRST_TWO -> index < 2;
-            case NONE -> false;
-        };
     }
 
     private String getClaimOwner() {

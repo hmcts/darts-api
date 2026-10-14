@@ -396,9 +396,6 @@ audioIngestion:
     DARTS_API_DB_USERNAME: "hmcts"
 
     AUDIO_INGESTION_MODE: true
-    ATS_MODE: false
-    API_MODE: false
-    AUTOMATED_TASK_MODE: false
 
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
