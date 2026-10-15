@@ -42,66 +42,66 @@ public class AudioIngestionServiceImpl implements AudioIngestionService {
             return;
         }
 
-        int temporaryFailureCount =
-            audioIngestionRepository.getTemporaryFailureCount();
-
         List<AudioIngestionEntity> claimedItems =
             audioIngestionRepository.findAllById(claimedIds);
 
         log.info(
             "External audio ingestion job claimed {} items. "
-                + "claimOwner={}, ids={}, temporaryFailureCount={}",
+                + "claimOwner={}, ids={}",
             claimedIds.size(),
             claimOwner,
-            claimedIds,
-            temporaryFailureCount
+            claimedIds
         );
 
         processItems(
             claimedItems,
-            claimOwner,
-            temporaryFailureCount
+            claimOwner
         );
     }
 
     private void processItems(
         List<AudioIngestionEntity> claimedItems,
-        String claimOwner,
-        int temporaryFailureCount
+        String claimOwner
     ) {
-        int failuresRemaining = temporaryFailureCount;
 
         for (AudioIngestionEntity item : claimedItems) {
+            String filename = item.getSourceFullFilename();
             log.info(
                 "Processing external audio item. "
                     + "claimOwner={}, id={}, sourceFullFilename={}",
                 claimOwner,
                 item.getId(),
-                item.getSourceFullFilename()
+                filename
             );
 
-            if (failuresRemaining > 0) {
+            if (filename != null
+                && java.nio.file.Path.of(filename)
+                .getFileName()
+                .toString()
+                .startsWith("FAIL")) {
                 log.warn(
                     "Simulating temporary failure for external audio item. "
-                        + "claimOwner={}, id={}. Item remains PROCESSING for retry.",
+                        + "claimOwner={}, id={}, filename={}. "
+                        + "Item remains PROCESSING for retry.",
                     claimOwner,
-                    item.getId()
+                    item.getId(),
+                    filename
                 );
 
-                failuresRemaining--;
                 continue;
             }
 
-            audioIngestionRepository.deleteProcessed(
+            int deleted = audioIngestionRepository.deleteProcessed(
                 item.getId().longValue(),
                 claimOwner
             );
 
             log.info(
-                "Successfully processed external audio item. "
-                    + "claimOwner={}, id={}",
+                "External audio item processing completed. "
+                    + "claimOwner={}, id={}, deleted={}",
                 claimOwner,
-                item.getId()
+                item.getId(),
+                deleted
             );
         }
     }

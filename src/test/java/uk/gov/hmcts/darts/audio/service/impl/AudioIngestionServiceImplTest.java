@@ -1,3 +1,4 @@
+
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -7,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.config.AudioIngestionConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.AudioIngestionEntity;
-import uk.gov.hmcts.darts.common.enums.AudioIngestionTemporaryFailureMode;
 import uk.gov.hmcts.darts.common.repository.AudioIngestionRepository;
 
 import java.time.Duration;
@@ -29,18 +29,14 @@ class AudioIngestionServiceImplTest {
     private AudioIngestionRepository audioIngestionRepository;
 
     private AudioIngestionServiceImpl audioIngestionService;
-    private AudioIngestionConfigurationProperties configurationProperties;
 
     @BeforeEach
     void setUp() {
-        configurationProperties =
+        AudioIngestionConfigurationProperties configurationProperties =
             new AudioIngestionConfigurationProperties();
 
         configurationProperties.setBatchSize(5);
         configurationProperties.setProcessingTimeout(Duration.ofMinutes(10));
-        configurationProperties.setTemporaryFailureMode(
-            AudioIngestionTemporaryFailureMode.NONE
-        );
 
         audioIngestionService = new AudioIngestionServiceImpl(
             audioIngestionRepository,
@@ -133,10 +129,6 @@ class AudioIngestionServiceImplTest {
 
     @Test
     void shouldLeaveAllItemsProcessingWhenWholeJobTemporarilyFails() {
-        configurationProperties.setTemporaryFailureMode(
-            AudioIngestionTemporaryFailureMode.ALL
-        );
-
         List<Long> claimedIds =
             List.of(1L, 2L, 3L, 4L, 5L);
 
@@ -148,15 +140,12 @@ class AudioIngestionServiceImplTest {
 
         when(audioIngestionRepository.findAllById(claimedIds))
             .thenReturn(List.of(
-                createItem(1),
-                createItem(2),
-                createItem(3),
-                createItem(4),
-                createItem(5)
+                createItem(1, "FAIL-1.wav"),
+                createItem(2, "FAIL-2.wav"),
+                createItem(3, "FAIL-3.wav"),
+                createItem(4, "FAIL-4.wav"),
+                createItem(5, "FAIL-5.wav")
             ));
-
-        when(audioIngestionRepository.getTemporaryFailureCount())
-            .thenReturn(5);
 
         audioIngestionService.process();
 
@@ -166,10 +155,6 @@ class AudioIngestionServiceImplTest {
 
     @Test
     void shouldLeaveFirstTwoItemsProcessingAndDeleteRemainingItems() {
-        configurationProperties.setTemporaryFailureMode(
-            AudioIngestionTemporaryFailureMode.FIRST_TWO
-        );
-
         List<Long> claimedIds =
             List.of(1L, 2L, 3L, 4L, 5L);
 
@@ -181,15 +166,12 @@ class AudioIngestionServiceImplTest {
 
         when(audioIngestionRepository.findAllById(claimedIds))
             .thenReturn(List.of(
-                createItem(1),
-                createItem(2),
-                createItem(3),
-                createItem(4),
-                createItem(5)
+                createItem(1, "FAIL-1.wav"),
+                createItem(2, "FAIL-2.wav"),
+                createItem(3, "audio-3.wav"),
+                createItem(4, "audio-4.wav"),
+                createItem(5, "audio-5.wav")
             ));
-
-        when(audioIngestionRepository.getTemporaryFailureCount())
-            .thenReturn(2);
 
         audioIngestionService.process();
 
@@ -210,12 +192,14 @@ class AudioIngestionServiceImplTest {
     }
 
     private AudioIngestionEntity createItem(int id) {
+        return createItem(id, "audio-" + id + ".wav");
+    }
+
+    private AudioIngestionEntity createItem(int id, String filename) {
         AudioIngestionEntity item = new AudioIngestionEntity();
 
         item.setId(id);
-        item.setSourceFullFilename(
-            "/spike/audio-" + id + ".wav"
-        );
+        item.setSourceFullFilename("/spike/" + filename);
 
         return item;
     }
