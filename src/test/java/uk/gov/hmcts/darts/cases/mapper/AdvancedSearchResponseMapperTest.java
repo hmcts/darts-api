@@ -9,6 +9,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.entity.CaseLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
@@ -18,7 +20,10 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
@@ -38,7 +43,7 @@ class AdvancedSearchResponseMapperTest {
     @Test
     void empty() {
         List<HearingEntity> hearings = new ArrayList<>();
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings);
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of(), Set.of());
         assertEquals(0, result.size());
     }
 
@@ -51,13 +56,65 @@ class AdvancedSearchResponseMapperTest {
         courtCase.setDataAnonymisedTs(OffsetDateTime.parse("2024-01-01T00:00:00Z"));
 
         hearings.add(hearing);
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings);
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of(), Set.of());
 
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/AdvancedSearchResponseMapperTest/one/expectedResponse.json");
         compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void mapResponse_shouldReturnLinkedCases_whenOneCaseAndOneLinkedCase() {
+        HearingEntity hearing = CommonTestDataUtil.createHearing(TEST_1, LocalTime.NOON);
+        CourtCaseEntity courtCase = hearing.getCourtCase();
+        CourtCaseEntity linkedCase = CommonTestDataUtil.createCaseWithId("linked-case", 202);
+
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(
+            List.of(hearing),
+            List.of(createLinkedCase(courtCase, linkedCase)),
+            Set.of(linkedCase.getCourthouse().getId())
+        );
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getLinkedCases()).hasSize(1);
+        assertThat(result.getFirst().getLinkedCases().getFirst().getCaseId()).isEqualTo(202);
+        assertThat(result.getFirst().getLinkedCases().getFirst().getCaseNumber()).isEqualTo("linked-case");
+        assertThat(result.getFirst().getLinkedCases().getFirst().getActiveLink()).isTrue();
+    }
+
+    @Test
+    void mapResponse_shouldReturnLinkedCases_whenMultipleCasesLinkedToDifferentCases() {
+        CourtCaseEntity courtCase1 = CommonTestDataUtil.createCaseWithId("case-1", 101);
+        CourtCaseEntity courtCase2 = CommonTestDataUtil.createCaseWithId("case-2", 102);
+        CourtCaseEntity linkedCase1 = CommonTestDataUtil.createCaseWithId("linked-case-1", 201);
+        CourtCaseEntity linkedCase2 = CommonTestDataUtil.createCaseWithId("linked-case-2", 202);
+        CourtCaseEntity linkedCase3 = CommonTestDataUtil.createCaseWithId("linked-case-3", 203);
+        linkedCase2.getCourthouse().setId(1002);
+
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(
+            List.of(
+                CommonTestDataUtil.createHearing(courtCase1, CommonTestDataUtil.createCourtroom("1"), LocalDate.of(2023, 6, 20), LocalTime.NOON),
+                CommonTestDataUtil.createHearing(courtCase2, CommonTestDataUtil.createCourtroom("2"), LocalDate.of(2023, 6, 21), LocalTime.NOON)
+            ),
+            List.of(
+                createLinkedCase(courtCase1, linkedCase1),
+                createLinkedCase(courtCase1, linkedCase2),
+                createLinkedCase(linkedCase3, courtCase2)
+            ),
+            Set.of(1001)
+        );
+
+        assertThat(result).hasSize(2);
+        assertThat(result.getFirst().getCaseId()).isEqualTo(101);
+        assertThat(result.getFirst().getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseId(), linkedCase -> linkedCase.getActiveLink())
+            .containsExactly(tuple(201, true), tuple(202, false));
+        assertThat(result.get(1).getCaseId()).isEqualTo(102);
+        assertThat(result.get(1).getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseId(), linkedCase -> linkedCase.getActiveLink())
+            .containsExactly(tuple(203, true));
     }
 
     @Test
@@ -83,7 +140,7 @@ class AdvancedSearchResponseMapperTest {
         List<HearingEntity> hearings = new ArrayList<>();
         hearings.add(hearing1);
         hearings.add(hearing2);
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings);
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of(), Set.of());
 
         String actualResponse = objectMapper.writeValueAsString(result);
 
@@ -144,13 +201,20 @@ class AdvancedSearchResponseMapperTest {
         hearings.add(hearing2);
         hearings.add(hearing3);
         hearings.add(hearing4);
-        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings);
+        List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings, List.of(), Set.of());
 
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/AdvancedSearchResponseMapperTest/fourWithTwoSameCase/expectedResponse.json");
         compareJson(actualResponse, expectedResponse);
+    }
+
+    private static CaseLinkedCaseEntity createLinkedCase(CourtCaseEntity courtCase, CourtCaseEntity linkedCase) {
+        CaseLinkedCaseEntity linkedCaseEntity = new CaseLinkedCaseEntity();
+        linkedCaseEntity.setCourtCase1(courtCase);
+        linkedCaseEntity.setCourtCase2(linkedCase);
+        return linkedCaseEntity;
     }
 
 }
