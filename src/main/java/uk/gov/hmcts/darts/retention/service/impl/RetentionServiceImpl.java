@@ -81,7 +81,7 @@ public class RetentionServiceImpl implements RetentionService {
         if (CollectionUtils.isNotEmpty(eventList)) {
             eventList.sort(
                 Comparator.comparing(EventEntity::getTimestamp).reversed()
-                    .thenComparing(eventEntity -> !isCloseEvent(eventEntity))
+                    .thenComparing(EventEntity::getCreatedDateTime, Comparator.reverseOrder())
             );
             EventEntity latestEvent = eventList.get(0);
             //find latest closed event
