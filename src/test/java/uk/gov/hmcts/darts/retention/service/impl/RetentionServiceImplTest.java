@@ -217,8 +217,8 @@ class RetentionServiceImplTest {
 
             EventEntity sentencingEvent = getEvent(2L, "2024-01-01T10:00:00Z", "Judge passed sentence", 56, false);
             EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", 79, false);
-            sentencingEvent.setCreatedDateTime(OffsetDateTime.parse("2024-01-01T10:00:00Z"));
-            closedEvent.setCreatedDateTime(OffsetDateTime.parse("2024-01-01T10:00:01Z"));
+            sentencingEvent.setCreatedDateTime(OffsetDateTime.parse("2024-01-01T10:00:00.123456789Z"));
+            closedEvent.setCreatedDateTime(OffsetDateTime.parse("2024-01-01T10:00:00.987654321Z"));
             List<EventEntity> events = new ArrayList<>(List.of(sentencingEvent, closedEvent));
             when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(events);
 
@@ -238,8 +238,8 @@ class RetentionServiceImplTest {
 
             EventEntity closedEvent = getEvent(1L, "2024-01-01T10:00:00Z", "Case closed", 79, false);
             EventEntity sentencingEvent = getEvent(2L, "2024-01-01T10:00:00Z", "Judge passed sentence", 56, false);
-            closedEvent.setCreatedDateTime(OffsetDateTime.parse("2024-01-01T10:00:00Z"));
-            sentencingEvent.setCreatedDateTime(OffsetDateTime.parse("2024-01-01T10:00:01Z"));
+            closedEvent.setCreatedDateTime(OffsetDateTime.parse("2024-01-01T10:00:00.123456789Z"));
+            sentencingEvent.setCreatedDateTime(OffsetDateTime.parse("2024-01-01T10:00:00.987654321Z"));
             List<EventEntity> events = new ArrayList<>(List.of(closedEvent, sentencingEvent));
             when(findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase)).thenReturn(events);
 
