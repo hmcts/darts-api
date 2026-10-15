@@ -79,11 +79,14 @@ public class RetentionServiceImpl implements RetentionService {
 
         List<EventEntity> eventList = findCurrentEntitiesHelper.getCurrentNonLogEvents(courtCase);
         if (CollectionUtils.isNotEmpty(eventList)) {
-            eventList.sort(Comparator.comparing(EventEntity::getTimestamp).reversed());
+            eventList.sort(
+                Comparator.comparing(EventEntity::getTimestamp).reversed()
+                    .thenComparing(eventEntity -> !isCloseEvent(eventEntity))
+            );
             EventEntity latestEvent = eventList.get(0);
             //find latest closed event
             Optional<EventEntity> latestClosedEvent =
-                eventList.stream().filter(eventEntity -> closeEventsHandler.equalsIgnoreCase(eventEntity.getEventType().getHandler())).findFirst();
+                eventList.stream().filter(this::isCloseEvent).findFirst();
 
             if (latestClosedEvent.isPresent()) {
                 if (latestEvent.getId().equals(latestClosedEvent.get().getId())) {
@@ -102,6 +105,10 @@ public class RetentionServiceImpl implements RetentionService {
             }
         }
         return confidenceCategory;
+    }
+
+    private boolean isCloseEvent(EventEntity eventEntity) {
+        return closeEventsHandler.equalsIgnoreCase(eventEntity.getEventType().getHandler());
     }
 
     private Integer getRetentionConfidenceCategoryEnumBasedOnDates(List<EventEntity> eventList,
