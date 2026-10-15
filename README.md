@@ -213,23 +213,6 @@ To build the project execute the following command:
   ./gradlew build
 ```
 
-### Integration tests
-
-Run all integration tests with:
-
-```bash
-  ./gradlew integration
-```
-
-To repeat the complete integration suite and record timing and pass/fail results:
-
-```bash
-  ./bin/repeat-integration-tests.sh 40
-```
-
-The script writes a CSV summary and one Gradle log per run beneath
-`build/integration-repeat-results/`.
-
 ### Jacoco Coverage Report
 
 A local jacoco coverage report can be generated using the following command:-
