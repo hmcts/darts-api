@@ -6,29 +6,13 @@ info:
   contact:
     name: DARTS team
   description: |-
-    Draft Common Platform integration contract for DARTS.
-
-    Common Platform submits existing daily-list XML and JSON versions of its event messages.
-    DARTS adapters map these requests to the existing daily-list and event processing services.
-    This contract does not expose native DARTS, administrative or portal operations.
-
-    The event JSON schema, transport metadata and success responses require agreement with
-    Common Platform. Marketplace connection details and application permissions also remain
-    to be confirmed. This draft must not be treated as an approved production contract.
-
-    Security requirements describe the intended Marketplace entry point. Implementing this
-    document alone does not configure APIM policies, JWT validation or CPP authorisation.
+    Draft API for Common Platform to submit daily-list XML and JSON events to DARTS.
+    Request formats, retry behaviour and Marketplace configuration remain subject to agreement.
   x-contract-status: draft
-  x-pending-decisions:
-    - Agree the event JSON schema and the location of the former SOAP envelope metadata.
-    - Agree the daily-list XML schema version and X-Message-Id header proposal.
-    - Agree success status, response body and duplicate-delivery behaviour.
-    - Agree payload limits, correlation headers and error responses at APIM and DARTS.
-    - Confirm Marketplace URLs, token contract and required application permissions.
 
 servers:
   - url: http://localhost:4550
-    description: Local development; CP controllers and authentication are not implemented by this definition.
+    description: Local development
 
 tags:
   - name: CommonPlatformDailyLists
@@ -48,35 +32,24 @@ paths:
       operationId: submitCommonPlatformDailyList
       summary: Submit a Common Platform daily list
       description: |-
-        Submit the existing daily-list XML document as the request body, without a SOAP
-        envelope or conversion to the native DARTS JSON request format.
-
-        DARTS must reproduce the relevant gateway processing: parse and validate the XML,
-        derive metadata, map the internal daily-list representation, and save the XML and
-        mapped data required by existing processing. Source system is established as CPP
-        by this operation. A successful receipt does not imply downstream processing has
-        completed.
-
-        X-Message-Id is a proposed replacement for the message ID previously carried in
-        SOAP. Its name and retry behaviour, the supported XML schema and size limit, and
-        the success response require agreement with Common Platform. Repeating a message
-        ID does not currently promise idempotent handling.
-      x-contract-status: draft
+        Submit a daily-list XML document without a SOAP envelope. The source system is CPP.
+        Success acknowledges receipt, not completion of downstream processing.
       x-darts-required-role: CPP
       parameters:
         - $ref: '#/components/parameters/MessageId'
         - $ref: '#/components/parameters/CorrelationId'
       requestBody:
         required: true
-        description: |-
-          The complete existing daily-list XML document. UTF-8 is proposed. XML schema
-          validation and request-size limits must be agreed before implementation.
+        description: Complete daily-list XML document.
         content:
           application/xml:
             schema:
               type: string
               minLength: 1
-              description: Raw daily-list XML; the document schema and maximum size remain to be confirmed.
+              # TODO: Confirm with CP/PlatOps against expected daily-list sizes and deployed request-byte limits.
+              # Provisional character limit; no explicit daily-list limit found in darts-gateway.
+              maxLength: 10485760
+              description: Raw daily-list XML.
       responses:
         '200':
           $ref: '#/components/responses/SubmissionReceived'
@@ -86,10 +59,14 @@ paths:
           $ref: '#/components/responses/Unauthenticated'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '413':
           $ref: '#/components/responses/PayloadTooLarge'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/BusinessValidationError'
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
@@ -104,38 +81,21 @@ paths:
       operationId: submitCommonPlatformEvent
       summary: Submit a Common Platform event
       description: |-
-        Submit a proposed JSON version of Common Platform's existing XML event. The
-        envelope retains message_id, type and sub_type from SOAP; document contains the
-        event information. Field names and required fields are proposed for CP review.
-
-        The adapter must preserve message ID, type, subtype, event ID, courthouse, courtroom,
-        case numbers, text, applicable retention information and event time. Confirm how
-        former SOAP envelope metadata is included and how timestamps and timezones are
-        represented. Separate date/time components are retained so DARTS performs the
-        existing timestamp conversion. The native DARTS JSON contract is not CP's contract.
-
-        document.retention_policy is optional and carries case_retention_fixed_policy
-        and case_total_sentence when supplied. Both values are optional strings, mapped
-        unchanged as in darts-gateway; DARTS must not supply defaults when they are omitted.
-
-        Success responses and retry/duplicate semantics are provisional. A successful
-        receipt does not imply all downstream processing has completed.
-      x-contract-status: draft
+        Submit event metadata and a JSON event document, with optional retention data.
+        Success acknowledges receipt, not completion of downstream processing.
       x-darts-required-role: CPP
       parameters:
         - $ref: '#/components/parameters/CorrelationId'
       requestBody:
         required: true
-        description: |-
-          Proposed JSON envelope and event document for CP review. Confirm the field
-          mapping against CP examples before implementing or publishing the operation.
+        description: Event metadata and document.
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CommonPlatformEventRequest'
             examples:
               juryIn:
-                summary: Proposed JSON equivalent of a jury-in XML event, using synthetic identifiers.
+                summary: Jury in
                 value:
                   message_id: 00000000-0000-4000-8000-000000000001
                   type: '1000'
@@ -154,8 +114,8 @@ paths:
                       - T20260001
                     event_text: Jury in
               eventWithRetentionPolicy:
-                summary: Event with optional retention data, using values from the gateway mapping test.
-                description: The CP event type and subtype shown are placeholders; confirm the applicable CP mapping.
+                summary: Event with retention data
+                description: Illustrative event type and subtype.
                 value:
                   message_id: 00000000-0000-4000-8000-000000000003
                   type: '<cp-event-type>'
@@ -177,18 +137,22 @@ paths:
                       case_retention_fixed_policy: '3'
                       case_total_sentence: 1Y2M0D
       responses:
-        '200':
-          $ref: '#/components/responses/SubmissionReceived'
+        '201':
+          $ref: '#/components/responses/EventCreated'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthenticated'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '413':
           $ref: '#/components/responses/PayloadTooLarge'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/BusinessValidationError'
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
@@ -201,14 +165,8 @@ components:
     marketplaceOAuth2:
       type: oauth2
       description: |-
-        OAuth2 client credentials for application-to-application access. CP obtains an
-        access token using the production credential mechanism agreed with Marketplace.
-        The .invalid token URL is deliberately non-operational and must be replaced with
-        the confirmed authority before this contract is published.
-
-        The requested resource/.default value and the required application role are not
-        yet agreed. App-only permission checks use the agreed token claims and map the
-        verified CP application to DARTS CPP; no delegated scope names are assumed here.
+        Application-to-application access using OAuth2 client credentials, mapped to DARTS CPP access.
+        The token URL is a placeholder pending Marketplace configuration.
       flows:
         clientCredentials:
           tokenUrl: https://marketplace-auth.example.invalid/oauth2/v2.0/token
@@ -225,10 +183,8 @@ components:
       in: header
       required: true
       description: |-
-        Proposed transport message ID replacing the SOAP messageId for XML daily lists.
-        Preserve the value across retries of the same message. This is separate from the
-        document unique ID and does not by itself guarantee idempotency. Header name,
-        proposed 256-character limit and duplicate handling require CP agreement.
+        Message identifier replacing SOAP messageId. Reuse it when retrying the same submission.
+        Reusing an identifier does not guarantee idempotent handling.
       schema:
         type: string
         minLength: 1
@@ -238,10 +194,7 @@ components:
       name: X-Correlation-ID
       in: header
       required: false
-      description: |-
-        Proposed correlation identifier for tracing a logical operation through CP,
-        Marketplace and DARTS. Header name, proposed 256-character limit and propagation require agreement.
-        It does not replace the message ID or establish caller identity.
+      description: Identifier for tracing a request across CP, Marketplace and DARTS.
       schema:
         type: string
         minLength: 1
@@ -250,10 +203,7 @@ components:
 
   responses:
     SubmissionReceived:
-      description: |-
-        Proposed successful receipt using a JSON equivalent of the gateway acknowledgement.
-        The request has been accepted into the existing DARTS processing flow; this does
-        not confirm completion of all downstream work. Status and body require CP agreement.
+      description: Daily list received.
       content:
         application/json:
           schema:
@@ -261,6 +211,15 @@ components:
           example:
             code: '200'
             message: OK
+    EventCreated:
+      description: Event created.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformSubmissionResponse'
+          example:
+            code: '201'
+            message: CREATED
     BadRequest:
       description: Malformed XML/JSON, missing required metadata, or invalid submission data.
       content:
@@ -269,9 +228,7 @@ components:
             $ref: '#/components/schemas/CommonPlatformProblem'
     Unauthenticated:
       description: |-
-        Missing or invalid bearer authentication, or a missing/invalid APIM subscription
-        key. The emitting layer and normalisation of APIM error bodies require agreement.
-        Bearer authentication failures must not redirect to a portal login.
+        Missing or invalid bearer token or APIM subscription key.
       headers:
         WWW-Authenticate:
           description: Bearer challenge for missing or invalid bearer authentication; not required for subscription-key failures.
@@ -283,13 +240,19 @@ components:
           schema:
             $ref: '#/components/schemas/CommonPlatformProblem'
     Forbidden:
-      description: The authenticated caller lacks the approved CP application identity, operation permission or DARTS CPP access.
+      description: The authenticated caller lacks permission to submit CP data.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+    NotFound:
+      description: Courthouse or event handler mapping not found.
       content:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/CommonPlatformProblem'
     PayloadTooLarge:
-      description: The request exceeds the agreed payload limit; the limit is not yet confirmed.
+      description: The request exceeds the payload limit.
       content:
         application/problem+json:
           schema:
@@ -300,8 +263,14 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/CommonPlatformProblem'
+    BusinessValidationError:
+      description: The submission failed business validation.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
     TooManyRequests:
-      description: The agreed rate limit has been exceeded. APIM error-body normalisation requires agreement.
+      description: The request rate limit has been exceeded.
       headers:
         Retry-After:
           description: Delay in seconds before retrying.
@@ -314,13 +283,13 @@ components:
           schema:
             $ref: '#/components/schemas/CommonPlatformProblem'
     InternalServerError:
-      description: An unexpected DARTS error occurred; delivery and retry behaviour must follow the agreed contract.
+      description: An unexpected DARTS error occurred.
       content:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/CommonPlatformProblem'
     ServiceUnavailable:
-      description: The CP integration is temporarily unavailable. No unauthenticated fallback is permitted.
+      description: The CP integration is temporarily unavailable.
       content:
         application/problem+json:
           schema:
@@ -329,11 +298,7 @@ components:
   schemas:
     CommonPlatformEventRequest:
       type: object
-      description: |-
-        Proposed JSON equivalent of the SOAP addDocument envelope for event submissions.
-        Numeric message types remain strings. The field names and required fields need
-        CP agreement; no arbitrary attributes or XML namespace prefixes are required.
-      x-contract-status: proposed-for-cp-review
+      description: Event metadata and document. Message types are strings.
       required:
         - message_id
         - type
@@ -344,31 +309,22 @@ components:
           type: string
           minLength: 1
           maxLength: 256
-          description: SOAP messageId carried in the JSON envelope. The length limit and retry semantics are proposed.
+          description: Submission identifier; reuse it when retrying the same message.
         type:
           type: string
           minLength: 1
-          description: Existing CP message type from SOAP; preserve established event mappings.
+          description: CP message type.
         sub_type:
           type: string
           minLength: 1
-          description: Existing CP message subtype from SOAP.
+          description: CP message subtype.
         document:
           $ref: '#/components/schemas/CommonPlatformEventDocument'
     CommonPlatformEventDocument:
       type: object
       description: |-
-        Proposed JSON event document with descriptive snake_case names for XML fields.
-        Separate Y/M/D/H/MIN/S attributes become year/month/day/hour/minute/second. These
-        represent local court time, provisionally interpreted as Europe/London to match
-        the gateway. Confirm timezone and daylight-saving behaviour with CP. DARTS must
-        validate the complete calendar date and convert it to its internal event timestamp.
-
-        ID becomes event_id, CourtHouse becomes courthouse, CourtRoom becomes courtroom,
-        CaseNumbers/CaseNumber becomes case_numbers and EventText becomes event_text.
-        Field limits for court names, case numbers and event text follow the gateway event
-        schema; confirm that schema version and the required fields with CP.
-      x-contract-status: proposed-for-cp-review
+        Event details. Date and time components represent Europe/London court time
+        and must form a valid calendar date and time.
       required:
         - event_id
         - year
@@ -383,7 +339,7 @@ components:
         event_id:
           type: string
           pattern: '^-?[0-9]+$'
-          description: XML ID represented as a string, preserving negative IDs without imposing a UUID format.
+          description: Numeric event identifier, which may be negative.
           example: '-12345678'
         year:
           type: integer
@@ -418,64 +374,62 @@ components:
         courthouse:
           type: string
           minLength: 1
-          maxLength: 255
-          description: XML CourtHouse value.
+          maxLength: 50
+          description: Courthouse name.
         courtroom:
           type: string
-          maxLength: 64
-          description: XML CourtRoom value; its requiredness depends on the agreed CP event contract.
+          maxLength: 25
+          description: Courtroom name.
         case_numbers:
           type: array
           minItems: 1
-          description: XML CaseNumber values, without the XML container; the maximum count needs agreement.
+          description: Case numbers associated with the event.
           items:
             type: string
             minLength: 1
-            maxLength: 32
+            maxLength: 25
         event_text:
           type: string
           maxLength: 2000
-          description: XML EventText value where supplied.
+          description: Event text.
         retention_policy:
           $ref: '#/components/schemas/CommonPlatformRetentionPolicy'
     CommonPlatformRetentionPolicy:
       type: object
       description: |-
-        Optional JSON equivalent of XML RetentionPolicy. As in darts-gateway, map both
-        supplied string values unchanged to the DARTS event retention policy. The policy
-        and each of its fields are optional; omit absent values without applying defaults.
+        Optional retention data. Both fields are optional strings, passed unchanged
+        without defaults when omitted.
       properties:
         case_retention_fixed_policy:
           type: string
-          description: Optional XML CaseRetentionFixedPolicy value, mapped unchanged as a string.
+          description: Retention policy identifier.
           example: '3'
         case_total_sentence:
           type: string
-          description: Optional XML CaseTotalSentence value, retaining the source sentence representation.
+          description: Total sentence in the source format.
           example: 1Y2M0D
     CommonPlatformSubmissionResponse:
       type: object
-      description: Provisional JSON version of the existing gateway acknowledgement, pending CP agreement.
+      description: Submission acknowledgement.
       required:
         - code
         - message
       properties:
         code:
           type: string
-          description: Successful receipt status represented as a string for gateway compatibility.
+          description: HTTP success status as a string.
           enum:
             - '200'
+            - '201'
         message:
           type: string
-          description: Successful receipt acknowledgement.
+          description: HTTP success status name.
           enum:
             - OK
+            - CREATED
     CommonPlatformProblem:
       type: object
-      description: |-
-        Problem JSON error details. Concrete problem identifiers and validation details
-        will be agreed during implementation. No credentials, sensitive payloads or stack
-        traces should be returned. APIM must be configured separately to normalise its errors.
+      description: Problem details for an unsuccessful request.
       properties:
         type:
           type: string
