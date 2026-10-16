@@ -153,7 +153,7 @@ darts:
     max-handheld-audio-files: ${MAX_HANDHELD_AUDIO_FILES:10}
   audio-ingestion:
     batch-size: ${AUDIO_INGESTION_BATCH_SIZE:5}
-    processing-timeout: ${AUDIO_INGESTION_PROCESSING_TIMEOUT:10m}
+    processing-timeout: ${AUDIO_INGESTION_PROCESSING_TIMEOUT:5m}
     temporary-failure-mode: ${AUDIO_INGESTION_TEMPORARY_FAILURE_MODE:NONE}
   azure:
     active-directory-b2c-base-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI:https://hmctsstgextid.b2clogin.com}
