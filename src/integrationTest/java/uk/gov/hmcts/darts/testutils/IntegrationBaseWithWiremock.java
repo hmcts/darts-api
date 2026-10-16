@@ -9,9 +9,12 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.DartsGatewayStub;
@@ -32,18 +35,35 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
     @Autowired
     protected WireMockServer wireMockServer;
 
+    @Autowired
+    @Qualifier("taskExecutor")
+    private TaskExecutor asyncTaskExecutor;
+
     @BeforeEach
-    void setup() {
+    void setup() throws InterruptedException {
+        waitForAsyncTasks(10, Duration.ofSeconds(10));
         try {
             log.info("Wiremock Port: " + wiremockPort);
             dartsGateway.clearStubs();
-            wireMockServer.start();
             // populate the jkws keys endpoint with a global public key
             tokenStub.stubExternalJwksKeys(DartsTokenGenerator.getGlobalKey());
             //Wait required to ensure that the wiremock server is up and running before the tests start
             waitForWiremock(10, Duration.ofSeconds(2));
         } catch (Exception e) {
             log.error("Error setting up wiremock", e);
+        }
+    }
+
+    @SuppressWarnings("PMD.DoNotUseThreads") // Waiting prevents async work from one test leaking into the next test's WireMock state.
+    private void waitForAsyncTasks(long waitMs, Duration maxTimeout) throws InterruptedException {
+        long maxWaitMs = maxTimeout.toMillis();
+        var executor = (ThreadPoolTaskExecutor) asyncTaskExecutor;
+        while (executor.getActiveCount() > 0 || !executor.getThreadPoolExecutor().getQueue().isEmpty()) {
+            Thread.sleep(waitMs);
+            maxWaitMs -= waitMs;
+            if (maxWaitMs <= 0) {
+                throw new DartsApiException(CommonApiError.INTERNAL_SERVER_ERROR, "Async test work did not finish");
+            }
         }
     }
 

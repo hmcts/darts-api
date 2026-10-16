@@ -202,7 +202,7 @@ tasks.withType(JavaExec).configureEach {
 tasks.withType(Test).configureEach {
   useJUnitPlatform()
 
-  maxHeapSize = '1G'
+  maxHeapSize = '3G'
 
   testLogging {
     exceptionFormat = 'full'
@@ -227,6 +227,7 @@ tasks.register('integration', Test) {
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
+  maxParallelForks = 2
 }
 
 tasks.register('smoke', Test) {

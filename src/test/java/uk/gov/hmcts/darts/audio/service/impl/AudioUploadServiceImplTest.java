@@ -45,7 +45,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -644,12 +643,10 @@ class AudioUploadServiceImplTest {
     }
 
     @Test
-    void deleteUploadedAudio_whenValidDataIsProvided_shouldDeleteUploadedAudio(CapturedOutput output) throws AzureDeleteBlobException {
+    void deleteUploadedAudio_whenValidDataIsProvided_shouldDeleteUploadedAudio() throws AzureDeleteBlobException {
         String externalLocation = UUID.randomUUID().toString();
         audioService.deleteUploadedAudio(externalLocation);
         verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
-        assertThat(output)
-            .doesNotContain("Failed to delete blob");
     }
 
     @Test

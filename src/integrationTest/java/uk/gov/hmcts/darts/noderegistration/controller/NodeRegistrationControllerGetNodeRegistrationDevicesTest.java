@@ -18,9 +18,6 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @Slf4j
@@ -96,15 +93,11 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
                                                       """
                                                       .replace("<nodeid>", String.valueOf(nodeRegisterEntity.getNodeId()))
                                                       .replace("<courtroom>", nodeRegisterEntity.getCourtroom().getName())
-                                                      .replace("<created_at1>",
-                                                               nodeRegisterEntity.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(
-                                                                   DateTimeFormatter.ISO_INSTANT))
+                                                      .replace("<created_at1>", nodeRegisterEntity.getCreatedDateTime().toInstant().toString())
                                                       .replace("<created_by1>", String.valueOf(nodeRegisterEntity.getCreatedById()))
                                                       .replace("<nodeid2>", String.valueOf(nodeRegisterEntity2.getNodeId()))
                                                       .replace("<courtroom2>", nodeRegisterEntity2.getCourtroom().getName())
-                                                      .replace("<created_at2>",
-                                                               nodeRegisterEntity2.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(
-                                                                   DateTimeFormatter.ISO_INSTANT))
+                                                      .replace("<created_at2>", nodeRegisterEntity2.getCreatedDateTime().toInstant().toString())
                                                       .replace("<created_by2>", String.valueOf(nodeRegisterEntity2.getCreatedById())));
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
@@ -127,6 +120,7 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
     }
 
     private String normalizeTimestamps(String json) {
-        return json.replaceAll("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{5})\\dZ", "$1Z");
+        return json.replaceAll("(\\.\\d*?[1-9])0+Z", "$1Z")
+            .replaceAll("\\.0+Z", "Z");
     }
 }
