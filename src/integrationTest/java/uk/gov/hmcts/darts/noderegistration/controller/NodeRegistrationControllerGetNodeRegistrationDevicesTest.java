@@ -52,8 +52,8 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
+        String actualJson = normalizeTimestamps(mvcResult.getResponse().getContentAsString());
+        String expectedJson = normalizeTimestamps("""
                                                       [
                                                           {
                                                               "id": <nodeid>,
@@ -69,7 +69,7 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
                                                               "hostname": "Host1",
                                                               "mac_address": "00:0a:95:9d:68:21",
                                                               "node_type": "DAR",
-                                                              "created_at": <created_at1>,
+                                                              "created_at": "<created_at1>",
                                                               "created_by": <created_by1>
                                                           },
                                                           {
@@ -86,21 +86,19 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
                                                               "hostname": "Host1",
                                                               "mac_address": "00:0a:95:9d:68:21",
                                                               "node_type": "DAR",
-                                                              "created_at": <created_at2>,
+                                                              "created_at": "<created_at2>",
                                                               "created_by": <created_by2>
                                                           }
                                                       ]
                                                       """
                                                       .replace("<nodeid>", String.valueOf(nodeRegisterEntity.getNodeId()))
                                                       .replace("<courtroom>", nodeRegisterEntity.getCourtroom().getName())
-                                                      .replace("<created_at1>", objectMapper.writeValueAsString(
-                                                          nodeRegisterEntity.getCreatedDateTime()))
+                                                      .replace("<created_at1>", nodeRegisterEntity.getCreatedDateTime().toInstant().toString())
                                                       .replace("<created_by1>", String.valueOf(nodeRegisterEntity.getCreatedById()))
                                                       .replace("<nodeid2>", String.valueOf(nodeRegisterEntity2.getNodeId()))
                                                       .replace("<courtroom2>", nodeRegisterEntity2.getCourtroom().getName())
-                                                      .replace("<created_at2>", objectMapper.writeValueAsString(
-                                                          nodeRegisterEntity2.getCreatedDateTime()))
-                                                      .replace("<created_by2>", String.valueOf(nodeRegisterEntity2.getCreatedById()));
+                                                      .replace("<created_at2>", nodeRegisterEntity2.getCreatedDateTime().toInstant().toString())
+                                                      .replace("<created_by2>", String.valueOf(nodeRegisterEntity2.getCreatedById())));
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -121,4 +119,8 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    private String normalizeTimestamps(String json) {
+        return json.replaceAll("(\\.\\d*?[1-9])0+Z", "$1Z")
+            .replaceAll("\\.0+Z", "Z");
+    }
 }

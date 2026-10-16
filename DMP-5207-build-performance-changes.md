@@ -42,11 +42,11 @@ The repository query has no `ORDER BY` clause, so PostgreSQL is not required to 
 ## Node registration timestamp assertion
 
 [The node registration controller integration test](src/integrationTest/java/uk/gov/hmcts/darts/noderegistration/controller/NodeRegistrationControllerGetNodeRegistrationDevicesTest.java#L50-L105)
-now serializes the expected timestamps with the configured application `ObjectMapper`.
+now consistently normalizes trailing zeroes in UTC fractional-second timestamps before comparing the JSON.
 
 The previous assertion manually formatted the expected timestamp and used a narrow workaround for one fractional-second
 format. Depending on trailing zeroes, the API could correctly return the same instant with a different string precision.
-Using the same serializer as the API removes that formatting-only failure. This is a test-only change.
+Normalising the precision removes that formatting-only failure. This is a test-only change.
 
 ## Recording future findings
 
