@@ -18,9 +18,6 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @Slf4j
@@ -55,8 +52,8 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
-        String actualJson = normalizeTimestamps(mvcResult.getResponse().getContentAsString());
-        String expectedJson = normalizeTimestamps("""
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
                                                       [
                                                           {
                                                               "id": <nodeid>,
@@ -72,7 +69,7 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
                                                               "hostname": "Host1",
                                                               "mac_address": "00:0a:95:9d:68:21",
                                                               "node_type": "DAR",
-                                                              "created_at": "<created_at1>",
+                                                              "created_at": <created_at1>,
                                                               "created_by": <created_by1>
                                                           },
                                                           {
@@ -89,23 +86,21 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
                                                               "hostname": "Host1",
                                                               "mac_address": "00:0a:95:9d:68:21",
                                                               "node_type": "DAR",
-                                                              "created_at": "<created_at2>",
+                                                              "created_at": <created_at2>,
                                                               "created_by": <created_by2>
                                                           }
                                                       ]
                                                       """
                                                       .replace("<nodeid>", String.valueOf(nodeRegisterEntity.getNodeId()))
                                                       .replace("<courtroom>", nodeRegisterEntity.getCourtroom().getName())
-                                                      .replace("<created_at1>",
-                                                               nodeRegisterEntity.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(
-                                                                   DateTimeFormatter.ISO_INSTANT))
+                                                      .replace("<created_at1>", objectMapper.writeValueAsString(
+                                                          nodeRegisterEntity.getCreatedDateTime()))
                                                       .replace("<created_by1>", String.valueOf(nodeRegisterEntity.getCreatedById()))
                                                       .replace("<nodeid2>", String.valueOf(nodeRegisterEntity2.getNodeId()))
                                                       .replace("<courtroom2>", nodeRegisterEntity2.getCourtroom().getName())
-                                                      .replace("<created_at2>",
-                                                               nodeRegisterEntity2.getCreatedDateTime().toInstant().atZone(ZoneOffset.UTC).format(
-                                                                   DateTimeFormatter.ISO_INSTANT))
-                                                      .replace("<created_by2>", String.valueOf(nodeRegisterEntity2.getCreatedById())));
+                                                      .replace("<created_at2>", objectMapper.writeValueAsString(
+                                                          nodeRegisterEntity2.getCreatedDateTime()))
+                                                      .replace("<created_by2>", String.valueOf(nodeRegisterEntity2.getCreatedById()));
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -126,7 +121,4 @@ class NodeRegistrationControllerGetNodeRegistrationDevicesTest extends Integrati
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
-    private String normalizeTimestamps(String json) {
-        return json.replaceAll("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{5})\\dZ", "$1Z");
-    }
 }

@@ -39,6 +39,15 @@ now checks that the expected media IDs are present without assuming their order.
 
 The repository query has no `ORDER BY` clause, so PostgreSQL is not required to return matching rows in ID order.
 
+## Node registration timestamp assertion
+
+[The node registration controller integration test](src/integrationTest/java/uk/gov/hmcts/darts/noderegistration/controller/NodeRegistrationControllerGetNodeRegistrationDevicesTest.java#L50-L105)
+now serializes the expected timestamps with the configured application `ObjectMapper`.
+
+The previous assertion manually formatted the expected timestamp and used a narrow workaround for one fractional-second
+format. Depending on trailing zeroes, the API could correctly return the same instant with a different string precision.
+Using the same serializer as the API removes that formatting-only failure. This is a test-only change.
+
 ## Recording future findings
 
 For each retained fix, add a section containing a link to the changed file, the failing test or symptom, the cause, and
