@@ -1,4 +1,7 @@
 #!groovy
+import uk.gov.hmcts.contino.GithubAPI
+import uk.gov.hmcts.contino.GradleBuilder
+
 properties([
     parameters([
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip all tests'),
@@ -7,9 +10,6 @@ properties([
     ])
 ])
 @Library("Infrastructure@2.12.2") _
-
-import uk.gov.hmcts.contino.GradleBuilder
-import uk.gov.hmcts.contino.GithubAPI
 
 def type = "java"
 def product = "darts"
@@ -267,7 +267,7 @@ withPipeline(type, product, component) {
   }
 
   afterAlways('akschartsinstall') {
-    if(params.SKIP_TESTS || params.SKIP_SONAR) {
+    if (params.SKIP_TESTS || params.SKIP_SONAR) {
       stage('SKIP_TESTS OR SKIP_SONAR IS TRUE') {
         error("Build can not fully complete when SKIP_TESTS or SKIP_SONAR is set to true")
       }
