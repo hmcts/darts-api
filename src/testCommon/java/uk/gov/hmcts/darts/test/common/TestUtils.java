@@ -16,7 +16,6 @@ import org.assertj.core.data.TemporalUnitOffset;
 import org.hibernate.LazyInitializationException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.zalando.problem.jackson.ProblemModule;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
 import uk.gov.hmcts.darts.task.runner.HasId;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
@@ -80,7 +79,6 @@ public final class TestUtils {
     public static ObjectMapper getObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.registerModule(new ProblemModule());
 
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);

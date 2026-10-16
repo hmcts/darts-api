@@ -282,7 +282,8 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcriptionEntity.getId());
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json")
+            .replace("$TRANSCRIPTION_ID", transcriptionEntity.getId().toString());
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -291,7 +292,8 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, -999);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json");
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseBadRequest.json")
+            .replace("$TRANSCRIPTION_ID", "-999");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -313,10 +315,12 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         });
         dartsDatabase.updateCreatedBy(transcriptionEntity, OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
 
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcriptionEntity.getId() + 1);
+        Long transcriptionId = transcriptionEntity.getId() + 1;
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcriptionId);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json")
+            .replace("$TRANSCRIPTION_ID", transcriptionId.toString());
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

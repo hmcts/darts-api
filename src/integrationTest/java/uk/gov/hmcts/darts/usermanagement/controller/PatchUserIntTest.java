@@ -231,8 +231,11 @@ class PatchUserIntTest extends IntegrationBase {
                          """);
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations[*].field", hasItems("fullName")));
+            .andExpect(jsonPath("$.type").value("COMMON_104"))
+            .andExpect(jsonPath("$.title").value("Invalid request"))
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.instance").value("/admin/users/" + userId))
+            .andExpect(jsonPath("$.properties.fullName").value("size must be between 1 and 256"));
     }
 
     @Test

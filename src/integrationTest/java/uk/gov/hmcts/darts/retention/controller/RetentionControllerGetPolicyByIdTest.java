@@ -68,7 +68,8 @@ class RetentionControllerGetPolicyByIdTest extends IntegrationBase {
             {
               "type": "RETENTION_108",
               "title": "The retention policy type id does not exist.",
-              "status": 404
+              "status": 404,
+              "instance": "/admin/retention-policy-types/45"
             }
             """;
 
