@@ -423,5 +423,5 @@ audioIngestion:
       host: "darts-modernisation-dev.postgres.database.azure.com"
       port: "5432"
       sslmode: "require"
-      query: "SELECT COUNT(*) FROM darts.audio_ingestion WHERE status = 'NEW' OR (status = 'PROCESSING' AND claimed_at < CURRENT_TIMESTAMP - INTERVAL '2 minutes')"
+      query: "SELECT COUNT(*) FROM darts.audio_ingestion WHERE status = 'NEW' OR (status = 'PROCESSING' AND claimed_at < CURRENT_TIMESTAMP - INTERVAL '5 minutes')"
       targetQueryValue: "5"
