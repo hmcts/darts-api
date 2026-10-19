@@ -36,8 +36,28 @@ public class EventMapper {
     }
 
     public AdminGetEventById200Response mapToAdminGetEventById200Response(EventEntity eventEntity) {
+        AdminGetEventResponseDetails responseDetails = mapToAdminGetEventResponseDetails(eventEntity);
         AdminGetEventById200Response response = new AdminGetEventById200Response();
-        mapToAdminGetEventsResponseForId(eventEntity, response);
+        response.setId(responseDetails.getId());
+        response.setDocumentumId(responseDetails.getDocumentumId());
+        response.setSourceId(responseDetails.getSourceId());
+        response.setMessageId(responseDetails.getMessageId());
+        response.setText(responseDetails.getText());
+        response.setEventMapping(responseDetails.getEventMapping());
+        response.setIsLogEntry(responseDetails.getIsLogEntry());
+        response.setCourthouse(responseDetails.getCourthouse());
+        response.setCourtroom(responseDetails.getCourtroom());
+        response.setVersion(responseDetails.getVersion());
+        response.setChronicleId(responseDetails.getChronicleId());
+        response.setAntecedentId(responseDetails.getAntecedentId());
+        response.setIsDataAnonymised(responseDetails.getIsDataAnonymised());
+        response.setEventStatus(responseDetails.getEventStatus());
+        response.setEventTs(responseDetails.getEventTs());
+        response.setIsCurrent(responseDetails.getIsCurrent());
+        response.setCreatedAt(responseDetails.getCreatedAt());
+        response.setCreatedBy(responseDetails.getCreatedBy());
+        response.setLastModifiedAt(responseDetails.getLastModifiedAt());
+        response.setLastModifiedBy(responseDetails.getLastModifiedBy());
 
         response.setCases(mapAdminGetEventResponseDetailsCasesCases(eventEntity.getLinkedCases()));
         response.setHearings(mapAdminGetEventResponseDetailsHearings(eventEntity.getHearingEntities()));
