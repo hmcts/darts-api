@@ -374,9 +374,14 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setTransferAttempts(2));
+        var armEodMedia0 = externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setTransferAttempts(2));
+        doReturn(List.of()).when(armDataManagementApi).listSubmissionBlobs(armEodMedia0.getId() + "_");
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
+        var armEodMedia1 = externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
+        String armEodMedia1RawFilename = format("%d_%d_1", armEodMedia1.getId(), medias.get(1).getId());
+        doReturn(List.of("DARTS/submission/" + armEodMedia1RawFilename))
+            .when(armDataManagementApi).listSubmissionBlobs(armEodMedia1.getId() + "_");
+
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), ARM_MANIFEST_FAILED, ARM, eod -> eod.setTransferAttempts(5));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(3), STORED, UNSTRUCTURED);
@@ -384,10 +389,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), ARM_INGESTION, ARM, eod -> eod.setTransferAttempts(1));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
-        var armEod5 = externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_RAW_DATA_PUSHED, ARM, eod -> eod.setTransferAttempts(1));
-
-        when(armDataManagementApi.listSubmissionBlobs(armEod5.getId() + "_"))
-            .thenReturn(List.of(format("%d_%d_1", armEod5.getId(), medias.get(5).getId())));
+        var armEodMedia5 = externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_RAW_DATA_PUSHED, ARM, eod -> eod.setTransferAttempts(1));
+        String armEodMedia5RawFilename = format("%d_%d_1", armEodMedia5.getId(), medias.get(5).getId());
+        doReturn(List.of("DARTS/submission/" + armEodMedia5RawFilename))
+            .when(armDataManagementApi).listSubmissionBlobs(armEodMedia5.getId() + "_");
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm(10);
@@ -421,8 +426,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(manifestFileContent.lines().count()).isEqualTo(8);
         assertThat(manifestFileContent).contains(
             format("_%d_", medias.getFirst().getId()),
-            format("_%d_", medias.get(1).getId())
+            format("_%d_", medias.get(1).getId()),
+            "\"dz_file_name\":\"" + armEodMedia1RawFilename
         );
+        assertThat(manifestFileContent).doesNotContain(format("\"dz_file_name\":\"%d_%d_2", armEodMedia1.getId(), medias.get(1).getId()));
         assertThat(manifestFileContent).doesNotContain(format("_%d_", medias.get(2).getId()));
     }
 
@@ -463,12 +470,14 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), ARM_RAW_DATA_FAILED, ARM, eod -> {
+        var armEodMedia0 = externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), ARM_RAW_DATA_FAILED, ARM, eod -> {
             eod.setManifestFile("existingManifestFile");
             eod.setTransferAttempts(2);
         });
+        doReturn(List.of()).when(armDataManagementApi).listSubmissionBlobs(armEodMedia0.getId() + "_");
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_RAW_DATA_FAILED, ARM);
+        var armEodMedia1 = externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_RAW_DATA_FAILED, ARM);
+        doReturn(List.of()).when(armDataManagementApi).listSubmissionBlobs(armEodMedia1.getId() + "_");
 
         doThrow(RuntimeException.class).when(armDataManagementApi).copyBlobDataToArm(any(), matches(".+_.+_3"));
 

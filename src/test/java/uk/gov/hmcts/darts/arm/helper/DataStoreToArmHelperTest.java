@@ -40,6 +40,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -74,6 +75,9 @@ class DataStoreToArmHelperTest {
     void setUp() {
         eodHelperMocks = new EodHelperMocks(false);
         eodHelperMocks.simulateInitWithMockedData();
+        ArmDataManagementConfiguration.Folders folders = new ArmDataManagementConfiguration.Folders();
+        folders.setSubmission("DARTS/submission/");
+        lenient().when(armDataManagementConfiguration.getFolders()).thenReturn(folders);
 
         dataStoreToArmHelper = new DataStoreToArmHelper(
             externalObjectDirectoryRepository,
@@ -313,22 +317,6 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void shouldPushRawDataToArm_ShouldReturnTrue_WhenPreviousStatusIsArmRawDataFailed() {
-        // given
-        ArmBatchItem batchItem = new ArmBatchItem();
-        batchItem.setPreviousStatus(eodHelperMocks.getFailedArmRawDataStatus());
-        UserAccountEntity userAccount = mock(UserAccountEntity.class);
-
-        // when
-        boolean result = dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, "123_456_1", userAccount);
-
-        // then
-        assertThat(result).isTrue();
-        verify(armDataManagementApi, never()).listSubmissionBlobs(anyString());
-        verify(externalObjectDirectoryRepository, never()).saveAndFlush(any());
-    }
-
-    @Test
     void shouldPushRawDataToArm_ShouldReturnFalseAndUpdateToPushed_WhenSubmissionBlobExists() {
         // given
         ArmBatchItem batchItem = createArmBatchItemWithRetryCheckStatus();
@@ -336,7 +324,7 @@ class DataStoreToArmHelperTest {
         ArchiveRecord archiveRecord = mock(ArchiveRecord.class);
         String rawFilename = "123_456_1";
 
-        when(armDataManagementApi.listSubmissionBlobs("123_")).thenReturn(List.of("123_456_1"));
+        when(armDataManagementApi.listSubmissionBlobs("123_")).thenReturn(List.of("DARTS/submission/123_456_1"));
         when(archiveRecordService.generateArchiveRecordInfo(123L, rawFilename)).thenReturn(archiveRecord);
 
         // when
@@ -351,6 +339,33 @@ class DataStoreToArmHelperTest {
         assertThat(batchItem.getArmEod().getManifestFile()).isEqualTo("manifest-file.a360");
         verify(armDataManagementApi).listSubmissionBlobs("123_");
         verify(archiveRecordService).generateArchiveRecordInfo(123L, rawFilename);
+        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(batchItem.getArmEod());
+    }
+
+    @Test
+    void shouldPushRawDataToArm_ShouldGenerateArchiveRecordWithFoundBlobFilename_WhenDifferentAttemptBlobExists() {
+        // given
+        ArmBatchItem batchItem = createArmBatchItemWithRetryCheckStatus();
+        UserAccountEntity userAccount = createUserAccount();
+        ArchiveRecord archiveRecord = mock(ArchiveRecord.class);
+        String rawFilename = "123_456_2";
+
+        when(armDataManagementApi.listSubmissionBlobs("123_")).thenReturn(List.of("DARTS/submission/123_456_1"));
+        when(archiveRecordService.generateArchiveRecordInfo(123L, "123_456_1")).thenReturn(archiveRecord);
+
+        // when
+        boolean result = dataStoreToArmHelper.shouldPushRawDataToArm(batchItem, rawFilename, userAccount);
+
+        // then
+        assertThat(result).isFalse();
+        assertThat(batchItem.getRawFilePushSuccessful()).isTrue();
+        assertThat(batchItem.getArchiveRecord()).isSameAs(archiveRecord);
+        assertThat(batchItem.getArmEod().getStatus().getId()).isEqualTo(eodHelperMocks.getArmRawDataPushedStatus().getId());
+        assertThat(batchItem.getArmEod().getLastModifiedById()).isEqualTo(userAccount.getId());
+        assertThat(batchItem.getArmEod().getManifestFile()).isEqualTo("manifest-file.a360");
+        assertThat(batchItem.getArmEod().getTransferAttempts()).isEqualTo(1);
+        verify(armDataManagementApi).listSubmissionBlobs("123_");
+        verify(archiveRecordService).generateArchiveRecordInfo(123L, "123_456_1");
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(batchItem.getArmEod());
     }
 
