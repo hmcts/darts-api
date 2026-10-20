@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
@@ -149,11 +150,36 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
         assertEquals(List.of(currentOwner.getId()), users.stream().map(UserAccountEntity::getId).toList());
     }
 
+    @Test
+    void findInactiveUsersForCleanupExcludingRoles_shouldReturnCurrentOwner_whenAssignmentTimestampsMatch() {
+        OffsetDateTime cutoffDateTime = OffsetDateTime.of(2026, 2, 14, 10, 5, 0, 0, ZoneOffset.UTC);
+        UserAccountEntity previousOwner = persistUser(
+            "previous.owner@example.net", cutoffDateTime, cutoffDateTime, false, false);
+        UserAccountEntity currentOwner = persistUser(
+            "current.owner@example.net", cutoffDateTime, cutoffDateTime, false, false);
+        createWithTranscriberWorkflowHistory(cutoffDateTime, Duration.ZERO, previousOwner, currentOwner);
+
+        List<UserAccountEntity> users = userAccountRepository.findInactiveUsersForCleanupExcludingRoles(
+            cutoffDateTime,
+            Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId()),
+            WITH_TRANSCRIBER.getId(),
+            Limit.of(1)
+        );
+
+        assertEquals(List.of(currentOwner.getId()), users.stream().map(UserAccountEntity::getId).toList());
+    }
+
     private void createWithTranscriberWorkflow(UserAccountEntity workflowActor, OffsetDateTime workflowTimestamp) {
         createWithTranscriberWorkflowHistory(workflowTimestamp, workflowActor);
     }
 
     private void createWithTranscriberWorkflowHistory(OffsetDateTime workflowTimestamp, UserAccountEntity... workflowActors) {
+        createWithTranscriberWorkflowHistory(workflowTimestamp, Duration.ofMinutes(1), workflowActors);
+    }
+
+    private void createWithTranscriberWorkflowHistory(OffsetDateTime workflowTimestamp,
+                                                       Duration assignmentInterval,
+                                                       UserAccountEntity... workflowActors) {
         TranscriptionEntity transcription = PersistableFactory.getTranscriptionTestData()
             .minimalRawTranscription(new TranscriptionStatusEntity(WITH_TRANSCRIBER.getId()));
         transcription = dartsPersistence.save(transcription);
@@ -171,7 +197,7 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
             withTranscriberWorkflow.setWorkflowActor(workflowActor);
             withTranscriberWorkflow.setWorkflowTimestamp(assignmentTimestamp);
             dartsPersistence.save(withTranscriberWorkflow);
-            assignmentTimestamp = assignmentTimestamp.plusMinutes(1);
+            assignmentTimestamp = assignmentTimestamp.plus(assignmentInterval);
         }
     }
 
