@@ -93,6 +93,20 @@ public interface UserAccountRepository extends
                 JOIN assignedTranscriptionWorkflow.transcription assignedTranscription
                 WHERE assignedTranscriptionWorkflow.workflowActor = userAccount
                 AND assignedTranscription.transcriptionStatus.id = :withTranscriberStatusId
+                AND assignedTranscriptionWorkflow.transcriptionStatus.id = :withTranscriberStatusId
+                AND NOT EXISTS (
+                    SELECT newerWorkflow.id
+                    FROM TranscriptionWorkflowEntity newerWorkflow
+                    WHERE newerWorkflow.transcription = assignedTranscriptionWorkflow.transcription
+                    AND newerWorkflow.transcriptionStatus.id = :withTranscriberStatusId
+                    AND (
+                        newerWorkflow.workflowTimestamp > assignedTranscriptionWorkflow.workflowTimestamp
+                        OR (
+                            newerWorkflow.workflowTimestamp = assignedTranscriptionWorkflow.workflowTimestamp
+                            AND newerWorkflow.id > assignedTranscriptionWorkflow.id
+                        )
+                    )
+                )
             )
         )
         AND userAccount.isSystemUser = false

@@ -130,22 +130,49 @@ class UserAccountRepositoryIntTest extends PostgresIntegrationBase {
         ));
     }
 
+    @Test
+    void findInactiveUsersForCleanupExcludingRoles_shouldReturnCurrentOwner_whenTranscriptionWasReassigned() {
+        OffsetDateTime cutoffDateTime = OffsetDateTime.of(2026, 2, 14, 10, 5, 0, 0, ZoneOffset.UTC);
+        UserAccountEntity previousOwner = persistUser(
+            "previous.owner@example.net", cutoffDateTime, cutoffDateTime, false, false);
+        UserAccountEntity currentOwner = persistUser(
+            "current.owner@example.net", cutoffDateTime, cutoffDateTime, false, false);
+        createWithTranscriberWorkflowHistory(cutoffDateTime, previousOwner, currentOwner);
+
+        List<UserAccountEntity> users = userAccountRepository.findInactiveUsersForCleanupExcludingRoles(
+            cutoffDateTime,
+            Set.of(SUPER_USER.getId(), SUPER_ADMIN.getId()),
+            WITH_TRANSCRIBER.getId(),
+            Limit.of(1)
+        );
+
+        assertEquals(List.of(currentOwner.getId()), users.stream().map(UserAccountEntity::getId).toList());
+    }
+
     private void createWithTranscriberWorkflow(UserAccountEntity workflowActor, OffsetDateTime workflowTimestamp) {
+        createWithTranscriberWorkflowHistory(workflowTimestamp, workflowActor);
+    }
+
+    private void createWithTranscriberWorkflowHistory(OffsetDateTime workflowTimestamp, UserAccountEntity... workflowActors) {
         TranscriptionEntity transcription = PersistableFactory.getTranscriptionTestData()
             .minimalRawTranscription(new TranscriptionStatusEntity(WITH_TRANSCRIBER.getId()));
         transcription = dartsPersistence.save(transcription);
 
         TranscriptionWorkflowEntity approvedWorkflow = PersistableFactory.getTranscriptionWorkflowTestData()
             .workflowForTranscriptionWithStatus(transcription, APPROVED);
-        approvedWorkflow.setWorkflowActor(workflowActor);
+        approvedWorkflow.setWorkflowActor(workflowActors[0]);
         approvedWorkflow.setWorkflowTimestamp(workflowTimestamp.minusMinutes(1));
         dartsPersistence.save(approvedWorkflow);
 
-        TranscriptionWorkflowEntity withTranscriberWorkflow = PersistableFactory.getTranscriptionWorkflowTestData()
-            .workflowForTranscriptionWithStatus(transcription, WITH_TRANSCRIBER);
-        withTranscriberWorkflow.setWorkflowActor(workflowActor);
-        withTranscriberWorkflow.setWorkflowTimestamp(workflowTimestamp);
-        dartsPersistence.save(withTranscriberWorkflow);
+        OffsetDateTime assignmentTimestamp = workflowTimestamp;
+        for (UserAccountEntity workflowActor : workflowActors) {
+            TranscriptionWorkflowEntity withTranscriberWorkflow = PersistableFactory.getTranscriptionWorkflowTestData()
+                .workflowForTranscriptionWithStatus(transcription, WITH_TRANSCRIBER);
+            withTranscriberWorkflow.setWorkflowActor(workflowActor);
+            withTranscriberWorkflow.setWorkflowTimestamp(assignmentTimestamp);
+            dartsPersistence.save(withTranscriberWorkflow);
+            assignmentTimestamp = assignmentTimestamp.plusMinutes(1);
+        }
     }
 
     private UserAccountEntity persistUser(String emailAddress,
