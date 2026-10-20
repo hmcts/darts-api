@@ -33,6 +33,20 @@ public interface TranscriptionWorkflowRepository extends
             JOIN tw.workflowActor ua
             WHERE trans.transcriptionStatus.id = :statusId
             AND ua.id = :userId
+            AND tw.transcriptionStatus.id = :statusId
+            AND NOT EXISTS (
+                SELECT newerWorkflow.id
+                FROM TranscriptionWorkflowEntity newerWorkflow
+                WHERE newerWorkflow.transcription = tw.transcription
+                AND newerWorkflow.transcriptionStatus.id = :statusId
+                AND (
+                    newerWorkflow.workflowTimestamp > tw.workflowTimestamp
+                    OR (
+                        newerWorkflow.workflowTimestamp = tw.workflowTimestamp
+                        AND newerWorkflow.id > tw.id
+                    )
+                )
+            )
             """)
     List<TranscriptionEntity> findWorkflowForUserWithTranscriptionState(
         Integer userId,
