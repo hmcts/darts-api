@@ -58,6 +58,7 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DARTS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIAL_CONDUCT;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -140,7 +141,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, TRANSLATION_QA, RCJ_APPEALS})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, TRANSLATION_QA, RCJ_APPEALS, JUDICIAL_CONDUCT})
     public ResponseEntity<Resource> downloadTranscript(Long transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
             transcriptionId);
@@ -191,7 +192,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDICIARY, APPROVER, REQUESTER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS, JUDICIAL_CONDUCT})
     public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(Long transcriptionId) {
         return new ResponseEntity<>(
             transcriptionService.getTranscription(transcriptionId),

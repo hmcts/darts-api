@@ -14,8 +14,8 @@ import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.EmptyRpoRequest;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 
 @Isolated
 @TestPropertySource(properties = {
-    "darts.storage.arm-api.enable-arm-v5-2-upgrade=true"
+    "darts.storage.arm-api.active-version=v5_2"
 })
 @Profile("in-memory-caching")
 @Import(InMemoryTestCache.class)
@@ -51,9 +51,9 @@ class ArmApiServiceVersionFiveTwoIntTest extends IntegrationBase {
     private ArmApiService armApiService;
 
     @MockitoBean
-    private ArmAuthClient armAuthClient;
+    private ArmAuthClientFiveTwo armAuthClient;
     @MockitoBean
-    private ArmApiBaseClient armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
 
     @BeforeEach
     void setup() {
