@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -98,6 +99,22 @@ class UserTranscriptionOwnershipIntTest extends IntegrationBase {
     }
 
     @Test
+    void findWorkflowForUserWithTranscriptionState_shouldReturnCurrentOwnersWork_whenAssignmentTimestampsMatch() {
+        UserAccountEntity previousOwner = createTranscriber("previous-owner");
+        UserAccountEntity currentOwner = createTranscriber("current-owner");
+        TranscriptionEntity transcription = createTranscriptionWithAssignmentHistory_lastUserIsCurrentOwner(
+            Duration.ZERO, previousOwner, currentOwner);
+
+        List<TranscriptionEntity> previousOwnersCurrentWork = transcriptionWorkflowRepository
+            .findWorkflowForUserWithTranscriptionState(previousOwner.getId(), WITH_TRANSCRIBER.getId());
+        List<TranscriptionEntity> currentOwnersCurrentWork = transcriptionWorkflowRepository
+            .findWorkflowForUserWithTranscriptionState(currentOwner.getId(), WITH_TRANSCRIBER.getId());
+
+        assertTrue(previousOwnersCurrentWork.isEmpty());
+        assertEquals(List.of(transcription.getId()), currentOwnersCurrentWork.stream().map(TranscriptionEntity::getId).toList());
+    }
+
+    @Test
     void rollbackUserTranscriptions_shouldLeaveReassignedWorkUnchanged_whenUserIsPreviousTranscriber() {
         UserAccountEntity previousOwner = createTranscriber("previous-owner");
         UserAccountEntity currentOwner = createTranscriber("current-owner");
@@ -139,6 +156,11 @@ class UserTranscriptionOwnershipIntTest extends IntegrationBase {
     }
 
     private TranscriptionEntity createTranscriptionWithAssignmentHistory_lastUserIsCurrentOwner(UserAccountEntity... owners) {
+        return createTranscriptionWithAssignmentHistory_lastUserIsCurrentOwner(Duration.ofSeconds(1), owners);
+    }
+
+    private TranscriptionEntity createTranscriptionWithAssignmentHistory_lastUserIsCurrentOwner(Duration assignmentInterval,
+                                                                                                 UserAccountEntity... owners) {
         var transcriptionStub = dartsDatabase.getTranscriptionStub();
         TranscriptionEntity transcription = transcriptionStub.createTranscription(
             hearing,
@@ -157,7 +179,7 @@ class UserTranscriptionOwnershipIntTest extends IntegrationBase {
             );
             transcription.getTranscriptionWorkflowEntities().add(workflow);
             dartsPersistence.save(workflow);
-            workflowTimestamp = workflowTimestamp.plusSeconds(1);
+            workflowTimestamp = workflowTimestamp.plus(assignmentInterval);
         }
 
         transcription.setTranscriptionStatus(withTranscriberStatus);
