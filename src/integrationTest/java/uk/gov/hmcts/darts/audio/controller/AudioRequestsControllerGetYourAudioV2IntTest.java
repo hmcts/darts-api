@@ -106,16 +106,13 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
             transformedMediaStub.createTransformedMediaEntity(someoneElsesExpiredMediaRequest, "file120", time, time);
         }
 
-        {
-            //create some DELETED media requests
-            mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, MediaRequestStatus.DELETED);
-            mediaRequestStub.createAndLoadMediaRequestEntity(
-                differentOwner,
-                AudioRequestType.DOWNLOAD,
-                MediaRequestStatus.DELETED
-            );
-
-        }
+        //create some DELETED media requests
+        mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, MediaRequestStatus.DELETED);
+        mediaRequestStub.createAndLoadMediaRequestEntity(
+            differentOwner,
+            AudioRequestType.DOWNLOAD,
+            MediaRequestStatus.DELETED
+        );
     }
 
     @Test
@@ -339,15 +336,12 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
             transformedMediaStub.createTransformedMediaEntity(someoneElsesExpiredMediaRequest, "file120", time, time);
         }
 
-        {
-            //create some DELETED media requests
-            mediaRequestStub.createAndLoadMediaRequestEntity(
-                differentOwner,
-                AudioRequestType.DOWNLOAD,
-                MediaRequestStatus.DELETED
-            );
-
-        }
+        //create some DELETED media requests
+        mediaRequestStub.createAndLoadMediaRequestEntity(
+            differentOwner,
+            AudioRequestType.DOWNLOAD,
+            MediaRequestStatus.DELETED
+        );
 
         var thisOwner = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
