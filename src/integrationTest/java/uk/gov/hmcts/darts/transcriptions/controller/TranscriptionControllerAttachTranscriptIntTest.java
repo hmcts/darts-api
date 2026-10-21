@@ -134,8 +134,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401}
-            """;
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401,"instance":"/transcriptions/%s/document"}
+            """.formatted(transcriptionId);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         assertEquals(0, dartsDatabase.getAuditRepository().findAll().size());
@@ -163,8 +163,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422}
-            """;
+            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422,"instance":"/transcriptions/%s/document"}
+            """.formatted(transcriptionId);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(0, dartsDatabase.getAuditRepository().findAll().size());
     }
@@ -191,8 +191,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422}
-            """;
+            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422,"instance":"/transcriptions/%s/document"}
+            """.formatted(transcriptionId);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(0, dartsDatabase.getAuditRepository().findAll().size());
     }
@@ -220,8 +220,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422}
-            """;
+            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":422,"instance":"/transcriptions/%s/document"}
+            """.formatted(transcriptionId);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(0, dartsDatabase.getAuditRepository().findAll().size());
     }

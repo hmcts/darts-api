@@ -95,8 +95,8 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401}
-            """;
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":401,"instance":"/cases/%s/hearings"}
+            """.formatted(hearingEntity.getCourtCase().getId());
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

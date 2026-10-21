@@ -325,7 +325,13 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"COMMON_100","title":"Provided courthouse does not exist","status":404,"detail":"Courthouse 'TEST' not found."}""";
+            {
+              "type":"COMMON_100",
+              "title":"Provided courthouse does not exist",
+              "status":404,
+              "detail":"Courthouse 'TEST' not found.",
+              "instance":"/audios/metadata"
+            }""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -347,7 +353,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
+            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403,"instance":"/audios/metadata"}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
