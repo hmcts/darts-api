@@ -30,11 +30,11 @@ java:
           alias: DARTS_API_DB_NAME
         - name: api-POSTGRES-SCHEMA
           alias: DARTS_API_DB_SCHEMA
-        - name: DevAzureAdB2CTenantId
+        - name: ApiAzureAdB2CTenantId
           alias: AAD_B2C_TENANT_ID
-        - name: DevAzureAdB2CClientId
+        - name: ApiAzureAdB2CClientId
           alias: AAD_B2C_CLIENT_ID
-        - name: DevAzureAdB2CClientSecret
+        - name: ApiAzureAdB2CClientSecret
           alias: AAD_B2C_CLIENT_SECRET
         - name: AzureAdB2CFuncTestROPCUsername
           alias: FUNC_TEST_ROPC_USERNAME
@@ -58,11 +58,11 @@ java:
           alias: AAD_CLIENT_ID
         - name: AzureADClientSecret
           alias: AAD_CLIENT_SECRET
-        - name: DevAzureADTenantIdJustice
+        - name: ApiAzureADTenantIdJustice
           alias: AAD_TENANT_ID_JUSTICE
-        - name: DevAzureADClientIdJustice
+        - name: ApiAzureADClientIdJustice
           alias: AAD_CLIENT_ID_JUSTICE
-        - name: DevAzureADClientSecretJustice
+        - name: ApiAzureADClientSecretJustice
           alias: AAD_CLIENT_SECRET_JUSTICE
         - name: XhibitUserName
           alias: XHIBIT_USER_NAME
@@ -185,7 +185,7 @@ darts-gateway:
         secrets:
           - name: AzureAdB2CFuncTestROPCClientId
             alias: AAD_B2C_ROPC_CLIENT_ID
-          - name: DevAzureAdB2CClientId
+          - name: ApiAzureAdB2CClientId
             alias: AAD_B2C_CLIENT_ID
           - name: app-insights-connection-string
             alias: app-insights-connection-string
@@ -193,7 +193,7 @@ darts-gateway:
             alias: MAX_FILE_UPLOAD_SIZE_MEGABYTES
           - name: redis-connection-string
             alias: REDIS_CONNECTION_STRING
-          - name: DevAzureAdB2CTenantId
+          - name: ApiAzureAdB2CTenantId
             alias: AAD_B2C_TENANT_ID
           - name: ViQExternalUserName
             alias: VIQ_EXTERNAL_USER_NAME
@@ -241,11 +241,11 @@ function:
           alias: GOVUK_NOTIFY_API_KEY
         - name: api-POSTGRES-SCHEMA
           alias: DARTS_API_DB_SCHEMA
-        - name: DevAzureAdB2CTenantId
+        - name: ApiAzureAdB2CTenantId
           alias: AAD_B2C_TENANT_ID
-        - name: DevAzureAdB2CClientId
+        - name: ApiAzureAdB2CClientId
           alias: AAD_B2C_CLIENT_ID
-        - name: DevAzureAdB2CClientSecret
+        - name: ApiAzureAdB2CClientSecret
           alias: AAD_B2C_CLIENT_SECRET
         - name: app-insights-connection-string
           alias: app-insights-connection-string
@@ -271,11 +271,11 @@ function:
           alias: AAD_CLIENT_ID
         - name: AzureADClientSecret
           alias: AAD_CLIENT_SECRET
-        - name: DevAzureADTenantIdJustice
+        - name: ApiAzureADTenantIdJustice
           alias: AAD_TENANT_ID_JUSTICE
-        - name: DevAzureADClientIdJustice
+        - name: ApiAzureADClientIdJustice
           alias: AAD_CLIENT_ID_JUSTICE
-        - name: DevAzureADClientSecretJustice
+        - name: ApiAzureADClientSecretJustice
           alias: AAD_CLIENT_SECRET_JUSTICE
         - name: XhibitUserName
           alias: XHIBIT_USER_NAME
