@@ -41,9 +41,9 @@ jobs:
           az rest --method PATCH --header "Content-Type=application/json" --uri $restUrl --body "{\"web\":{\"redirectUris\":[$replyUrlString]}}" #--debug
         env:
           PR_NUMBER: ${{ github.event.number }}
-          SP_APP_ID: ${{ secrets.SP_APP_ID_DEV }}
-          SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID_DEV }}
-          SP_SECRET_KEY: ${{ secrets.SP_SECRET_KEY_DEV }}
+          SP_APP_ID: ${{ secrets.SP_APP_ID_API }}
+          SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID_API }}
+          SP_SECRET_KEY: ${{ secrets.SP_SECRET_KEY_API }}
           SP_TENANT_ID: ${{ secrets.SP_TENANT_ID }}
   remove-external-ad-b2c-callback-urls:
     runs-on: ubuntu-latest
@@ -77,7 +77,7 @@ jobs:
           az rest --method PATCH --header "Content-Type=application/json" --uri $restUrl --body "{\"web\":{\"redirectUris\":[$replyUrlString]}}" #--debug
         env:
           PR_NUMBER: ${{ github.event.number }}
-          SP_APP_ID: ${{ secrets.SP_APP_ID_DEV_B2C }}
-          SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID_DEV_B2C }}
-          SP_SECRET_KEY: ${{ secrets.SP_SECRET_KEY_DEV_B2C }}
+          SP_APP_ID: ${{ secrets.SP_APP_ID_API_B2C }}
+          SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID_API_B2C }}
+          SP_SECRET_KEY: ${{ secrets.SP_SECRET_KEY_API_B2C }}
           SP_TENANT_ID: ${{ secrets.SP_TENANT_ID_B2C }}
