@@ -406,6 +406,26 @@ This repo contains overrides for the default dev environment configuration, cont
 | enable_darts_portal    | Deploys a DARTS portal instance alongside the API in the dev environment                         |
 | enable_darts_fullstack | Not yet supported, but will deploy the full DARTS stack alongside the API in the dev environment |
 
+All API PRs, including Renovate PRs, use the `DevAzure…` credentials configured in `values.dev.template.yaml`.
+The callback workflows use these GitHub repository secrets for the target app registrations:
+
+| Repository secret | Client ID matching the Key Vault secret in the Helm overlay |
+|---------------------|----------------------------------------------------------------|
+| `SP_APP_ID_DEV` | `DevAzureADClientIdJustice` |
+| `SP_APP_ID_DEV_B2C` | `DevAzureAdB2CClientId` |
+
+Azure login uses the following GitHub credentials:
+
+| Environment | Login type | Client ID secret | Secret key secret |
+|-------------|------------|------------------|-------------------|
+| DEV | Internal Entra | `SP_CLIENT_ID_DEV` | `SP_SECRET_KEY_DEV` |
+| DEV | External B2C | `SP_CLIENT_ID_DEV_B2C` | `SP_SECRET_KEY_DEV_B2C` |
+
+The tenant secrets remain `SP_TENANT_ID` for internal Entra and `SP_TENANT_ID_B2C` for external B2C.
+Each service principal must be able to read and update its corresponding app registration.
+The login client ID identifies the service principal managing callbacks; the target app ID identifies the app registration used by Helm.
+Callback registration runs on PR opening, reopening, or a new push. Callbacks are removed from the same DEV registrations when the PR closes.
+
 ## OpenAPI Validation
 
 The application uses OpenAPI validation to ensure that incoming requests and outgoing responses conform to the OpenAPI specification. To install the IBM OpenAPI
