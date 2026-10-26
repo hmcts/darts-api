@@ -6,19 +6,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
+import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 
 import java.net.URI;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 class DartsApiErrorResponseWriterTest {
 
-    private final ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
+    private final ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper();
 
     @Test
     void givenInactiveUserException_whenChecked_thenReturnsTrue() {
@@ -68,6 +69,20 @@ class DartsApiErrorResponseWriterTest {
         assertThat(responseBody.get("type").asText()).isEqualTo(AuthorisationError.USER_DETAILS_INVALID.getType());
         assertThat(responseBody.get("title").asText()).isEqualTo(AuthorisationError.USER_DETAILS_INVALID.getTitle());
         assertThat(responseBody.get("status").asInt()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @Test
+    void givenSecurityExceptionWithExtensions_whenWritten_thenPreservesTopLevelFields() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/secured-endpoint");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        DartsApiException exception = new DartsApiException(AuthorisationError.USER_NOT_ACTIVE, Map.of("reason", "inactive"));
+
+        DartsApiErrorResponseWriter.writeErrorResponse(request, response, objectMapper, exception);
+
+        JsonNode responseBody = objectMapper.readTree(response.getContentAsString());
+        assertThat(responseBody.get("reason").asText()).isEqualTo("inactive");
+        assertThat(responseBody.has("properties")).isFalse();
+        assertThat(responseBody.get("instance").asText()).isEqualTo("/secured-endpoint");
     }
 
     @Test

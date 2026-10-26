@@ -693,7 +693,7 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.type").value("COMMON_104"))
             .andExpect(jsonPath("$.title").value("Invalid request"))
             .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
-            .andExpect(jsonPath("$.properties.courthouseName").value("must not be null"));
+            .andExpect(jsonPath("$.courthouseName").value("must not be null"));
     }
 
     @Test
@@ -719,7 +719,7 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.type").value("COMMON_104"))
             .andExpect(jsonPath("$.title").value("Invalid request"))
             .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
-            .andExpect(jsonPath("$.properties.displayName").value("must not be null"));
+            .andExpect(jsonPath("$.displayName").value("must not be null"));
     }
 
     @Test

@@ -2,8 +2,7 @@ package uk.gov.hmcts.darts.common.exception;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -22,6 +21,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.List;
@@ -29,15 +29,15 @@ import java.util.Locale;
 
 @ControllerAdvice
 @EnableAutoConfiguration(exclude = ErrorMvcAutoConfiguration.class)
+@Slf4j
 public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DartsApiExceptionHandler.class);
     private static final String JSON_PARSE_ERROR_DETAIL = "JSON parse error";
 
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> handleDartsApiException(DartsApiException exception, NativeWebRequest request) {
         if (shouldLogException(exception)) {
-            LOGGER.error("A darts exception occurred", exception);
+            log.error("A darts exception occurred", exception);
         }
 
         var problemDetail = DartsApiProblemDetailFactory.createProblemDetail(exception, request);
@@ -52,7 +52,7 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = DartsApiProblemDetailFactory.createConstraintViolationProblemDetail(request);
 
         for (FieldError fieldError : exception.getFieldErrors()) {
-            problemDetail.setProperty(fieldError.getField(), fieldError.getDefaultMessage());
+            DartsApiProblemDetailFactory.addValidationMessage(problemDetail, fieldError.getField(), fieldError.getDefaultMessage());
         }
 
         return handleExceptionInternal(exception, problemDetail, headers, HttpStatus.BAD_REQUEST, request);
@@ -77,7 +77,7 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
                 .toList();
 
             if (!messages.isEmpty()) {
-                problemDetail.setProperty(parameterName, String.join(", ", messages));
+                DartsApiProblemDetailFactory.addValidationMessage(problemDetail, parameterName, String.join(", ", messages));
             }
         }
 
@@ -90,7 +90,8 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = DartsApiProblemDetailFactory.createConstraintViolationProblemDetail(request);
 
         for (ConstraintViolation<?> constraintViolation : exception.getConstraintViolations()) {
-            problemDetail.setProperty(constraintViolation.getPropertyPath().toString(), constraintViolation.getMessage());
+            DartsApiProblemDetailFactory.addValidationMessage(
+                problemDetail, constraintViolation.getPropertyPath().toString(), constraintViolation.getMessage());
         }
 
         return new ResponseEntity<>(problemDetail, HttpStatus.BAD_REQUEST);
@@ -120,9 +121,17 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(exception, problemDetail, headers, HttpStatus.BAD_REQUEST, request);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    protected ResponseEntity<ProblemDetail> handleRuntimeException(RuntimeException exception, NativeWebRequest request) {
-        LOGGER.error("An unexpected exception occurred", exception);
+    @ExceptionHandler(MultipartException.class)
+    protected ResponseEntity<ProblemDetail> handleMultipartException(MultipartException exception, NativeWebRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid multipart request");
+        DartsApiProblemDetailFactory.setInstance(problemDetail, request);
+
+        return new ResponseEntity<>(problemDetail, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<ProblemDetail> handleUnexpectedException(Exception exception, NativeWebRequest request) {
+        log.error("An unexpected exception occurred", exception);
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
         problemDetail.setTitle(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
