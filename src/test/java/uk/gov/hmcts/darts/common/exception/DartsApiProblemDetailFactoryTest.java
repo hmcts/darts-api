@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 
 import java.net.URI;
 import java.util.Map;
@@ -39,6 +41,21 @@ class DartsApiProblemDetailFactoryTest {
         ProblemDetail problemDetail = DartsApiProblemDetailFactory.createProblemDetail(exception);
 
         assertThat(problemDetail.getProperties()).isNull();
+    }
+
+    @Test
+    void givenValidationMessagesForSameField_whenAdded_thenRetainsEveryMessageAndIgnoresMissingMessages() {
+        ProblemDetail problemDetail = DartsApiProblemDetailFactory.createConstraintViolationProblemDetail(
+            new ServletWebRequest(new MockHttpServletRequest()));
+
+        DartsApiProblemDetailFactory.addValidationMessage(problemDetail, "name", "must not be blank");
+        DartsApiProblemDetailFactory.addValidationMessage(problemDetail, "name", null);
+        DartsApiProblemDetailFactory.addValidationMessage(problemDetail, "name", "must only contain letters");
+        DartsApiProblemDetailFactory.addValidationMessage(problemDetail, "email", "must be a valid email address");
+
+        assertThat(problemDetail.getProperties())
+            .containsEntry("name", "must not be blank, must only contain letters")
+            .containsEntry("email", "must be a valid email address");
     }
 
     @Getter

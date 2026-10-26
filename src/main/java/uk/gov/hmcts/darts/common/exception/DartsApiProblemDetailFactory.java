@@ -51,6 +51,12 @@ final class DartsApiProblemDetailFactory {
         }
     }
 
+    static void addValidationMessage(ProblemDetail problemDetail, String field, String message) {
+        if (message != null) {
+            problemDetail.getProperties().merge(field, message, (existing, additional) -> existing + ", " + additional);
+        }
+    }
+
     private static URI getNativeRequestUri(NativeWebRequest request) {
         HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
         if (servletRequest == null) {

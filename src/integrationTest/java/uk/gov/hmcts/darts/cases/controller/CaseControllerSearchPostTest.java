@@ -598,9 +598,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
               "title": "Invalid request",
               "status": 400,
               "instance": "/cases/search",
-              "properties": {
-                "eventTextContains": "size must be between 3 and 2000"
-              }
+              "eventTextContains": "size must be between 3 and 2000"
             }
             """;
         String actualResponse = response.getResponse().getContentAsString();
