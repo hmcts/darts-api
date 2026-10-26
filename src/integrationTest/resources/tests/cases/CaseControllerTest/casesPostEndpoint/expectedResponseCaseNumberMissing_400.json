@@ -3,7 +3,5 @@
   "status": 400,
   "title": "Invalid request",
   "instance": "<instance>",
-  "properties": {
-    "caseNumber": "must not be null"
-  }
+  "caseNumber": "must not be null"
 }

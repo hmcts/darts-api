@@ -9,6 +9,8 @@ import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.json.ProblemDetailJacksonMixin;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -19,6 +21,7 @@ public class ObjectMapperConfig {
     @Primary
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class);
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.registerModule(new JsonNullableModule());
 

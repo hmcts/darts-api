@@ -228,7 +228,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
-            .andExpect(jsonPath("$.properties.duplicate_transcription_id", is(dupeTranscription.getId().intValue())));
+            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId().intValue())));
     }
 
     @Test
@@ -255,7 +255,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
             .andExpect(jsonPath("$.title", is("A transcription already exists with these properties")))
-            .andExpect(jsonPath("$.properties.duplicate_transcription_id", is(dupeTranscription.getId().intValue())));
+            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId().intValue())));
     }
 
 

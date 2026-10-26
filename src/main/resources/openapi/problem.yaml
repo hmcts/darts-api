@@ -1,4 +1,8 @@
 type: object
+additionalProperties: true
+description: |
+  RFC 9457 problem details. Problem-specific extensions, including validation
+  field messages, are returned as top-level JSON properties.
 properties:
   type:
     type: object
@@ -29,8 +33,3 @@ properties:
     type: string
     description: |
       A URI reference that identifies the specific occurrence of the problem.
-  properties:
-    type: object
-    additionalProperties: {}
-    description: |
-      Additional problem-specific values.

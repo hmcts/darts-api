@@ -100,9 +100,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
               "title": "Invalid request",
               "status": 400,
               "instance": "/admin/users/search",
-              "properties": {
-                "emailAddress": "size must be between 1 and 256"
-              }
+              "emailAddress": "size must be between 1 and 256"
             }
             """;
         JSONAssert.assertEquals(

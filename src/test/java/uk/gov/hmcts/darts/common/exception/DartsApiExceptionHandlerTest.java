@@ -47,6 +47,7 @@ class DartsApiExceptionHandlerTest {
         TestRequest requestBody = new TestRequest("too-long");
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(requestBody, "testRequest");
         bindingResult.addError(new FieldError("testRequest", "name", "size must be between 1 and 5"));
+        bindingResult.addError(new FieldError("testRequest", "name", "must only contain letters"));
         MethodParameter methodParameter = new MethodParameter(
             DartsApiExceptionHandlerTestController.class.getDeclaredMethod("test", TestRequest.class),
             0
@@ -66,7 +67,7 @@ class DartsApiExceptionHandlerTest {
             assertThat(problemDetail.getTitle()).isEqualTo(CommonApiError.BAD_REQUEST.getTitle());
             assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
             assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI));
-            assertThat(problemDetail.getProperties()).containsEntry("name", "size must be between 1 and 5");
+            assertThat(problemDetail.getProperties()).containsEntry("name", "size must be between 1 and 5, must only contain letters");
         });
     }
 
@@ -162,7 +163,11 @@ class DartsApiExceptionHandlerTest {
         when(constraintViolation.getPropertyPath()).thenReturn(propertyPath);
         when(constraintViolation.getMessage()).thenReturn("must not be blank");
 
-        ConstraintViolationException exception = new ConstraintViolationException(Set.of(constraintViolation));
+        ConstraintViolation<?> additionalViolation = mock(ConstraintViolation.class);
+        when(additionalViolation.getPropertyPath()).thenReturn(propertyPath);
+        when(additionalViolation.getMessage()).thenReturn("must only contain letters");
+
+        ConstraintViolationException exception = new ConstraintViolationException(Set.of(constraintViolation, additionalViolation));
 
         ResponseEntity<Object> response = exceptionHandler.handleConstraintViolationException(exception, webRequest());
 
@@ -172,7 +177,8 @@ class DartsApiExceptionHandlerTest {
             assertThat(problemDetail.getTitle()).isEqualTo(CommonApiError.BAD_REQUEST.getTitle());
             assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
             assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI));
-            assertThat(problemDetail.getProperties()).containsEntry("request.name", "must not be blank");
+            assertThat(problemDetail.getProperties().get("request.name").toString().split(", "))
+                .containsExactlyInAnyOrder("must not be blank", "must only contain letters");
         });
     }
 
@@ -235,7 +241,7 @@ class DartsApiExceptionHandlerTest {
         NativeWebRequest request = mock(NativeWebRequest.class);
         RuntimeException exception = new RuntimeException("Something failed");
 
-        ResponseEntity<ProblemDetail> response = exceptionHandler.handleRuntimeException(exception, request);
+        ResponseEntity<ProblemDetail> response = exceptionHandler.handleUnexpectedException(exception, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody()).satisfies(problemDetail -> assertThat(problemDetail.getInstance()).isNull());
@@ -245,7 +251,7 @@ class DartsApiExceptionHandlerTest {
     void givenRuntimeException_whenHandled_thenReturnsInternalServerErrorProblemDetail() {
         RuntimeException exception = new RuntimeException("Something failed");
 
-        ResponseEntity<ProblemDetail> response = exceptionHandler.handleRuntimeException(exception, webRequest());
+        ResponseEntity<ProblemDetail> response = exceptionHandler.handleUnexpectedException(exception, webRequest());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody()).satisfies(problemDetail -> {

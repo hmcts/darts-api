@@ -341,9 +341,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
               "title": "Invalid request",
               "status": 400,
               "instance": "/admin/medias/%s/hide",
-              "properties": {
-                "isHidden": "must not be null"
-              }
+              "isHidden": "must not be null"
             }""";
         String actualResponse = response.getResponse().getContentAsString();
         JSONAssert.assertEquals(expectedResponse.formatted(mediaEntity.getId()), actualResponse, JSONCompareMode.NON_EXTENSIBLE);

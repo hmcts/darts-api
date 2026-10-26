@@ -3,7 +3,5 @@
   "status": 400,
   "title": "Invalid request",
   "instance": "<instance>",
-  "properties": {
-    "courthouse": "must not be null"
-  }
+  "courthouse": "must not be null"
 }

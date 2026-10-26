@@ -235,7 +235,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.title").value("Invalid request"))
             .andExpect(jsonPath("$.status").value(400))
             .andExpect(jsonPath("$.instance").value("/admin/users/" + userId))
-            .andExpect(jsonPath("$.properties.fullName").value("size must be between 1 and 256"));
+            .andExpect(jsonPath("$.fullName").value("size must be between 1 and 256"));
     }
 
     @Test

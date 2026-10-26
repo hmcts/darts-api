@@ -240,7 +240,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.title").value("Duplicate security group names are not permitted"))
             .andExpect(jsonPath("$.status").value(409))
             .andExpect(jsonPath("$.instance").value("/admin/security-groups"))
-            .andExpect(jsonPath("$.properties.existing_group_id").value(initialSecurityGroup.get("id")));
+            .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")));
     }
 
     @Test
@@ -275,7 +275,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.title").value("Duplicate security group display name are not permitted"))
             .andExpect(jsonPath("$.status").value(409))
             .andExpect(jsonPath("$.instance").value("/admin/security-groups"))
-            .andExpect(jsonPath("$.properties.existing_group_id").value(initialSecurityGroup.get("id")));
+            .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")));
     }
 
     @Test

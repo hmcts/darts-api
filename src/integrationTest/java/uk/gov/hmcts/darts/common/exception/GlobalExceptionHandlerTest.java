@@ -200,9 +200,7 @@ class GlobalExceptionHandlerTest extends IntegrationBase {
                 "title":"Invalid request",
                 "status":400,
                 "instance":"/test",
-                "properties":{
-                    "name":"size must be between 1 and 5"
-                }
+                "name":"size must be between 1 and 5"
             }
             """;
 

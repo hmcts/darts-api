@@ -633,7 +633,7 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
             .andExpect(jsonPath("$.type").value("COMMON_104"))
             .andExpect(jsonPath("$.title").value("Invalid request"))
             .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
-            .andExpect(jsonPath("$.properties.duration").value("must match \"^\\d{1,2}Y\\d{1,2}M\\d{1,2}D$\""));
+            .andExpect(jsonPath("$.duration").value("must match \"^\\d{1,2}Y\\d{1,2}M\\d{1,2}D$\""));
     }
 
     @Test
@@ -660,7 +660,7 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
             .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("RETENTION_111"))
             .andExpect(jsonPath("$.title").value("Duration too short"))
-            .andExpect(jsonPath("$.properties.min_allowable_days").value(1));
+            .andExpect(jsonPath("$.min_allowable_days").value(1));
     }
 
     @Test
@@ -691,7 +691,7 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
             .andExpect(jsonPath("$.type").value("COMMON_104"))
             .andExpect(jsonPath("$.title").value("Invalid request"))
             .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
-            .andExpect(jsonPath("$.properties.description").value("size must be between 0 and 256"));
+            .andExpect(jsonPath("$.description").value("size must be between 0 and 256"));
     }
 
     @Test
@@ -729,7 +729,7 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
             .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.type").value("RETENTION_117"))
             .andExpect(jsonPath("$.title").value("Target policy has pending revision"))
-            .andExpect(jsonPath("$.properties.pending_revision_id").value(pendingPolicy200.getId()));
+            .andExpect(jsonPath("$.pending_revision_id").value(pendingPolicy200.getId()));
     }
 
     @Test
