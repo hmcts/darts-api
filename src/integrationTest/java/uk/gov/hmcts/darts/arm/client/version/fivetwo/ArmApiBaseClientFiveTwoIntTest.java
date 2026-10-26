@@ -61,7 +61,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 class ArmApiBaseClientFiveTwoIntTest extends IntegrationBaseWithWiremock {
 
     @Autowired
-    private ArmApiBaseClientFiveTwo armApiBaseClient;
+    private ArmApiBaseClientFiveTwo armApiBaseClient; 
 
     private static final String BASE_JSON_DIRECTORY = "tests/arm/client/version/fivetwo/ArmApiBaseClientIntTest/";
     private static final String MOCK_RESPONSE_DIRECTORY = BASE_JSON_DIRECTORY + "mocks/";
