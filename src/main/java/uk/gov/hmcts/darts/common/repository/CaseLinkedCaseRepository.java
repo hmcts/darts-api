@@ -17,6 +17,8 @@ public interface CaseLinkedCaseRepository extends JpaRepository<CaseLinkedCaseEn
     @Query("""
         SELECT clc
         FROM CaseLinkedCaseEntity clc
+        JOIN FETCH clc.courtCase1
+        JOIN FETCH clc.courtCase2
         WHERE clc.courtCase1 = :courtCase
         OR clc.courtCase2 = :courtCase
         """)
@@ -25,6 +27,8 @@ public interface CaseLinkedCaseRepository extends JpaRepository<CaseLinkedCaseEn
     @Query("""
         SELECT clc
         FROM CaseLinkedCaseEntity clc
+        JOIN FETCH clc.courtCase1
+        JOIN FETCH clc.courtCase2
         WHERE clc.courtCase1 IN :courtCases
         OR clc.courtCase2 IN :courtCases
         """)
