@@ -426,6 +426,11 @@ Each service principal must be able to read and update its corresponding app reg
 The login client ID identifies the service principal managing callbacks; the target app ID identifies the app registration used by Helm.
 Callback registration runs on PR opening, reopening, or a new push. Callbacks are removed from the same API registrations when the PR closes.
 
+Staging API pods use `PortalAzure…` authentication secrets from `values.stg.template.yaml`.
+The B2C tenant, client ID, and client secret use `PortalAzureAdB2C…`; internal Justice authentication uses `PortalAzureAD…Justice`.
+The portal workflow target secrets `SP_APP_ID_PORTAL` and `SP_APP_ID_PORTAL_B2C` must match
+`PortalAzureADClientIdJustice` and `PortalAzureAdB2CClientId`, respectively.
+
 ## OpenAPI Validation
 
 The application uses OpenAPI validation to ensure that incoming requests and outgoing responses conform to the OpenAPI specification. To install the IBM OpenAPI
