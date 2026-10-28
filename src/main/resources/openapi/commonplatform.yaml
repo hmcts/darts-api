@@ -1,28 +1,20 @@
 openapi: 3.0.1
 
 info:
-  version: ${version}
-  title: DARTS Common Platform API
-  contact:
-    name: DARTS team
-  description: |-
-    Draft API for Common Platform to submit daily-list XML and JSON events to DARTS.
-    Request formats, retry behaviour and Marketplace configuration remain subject to agreement.
-  x-contract-status: draft
 
+  version: ${version}
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+    Draft API for Common Platform to submit daily-list XML and JSON events to DARTS. Request formats, retry behaviour and Marketplace configuration remain subject to agreement.
 servers:
-  - url: http://localhost:4550
-    description: Local development
+  - url: http://localhost:4550/
 
 tags:
   - name: CommonPlatformDailyLists
     description: Common Platform daily-list XML submissions.
   - name: CommonPlatformEvents
     description: Common Platform event JSON submissions.
-
-security:
-  - marketplaceOAuth2: [ ]
-    marketplaceSubscriptionKey: [ ]
 
 paths:
   /external/cp/daily-lists:
