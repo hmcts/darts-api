@@ -11,16 +11,14 @@ servers:
   - url: http://localhost:4550/
 
 tags:
-  - name: CommonPlatformDailyLists
-    description: Common Platform daily-list XML submissions.
-  - name: CommonPlatformEvents
-    description: Common Platform event JSON submissions.
+  - name: CommonPlatform
+    description: Common Platform daily-list and event submissions.
 
 paths:
   /external/cp/daily-lists:
     post:
       tags:
-        - CommonPlatformDailyLists
+        - CommonPlatform
       operationId: submitCommonPlatformDailyList
       summary: Submit a Common Platform daily list
       description: |-
@@ -69,7 +67,7 @@ paths:
   /external/cp/events:
     post:
       tags:
-        - CommonPlatformEvents
+        - CommonPlatform
       operationId: submitCommonPlatformEvent
       summary: Submit a Common Platform event
       description: |-
