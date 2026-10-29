@@ -25,13 +25,13 @@ import uk.gov.hmcts.darts.common.service.JudgeCommonService;
 
 import java.time.LocalDateTime;
 
+/**
+ * Please use RetrieveCoreObjectServiceTransactionalSupport instead of this class, as this beter supports transaction state.
+ */
 @RequiredArgsConstructor
 @Service
 @Slf4j
 @SuppressWarnings("PMD.TooManyMethods")//TODO - refactor to reduce methods when this class is next edited
-/**
- * Please use RetrieveCoreObjectServiceTransactionalSupport instead of this class, as this beter supports transaction state.
- */
 public class RetrieveCoreObjectServiceSupport {
 
     private final HearingCommonService hearingCommonService;
