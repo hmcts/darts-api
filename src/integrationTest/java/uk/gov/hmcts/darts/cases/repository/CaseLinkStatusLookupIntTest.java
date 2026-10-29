@@ -50,7 +50,7 @@ class CaseLinkStatusLookupIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void given_existingAudits_when_migratingStatuses_then_preserveOutcomesAndEnforceForeignKeys() throws SQLException {
+    void given_emptySchema_when_creatingImportTables_then_supportLookupStatusesAndBothCourthouses() throws SQLException {
         String schema = "case_link_status_" + UUID.randomUUID().toString().replace("-", "");
         try (var connection = dataSource.getConnection()) {
             String originalSchema = connection.getSchema();
@@ -63,11 +63,8 @@ class CaseLinkStatusLookupIntTest extends PostgresIntegrationBase {
                 jdbc.execute("CREATE TABLE court_case (cas_id INTEGER PRIMARY KEY)");
                 jdbc.execute("CREATE TABLE case_linked_case (clc_id INTEGER PRIMARY KEY)");
                 ScriptUtils.executeSqlScript(connection, new ClassPathResource(MIGRATIONS + "V1_523__create_case_link_import_tables.sql"));
-                seedLegacyAudits(jdbc);
-                ScriptUtils.executeSqlScript(connection, new ClassPathResource(MIGRATIONS + "V1_524__create_case_link_status_lookup_tables.sql"));
-                ScriptUtils.executeSqlScript(connection,
-                                             new ClassPathResource(MIGRATIONS + "V1_525__add_case_2_courthouse_to_case_link_import_results.sql"));
-                assertMigratedAudits(jdbc);
+                seedAudits(jdbc);
+                assertStoredAudits(jdbc);
                 assertThatThrownBy(() -> jdbc.update("UPDATE case_link_import SET cis_id = 999 WHERE cli_id = 1"))
                     .isInstanceOf(DataIntegrityViolationException.class);
                 assertThatThrownBy(() -> jdbc.update("UPDATE case_link_import_result SET crs_id = 999 WHERE clr_id = 1"))
@@ -79,24 +76,24 @@ class CaseLinkStatusLookupIntTest extends PostgresIntegrationBase {
         }
     }
 
-    private void seedLegacyAudits(JdbcTemplate jdbc) {
+    private void seedAudits(JdbcTemplate jdbc) {
         for (var status : CaseLinkImportStatus.values()) {
             jdbc.update("""
-                INSERT INTO case_link_import (cli_id, original_filename, status, created_ts, created_by, last_modified_ts, last_modified_by)
+                INSERT INTO case_link_import (cli_id, original_filename, cis_id, created_ts, created_by, last_modified_ts, last_modified_by)
                 VALUES (?, 'original.csv', ?, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0)
-                """, status.getId(), status.name());
+                """, status.getId(), status.getId());
         }
         for (var status : CaseLinkResultStatus.values()) {
             jdbc.update("""
                 INSERT INTO case_link_import_result
-                    (clr_id, cli_id, row_number, case_1_case_number, case_1_courthouse, case_2_case_number,
-                     column_count, status, error_message, created_ts, created_by, last_modified_ts, last_modified_by)
-                VALUES (?, 1, ?, 'X1', 'YORK', 'CP1', 3, ?, 'Original outcome', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0)
-                """, status.getId(), status.getId() + 1, status.name());
+                    (clr_id, cli_id, row_number, case_1_case_number, case_1_courthouse, case_2_case_number, case_2_courthouse,
+                     column_count, crs_id, error_message, created_ts, created_by, last_modified_ts, last_modified_by)
+                VALUES (?, 1, ?, 'X1', 'YORK', 'CP1', 'LEEDS', 3, ?, 'Original outcome', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0)
+                """, status.getId(), status.getId() + 1, status.getId());
         }
     }
 
-    private void assertMigratedAudits(JdbcTemplate jdbc) {
+    private void assertStoredAudits(JdbcTemplate jdbc) {
         for (var status : CaseLinkImportStatus.values()) {
             assertThat(jdbc.queryForObject("SELECT cis_id FROM case_link_import WHERE cli_id = ?", Integer.class, status.getId()))
                 .isEqualTo(status.getId());
@@ -107,7 +104,8 @@ class CaseLinkStatusLookupIntTest extends PostgresIntegrationBase {
         }
         assertThat(jdbc.queryForList("SELECT original_filename FROM case_link_import", String.class)).containsOnly("original.csv");
         assertThat(jdbc.queryForList("SELECT error_message FROM case_link_import_result", String.class)).containsOnly("Original outcome");
-        assertThat(jdbc.queryForList("SELECT case_2_courthouse FROM case_link_import_result", String.class)).containsOnly("YORK");
+        assertThat(jdbc.queryForList("SELECT case_1_courthouse FROM case_link_import_result", String.class)).containsOnly("YORK");
+        assertThat(jdbc.queryForList("SELECT case_2_courthouse FROM case_link_import_result", String.class)).containsOnly("LEEDS");
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM case_link_import_result WHERE crs_id = ?", Long.class,
                                       CaseLinkResultStatus.SUCCESS.getId())).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM case_link_import_result WHERE crs_id = ?", Long.class,
