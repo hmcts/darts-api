@@ -67,8 +67,6 @@ import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.CaseLinkImportRepository;
-import uk.gov.hmcts.darts.common.repository.CaseLinkImportResultRepository;
 import uk.gov.hmcts.darts.common.repository.CaseLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -179,8 +177,6 @@ public class DartsDatabaseStub {
     private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
     private final AuditRepository auditRepository;
     private final CaseDocumentRepository caseDocumentRepository;
-    private final CaseLinkImportResultRepository caseLinkImportResultRepository;
-    private final CaseLinkImportRepository caseLinkImportRepository;
     private final CaseLinkedCaseRepository caseLinkedCaseRepository;
     private final CaseManagementRetentionRepository caseManagementRetentionRepository;
     private final CaseRepository caseRepository;
@@ -302,8 +298,6 @@ public class DartsDatabaseStub {
                              CaseDocumentEntity.class,
                              MediaEntity.class,
                              TranscriptionDocumentEntity.class);
-            caseLinkImportResultRepository.deleteAllInBatch();
-            caseLinkImportRepository.deleteAllInBatch();
             objectStateRecordRepository.deleteAllInBatch();
             transcriptionLinkedCaseRepository.deleteAllInBatch();
             dataAnonymisationRepository.deleteAllInBatch();
