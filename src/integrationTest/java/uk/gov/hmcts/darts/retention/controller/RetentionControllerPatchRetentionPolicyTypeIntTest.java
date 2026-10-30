@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.domain.Example;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -629,10 +630,10 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
         // Then
         resultActions
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("https://zalando.github.io/problem/constraint-violation"))
-            .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations.*.field").value("duration"))
-            .andExpect(jsonPath("$.violations.*.message").value("must match \"^\\d{1,2}Y\\d{1,2}M\\d{1,2}D$\""));
+            .andExpect(jsonPath("$.type").value("COMMON_104"))
+            .andExpect(jsonPath("$.title").value("Invalid request"))
+            .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
+            .andExpect(jsonPath("$.duration").value("must match \"^\\d{1,2}Y\\d{1,2}M\\d{1,2}D$\""));
     }
 
     @Test
@@ -687,10 +688,10 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegra
         // Then
         resultActions
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("https://zalando.github.io/problem/constraint-violation"))
-            .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations.*.field").value("description"))
-            .andExpect(jsonPath("$.violations.*.message").value("size must be between 0 and 256"));
+            .andExpect(jsonPath("$.type").value("COMMON_104"))
+            .andExpect(jsonPath("$.title").value("Invalid request"))
+            .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
+            .andExpect(jsonPath("$.description").value("size must be between 0 and 256"));
     }
 
     @Test
