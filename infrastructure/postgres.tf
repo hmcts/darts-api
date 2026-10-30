@@ -11,6 +11,7 @@ module "postgresql_flexible" {
   business_area        = "sds"
   location             = var.location
   pgsql_sku            = var.pgsqlSku
+  high_availability    = var.env == "test" ? false : null
   pgsql_storage_mb     = var.pgsqlstoragemb
   auto_grow_enabled    = true
   common_tags          = merge(var.common_tags, var.extra_tags)
