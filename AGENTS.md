@@ -12,12 +12,12 @@
 - `**/util`: shared helpers (check before adding new utilities).
 
 Core Flyway migrations live under `src/main/resources/db/migration/common` and `src/main/resources/db/migration/postgres`; profile-specific overlays live under
-`src/main/resources/db/migration/dev`, `src/main/resources/db/migration/local`, and `src/main/resources/db/migration/h2`.
-Reference-only production manual data fixes live under `src/main/resources/db/reference/manual-data-fixes`; do not treat them as Flyway migrations.
+`src/main/resources/db/migration/dev`, `src/main/resources/db/migration/local`, and `src/main/resources/db/migration/h2`. Reference-only production manual data
+fixes live under `src/main/resources/db/reference/manual-data-fixes`; do not treat them as Flyway migrations.
 
 OpenAPI specs live under `src/main/resources/openapi`. They are processed + versioned into `build/processedSpecs/` and server stubs are generated into
-`build/generated/openapi/src/main/java` (wired into the `main` source set).
-When adding a new OAS definition, also update `index.html` so the GitHub Pages Swagger UI can list it.
+`build/generated/openapi/src/main/java` (wired into the `main` source set). When adding a new OAS definition, also update `index.html` so the GitHub Pages
+Swagger UI can list it.
 
 Tests are split across Gradle source sets:
 
@@ -28,8 +28,8 @@ Tests are split across Gradle source sets:
 - `src/smokeTest/java`
 
 Each source set has a matching resources directory (`src/test/resources`, `src/testCommon/resources`, `src/integrationTest/resources`,
-`src/functionalTest/resources`, `src/smokeTest/resources`) for profile YAML, WireMock data, and suite-specific fixtures.
-Shared test data helpers and entity builders live under `src/testCommon/java/uk/gov/hmcts/darts/test/common`; prefer extending these over duplicating setup.
+`src/functionalTest/resources`, `src/smokeTest/resources`) for profile YAML, WireMock data, and suite-specific fixtures. Shared test data helpers and entity
+builders live under `src/testCommon/java/uk/gov/hmcts/darts/test/common`; prefer extending these over duplicating setup.
 
 Automated task framework code lives under `src/main/java/uk/gov/hmcts/darts/task`: task names in `task/api/AutomatedTaskName`, config classes in
 `task/config`, and lockable runners in `task/runner/impl`. Reusable agent workflows live under `skills/`; use
@@ -64,8 +64,8 @@ For a full stack in Docker (API + dependencies), use `./bin/dcup` or `./bin/run-
 ## Build, Test, and Development Commands
 
 - `./gradlew build`: compiles, runs unit tests, and produces the service artifact; use before PRs.
-- `./gradlew check`: runs static analysis + unit tests (what CI typically expects as a baseline). Note: this project finalizes `check` by running
-  the `integration` test task.
+- `./gradlew check`: runs static analysis + unit tests (what CI typically expects as a baseline). Note: this project finalizes `check` by running the
+  `integration` test task.
 - `./gradlew integration`: runs integration tests (source set `integrationTest`). Add `--tests 'Pattern'` to focus.
 - `./gradlew functional`: runs functional tests (source set `functionalTest`). Add `--tests 'Pattern'` to focus.
 - `./gradlew smoke`: runs smoke tests (source set `smokeTest`). Add `--tests 'Pattern'` to focus.
@@ -109,21 +109,41 @@ Code style in this repo is effectively:
 - 4-space indentation for Java.
 - Preferred max line length is **160** (see `config/checkstyle/checkstyle.xml` and `.idea/codeStyles/project.xml`).
 - Avoid wildcard imports; keep imports ordered per IntelliJ scheme.
+- Use descriptive variable names that make the value's type or purpose explicit. `var` is allowed, but the variable name must remain clear without an
+  explicit type declaration: prefer `var caseLinkImportEntity = ...` over `var entity = ...`. Apply this to production code and tests.
 
 Use constructor injection and `@Slf4j` for logging. Packages use lowercase dot notation (root `uk.gov.hmcts.darts`); classes/enums stay PascalCase and beans end
 with `Service`, `Controller`, or `Repository`.
 
+Program to service interfaces. Define service contracts in the owning domain's `service` package and implement them as `*ServiceImpl` classes in
+`service.impl`. Controllers and collaborating services must inject the interfaces. Keep Spring service and transaction annotations on the implementations.
+Unit tests should test the implementation class and mock collaborating services through their interfaces.
+
 For DTO/entity mapping, prefer existing MapStruct mappers under `**/mapper` with `@Mapper(componentModel = "spring")` over hand-written conversion logic.
 
 For external HTTP integrations, follow the existing Spring Cloud OpenFeign client pattern under `**/client` (for example
-`event/client/DartsGatewayClient.java`, `common/service/bankholidays/BankHolidaysApi.java`, and `arm/client/version/**`) rather than creating ad-hoc
-HTTP clients.
+`event/client/DartsGatewayClient.java`, `common/service/bankholidays/BankHolidaysApi.java`, and `arm/client/version/**`) rather than creating ad-hoc HTTP
+clients.
 
 Agents must consult the active Checkstyle profile (`config/checkstyle/checkstyle.xml`) and the JetBrains scheme (`.idea/codeStyles/project.xml`) when generating
 code so formatting, imports, and annotations align with what CI enforces.
 
-ORM entities should default to `FetchType.LAZY`; when richer graphs are required, define JPA entity graphs or DTO projections rather than flipping
-associations to eager.
+ORM entities should default to `FetchType.LAZY`; when richer graphs are required, define JPA entity graphs or DTO projections rather than flipping associations
+to eager.
+
+For new validation components, use the shared `uk.gov.hmcts.darts.common.component.validation.Validator<T>` interface and implement its `validate(T)`
+contract. Reuse existing validators where applicable. Validation failures must use `DartsApiException` with a domain API error, following the pattern below.
+
+### API Error Handling for New Endpoints
+
+- New endpoints must use the established API error pattern: throw `DartsApiException` with a domain error enum implementing `DartsApiError`
+  (for example, `throw new DartsApiException(CaseApiError.INVALID_FILE_TYPE);`). Do not create endpoint-specific custom exception classes for validation or
+  business errors.
+- Define new error codes and titles in the relevant OpenAPI specification, then map the generated values and appropriate HTTP status in the domain API error
+  enum. Document the endpoint's error responses in the specification.
+- Throw these exceptions from services or validators and let the existing global exception handler generate the standard problem response. Preserve the original
+  cause when wrapping an underlying failure in `DartsApiException`.
+- Test the error enum carried by `DartsApiException` and the HTTP status, error type, and title returned by the endpoint.
 
 ## Testing Guidelines
 
@@ -139,8 +159,13 @@ Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` an
 - Skip trivial getters/setters, data records, generated OpenAPI models/clients, or one-line delegators with no decision logic.
 - Target branch coverage for decision-heavy code; use parameterised tests for boundaries, property tests for round-trip mappers, and cover both happy/unhappy
   paths.
-- Mock external dependencies (repos, clients, UUID/time sources) to keep tests fast and deterministic, and name tests
-  `given_<precondition>_when_<action>_then_<outcome>`.
+- Mock external dependencies (repos, clients, UUID/time sources) to keep tests fast and deterministic.
+- Name tests `methodName_shouldExpectation_whenCondition`, with underscores separating the BDD sections. Start with the entrypoint under test, generally
+  the public method being called, then describe the expected behaviour and the circumstances that produce it. Keep names consistent with the actual assertions,
+  including for parameterised tests; for example, `addAsyncSearch_shouldReturnSearchName_whenASuccessResponseIsObtainedFromArm`.
+- For complex scenarios, keep the method name concise and add a multiline `@DisplayName` using Java text blocks. The display name must describe the entrypoint,
+  `SHOULD` expectations and `WHEN` conditions in full, using indented `AND` clauses where helpful. Reports may show only the display name, so it must communicate
+  the complete test intent without relying on the method name.
 
 ## Code Review Guidance for Agents
 
