@@ -1,5 +1,6 @@
-package uk.gov.hmcts.darts.cases.service;
+package uk.gov.hmcts.darts.cases.service.impl;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,27 +21,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CaseLinkImportSummaryServiceTest {
+class CaseLinkImportSummaryServiceImplTest {
 
     @Mock
     private CaseLinkImportRepository importRepository;
     @Mock
     private CaseLinkImportResultRepository resultRepository;
     @InjectMocks
-    private CaseLinkImportSummaryService service;
+    private CaseLinkImportSummaryServiceImpl service;
 
+    @DisplayName("""
+        getSummary()
+        SHOULD derive total, successful and failed row counts from stored results
+            AND return the stored import status
+            AND include every failed row with its supplied case details, row number, error code and message
+        WHEN an import contains both successful and failed results
+        """)
     @Test
-    void given_persistedOutcomes_when_regeneratingSummary_then_countRowsAndMapEveryFailureField() {
-        var entity = new CaseLinkImportEntity();
-        entity.setStatus(new CaseLinkImportStatusEntity(CaseLinkImportStatus.COMPLETED_WITH_ERRORS.getId()));
-        var row = new CaseLinkImportResultEntity();
+    void getSummary_shouldReturnStoredOutcomes_whenImportHasMixedResults() {
+        CaseLinkImportEntity caseLinkImportEntity = new CaseLinkImportEntity();
+        caseLinkImportEntity.setStatus(new CaseLinkImportStatusEntity(CaseLinkImportStatus.COMPLETED_WITH_ERRORS.getId()));
+        CaseLinkImportResultEntity row = new CaseLinkImportResultEntity();
         row.setRowNumber(7);
         row.setCase1CaseNumber(" X1 ");
         row.setCase1Courthouse(" york ");
         row.setCase2CaseNumber(" CP1 ");
         row.setErrorCode("CASE_1_NOT_FOUND");
         row.setErrorMessage("Case 1 does not exist");
-        when(importRepository.findById(1L)).thenReturn(Optional.of(entity));
+        when(importRepository.findById(1L)).thenReturn(Optional.of(caseLinkImportEntity));
         when(resultRepository.countByImportId(1L)).thenReturn(3L);
         when(resultRepository.countByImportIdAndStatusId(1L, CaseLinkResultStatus.SUCCESS.getId())).thenReturn(2L);
         when(resultRepository.countByImportIdAndStatusId(1L, CaseLinkResultStatus.FAILED.getId())).thenReturn(1L);

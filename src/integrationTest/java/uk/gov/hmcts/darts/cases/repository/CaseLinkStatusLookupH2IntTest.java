@@ -18,7 +18,7 @@ class CaseLinkStatusLookupH2IntTest extends IntegrationBase {
     private CaseLinkImportResultStatusRepository resultStatusRepository;
 
     @Test
-    void given_h2Migration_when_loadingLookups_then_seedEveryStatus() {
+    void findAll_shouldReturnAllStatuses_whenH2MigrationsHaveRun() {
         assertThat(importStatusRepository.findAll()).hasSize(CaseLinkImportStatus.values().length);
         assertThat(resultStatusRepository.findAll()).hasSize(CaseLinkResultStatus.values().length);
         for (var status : CaseLinkImportStatus.values()) {

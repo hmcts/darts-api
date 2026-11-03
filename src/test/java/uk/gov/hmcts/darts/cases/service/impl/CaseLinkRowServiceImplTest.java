@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.cases.service;
+package uk.gov.hmcts.darts.cases.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,12 +7,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkResultStatus;
-import uk.gov.hmcts.darts.cases.exception.CaseLinkRowException;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.common.entity.CaseLinkImportResultEntity;
 import uk.gov.hmcts.darts.common.entity.CaseLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseLinkImportResultRepository;
 import uk.gov.hmcts.darts.common.repository.CaseLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CaseLinkRowServiceTest {
+class CaseLinkRowServiceImplTest {
 
     @Mock
     private CourthouseRepository courthouseRepository;
@@ -43,7 +44,7 @@ class CaseLinkRowServiceTest {
     @Mock
     private CaseLinkImportResultRepository resultRepository;
     @InjectMocks
-    private CaseLinkRowService service;
+    private CaseLinkRowServiceImpl service;
 
     private final CourthouseEntity courthouse = new CourthouseEntity();
     private final UserAccountEntity user = new UserAccountEntity();
@@ -58,14 +59,14 @@ class CaseLinkRowServiceTest {
     }
 
     @Test
-    void given_missingCourthouse_when_processing_then_failWithoutCreatingCase() {
+    void process_shouldRejectRowWithoutCreatingCases_whenCourthouseDoesNotExist() {
         when(courthouseRepository.findForCaseLinkImport("YORK")).thenReturn(Optional.empty());
         assertFailure("COURTHOUSE_NOT_FOUND");
         verify(caseCommonService, never()).retrieveOrCreateCase(any(CourthouseEntity.class), any(), any());
     }
 
     @Test
-    void given_missingCase1_when_processing_then_failWithoutCreatingCase2() {
+    void process_shouldRejectRowWithoutCreatingCase2_whenCase1DoesNotExist() {
         when(courthouseRepository.findForCaseLinkImport("YORK")).thenReturn(Optional.of(courthouse));
         when(caseRepository.findByCaseNumberAndCourthouse("X1", courthouse)).thenReturn(Optional.empty());
         assertFailure("CASE_1_NOT_FOUND");
@@ -73,7 +74,7 @@ class CaseLinkRowServiceTest {
     }
 
     @Test
-    void given_missingCase2_when_processing_then_useExistingCreationCodeAndCreateLink() {
+    void process_shouldCreateCase2AndLinkUsingExistingService_whenCase2DoesNotExist() {
         var first = givenFirstCase();
         var second = courtCase(2);
         when(caseRepository.findByCaseNumberAndCourthouse("CP1", courthouse)).thenReturn(Optional.empty());
@@ -87,7 +88,7 @@ class CaseLinkRowServiceTest {
             link.setId(10);
             return link;
         });
-        service.process(row, user);
+        service.linkCaseToCase(row, user);
         assertThat(row.isCase2Created()).isTrue();
         assertThat(row.getCase2Id()).isEqualTo(2);
         assertThat(row.getLinkedCaseId()).isEqualTo(10);
@@ -96,13 +97,13 @@ class CaseLinkRowServiceTest {
     }
 
     @Test
-    void given_existingCaseAndLink_when_processing_then_reuseWithoutCreatingOrUpdatingCases() {
+    void process_shouldReuseExistingCasesAndLink_whenMappingAlreadyExists() {
         givenFirstCase();
         when(caseRepository.findByCaseNumberAndCourthouse("CP1", courthouse)).thenReturn(Optional.of(courtCase(2)));
-        var link = new CaseLinkedCaseEntity();
+        CaseLinkedCaseEntity link = new CaseLinkedCaseEntity();
         link.setId(10);
         when(linkedCaseRepository.findByCaseIds(1, 2)).thenReturn(List.of(link));
-        service.process(row, user);
+        service.linkCaseToCase(row, user);
         assertThat(row.isCase2Created()).isFalse();
         assertThat(row.getLinkedCaseId()).isEqualTo(10);
         verify(caseCommonService, never()).retrieveOrCreateCase(any(CourthouseEntity.class), any(), any());
@@ -110,7 +111,7 @@ class CaseLinkRowServiceTest {
     }
 
     @Test
-    void given_sameCaseIds_when_processing_then_rejectSelfLink() {
+    void process_shouldRejectSelfLink_whenResolvedCaseIdsAreEqual() {
         var first = givenFirstCase();
         when(caseRepository.findByCaseNumberAndCourthouse("CP1", courthouse)).thenReturn(Optional.of(first));
         assertFailure("SELF_LINK");
@@ -118,14 +119,14 @@ class CaseLinkRowServiceTest {
     }
 
     @Test
-    void given_deletedAndAnonymisedCases_when_processing_then_recordWarningsAndContinue() {
+    void process_shouldRecordWarningsAndSucceed_whenCasesAreDeletedOrAnonymised() {
         var first = givenFirstCase();
         first.setDeleted(true);
         var second = courtCase(2);
         second.setDataAnonymised(true);
         when(caseRepository.findByCaseNumberAndCourthouse("CP1", courthouse)).thenReturn(Optional.of(second));
         when(linkedCaseRepository.findByCaseIds(1, 2)).thenReturn(List.of(new CaseLinkedCaseEntity()));
-        service.process(row, user);
+        service.linkCaseToCase(row, user);
         assertThat(row.getWarningCodes()).isEqualTo("CASE_1_DELETED,CASE_2_ANONYMISED");
         assertThat(row.getStatus().getId()).isEqualTo(CaseLinkResultStatus.SUCCESS.getId());
     }
@@ -138,13 +139,14 @@ class CaseLinkRowServiceTest {
     }
 
     private CourtCaseEntity courtCase(int id) {
-        var entity = new CourtCaseEntity();
-        entity.setId(id);
-        return entity;
+        CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setId(id);
+        return courtCaseEntity;
     }
 
     private void assertFailure(String code) {
-        assertThatThrownBy(() -> service.process(row, user)).isInstanceOfSatisfying(CaseLinkRowException.class,
-            exception -> assertThat(exception.getErrorCode()).isEqualTo(code));
+        assertThatThrownBy(() -> service.linkCaseToCase(row, user)).isInstanceOfSatisfying(DartsApiException.class,
+                                                                                           exception -> assertThat(exception.getError()).isEqualTo(
+                                                                                               CaseApiError.valueOf(code)));
     }
 }
