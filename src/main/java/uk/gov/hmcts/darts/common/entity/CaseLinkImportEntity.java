@@ -28,7 +28,7 @@ public class CaseLinkImportEntity extends CreatedModifiedBaseEntity {
     @Column(name = "cli_id")
     private Long id;
 
-    @Column(name = "original_filename", columnDefinition = "text")
+    @Column(name = "original_filename")
     private String originalFilename;
 
     @Column(name = "file_checksum", length = 64)
@@ -47,6 +47,6 @@ public class CaseLinkImportEntity extends CreatedModifiedBaseEntity {
     @Column(name = "error_code")
     private String errorCode;
 
-    @Column(name = "error_message", columnDefinition = "text")
+    @Column(name = "error_message")
     private String errorMessage;
 }

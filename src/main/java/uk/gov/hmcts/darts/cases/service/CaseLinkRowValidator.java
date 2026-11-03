@@ -2,8 +2,9 @@ package uk.gov.hmcts.darts.cases.service;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.cases.exception.CaseLinkRowException;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.common.entity.CaseLinkImportResultEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.util.Set;
 
@@ -16,26 +17,29 @@ public class CaseLinkRowValidator {
 
     public void validate(CaseLinkImportResultEntity row, Set<Mapping> seen) {
         if (row.getColumnCount() != COLUMN_COUNT) {
-            throw new CaseLinkRowException("INVALID_COLUMN_COUNT", "Each row must contain exactly three columns");
+            throw new DartsApiException(CaseApiError.INVALID_COLUMN_COUNT);
         }
-        validateValue(row.getCase1CaseNumber(), CASE_NUMBER_LENGTH, "CASE_1_CASE_NUMBER");
-        validateValue(row.getCase1Courthouse(), COURTHOUSE_LENGTH, "CASE_1_COURTHOUSE");
-        validateValue(row.getCase2CaseNumber(), CASE_NUMBER_LENGTH, "CASE_2_CASE_NUMBER");
+        validateValue(row.getCase1CaseNumber(), CASE_NUMBER_LENGTH,
+                      CaseApiError.CASE_1_CASE_NUMBER_REQUIRED, CaseApiError.CASE_1_CASE_NUMBER_TOO_LONG);
+        validateValue(row.getCase1Courthouse(), COURTHOUSE_LENGTH,
+                      CaseApiError.CASE_1_COURTHOUSE_REQUIRED, CaseApiError.CASE_1_COURTHOUSE_TOO_LONG);
+        validateValue(row.getCase2CaseNumber(), CASE_NUMBER_LENGTH,
+                      CaseApiError.CASE_2_CASE_NUMBER_REQUIRED, CaseApiError.CASE_2_CASE_NUMBER_TOO_LONG);
         String case1 = row.getCase1CaseNumber().trim();
         String case2 = row.getCase2CaseNumber().trim();
         String courthouse = StringUtils.toRootUpperCase(row.getCase1Courthouse().trim());
         Mapping mapping = case1.compareTo(case2) <= 0 ? new Mapping(courthouse, case1, case2) : new Mapping(courthouse, case2, case1);
         if (!seen.add(mapping)) {
-            throw new CaseLinkRowException("DUPLICATE_MAPPING", "The mapping duplicates an earlier row in either case order");
+            throw new DartsApiException(CaseApiError.DUPLICATE_MAPPING);
         }
     }
 
-    private void validateValue(String value, int maxLength, String field) {
+    private void validateValue(String value, int maxLength, CaseApiError requiredError, CaseApiError lengthError) {
         if (StringUtils.isBlank(value)) {
-            throw new CaseLinkRowException(field + "_REQUIRED", field + " is required");
+            throw new DartsApiException(requiredError);
         }
         if (value.trim().length() > maxLength) {
-            throw new CaseLinkRowException(field + "_TOO_LONG", field + " exceeds the maximum length of " + maxLength);
+            throw new DartsApiException(lengthError);
         }
     }
 

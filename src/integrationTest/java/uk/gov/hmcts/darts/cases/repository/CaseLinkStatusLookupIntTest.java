@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.repository;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -35,7 +36,7 @@ class CaseLinkStatusLookupIntTest extends PostgresIntegrationBase {
 
     @ParameterizedTest
     @EnumSource(CaseLinkImportStatus.class)
-    void given_importStatus_when_readingLookup_then_matchStableIdAndCode(CaseLinkImportStatus status) {
+    void findById_shouldReturnMatchingCodeAndDisplayName_whenImportStatusExists(CaseLinkImportStatus status) {
         var lookup = importStatusRepository.findById(status.getId()).orElseThrow();
         assertThat(lookup.getStatusType()).isEqualTo(status.name());
         assertThat(lookup.getDisplayName()).isNotBlank();
@@ -43,14 +44,21 @@ class CaseLinkStatusLookupIntTest extends PostgresIntegrationBase {
 
     @ParameterizedTest
     @EnumSource(CaseLinkResultStatus.class)
-    void given_rowStatus_when_readingLookup_then_matchStableIdAndCode(CaseLinkResultStatus status) {
+    void findById_shouldReturnMatchingCodeAndDisplayName_whenResultStatusExists(CaseLinkResultStatus status) {
         var lookup = resultStatusRepository.findById(status.getId()).orElseThrow();
         assertThat(lookup.getStatusType()).isEqualTo(status.name());
         assertThat(lookup.getDisplayName()).isNotBlank();
     }
 
+    @DisplayName("""
+        V1_523__create_case_link_import_tables.sql
+        SHOULD create the import and row audit tables with seeded status lookups
+            AND retain supplied filenames, row outcomes and separate case courthouses
+            AND enforce status foreign keys for imports and rows
+        WHEN the migration runs in an empty schema with its prerequisite tables
+        """)
     @Test
-    void given_emptySchema_when_creatingImportTables_then_supportLookupStatusesAndBothCourthouses() throws SQLException {
+    void createCaseLinkImportTables_shouldCreateAuditSchema_whenSchemaIsEmpty() throws SQLException {
         String schema = "case_link_status_" + UUID.randomUUID().toString().replace("-", "");
         try (var connection = dataSource.getConnection()) {
             String originalSchema = connection.getSchema();

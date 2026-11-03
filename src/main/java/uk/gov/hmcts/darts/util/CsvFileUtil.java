@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.util;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.IOException;
@@ -11,7 +12,6 @@ public final class CsvFileUtil {
 
     }
 
-
     public static Iterable<CSVRecord> readCsv(Reader reader) throws IOException {
 
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
@@ -19,6 +19,10 @@ public final class CsvFileUtil {
             .setSkipHeaderRecord(true)
             .build();
 
+        return readCsv(reader, csvFormat);
+    }
+
+    public static CSVParser readCsv(Reader reader, CSVFormat csvFormat) throws IOException {
         return csvFormat.parse(reader);
     }
 }

@@ -671,13 +671,15 @@ paths:
         - CaseLinkImports
       summary: Import case links from a CSV file as a global Super Admin
       description: |-
-        Upload one UTF-8 CSV file with positional columns XHIBIT_CASE,XHIBIT_COURTHOUSE,CP_URN.
-        The first CSV record is skipped without inspecting its header names.
+        Upload a UTF-8 CSV file with a .csv extension, text/csv content type,
+        and positional columns XHIBIT_CASE,XHIBIT_COURTHOUSE,CP_URN.
+        The first CSV row is skipped without inspecting its header names.
         Both cases use the supplied existing courthouse. Case 1 must exist; case 2 is created if missing.
         Each data row commits independently. Invalid rows and duplicate or reversed mappings fail individually.
         Existing database links are successful. Deleted or anonymised cases are linked with audit warnings.
         Row numbers include the skipped header record, so the first data row is row 2.
-        Structural CSV errors and the configured file-size limit reject the file before processing any data rows.
+        An import audit is created before validating the file extension, content type, emptiness, size or CSV structure.
+        File validation and file-read failures are audited and reject the file before processing any data rows.
         The import and row outcomes are stored; summaries are calculated from those outcomes.
       requestBody:
         required: true
@@ -692,6 +694,10 @@ paths:
                 file:
                   type: string
                   format: binary
+                  description: CSV file with a .csv extension and text/csv content type
+            encoding:
+              file:
+                contentType: text/csv
       responses:
         '200':
           description: Processing completed, possibly with individual row failures
@@ -718,14 +724,52 @@ paths:
               schema:
                 $ref: './problem.yaml'
         '422':
-          description: File rejected; no cases or links were created
+          description: |-
+            File rejected before any rows are processed. All file validation and file-read failures are audited,
+            including invalid file extensions, unsupported content types, zero-byte files and files above the
+            configured size limit. Rejection responses include import_id, error_code and error_message from that audit.
+            Validation uses standard API errors:
+            * CASE_109 - INVALID_FILE_TYPE
+            * CASE_110 - INVALID_CONTENT_TYPE
+            * CASE_111 - EMPTY_FILE
+            * CASE_112 - FILE_TOO_LARGE
+            * CASE_113 - MALFORMED_CSV
+            * CASE_114 - FILE_READ_FAILED
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml'
+                $ref: '#/components/schemas/CaseLinkImportProblem'
+              example:
+                type: "CASE_113"
+                title: "The file must contain well-formed UTF-8 CSV"
+                status: 422
+                import_id: 123
+                error_code: MALFORMED_CSV
+                error_message: "The file must contain well-formed UTF-8 CSV"
 
 components:
   schemas:
+    CaseLinkImportProblem:
+      allOf:
+        - $ref: './problem.yaml'
+        - type: object
+          required:
+            - import_id
+            - error_code
+            - error_message
+          properties:
+            import_id:
+              type: integer
+              format: int64
+              description: Audit ID of the rejected import
+            error_code:
+              type: string
+              description: Generic validation code stored in the import audit
+              example: MALFORMED_CSV
+            error_message:
+              type: string
+              description: Validation failure message stored in the import audit
+
     CaseLinkImportResponse:
       type: object
       required:
@@ -774,6 +818,7 @@ components:
           description: Supplied CP_URN
         error_code:
           type: string
+          description: Generic case 1/case 2 validation code or an error code from case processing
           example: CASE_1_NOT_FOUND
         error_message:
           type: string
@@ -1362,7 +1407,49 @@ components:
         - "CASE_106"
         - "CASE_107"
         - "CASE_108"
-      x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET, HEARINGS_NOT_ACTUAL, CASE_EXPIRED ]
+        - "CASE_109"
+        - "CASE_110"
+        - "CASE_111"
+        - "CASE_112"
+        - "CASE_113"
+        - "CASE_114"
+        - "CASE_115"
+        - "CASE_116"
+        - "CASE_117"
+        - "CASE_118"
+        - "CASE_119"
+        - "CASE_120"
+        - "CASE_121"
+        - "CASE_122"
+        - "CASE_123"
+        - "CASE_124"
+        - "CASE_125"
+      x-enum-varnames:
+        - TOO_MANY_RESULTS
+        - NO_CRITERIA_SPECIFIED
+        - CRITERIA_TOO_BROAD
+        - INVALID_REQUEST
+        - CASE_NOT_FOUND
+        - PATCH_CRITERIA_NOT_MET
+        - HEARINGS_NOT_ACTUAL
+        - CASE_EXPIRED
+        - INVALID_FILE_TYPE
+        - INVALID_CONTENT_TYPE
+        - EMPTY_FILE
+        - FILE_TOO_LARGE
+        - MALFORMED_CSV
+        - FILE_READ_FAILED
+        - INVALID_COLUMN_COUNT
+        - CASE_1_CASE_NUMBER_REQUIRED
+        - CASE_1_COURTHOUSE_REQUIRED
+        - CASE_2_CASE_NUMBER_REQUIRED
+        - CASE_1_CASE_NUMBER_TOO_LONG
+        - CASE_1_COURTHOUSE_TOO_LONG
+        - CASE_2_CASE_NUMBER_TOO_LONG
+        - DUPLICATE_MAPPING
+        - COURTHOUSE_NOT_FOUND
+        - CASE_1_NOT_FOUND
+        - SELF_LINK
 
     CaseTitleErrors:
       type: string
@@ -1375,7 +1462,49 @@ components:
         - "The request does not contain any values that are supported by the PATCH operation."
         - "The requested case does not contain any actual hearings."
         - "Case has expired."
-      x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET, HEARINGS_NOT_ACTUAL, CASE_EXPIRED ]
+        - "A CSV file is required"
+        - "The declared content type of the CSV file is not allowed"
+        - "The CSV must contain at least one data row"
+        - "The CSV exceeds the configured maximum file size"
+        - "The file must contain well-formed UTF-8 CSV"
+        - "The uploaded file could not be read"
+        - "Each row must contain exactly three columns"
+        - "Case 1 case number is required"
+        - "Case 1 courthouse is required"
+        - "Case 2 case number is required"
+        - "Case 1 case number exceeds the maximum length of 32"
+        - "Case 1 courthouse exceeds the maximum length of 255"
+        - "Case 2 case number exceeds the maximum length of 32"
+        - "The mapping duplicates an earlier row in either case order"
+        - "The supplied courthouse does not exist"
+        - "Case 1 does not exist and must already exist"
+        - "A case cannot be linked to itself"
+      x-enum-varnames:
+        - TOO_MANY_RESULTS
+        - NO_CRITERIA_SPECIFIED
+        - CRITERIA_TOO_BROAD
+        - INVALID_REQUEST
+        - CASE_NOT_FOUND
+        - PATCH_CRITERIA_NOT_MET
+        - HEARINGS_NOT_ACTUAL
+        - CASE_EXPIRED
+        - INVALID_FILE_TYPE
+        - INVALID_CONTENT_TYPE
+        - EMPTY_FILE
+        - FILE_TOO_LARGE
+        - MALFORMED_CSV
+        - FILE_READ_FAILED
+        - INVALID_COLUMN_COUNT
+        - CASE_1_CASE_NUMBER_REQUIRED
+        - CASE_1_COURTHOUSE_REQUIRED
+        - CASE_2_CASE_NUMBER_REQUIRED
+        - CASE_1_CASE_NUMBER_TOO_LONG
+        - CASE_1_COURTHOUSE_TOO_LONG
+        - CASE_2_CASE_NUMBER_TOO_LONG
+        - DUPLICATE_MAPPING
+        - COURTHOUSE_NOT_FOUND
+        - CASE_1_NOT_FOUND
+        - SELF_LINK
 
     CaseOpenStatusEnum:
       type: string
