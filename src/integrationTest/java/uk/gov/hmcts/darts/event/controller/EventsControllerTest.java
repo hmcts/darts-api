@@ -319,7 +319,8 @@ class EventsControllerTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden())
             .andReturn();
 
-        Assertions.assertEquals("{\"type\":\"AUTHORISATION_109\",\"title\":\"User is not authorised for this endpoint\",\"status\":403}",
+        Assertions.assertEquals("{\"type\":\"AUTHORISATION_109\",\"title\":\"User is not authorised for this endpoint\",\"status\":403,"
+                                    + "\"instance\":\"/admin/events/obfuscate\"}",
                                 response.getResponse().getContentAsString());
     }
 

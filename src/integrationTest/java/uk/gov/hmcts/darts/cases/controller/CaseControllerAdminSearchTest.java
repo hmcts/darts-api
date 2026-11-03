@@ -279,7 +279,8 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
                "type": "CASE_103",
                "title": "The request is not valid",
                "status": 422,
-               "detail": "Courthouse and courtroom must be uppercase."
+               "detail": "Courthouse and courtroom must be uppercase.",
+               "instance": "/admin/cases/search"
              }""";
 
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -306,7 +307,8 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
                "type": "COMMON_104",
                "title": "Invalid request",
                "status": 422,
-               "detail": "The hearing start date cannot be after the end date."
+               "detail": "The hearing start date cannot be after the end date.",
+               "instance": "/admin/cases/search"
              }
             """;
 
@@ -332,7 +334,8 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
             {
               "type": "COMMON_105",
               "title": "The search criteria is too broad",
-              "status": 422
+              "status": 422,
+              "instance": "/admin/cases/search"
             }
             """;
 

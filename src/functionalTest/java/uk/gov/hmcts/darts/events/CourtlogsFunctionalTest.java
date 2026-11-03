@@ -133,7 +133,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
 
         assertEquals(400, response.statusCode());
         assertThat(response.asPrettyString()).contains(
-            "Required request parameter 'start_date_time' for method parameter type OffsetDateTime is not present");
+            "Required parameter 'start_date_time' is not present.");
 
     }
 
