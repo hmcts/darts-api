@@ -74,6 +74,9 @@ public class CaseLinkImportServiceImpl implements CaseLinkImportService {
             throw reject(importId, exception);
         } catch (IOException exception) {
             throw reject(importId, new DartsApiException(CaseApiError.FILE_READ_FAILED, exception));
+        } catch (RuntimeException exception) {
+            caseLinkImportAuditService.failImport(importId, CaseLinkImportStatus.FAILED, "IMPORT_FAILED", "The import could not be completed");
+            throw exception;
         }
     }
 
