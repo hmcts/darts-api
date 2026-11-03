@@ -12,7 +12,7 @@ class CaseLinkImportStatusTest {
 
     @ParameterizedTest
     @CsvSource({"1,RECEIVED", "2,PROCESSING", "3,COMPLETED", "4,COMPLETED_WITH_ERRORS", "5,REJECTED", "6,FAILED"})
-    void given_lookupId_when_mappingStatus_then_returnApiStatus(Integer id, CaseLinkImportStatus expected) {
+    void fromId_shouldReturnMatchingStatus_whenIdIsKnown(Integer id, CaseLinkImportStatus expected) {
         assertThat(CaseLinkImportStatus.fromId(id)).isEqualTo(expected);
         assertThat(expected.getId()).isEqualTo(id);
     }
@@ -20,7 +20,7 @@ class CaseLinkImportStatusTest {
     @ParameterizedTest
     @NullSource
     @ValueSource(ints = {-1, 0, 7})
-    void given_unknownLookupId_when_mappingStatus_then_reject(Integer id) {
+    void fromId_shouldThrowIllegalArgumentException_whenIdIsUnknownOrNull(Integer id) {
         assertThatThrownBy(() -> CaseLinkImportStatus.fromId(id)).isInstanceOf(IllegalArgumentException.class);
     }
 }

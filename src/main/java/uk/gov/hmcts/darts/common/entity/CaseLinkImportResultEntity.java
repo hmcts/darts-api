@@ -20,8 +20,6 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 @Setter
 public class CaseLinkImportResultEntity extends CreatedModifiedBaseEntity {
 
-    private static final String TEXT_TYPE = "text";
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "clr_gen")
     @SequenceGenerator(name = "clr_gen", sequenceName = "clr_seq", allocationSize = 1)
@@ -34,16 +32,16 @@ public class CaseLinkImportResultEntity extends CreatedModifiedBaseEntity {
     @Column(name = "row_number", nullable = false)
     private Integer rowNumber;
 
-    @Column(name = "case_1_case_number", columnDefinition = TEXT_TYPE)
+    @Column(name = "case_1_case_number")
     private String case1CaseNumber;
 
-    @Column(name = "case_1_courthouse", columnDefinition = TEXT_TYPE)
+    @Column(name = "case_1_courthouse")
     private String case1Courthouse;
 
-    @Column(name = "case_2_case_number", columnDefinition = TEXT_TYPE)
+    @Column(name = "case_2_case_number")
     private String case2CaseNumber;
 
-    @Column(name = "case_2_courthouse", columnDefinition = TEXT_TYPE)
+    @Column(name = "case_2_courthouse")
     private String case2Courthouse;
 
     @Column(name = "column_count", nullable = false)
@@ -83,9 +81,9 @@ public class CaseLinkImportResultEntity extends CreatedModifiedBaseEntity {
     @Column(name = "error_code")
     private String errorCode;
 
-    @Column(name = "error_message", columnDefinition = TEXT_TYPE)
+    @Column(name = "error_message")
     private String errorMessage;
 
-    @Column(name = "warning_codes", columnDefinition = TEXT_TYPE)
+    @Column(name = "warning_codes")
     private String warningCodes;
 }
