@@ -353,6 +353,31 @@ class AdminCaseControllerIntTest extends PostgresIntegrationBase {
     }
 
     @Test
+    void adminCaseLinkImportsPost_shouldAuditRejectionWithoutCreatingLinks_whenBlankRowsExceedDefaultMaximum() throws Exception {
+        var upload = file("X1,YORK,CP1\n" + "\n".repeat(100_000));
+
+        mockMvc.perform(multipart(ENDPOINT).file(upload))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.type").value("CASE_126"))
+            .andExpect(jsonPath("$.title").value(CaseApiError.TOO_MANY_ROWS.getTitle()))
+            .andExpect(jsonPath("$.error_code").value("TOO_MANY_ROWS"))
+            .andExpect(jsonPath("$.error_message").value(CaseApiError.TOO_MANY_ROWS.getTitle()))
+            .andExpect(jsonPath("$.import_id").isNumber());
+
+        assertThat(importRepository.findAll()).singleElement().satisfies(caseLinkImportEntity -> {
+            assertThat(caseLinkImportEntity.getStatus().getId()).isEqualTo(CaseLinkImportStatus.REJECTED.getId());
+            assertThat(caseLinkImportEntity.getErrorCode()).isEqualTo("TOO_MANY_ROWS");
+            assertThat(caseLinkImportEntity.getErrorMessage()).isEqualTo(CaseApiError.TOO_MANY_ROWS.getTitle());
+            assertThat(caseLinkImportEntity.getOriginalFilename()).isEqualTo("cases.csv");
+            assertThat(caseLinkImportEntity.getCreatedById()).isEqualTo(user.getId());
+            assertThat(caseLinkImportEntity.getProcessingCompletedAt()).isNotNull();
+        });
+        assertThat(resultRepository.count()).isZero();
+        assertThat(linkedCaseRepository.count()).isZero();
+        assertThat(caseRepository.findByCaseNumberAndCourthouse("CP1", courthouse)).isEmpty();
+    }
+
+    @Test
     void adminCaseLinkImportsPost_shouldAuditRejection_whenCsvHasNoDataRows() throws Exception {
         var upload = new MockMultipartFile("file", "cases.csv", "text/csv", HEADER.getBytes(StandardCharsets.UTF_8));
         mockMvc.perform(multipart(ENDPOINT).file(upload))
