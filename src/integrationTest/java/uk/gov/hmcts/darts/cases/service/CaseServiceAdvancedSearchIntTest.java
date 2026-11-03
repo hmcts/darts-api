@@ -8,6 +8,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
+import uk.gov.hmcts.darts.common.entity.CaseLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -29,6 +30,8 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -49,6 +52,7 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
     private CaseService service;
     private CourthouseEntity swanseaCourthouse;
     private CourthouseEntity londonCourthouse;
+    private CourthouseEntity linkedCasesCourthouse;
     private UserAccountEntity user;
 
     @BeforeEach
@@ -60,6 +64,10 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
         londonCourthouse = someMinimalCourthouse();
         londonCourthouse.setCourthouseName("LONDON");
         londonCourthouse.setDisplayName("LONDON");
+
+        linkedCasesCourthouse = someMinimalCourthouse();
+        linkedCasesCourthouse.setCourthouseName("CARDIFF");
+        linkedCasesCourthouse.setDisplayName("CARDIFF");
 
         CourtCaseEntity case1 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case1.setCaseNumber("Case1");
@@ -91,6 +99,15 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
 
         CourtCaseEntity case10 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case10.setCaseNumber("case10");
+
+        CourtCaseEntity linkedSearchCase1 = PersistableFactory.getCourtCaseTestData().createCaseAt(linkedCasesCourthouse);
+        linkedSearchCase1.setCaseNumber("LinkedCase01");
+
+        CourtCaseEntity linkedSearchCase2 = PersistableFactory.getCourtCaseTestData().createCaseAt(linkedCasesCourthouse);
+        linkedSearchCase2.setCaseNumber("LinkedCase02");
+
+        CourtCaseEntity linkedSearchCase3 = PersistableFactory.getCourtCaseTestData().createCaseAt(linkedCasesCourthouse);
+        linkedSearchCase3.setCaseNumber("LinkedCase03");
 
         JudgeEntity judge = createJudgeWithName("aJudge");
         CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
@@ -148,6 +165,15 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
         HearingEntity hearing10b = PersistableFactory
             .getHearingTestData().createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 24), judge3a, false);
 
+        JudgeEntity linkedCaseJudge = createJudgeWithName("linkedCaseJudge");
+        CourtroomEntity linkedCaseCourtroom = createCourtRoomWithNameAtCourthouse(linkedCasesCourthouse, "linkedCaseCourtroom");
+        HearingEntity linkedCaseHearing1 = PersistableFactory
+            .getHearingTestData().createHearingWithDefaults(linkedSearchCase1, linkedCaseCourtroom, LocalDate.of(2024, 1, 1), linkedCaseJudge);
+        HearingEntity linkedCaseHearing2 = PersistableFactory
+            .getHearingTestData().createHearingWithDefaults(linkedSearchCase2, linkedCaseCourtroom, LocalDate.of(2024, 1, 2), linkedCaseJudge);
+        HearingEntity linkedCaseHearing3 = PersistableFactory
+            .getHearingTestData().createHearingWithDefaults(linkedSearchCase3, linkedCaseCourtroom, LocalDate.of(2024, 1, 3), linkedCaseJudge);
+
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
                               hearing2a, hearing2b, hearing2c,
                               hearing3a, hearing3b, hearing3c,
@@ -157,8 +183,12 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
                               hearing7a, hearing7b,
                               hearing8,
                               hearing9,
-                              hearing10a, hearing10b
+                              hearing10a, hearing10b,
+                              linkedCaseHearing1, linkedCaseHearing2, linkedCaseHearing3
         );
+
+        dartsDatabase.save(createLinkedCase(linkedSearchCase1, linkedSearchCase2));
+        dartsDatabase.save(createLinkedCase(linkedSearchCase3, linkedSearchCase1));
 
         EventEntity event4a = createEventWith("eventName", "event4a", hearing4a, OffsetDateTime.now());
         EventEntity event5b = createEventWith("eventName", "event5b", hearing5b, OffsetDateTime.now());
@@ -212,6 +242,86 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void advancedSearch_shouldReturnLinkedCases_whenOneCaseAndOneLinkedCase() {
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .caseNumber("LinkedCase02")
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, linkedCasesCourthouse);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+
+        assertThat(resultList).hasSize(1);
+        assertThat(resultList.getFirst().getCaseNumber()).isEqualTo("LinkedCase02");
+        assertThat(resultList.getFirst().getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber())
+            .containsExactly("LinkedCase01");
+        assertThat(resultList.getFirst().getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getActiveLink())
+            .containsExactly(true);
+    }
+
+    @Test
+    void advancedSearch_shouldReturnLinkedCases_whenMultipleCasesLinkedToDifferentCases() {
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .dateFrom(LocalDate.of(2024, 1, 1))
+            .dateTo(LocalDate.of(2024, 1, 3))
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, linkedCasesCourthouse);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+
+        AdvancedSearchResult linkedCase1 = getResultByCaseNumber(resultList, "LinkedCase01");
+        AdvancedSearchResult linkedCase2 = getResultByCaseNumber(resultList, "LinkedCase02");
+        AdvancedSearchResult linkedCase3 = getResultByCaseNumber(resultList, "LinkedCase03");
+
+        assertThat(resultList).hasSize(3);
+        assertThat(linkedCase1.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber())
+            .containsExactlyInAnyOrder("LinkedCase02", "LinkedCase03");
+        assertThat(linkedCase1.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getActiveLink())
+            .containsOnly(true);
+        assertThat(linkedCase2.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber())
+            .containsExactly("LinkedCase01");
+        assertThat(linkedCase2.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getActiveLink())
+            .containsExactly(true);
+        assertThat(linkedCase3.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber())
+            .containsExactly("LinkedCase01");
+        assertThat(linkedCase3.getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getActiveLink())
+            .containsExactly(true);
+    }
+
+    @Test
+    void advancedSearch_shouldReturnLinkedCasesWithActiveLinkFalse_whenUserDoesNotHaveAccessToSomeLinkedCases() {
+        CourtCaseEntity linkedSearchCase = getCourtCase("LinkedCase01", "CARDIFF");
+        CourtCaseEntity inaccessibleLinkedCase = getCourtCase("Case9", "LONDON");
+        dartsDatabase.save(createLinkedCase(linkedSearchCase, inaccessibleLinkedCase));
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .caseNumber("LinkedCase01")
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, linkedCasesCourthouse);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+
+        assertThat(resultList).hasSize(1);
+        assertThat(resultList.getFirst().getLinkedCases())
+            .extracting(linkedCase -> linkedCase.getCaseNumber(), linkedCase -> linkedCase.getActiveLink())
+            .containsExactlyInAnyOrder(
+                tuple("LinkedCase02", true),
+                tuple("LinkedCase03", true),
+                tuple("Case9", false)
+            );
     }
 
     @Test
@@ -488,6 +598,28 @@ class CaseServiceAdvancedSearchIntTest extends IntegrationBase {
             refreshedUser.getSecurityGroupEntities().add(securityGroup);
             dartsDatabase.save(refreshedUser);
         });
+    }
+
+    private CaseLinkedCaseEntity createLinkedCase(CourtCaseEntity courtCase1, CourtCaseEntity courtCase2) {
+        CaseLinkedCaseEntity linkedCase = new CaseLinkedCaseEntity();
+        linkedCase.setCourtCase1(courtCase1);
+        linkedCase.setCourtCase2(courtCase2);
+        linkedCase.setCreatedById(0);
+        linkedCase.setLastModifiedById(0);
+        return linkedCase;
+    }
+
+    private AdvancedSearchResult getResultByCaseNumber(List<AdvancedSearchResult> resultList, String caseNumber) {
+        return resultList.stream()
+            .filter(result -> caseNumber.equals(result.getCaseNumber()))
+            .findFirst()
+            .orElseThrow();
+    }
+
+    private CourtCaseEntity getCourtCase(String caseNumber, String courthouseName) {
+        return dartsDatabase.getCaseRepository()
+            .findByCaseNumberAndCourthouse_CourthouseName(caseNumber, courthouseName)
+            .orElseThrow();
     }
 
     private static void compareJson(String actualResponse, String expectedResponse) {
