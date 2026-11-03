@@ -30,7 +30,8 @@ public class CaseLinkFileValidator implements Validator<MultipartFile> {
         if (!"csv".equalsIgnoreCase(FilenameUtils.getExtension(file.getOriginalFilename()))) {
             throw new DartsApiException(CaseApiError.INVALID_FILE_TYPE);
         }
-        if (!"text/csv".equals(file.getContentType())) {
+        String contentType = file.getContentType();
+        if (contentType == null || !"text/csv".equalsIgnoreCase(contentType.split(";", 2)[0].trim())) {
             throw new DartsApiException(CaseApiError.INVALID_CONTENT_TYPE);
         }
     }
