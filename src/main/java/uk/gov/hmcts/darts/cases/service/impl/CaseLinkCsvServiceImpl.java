@@ -1,9 +1,11 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.darts.cases.config.CaseLinkImportConfiguration;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkResultStatus;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.service.CaseLinkCsvService;
@@ -20,10 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CaseLinkCsvServiceImpl implements CaseLinkCsvService {
 
     private static final int COLUMN_COUNT = 3;
     private static final char NULL_CHARACTER = '\0';
+
+    private final CaseLinkImportConfiguration configuration;
 
     @Override
     public List<CaseLinkImportResultEntity> readCaseLinkCsvFile(MultipartFile file) {
@@ -38,9 +43,7 @@ public class CaseLinkCsvServiceImpl implements CaseLinkCsvService {
                 if (record.getRecordNumber() == 1) {
                     continue; // The first CSV record is always skipped; header names are not inspected.
                 }
-                if (record.stream().anyMatch(value -> value.indexOf(NULL_CHARACTER) >= 0)) {
-                    throw new DartsApiException(CaseApiError.MALFORMED_CSV);
-                }
+                validateDataRecord(record, rows.size());
                 rows.add(createCaseLinkImportResult(record));
             }
             if (rows.isEmpty()) {
@@ -49,6 +52,15 @@ public class CaseLinkCsvServiceImpl implements CaseLinkCsvService {
             return rows;
         } catch (IOException | IllegalArgumentException | java.io.UncheckedIOException exception) {
             throw new DartsApiException(CaseApiError.MALFORMED_CSV, exception);
+        }
+    }
+
+    private void validateDataRecord(CSVRecord record, int bufferedRowCount) {
+        if (bufferedRowCount >= configuration.getMaxRows()) {
+            throw new DartsApiException(CaseApiError.TOO_MANY_ROWS);
+        }
+        if (record.stream().anyMatch(value -> value.indexOf(NULL_CHARACTER) >= 0)) {
+            throw new DartsApiException(CaseApiError.MALFORMED_CSV);
         }
     }
 

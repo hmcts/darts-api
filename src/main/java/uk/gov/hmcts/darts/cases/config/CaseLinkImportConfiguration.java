@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.config;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,4 +18,7 @@ public class CaseLinkImportConfiguration {
 
     @NotNull
     private DataSize maxFileSize = DataSize.ofMegabytes(25);
+
+    @Min(1)
+    private int maxRows = 100_000;
 }
