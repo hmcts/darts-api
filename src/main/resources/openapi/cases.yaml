@@ -674,11 +674,14 @@ paths:
         Upload a UTF-8 CSV file with a .csv extension, text/csv content type,
         and positional columns XHIBIT_CASE,XHIBIT_COURTHOUSE,CP_URN.
         The first CSV row is skipped without inspecting its header names.
+        The maximum number of data records is configurable and defaults to 100,000.
+        Blank and invalid records count towards this limit; the skipped header does not.
+        Files exceeding the record limit are rejected before any data rows are processed.
         Both cases use the supplied existing courthouse. Case 1 must exist; case 2 is created if missing.
         Each data row commits independently. Invalid rows and duplicate or reversed mappings fail individually.
         Existing database links are successful. Deleted or anonymised cases are linked with audit warnings.
         Row numbers include the skipped header record, so the first data row is row 2.
-        An import audit is created before validating the file extension, content type, emptiness, size or CSV structure.
+        An import audit is created before validating the file extension, content type, emptiness, size, record count or CSV structure.
         File validation and file-read failures are audited and reject the file before processing any data rows.
         The import and row outcomes are stored; summaries are calculated from those outcomes.
       requestBody:
@@ -727,7 +730,7 @@ paths:
           description: |-
             File rejected before any rows are processed. All file validation and file-read failures are audited,
             including invalid file extensions, unsupported content types, zero-byte files and files above the
-            configured size limit. Rejection responses include import_id, error_code and error_message from that audit.
+            configured size or data-record limit. Rejection responses include import_id, error_code and error_message from that audit.
             Validation uses standard API errors:
             * CASE_109 - INVALID_FILE_TYPE
             * CASE_110 - INVALID_CONTENT_TYPE
@@ -735,6 +738,7 @@ paths:
             * CASE_112 - FILE_TOO_LARGE
             * CASE_113 - MALFORMED_CSV
             * CASE_114 - FILE_READ_FAILED
+            * CASE_126 - TOO_MANY_ROWS
           content:
             application/json+problem:
               schema:
@@ -1424,6 +1428,7 @@ components:
         - "CASE_123"
         - "CASE_124"
         - "CASE_125"
+        - "CASE_126"
       x-enum-varnames:
         - TOO_MANY_RESULTS
         - NO_CRITERIA_SPECIFIED
@@ -1450,6 +1455,7 @@ components:
         - COURTHOUSE_NOT_FOUND
         - CASE_1_NOT_FOUND
         - SELF_LINK
+        - TOO_MANY_ROWS
 
     CaseTitleErrors:
       type: string
@@ -1479,6 +1485,7 @@ components:
         - "The supplied courthouse does not exist"
         - "Case 1 does not exist and must already exist"
         - "A case cannot be linked to itself"
+        - "The CSV exceeds the configured maximum number of data rows"
       x-enum-varnames:
         - TOO_MANY_RESULTS
         - NO_CRITERIA_SPECIFIED
@@ -1505,6 +1512,7 @@ components:
         - COURTHOUSE_NOT_FOUND
         - CASE_1_NOT_FOUND
         - SELF_LINK
+        - TOO_MANY_ROWS
 
     CaseOpenStatusEnum:
       type: string
