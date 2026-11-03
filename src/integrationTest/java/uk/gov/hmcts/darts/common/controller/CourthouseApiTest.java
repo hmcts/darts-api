@@ -502,7 +502,7 @@ class CourthouseApiTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(jsonRequestBody);
 
-        /// When
+        // When
         mockMvc.perform(requestBuilder)
             // Then
             .andExpect(status().isUnprocessableEntity())

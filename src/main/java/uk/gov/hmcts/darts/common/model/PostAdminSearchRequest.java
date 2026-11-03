@@ -16,12 +16,12 @@ import java.util.List;
 @Builder
 public class PostAdminSearchRequest {
 
-    private @Nullable List<Integer> courthouseIds;
-    private @Nullable String caseNumber;
-    private @Nullable String courtroomName;
+    @Nullable private List<Integer> courthouseIds;
+    @Nullable private String caseNumber;
+    @Nullable private String courtroomName;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private @Nullable LocalDate hearingStartAt;
+    @Nullable private LocalDate hearingStartAt;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private @Nullable LocalDate hearingEndAt;
+    @Nullable private LocalDate hearingEndAt;
 
 }

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.BeanUtils;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -89,7 +90,9 @@ class EventMapperTest {
         AdminGetEventById200Response responseResult = eventMapper.mapToAdminGetEventById200Response(eventEntity);
 
         // Then
-        assertAdminEventResponseDetails(eventEntity, responseResult);
+        AdminGetEventResponseDetails responseDetails = new AdminGetEventResponseDetails();
+        BeanUtils.copyProperties(responseResult, responseDetails);
+        assertAdminEventResponseDetails(eventEntity, responseDetails);
 
         assertThat(responseResult.getCases())
             .containsExactly(adminGetEventResponseDetailsCasesCasesInner1, adminGetEventResponseDetailsCasesCasesInner2,
