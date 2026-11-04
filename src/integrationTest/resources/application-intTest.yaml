@@ -115,6 +115,11 @@ darts:
           remove-production-path: /v1/removeProduction
           get-extended-productions-by-matter: /v1/getExtendedProductionsByMatter
           download-production-path: /v1/downloadProduction/{productionExportFileID}/false
+      version5-3:
+        authentication:
+          auth-base-url: http://localhost:${wiremock.server.port}
+        api:
+          api-base-url: http://localhost:${wiremock.server.port}
     arm:
       temp-blob-workspace: ${java.io.tmpdir}/armworkspace
       max-continuation-batch-size: 10
