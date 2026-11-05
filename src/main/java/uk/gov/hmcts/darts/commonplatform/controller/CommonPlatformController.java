@@ -30,9 +30,9 @@ public class CommonPlatformController implements CommonPlatformApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {CPP})
     public ResponseEntity<CommonPlatformSubmissionResponse> submitCommonPlatformDailyList(
-        @RequestHeader(value = "X-Message-Id", required = true) String xMessageId,
+        @RequestHeader(value = "X-Message-Id", required = true) String messageId,
         @RequestBody String body,
-        @RequestHeader(value = "X-Correlation-ID", required = false) String xCorrelationId) {
+        @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId) {
 
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -42,9 +42,9 @@ public class CommonPlatformController implements CommonPlatformApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {CPP})
     public ResponseEntity<CommonPlatformSubmissionResponse> submitCommonPlatformEvent(
-        @RequestHeader(value = "X-Message-Id", required = true) String xMessageId,
+        @RequestHeader(value = "X-Message-Id", required = true) String messageId,
         @RequestBody CommonPlatformEventRequest commonPlatformEventRequest,
-        @RequestHeader(value = "X-Correlation-ID", required = false) String xCorrelationId) {
+        @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId) {
 
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
