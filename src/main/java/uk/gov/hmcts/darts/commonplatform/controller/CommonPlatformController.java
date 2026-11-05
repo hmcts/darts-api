@@ -32,7 +32,7 @@ public class CommonPlatformController implements CommonPlatformApi {
     public ResponseEntity<CommonPlatformSubmissionResponse> submitCommonPlatformDailyList(
         @RequestHeader(value = "X-Message-Id", required = true) String xMessageId,
         @RequestBody String body,
-        @RequestHeader(value = "X-Correlation-ID", required = false) String xCorrelationID) {
+        @RequestHeader(value = "X-Correlation-ID", required = false) String xCorrelationId) {
 
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -44,7 +44,7 @@ public class CommonPlatformController implements CommonPlatformApi {
     public ResponseEntity<CommonPlatformSubmissionResponse> submitCommonPlatformEvent(
         @RequestHeader(value = "X-Message-Id", required = true) String xMessageId,
         @RequestBody CommonPlatformEventRequest commonPlatformEventRequest,
-        @RequestHeader(value = "X-Correlation-ID", required = false) String xCorrelationID) {
+        @RequestHeader(value = "X-Correlation-ID", required = false) String xCorrelationId) {
 
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
