@@ -79,14 +79,15 @@ paths:
       operationId: submitCommonPlatformEvent
       summary: Submit a Common Platform event
       description: |-
-        Submit event metadata and a JSON event document, with optional retention data.
+        Submit a JSON event, with optional retention data.
         Success acknowledges receipt, not completion of downstream processing.
       x-darts-required-role: CPP
       parameters:
+        - $ref: '#/components/parameters/MessageId'
         - $ref: '#/components/parameters/CorrelationId'
       requestBody:
         required: true
-        description: Event metadata and document.
+        description: Event details.
         content:
           application/json:
             schema:
@@ -95,45 +96,31 @@ paths:
               juryIn:
                 summary: Jury in
                 value:
-                  message_id: 00000000-0000-4000-8000-000000000001
                   type: '1000'
                   sub_type: '1051'
-                  document:
-                    event_id: '12345678'
-                    year: 2026
-                    month: 9
-                    day: 16
-                    hour: 12
-                    minute: 1
-                    second: 34
-                    courthouse: EXAMPLE COURT
-                    courtroom: '3'
-                    case_numbers:
-                      - T20260001
-                    event_text: Jury in
+                  event_id: '12345678'
+                  date_time: '2026-09-16T11:01:34.000Z'
+                  courthouse: EXAMPLE COURT
+                  courtroom: '3'
+                  case_numbers:
+                    - T20260001
+                  event_text: Jury in
               eventWithRetentionPolicy:
                 summary: Event with retention data
                 description: Illustrative event type and subtype.
                 value:
-                  message_id: 00000000-0000-4000-8000-000000000003
                   type: '<cp-event-type>'
                   sub_type: '<cp-event-subtype>'
-                  document:
-                    event_id: '12345679'
-                    year: 2026
-                    month: 9
-                    day: 16
-                    hour: 12
-                    minute: 2
-                    second: 0
-                    courthouse: EXAMPLE COURT
-                    courtroom: '3'
-                    case_numbers:
-                      - T20260001
-                    event_text: Example event carrying retention information
-                    retention_policy:
-                      case_retention_fixed_policy: '3'
-                      case_total_sentence: 1Y2M0D
+                  event_id: '12345679'
+                  date_time: '2026-09-16T11:02:00.000Z'
+                  courthouse: EXAMPLE COURT
+                  courtroom: '3'
+                  case_numbers:
+                    - T20260001
+                  event_text: Example event carrying retention information
+                  retention_policy:
+                    case_retention_fixed_policy: '3'
+                    case_total_sentence: 1Y2M0D
       responses:
         '201':
           $ref: '#/components/responses/EventCreated'
@@ -143,10 +130,14 @@ paths:
           $ref: '#/components/responses/Unauthenticated'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '413':
           $ref: '#/components/responses/PayloadTooLarge'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/BusinessValidationError'
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
@@ -292,18 +283,15 @@ components:
   schemas:
     CommonPlatformEventRequest:
       type: object
-      description: Event metadata and document. Message types are strings.
+      description: Event details. Message types are strings.
       required:
-        - message_id
         - type
         - sub_type
-        - document
+        - event_id
+        - date_time
+        - courthouse
+        - case_numbers
       properties:
-        message_id:
-          type: string
-          minLength: 1
-          maxLength: 256
-          description: Submission identifier; reuse it when retrying the same message.
         type:
           type: string
           minLength: 1
@@ -312,59 +300,16 @@ components:
           type: string
           minLength: 1
           description: CP message subtype.
-        document:
-          $ref: '#/components/schemas/CommonPlatformEventDocument'
-    CommonPlatformEventDocument:
-      type: object
-      description: |-
-        Event details. Date and time components represent Europe/London court time
-        and must form a valid calendar date and time.
-      required:
-        - event_id
-        - year
-        - month
-        - day
-        - hour
-        - minute
-        - second
-        - courthouse
-        - case_numbers
-      properties:
         event_id:
           type: string
           pattern: '^-?[0-9]+$'
           description: Numeric event identifier, which may be negative.
           example: '-12345678'
-        year:
-          type: integer
-          minimum: 1
-          maximum: 9999
-          description: XML Y attribute.
-        month:
-          type: integer
-          minimum: 1
-          maximum: 12
-          description: XML M attribute.
-        day:
-          type: integer
-          minimum: 1
-          maximum: 31
-          description: XML D attribute; must form a valid date with year and month.
-        hour:
-          type: integer
-          minimum: 0
-          maximum: 23
-          description: XML H attribute in local court time.
-        minute:
-          type: integer
-          minimum: 0
-          maximum: 59
-          description: XML MIN attribute.
-        second:
-          type: integer
-          minimum: 0
-          maximum: 59
-          description: XML S attribute.
+        date_time:
+          type: string
+          format: date-time
+          description: Event timestamp, using the same date_time format as existing DARTS events.
+          example: '2026-09-16T11:01:34.000Z'
         courthouse:
           type: string
           minLength: 1
