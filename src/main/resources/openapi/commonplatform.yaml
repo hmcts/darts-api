@@ -176,7 +176,7 @@ components:
         maxLength: 256
       example: 00000000-0000-4000-8000-000000000001
     CorrelationId:
-      name: X-Correlation-ID
+      name: X-Correlation-Id
       in: header
       required: false
       description: Identifier for tracing a request across CP, Marketplace and DARTS.
