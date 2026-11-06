@@ -50,6 +50,8 @@ public interface TranscriptionService {
 
     GetYourTranscriptsResponse getYourTranscripts(Integer userId, Boolean includeHiddenFromRequester);
 
+    GetYourTranscriptsResponse getTranscriptionHubYourTranscripts(Integer userId, Boolean includeHiddenFromRequester);
+
     List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned);
 
     TranscriptionTranscriberCountsResponse getTranscriptionTranscriberCounts(Integer userId);
