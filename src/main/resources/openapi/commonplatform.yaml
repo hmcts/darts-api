@@ -302,8 +302,10 @@ components:
           description: CP message subtype.
         event_id:
           type: string
-          pattern: '^-?[0-9]+$'
-          description: Numeric event identifier, which may be negative.
+          minLength: 1
+          maxLength: 11
+          pattern: '^-?[0-9]{1,10}$'
+          description: Numeric source event identifier, which may be negative; not an event-handler type or name.
           example: '-12345678'
         date_time:
           type: string
