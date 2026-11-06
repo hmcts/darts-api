@@ -191,6 +191,37 @@ paths:
               items:
                 $ref: '#/components/schemas/UpdateTranscriptionsItem'
 
+  /transcriptions/transcription-hub-view:
+    get:
+      tags:
+        - Transcription
+      summary: Transcription Hub view for transcript requests
+      operationId: getTranscriptionHubYourTranscripts
+      parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetYourTranscriptsResponse'
+        '422':
+          description: Business Validation Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
+
   /transcriptions/{transcription_id}:
     get:
       tags:
