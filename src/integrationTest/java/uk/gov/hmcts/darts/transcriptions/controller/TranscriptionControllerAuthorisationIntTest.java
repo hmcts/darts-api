@@ -71,7 +71,8 @@ class TranscriptionControllerAuthorisationIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {
-        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
+        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT",
+        "HMCTS_TRANSCRIPTION_HUB"
     }, mode = EXCLUDE)
     void transcriptionEndpoints_shouldForbidAccess_whenRoleLacksConfiguredGlobalTranscriptionAccess(SecurityRoleEnum role)
         throws Exception {
@@ -88,6 +89,31 @@ class TranscriptionControllerAuthorisationIntTest extends IntegrationBase {
 
         mockMvc.perform(get("/transcriptions/{transcription_id}", transcription.getId())).andExpect(status().isOk());
         mockMvc.perform(get("/transcriptions/{transcription_id}/document", transcription.getId()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void transcriptionEndpoints_shouldAllowDetailsButForbidDocumentDownload_whenUserHasHubRole() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB);
+
+        mockMvc.perform(get("/transcriptions/{transcription_id}", transcription.getId())).andExpect(status().isOk());
+        mockMvc.perform(get("/transcriptions/{transcription_id}/document", transcription.getId()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void transcriptionHubView_shouldAllowAccess_whenUserHasHubRole() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB);
+
+        mockMvc.perform(get("/transcriptions/transcription-hub-view").header("user_id", 1))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void transcriptionHubView_shouldForbidAccess_whenUserDoesNotHaveHubRole() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.APPROVER);
+
+        mockMvc.perform(get("/transcriptions/transcription-hub-view").header("user_id", 1))
             .andExpect(status().isForbidden());
     }
 
