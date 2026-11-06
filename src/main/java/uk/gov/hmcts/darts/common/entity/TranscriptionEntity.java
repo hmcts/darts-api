@@ -93,6 +93,11 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity implements Ha
     @JoinColumn(name = "requested_by")
     private UserAccountEntity requestedBy;
 
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requesting_group_id")
+    private SecurityGroupEntity requestingSecurityGroup;
+
     @Column(name = "hearing_date")
     private LocalDate hearingDate;
 

@@ -10,4 +10,8 @@ public interface YourTranscriptsQuery {
 
     List<YourTranscriptsSummary> getApproverTranscriptions(Integer userId);
 
+    List<YourTranscriptsSummary> getTranscriptionHubRequesterTranscriptions(Integer userId, Boolean includeHiddenFromRequester);
+
+    List<YourTranscriptsSummary> getTranscriptionHubApproverTranscriptions(Integer userId);
+
 }
