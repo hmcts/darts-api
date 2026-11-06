@@ -68,6 +68,29 @@ class CommonPlatformOpenApiContractTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"0", "1", "-1", "12345678", "-12345678", "2147483647", "-2147483648"})
+    void givenValidEventId_whenValidatingEvent_thenAcceptsRequest(String eventId) throws JsonProcessingException {
+        ObjectNode body = eventBody();
+        body.put("event_id", eventId);
+
+        ValidationReport report = validateEvent(body);
+
+        assertTrue(report.getMessages().isEmpty(), () -> "Expected no validation errors but got: " + report.getMessages());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"12345678901", "-12345678901", "NEWCASE", "Jury in", "1.5", "-"})
+    void givenInvalidEventId_whenValidatingEvent_thenRejectsRequest(String eventId) throws JsonProcessingException {
+        ObjectNode body = eventBody();
+        body.put("event_id", eventId);
+
+        ValidationReport report = validateEvent(body);
+
+        assertFalse(report.getMessages().isEmpty(), "Expected a validation error for an invalid event ID");
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = {
         "2026-09-16T11:01:34Z",
         "2026-09-16T12:01:34+01:00",
