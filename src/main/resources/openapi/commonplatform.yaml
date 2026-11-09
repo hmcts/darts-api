@@ -106,11 +106,9 @@ paths:
                     - T20260001
                   event_text: Jury in
               eventWithRetentionPolicy:
-                summary: Event with retention data
-                description: Illustrative event type and subtype.
+                summary: Type-only event with retention data
                 value:
-                  type: '<cp-event-type>'
-                  sub_type: '<cp-event-subtype>'
+                  type: '3010'
                   event_id: '12345679'
                   date_time: '2026-09-16T11:02:00.000Z'
                   courthouse: EXAMPLE COURT
@@ -286,7 +284,6 @@ components:
       description: Event details. Message types are strings.
       required:
         - type
-        - sub_type
         - event_id
         - date_time
         - courthouse
@@ -298,8 +295,9 @@ components:
           description: CP message type.
         sub_type:
           type: string
+          nullable: true
           minLength: 1
-          description: CP message subtype.
+          description: Optional CP message subtype; omit or set to null for type-only events.
         event_id:
           type: string
           minLength: 1

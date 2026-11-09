@@ -68,6 +68,50 @@ class CommonPlatformOpenApiContractTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"1100", "1200", "3000", "3010", "40750"})
+    void givenTypeOnlyEventWithOmittedSubtype_whenValidatingEvent_thenAcceptsRequest(String type) throws JsonProcessingException {
+        ObjectNode body = eventBody();
+        body.put("type", type);
+        body.remove("sub_type");
+
+        ValidationReport report = validateEvent(body);
+
+        assertTrue(report.getMessages().isEmpty(), () -> "Expected no validation errors but got: " + report.getMessages());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"1100", "1200", "3000", "3010", "40750"})
+    void givenTypeOnlyEventWithNullSubtype_whenValidatingEvent_thenAcceptsRequest(String type) throws JsonProcessingException {
+        ObjectNode body = eventBody();
+        body.put("type", type);
+        body.putNull("sub_type");
+
+        ValidationReport report = validateEvent(body);
+
+        assertTrue(report.getMessages().isEmpty(), () -> "Expected no validation errors but got: " + report.getMessages());
+    }
+
+    @Test
+    void givenEmptySubtype_whenValidatingEvent_thenRejectsRequest() throws JsonProcessingException {
+        ObjectNode body = eventBody();
+        body.put("sub_type", "");
+
+        ValidationReport report = validateEvent(body);
+
+        assertFalse(report.getMessages().isEmpty(), "Expected a validation error for an empty subtype");
+    }
+
+    @Test
+    void givenNonStringSubtype_whenValidatingEvent_thenRejectsRequest() throws JsonProcessingException {
+        ObjectNode body = eventBody();
+        body.put("sub_type", 1051);
+
+        ValidationReport report = validateEvent(body);
+
+        assertFalse(report.getMessages().isEmpty(), "Expected a validation error for a non-string subtype");
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = {"0", "1", "-1", "12345678", "-12345678", "2147483647", "-2147483648"})
     void givenValidEventId_whenValidatingEvent_thenAcceptsRequest(String eventId) throws JsonProcessingException {
         ObjectNode body = eventBody();
@@ -141,7 +185,7 @@ class CommonPlatformOpenApiContractTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"type", "sub_type", "event_id", "date_time", "courthouse", "case_numbers"})
+    @ValueSource(strings = {"type", "event_id", "date_time", "courthouse", "case_numbers"})
     void givenMissingRequiredEventField_whenValidatingEvent_thenRejectsRequest(String field) throws JsonProcessingException {
         ObjectNode body = eventBody();
         body.remove(field);
