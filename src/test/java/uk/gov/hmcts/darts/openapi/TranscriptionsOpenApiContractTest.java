@@ -68,6 +68,33 @@ class TranscriptionsOpenApiContractTest {
 
 
     @Nested
+    class TranscriptionHubView {
+
+        @Test
+        void openApi_ShouldReturnNoError_WhenValidUserIdHeaderUsed() {
+            ValidationReport report = VALIDATOR.validateRequest(transcriptionHubViewRequest("1"));
+
+            assertTrue(report.getMessages().isEmpty(), "Expected no validation errors for a valid user_id header");
+        }
+
+        @Test
+        void openApi_ShouldReturnError_WhenUserIdHeaderIsMissing() {
+            ValidationReport report = VALIDATOR.validateRequest(SimpleRequest.Builder
+                .get("/transcriptions/transcription-hub-view")
+                .build());
+
+            assertFalse(report.getMessages().isEmpty(), "Expected validation errors when the user_id header is missing");
+        }
+
+        @Test
+        void openApi_ShouldReturnError_WhenUserIdHeaderIsNotAnInteger() {
+            ValidationReport report = VALIDATOR.validateRequest(transcriptionHubViewRequest("not-an-integer"));
+
+            assertFalse(report.getMessages().isEmpty(), "Expected validation errors for a non-integer user_id header");
+        }
+    }
+
+    @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class TranscriptionsPatch {
 
@@ -121,6 +148,13 @@ class TranscriptionsOpenApiContractTest {
             .patch("/transcriptions")
             .withContentType("application/json")
             .withBody(body)
+            .build();
+    }
+
+    private static SimpleRequest transcriptionHubViewRequest(String userId) {
+        return SimpleRequest.Builder
+            .get("/transcriptions/transcription-hub-view")
+            .withHeader("user_id", userId)
             .build();
     }
 
