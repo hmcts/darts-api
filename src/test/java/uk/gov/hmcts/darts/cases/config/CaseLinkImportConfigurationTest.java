@@ -19,4 +19,16 @@ class CaseLinkImportConfigurationTest {
                 .satisfies(violation -> assertThat(violation.getPropertyPath().toString()).isEqualTo("maxRows"));
         }
     }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    void validate_shouldRejectConfiguration_whenFailurePageSizeIsNotPositive(int failurePageSize) {
+        CaseLinkImportConfiguration configuration = new CaseLinkImportConfiguration();
+        configuration.setFailurePageSize(failurePageSize);
+
+        try (var validatorFactory = Validation.buildDefaultValidatorFactory()) {
+            assertThat(validatorFactory.getValidator().validate(configuration)).singleElement()
+                .satisfies(violation -> assertThat(violation.getPropertyPath().toString()).isEqualTo("failurePageSize"));
+        }
+    }
 }

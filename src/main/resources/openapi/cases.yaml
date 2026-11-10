@@ -684,6 +684,10 @@ paths:
         An import audit is created before validating the file extension, content type, emptiness, size, record count or CSV structure.
         File validation and file-read failures are audited and reject the file before processing any data rows.
         The import and row outcomes are stored; summaries are calculated from those outcomes.
+        The response contains the first page of failures, ordered by CSV row number, with pagination metadata.
+        The default and maximum page size are configurable and default to 100 failures per page.
+        All failed rows remain accessible through GET /admin/case-link-imports/{import_id}/failures;
+        there is no separate limit on the total number of failures that can be retrieved.
       requestBody:
         required: true
         content:
@@ -751,6 +755,78 @@ paths:
                 error_code: MALFORMED_CSV
                 error_message: "The file must contain well-formed UTF-8 CSV"
 
+  /admin/case-link-imports/{import_id}/failures:
+    get:
+      operationId: adminCaseLinkImportFailuresGet
+      tags:
+        - CaseLinkImports
+      summary: Retrieve a page of audited import failures as a global Super Admin
+      description: |-
+        Returns the full import summary and one page of stored failed rows, ordered by CSV row number.
+        Pagination uses one-based page numbers. All failures can be retrieved across successive pages;
+        there is no limit of 1,000 total results. total_items and total_pages describe the failed rows,
+        while total_rows, successful_rows and failed_rows describe the whole import.
+        The configured failure page size is both the default and maximum page size (100 by default).
+        Pages beyond the last page return an empty failures array with the full counts and pagination metadata.
+        Retrieving failures does not reprocess the uploaded file or create another import audit.
+      parameters:
+        - in: path
+          name: import_id
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - in: query
+          name: page_number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: page_size
+          description: Number of failures per page; defaults to the configured failure page size (100 by default) and cannot exceed it.
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Import summary and the requested page of failed rows
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseLinkImportResponse'
+        '400':
+          description: Invalid path or pagination parameter
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: User does not have the global SUPER_ADMIN role
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '404':
+          description: Import audit does not exist
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: CASE_127
+                title: The requested case link import cannot be found
+                status: 404
+        '422':
+          description: The requested page size exceeds the configured maximum (CASE_103 - INVALID_REQUEST)
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
 components:
   schemas:
     CaseLinkImportProblem:
@@ -788,34 +864,36 @@ components:
         - TOO_MANY_ROWS
 
     CaseLinkImportResponse:
-      type: object
-      required:
-        - import_id
-        - status
-        - total_rows
-        - successful_rows
-        - failed_rows
-        - failures
-      properties:
-        import_id:
-          type: integer
-          format: int64
-        status:
-          type: string
-          example: COMPLETED_WITH_ERRORS
-        total_rows:
-          type: integer
-          minimum: 0
-        successful_rows:
-          type: integer
-          minimum: 0
-        failed_rows:
-          type: integer
-          minimum: 0
-        failures:
-          type: array
-          items:
-            $ref: '#/components/schemas/CaseLinkImportFailure'
+      allOf:
+        - $ref: './common.yaml#/components/schemas/paginated_list_common'
+        - type: object
+          required:
+            - import_id
+            - status
+            - total_rows
+            - successful_rows
+            - failed_rows
+            - failures
+          properties:
+            import_id:
+              type: integer
+              format: int64
+            status:
+              type: string
+              example: COMPLETED_WITH_ERRORS
+            total_rows:
+              type: integer
+              minimum: 0
+            successful_rows:
+              type: integer
+              minimum: 0
+            failed_rows:
+              type: integer
+              minimum: 0
+            failures:
+              type: array
+              items:
+                $ref: '#/components/schemas/CaseLinkImportFailure'
 
     CaseLinkImportFailure:
       type: object
@@ -1460,6 +1538,7 @@ components:
         - "CASE_124"
         - "CASE_125"
         - "CASE_126"
+        - "CASE_127"
       x-enum-varnames:
         - TOO_MANY_RESULTS
         - NO_CRITERIA_SPECIFIED
@@ -1487,6 +1566,7 @@ components:
         - CASE_1_NOT_FOUND
         - SELF_LINK
         - TOO_MANY_ROWS
+        - CASE_LINK_IMPORT_NOT_FOUND
 
     CaseTitleErrors:
       type: string
@@ -1517,6 +1597,7 @@ components:
         - "Case 1 does not exist and must already exist"
         - "A case cannot be linked to itself"
         - "The CSV exceeds the configured maximum number of data rows"
+        - "The requested case link import cannot be found"
       x-enum-varnames:
         - TOO_MANY_RESULTS
         - NO_CRITERIA_SPECIFIED
@@ -1544,6 +1625,7 @@ components:
         - CASE_1_NOT_FOUND
         - SELF_LINK
         - TOO_MANY_ROWS
+        - CASE_LINK_IMPORT_NOT_FOUND
 
     CaseOpenStatusEnum:
       type: string
