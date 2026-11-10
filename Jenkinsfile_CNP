@@ -9,7 +9,7 @@ properties([
         booleanParam(name: 'FAIL_FAST', defaultValue: false, description: 'Should tests fail fast'),
     ])
 ])
-@Library("Infrastructure@2.12.2") _
+@Library("Infrastructure@2.13.6") _
 
 def type = "java"
 def product = "darts"

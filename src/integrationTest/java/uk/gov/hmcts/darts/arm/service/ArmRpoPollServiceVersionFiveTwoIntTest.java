@@ -23,8 +23,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClient;
-import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClient;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRpoPollServiceImpl;
@@ -34,7 +34,7 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.InMemoryTestCache;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,19 +62,17 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
 
 @Isolated
 @TestPropertySource(properties = {
-    """
-        darts.storage.arm-api.enable-arm-v5-2-upgrade=true
-        darts.storage.arm.is-mock-arm-rpo-download-csv=false
-        """
+    "darts.storage.arm.is-mock-arm-rpo-download-csv=false",
+    "darts.storage.arm-api.active-version=v5_2"
 })
 @Slf4j
 @Profile("in-memory-caching")
 @Import(InMemoryTestCache.class)
-class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
+class ArmRpoPollServiceVersionFiveTwoIntTest extends PostgresIntegrationBase {
 
     private static final String PRODUCTIONEXPORTFILE_CSV = "tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv";
     private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
-    private static final String PRODUCTION_ID = "b52268a3-75e5-4dd4-a8d3-0b43781cfcf9";
+    private static final String PRODUCTION_ID = " b52268a3-75e5-4dd4-a8d3-0b43781cfcf9";
     private static final String SEARCH_ID = "8271f101-8c14-4c41-8865-edc5d8baed99";
     private static final String MATTER_ID = "cb70c7fa-8972-4400-af1d-ff5dd76d2104";
     private static final String STORAGE_ACCOUNT_ID = "StorageAccountId";
@@ -88,10 +86,6 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
 
     @MockitoBean
     private UserIdentity userIdentity;
-    @MockitoBean
-    private ArmApiBaseClient armApiBaseClient;
-    @MockitoBean
-    private ArmAuthClient armAuthClient;
     @MockitoSpyBean
     private ArmRpoUtil armRpoUtil;
 
@@ -99,6 +93,11 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
     private String uniqueProductionName;
     private final Duration pollDuration = Duration.ofHours(4);
     private int batchSize = 10;
+
+    @MockitoBean
+    private ArmAuthClientFiveTwo armAuthClient;
+    @MockitoBean
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
 
     @Autowired
     private ArmRpoPollServiceImpl armRpoPollService;
@@ -178,7 +177,7 @@ class ArmRpoPollServiceVersionFiveTwoIntTest extends IntegrationBase {
         verify(armApiBaseClient).getProductionOutputFiles(any(), any());
         verify(armApiBaseClient).downloadProduction(any(), any());
         verify(armApiBaseClient).removeProduction(any(), any());
-
+        verifyNoMoreInteractions(armApiBaseClient);
     }
 
     @Test

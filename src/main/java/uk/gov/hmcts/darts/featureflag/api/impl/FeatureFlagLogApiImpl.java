@@ -27,11 +27,7 @@ public class FeatureFlagLogApiImpl implements FeatureFlagLogApi {
     public void logArmPull(String logMessage) {
         logIfEnabled(featureFlagLoggingConfig.isArmPullFeatureFlagLogsEnabled(), logMessage);
     }
-
-    @Override
-    public void logDetsCleanUp(String logMessage) {
-        logIfEnabled(featureFlagLoggingConfig.isCleanUpDetsDataFeatureFlagLogsEnabled(), logMessage);
-    }
+    
 
     private void logIfEnabled(boolean isEnabled, String logMessage) {
         if (isEnabled) {

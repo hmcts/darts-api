@@ -7,14 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmApiBaseClientFiveTwo;
+import uk.gov.hmcts.darts.arm.client.version.fivetwo.ArmAuthClientFiveTwo;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmClientService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmClientServiceFiveTwo;
 import uk.gov.hmcts.darts.arm.util.ArmRpoUtil;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -33,15 +35,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@ConditionalOnProperty(prefix = "darts.storage.arm-api", name = "enable-arm-v5-2-upgrade", havingValue = "true")
 class CreateExportBasedOnSearchResultsTableCheckServiceTest {
     private static final Integer EXECUTION_ID = 1;
 
     @Mock
-    private ArmRpoClient armRpoClient;
-    @Mock
     private ArmApiService armApiService;
     @Mock
     private ArmRpoService armRpoService;
+    @Mock
+    private ArmAuthClientFiveTwo armAuthClient;
+    @Mock
+    private ArmApiBaseClientFiveTwo armApiBaseClient;
 
     private CreateExportBasedOnSearchResultsTableServiceImpl createExportBasedOnSearchResultsTableService;
 
@@ -61,7 +66,7 @@ class CreateExportBasedOnSearchResultsTableCheckServiceTest {
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
         ArmRpoUtil armRpoUtil = spy(new ArmRpoUtil(armRpoService, armApiService));
 
-        ArmClientService armClientService = new ArmClientServiceImpl(null, null, armRpoClient);
+        ArmClientService armClientService = new ArmClientServiceFiveTwo(armAuthClient, armApiBaseClient);
 
         createExportBasedOnSearchResultsTableService = new CreateExportBasedOnSearchResultsTableServiceImpl(
             armClientService, armRpoService, armRpoUtil, currentTimeHelper, objectMapper);
