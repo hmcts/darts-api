@@ -48,8 +48,8 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.number }}
           SP_APP_ID: ${{ secrets.SP_APP_ID_API }}
-          SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID_API }}
-          SP_SECRET_KEY: ${{ secrets.SP_SECRET_KEY_API }}
+          SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID_PORTAL }}
+          SP_SECRET_KEY: ${{ secrets.SP_SECRET_KEY_PORTAL }}
           SP_TENANT_ID: ${{ secrets.SP_TENANT_ID }}
   set-external-ad-b2c-callback-urls:
     runs-on: ubuntu-latest
