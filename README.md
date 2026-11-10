@@ -418,7 +418,7 @@ Azure login uses the following GitHub credentials:
 
 | Environment | Login type | Client ID secret | Secret key secret |
 |-------------|------------|------------------|-------------------|
-| API | Internal Entra | `SP_CLIENT_ID_API` | `SP_SECRET_KEY_API` |
+| API | Internal Entra | `SP_CLIENT_ID_PORTAL` | `SP_SECRET_KEY_PORTAL` |
 | API | External B2C | `SP_CLIENT_ID_API_B2C` | `SP_SECRET_KEY_API_B2C` |
 
 The tenant secrets remain `SP_TENANT_ID` for internal Entra and `SP_TENANT_ID_B2C` for external B2C.
