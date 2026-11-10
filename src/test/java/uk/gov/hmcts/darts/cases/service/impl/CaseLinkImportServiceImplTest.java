@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkImportStatus;
@@ -43,6 +44,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -213,6 +215,61 @@ class CaseLinkImportServiceImplTest {
         verify(auditService).failImport(1L, CaseLinkImportStatus.REJECTED, "FILE_READ_FAILED", CaseApiError.FILE_READ_FAILED.getTitle());
         verify(auditService, never()).checksum(any(), any());
         verifyNoInteractions(csvService, validator, rowService, summaryService);
+    }
+
+    @DisplayName("""
+        importCaseLinkingFile()
+        SHOULD close the upload stream
+            AND mark the import FAILED with IMPORT_FAILED
+            AND rethrow the original database exception
+            AND stop before parsing or processing rows
+        WHEN persisting the calculated checksum fails
+        """)
+    @Test
+    void importCaseLinkingFile_shouldMarkImportFailedAndCloseStream_whenChecksumCannotBePersisted() throws IOException {
+        givenImportAudit();
+        var uploadedFile = spy(file);
+        var checksumPersistenceFailure = new TransientDataAccessResourceException("Checksum storage unavailable");
+        doReturn(checksumInputStream).when(uploadedFile).getInputStream();
+        when(fileContentChecksum.calculate(checksumInputStream)).thenReturn("file-checksum");
+        doThrow(checksumPersistenceFailure).when(auditService).checksum(1L, "file-checksum");
+
+        assertThatThrownBy(() -> service.importCaseLinkingFile(uploadedFile)).isSameAs(checksumPersistenceFailure);
+
+        var processingOrder = inOrder(fileValidator, fileContentChecksum, auditService, checksumInputStream);
+        processingOrder.verify(auditService).createCaseLinkImport("cases.csv", user);
+        processingOrder.verify(fileValidator).validate(uploadedFile);
+        processingOrder.verify(fileContentChecksum).calculate(checksumInputStream);
+        processingOrder.verify(auditService).checksum(1L, "file-checksum");
+        processingOrder.verify(checksumInputStream).close();
+        processingOrder.verify(auditService).failImport(1L, CaseLinkImportStatus.FAILED, "IMPORT_FAILED", "The import could not be completed");
+        verifyNoMoreInteractions(auditService);
+        verifyNoInteractions(csvService, validator, rowService, summaryService);
+    }
+
+    @DisplayName("""
+        importCaseLinkingFile()
+        SHOULD mark the import FAILED with IMPORT_FAILED
+            AND rethrow the original exception
+            AND stop before preparing or processing row audits
+        WHEN CSV preprocessing throws an unexpected runtime exception
+        """)
+    @Test
+    void importCaseLinkingFile_shouldMarkImportFailed_whenCsvPreprocessingFailsUnexpectedly() {
+        givenImportAudit();
+        var csvPreprocessingFailure = new IllegalStateException("Unexpected CSV preprocessing failure");
+        when(fileContentChecksum.calculate(any(InputStream.class))).thenReturn("file-checksum");
+        when(csvService.readCaseLinkCsvFile(file)).thenThrow(csvPreprocessingFailure);
+
+        assertThatThrownBy(() -> service.importCaseLinkingFile(file)).isSameAs(csvPreprocessingFailure);
+
+        var processingOrder = inOrder(auditService, csvService);
+        processingOrder.verify(auditService).createCaseLinkImport("cases.csv", user);
+        processingOrder.verify(auditService).checksum(1L, "file-checksum");
+        processingOrder.verify(csvService).readCaseLinkCsvFile(file);
+        processingOrder.verify(auditService).failImport(1L, CaseLinkImportStatus.FAILED, "IMPORT_FAILED", "The import could not be completed");
+        verifyNoMoreInteractions(auditService);
+        verifyNoInteractions(validator, rowService, summaryService);
     }
 
     @Test

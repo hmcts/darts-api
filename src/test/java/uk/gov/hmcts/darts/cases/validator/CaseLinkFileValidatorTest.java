@@ -30,8 +30,25 @@ class CaseLinkFileValidatorTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {
+        "Text/CSV",
+        "TEXT/CSV",
+        "text/csv; charset=UTF-8",
+        "Text/CSV; charset=UTF-8",
+        "text/csv ; charset=UTF-8"
+    })
+    void validate_shouldAcceptFile_whenCsvContentTypeUsesDifferentCasingOrParameters(String contentType) {
+        var uploadedFile = new MockMultipartFile("file", "cases.csv", contentType, content);
+
+        assertThatCode(() -> validator.validate(uploadedFile)).doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
     @NullSource
-    @ValueSource(strings = {"", "application/csv", "application/vnd.ms-excel", "text/plain", "application/json", "application/octet-stream", "text/html"})
+    @ValueSource(strings = {
+        "", "application/csv", "application/vnd.ms-excel", "text/plain", "application/json", "application/octet-stream", "text/html",
+        "text/plain; charset=UTF-8", "application/csv; charset=UTF-8"
+    })
     void validate_shouldRejectFile_whenContentTypeIsNotTextCsv(String contentType) {
         var file = new MockMultipartFile("file", "cases.csv", contentType, content);
         assertThatThrownBy(() -> validator.validate(file))
