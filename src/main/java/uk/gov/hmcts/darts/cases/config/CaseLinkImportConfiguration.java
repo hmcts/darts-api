@@ -21,4 +21,7 @@ public class CaseLinkImportConfiguration {
 
     @Min(1)
     private int maxRows = 100_000;
+
+    @Min(1)
+    private int failurePageSize = 100;
 }

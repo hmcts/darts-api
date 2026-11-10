@@ -141,6 +141,11 @@ public enum CaseApiError implements DartsApiError {
         CaseErrorCode.TOO_MANY_ROWS.getValue(),
         HttpStatus.UNPROCESSABLE_ENTITY,
         CaseTitleErrors.TOO_MANY_ROWS.toString()
+    ),
+    CASE_LINK_IMPORT_NOT_FOUND(
+        CaseErrorCode.CASE_LINK_IMPORT_NOT_FOUND.getValue(),
+        HttpStatus.NOT_FOUND,
+        CaseTitleErrors.CASE_LINK_IMPORT_NOT_FOUND.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "CASE";
