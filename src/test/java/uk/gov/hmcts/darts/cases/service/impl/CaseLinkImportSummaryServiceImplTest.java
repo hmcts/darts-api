@@ -1,13 +1,16 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkImportStatus;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkResultStatus;
+import uk.gov.hmcts.darts.cases.model.CaseLinkImportFailureCode;
 import uk.gov.hmcts.darts.common.entity.CaseLinkImportEntity;
 import uk.gov.hmcts.darts.common.entity.CaseLinkImportResultEntity;
 import uk.gov.hmcts.darts.common.entity.CaseLinkImportStatusEntity;
@@ -37,8 +40,9 @@ class CaseLinkImportSummaryServiceImplTest {
             AND include every failed row with its supplied case details, row number, error code and message
         WHEN an import contains both successful and failed results
         """)
-    @Test
-    void getSummary_shouldReturnStoredOutcomes_whenImportHasMixedResults() {
+    @ParameterizedTest
+    @EnumSource(CaseLinkImportFailureCode.class)
+    void getSummary_shouldReturnStoredOutcomes_whenImportHasMixedResults(CaseLinkImportFailureCode failureCode) {
         CaseLinkImportEntity caseLinkImportEntity = new CaseLinkImportEntity();
         caseLinkImportEntity.setStatus(new CaseLinkImportStatusEntity(CaseLinkImportStatus.COMPLETED_WITH_ERRORS.getId()));
         CaseLinkImportResultEntity row = new CaseLinkImportResultEntity();
@@ -46,8 +50,8 @@ class CaseLinkImportSummaryServiceImplTest {
         row.setCase1CaseNumber(" X1 ");
         row.setCase1Courthouse(" york ");
         row.setCase2CaseNumber(" CP1 ");
-        row.setErrorCode("CASE_1_NOT_FOUND");
-        row.setErrorMessage("Case 1 does not exist");
+        row.setErrorCode(failureCode.getValue());
+        row.setErrorMessage("Stored row failure message");
         when(importRepository.findById(1L)).thenReturn(Optional.of(caseLinkImportEntity));
         when(resultRepository.countByImportId(1L)).thenReturn(3L);
         when(resultRepository.countByImportIdAndStatusId(1L, CaseLinkResultStatus.SUCCESS.getId())).thenReturn(2L);
@@ -64,8 +68,27 @@ class CaseLinkImportSummaryServiceImplTest {
             assertThat(failure.getCase1CaseNumber()).isEqualTo(row.getCase1CaseNumber());
             assertThat(failure.getCase1Courthouse()).isEqualTo(row.getCase1Courthouse());
             assertThat(failure.getCase2CaseNumber()).isEqualTo(row.getCase2CaseNumber());
-            assertThat(failure.getErrorCode()).isEqualTo(row.getErrorCode());
+            assertThat(failure.getErrorCode()).isEqualTo(failureCode);
             assertThat(failure.getErrorMessage()).isEqualTo(row.getErrorMessage());
+        });
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"INVALID_REQUEST", "CASE_100", "UNKNOWN_ERROR"})
+    void getSummary_shouldReturnGenericFailureAndPreserveMessage_whenStoredErrorCodeIsOutsideRowFailureContract(String storedErrorCode) {
+        CaseLinkImportEntity caseLinkImportEntity = new CaseLinkImportEntity();
+        caseLinkImportEntity.setStatus(new CaseLinkImportStatusEntity(CaseLinkImportStatus.COMPLETED_WITH_ERRORS.getId()));
+        CaseLinkImportResultEntity failedRow = new CaseLinkImportResultEntity();
+        failedRow.setErrorCode(storedErrorCode);
+        failedRow.setErrorMessage("Original failure details");
+        when(importRepository.findById(1L)).thenReturn(Optional.of(caseLinkImportEntity));
+        when(resultRepository.findByImportIdAndStatusIdOrderByRowNumber(1L, CaseLinkResultStatus.FAILED.getId())).thenReturn(List.of(failedRow));
+
+        var summary = service.getSummary(1L);
+
+        assertThat(summary.getFailures()).singleElement().satisfies(failure -> {
+            assertThat(failure.getErrorCode()).isEqualTo(CaseLinkImportFailureCode.ROW_PROCESSING_FAILED);
+            assertThat(failure.getErrorMessage()).isEqualTo(failedRow.getErrorMessage());
         });
     }
 }

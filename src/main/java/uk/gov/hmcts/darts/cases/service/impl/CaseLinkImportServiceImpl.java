@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.cases.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkImportStatus;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
+import uk.gov.hmcts.darts.cases.model.CaseLinkImportFailureCode;
 import uk.gov.hmcts.darts.cases.model.CaseLinkImportResponse;
 import uk.gov.hmcts.darts.cases.service.CaseLinkCsvService;
 import uk.gov.hmcts.darts.cases.service.CaseLinkImportAuditService;
@@ -94,10 +96,13 @@ public class CaseLinkImportServiceImpl implements CaseLinkImportService {
             caseLinkRowValidator.validate(row, seen);
             caseLinkRowService.linkCaseToCase(row, user);
         } catch (DartsApiException exception) {
-            caseLinkImportAuditService.failRow(row, getErrorCode(exception), exception.getMessage());
+            CaseLinkImportFailureCode failureCode = EnumUtils.getEnum(CaseLinkImportFailureCode.class, getErrorCode(exception),
+                                                                    CaseLinkImportFailureCode.ROW_PROCESSING_FAILED);
+            caseLinkImportAuditService.failRow(row, failureCode.getValue(), exception.getMessage());
         } catch (RuntimeException exception) {
             log.error("Case link import {} row {} failed with {}", row.getImportId(), row.getRowNumber(), exception.getClass().getSimpleName());
-            caseLinkImportAuditService.failRow(row, "ROW_PROCESSING_FAILED", "The row could not be processed; its case and link changes were rolled back");
+            caseLinkImportAuditService.failRow(row, CaseLinkImportFailureCode.ROW_PROCESSING_FAILED.getValue(),
+                                             "The row could not be processed; its case and link changes were rolled back");
         }
     }
 

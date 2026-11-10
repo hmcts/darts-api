@@ -12,6 +12,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkImportStatus;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
+import uk.gov.hmcts.darts.cases.model.CaseLinkImportFailureCode;
 import uk.gov.hmcts.darts.cases.model.CaseLinkImportResponse;
 import uk.gov.hmcts.darts.cases.service.CaseLinkCsvService;
 import uk.gov.hmcts.darts.cases.service.CaseLinkImportAuditService;
@@ -106,14 +107,15 @@ class CaseLinkImportServiceImplTest {
         verify(auditService).setCompletion(1L);
     }
 
-    @Test
-    void importCaseLinkingFile_shouldAuditRejectionWithoutProcessingRows_whenCsvIsMalformed() {
+    @ParameterizedTest
+    @EnumSource(value = CaseApiError.class, names = {"MALFORMED_CSV", "FILE_READ_FAILED", "TOO_MANY_ROWS"})
+    void importCaseLinkingFile_shouldAuditRejectionWithoutProcessingRows_whenCsvCannotBeParsed(CaseApiError error) {
         givenImportAudit();
-        var failure = new DartsApiException(CaseApiError.MALFORMED_CSV);
+        var failure = new DartsApiException(error);
         when(csvService.readCaseLinkCsvFile(file)).thenThrow(failure);
         assertThatThrownBy(() -> service.importCaseLinkingFile(file)).isSameAs(failure);
-        assertThat(failure.getCustomProperties()).containsEntry("import_id", 1L).containsEntry("error_code", "MALFORMED_CSV");
-        verify(auditService).failImport(1L, CaseLinkImportStatus.REJECTED, "MALFORMED_CSV", CaseApiError.MALFORMED_CSV.getTitle());
+        assertThat(failure.getCustomProperties()).containsEntry("import_id", 1L).containsEntry("error_code", error.name());
+        verify(auditService).failImport(1L, CaseLinkImportStatus.REJECTED, error.name(), error.getTitle());
         verify(rowService, never()).linkCaseToCase(any(), any());
     }
 
@@ -152,16 +154,40 @@ class CaseLinkImportServiceImplTest {
         verifyNoInteractions(csvService, validator, rowService);
     }
 
+    @ParameterizedTest
+    @EnumSource(value = CaseApiError.class, names = {"INVALID_REQUEST", "MALFORMED_CSV"})
+    void importCaseLinkingFile_shouldAuditGenericRowFailureAndContinue_whenCaseCreationThrowsUnrelatedCaseApiError(CaseApiError error) {
+        assertUnexpectedApiErrorIsAudited(new DartsApiException(error));
+    }
+
     @Test
-    void importCaseLinkingFile_shouldAuditApiErrorAndContinue_whenCaseCreationFails() {
+    void importCaseLinkingFile_shouldAuditGenericRowFailureAndContinue_whenCaseCreationThrowsCommonApiError() {
+        assertUnexpectedApiErrorIsAudited(new DartsApiException(CommonApiError.INVALID_REQUEST));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = CaseLinkImportFailureCode.class, names = "ROW_PROCESSING_FAILED", mode = EnumSource.Mode.EXCLUDE)
+    void importCaseLinkingFile_shouldPreserveRowFailureCode_whenRowThrowsDocumentedApiError(CaseLinkImportFailureCode failureCode) {
+        givenImportAudit();
+        CaseLinkImportResultEntity failedRow = new CaseLinkImportResultEntity();
+        when(csvService.readCaseLinkCsvFile(file)).thenReturn(List.of(failedRow));
+        CaseApiError apiError = CaseApiError.valueOf(failureCode.name());
+        doThrow(new DartsApiException(apiError)).when(rowService).linkCaseToCase(failedRow, user);
+
+        service.importCaseLinkingFile(file);
+
+        verify(auditService).failRow(failedRow, failureCode.getValue(), apiError.getTitle());
+        verify(auditService).setCompletion(1L);
+    }
+
+    private void assertUnexpectedApiErrorIsAudited(DartsApiException exception) {
         givenImportAudit();
         CaseLinkImportResultEntity failed = new CaseLinkImportResultEntity();
         CaseLinkImportResultEntity valid = new CaseLinkImportResultEntity();
         when(csvService.readCaseLinkCsvFile(file)).thenReturn(List.of(failed, valid));
-        var error = CommonApiError.INVALID_REQUEST;
-        doThrow(new DartsApiException(error)).when(rowService).linkCaseToCase(failed, user);
+        doThrow(exception).when(rowService).linkCaseToCase(failed, user);
         service.importCaseLinkingFile(file);
-        verify(auditService).failRow(failed, error.getType(), error.getTitle());
+        verify(auditService).failRow(failed, "ROW_PROCESSING_FAILED", exception.getMessage());
         verify(rowService).linkCaseToCase(valid, user);
         verify(auditService).setCompletion(1L);
     }
