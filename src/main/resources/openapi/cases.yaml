@@ -767,12 +767,25 @@ components:
               format: int64
               description: Audit ID of the rejected import
             error_code:
-              type: string
-              description: Generic validation code stored in the import audit
-              example: MALFORMED_CSV
+              $ref: '#/components/schemas/CaseLinkImportRejectionCode'
             error_message:
               type: string
               description: Validation failure message stored in the import audit
+
+    CaseLinkImportRejectionCode:
+      type: string
+      description: |-
+        File-level error recorded in the import audit and returned in the HTTP 422 problem response.
+        The file is rejected before any rows are processed.
+      example: MALFORMED_CSV
+      enum:
+        - INVALID_FILE_TYPE
+        - INVALID_CONTENT_TYPE
+        - EMPTY_FILE
+        - FILE_TOO_LARGE
+        - MALFORMED_CSV
+        - FILE_READ_FAILED
+        - TOO_MANY_ROWS
 
     CaseLinkImportResponse:
       type: object
@@ -821,11 +834,29 @@ components:
           type: string
           description: Supplied CP_URN
         error_code:
-          type: string
-          description: Generic case 1/case 2 validation code or an error code from case processing
-          example: CASE_1_NOT_FOUND
+          $ref: '#/components/schemas/CaseLinkImportFailureCode'
         error_message:
           type: string
+
+    CaseLinkImportFailureCode:
+      type: string
+      description: |-
+        Row-level error recorded in the row audit and returned in the failures array of the HTTP 200 import summary.
+        Processing continues with subsequent rows. Unexpected processing errors use ROW_PROCESSING_FAILED.
+      example: CASE_1_NOT_FOUND
+      enum:
+        - INVALID_COLUMN_COUNT
+        - CASE_1_CASE_NUMBER_REQUIRED
+        - CASE_1_COURTHOUSE_REQUIRED
+        - CASE_2_CASE_NUMBER_REQUIRED
+        - CASE_1_CASE_NUMBER_TOO_LONG
+        - CASE_1_COURTHOUSE_TOO_LONG
+        - CASE_2_CASE_NUMBER_TOO_LONG
+        - DUPLICATE_MAPPING
+        - COURTHOUSE_NOT_FOUND
+        - CASE_1_NOT_FOUND
+        - SELF_LINK
+        - ROW_PROCESSING_FAILED
 
     add_case_request:
       type: object
