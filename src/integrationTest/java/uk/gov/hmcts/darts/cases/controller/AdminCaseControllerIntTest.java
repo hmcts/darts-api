@@ -202,7 +202,7 @@ class AdminCaseControllerIntTest extends PostgresIntegrationBase {
         assertThat(response.getTotalRows()).isEqualTo(10);
         assertThat(response.getSuccessfulRows()).isEqualTo(2);
         assertThat(response.getFailedRows()).isEqualTo(8);
-        assertThat(response.getFailures()).extracting(failure -> failure.getErrorCode()).containsExactly(
+        assertThat(response.getFailures()).extracting(failure -> failure.getErrorCode().getValue()).containsExactly(
             "CASE_1_NOT_FOUND", "COURTHOUSE_NOT_FOUND", "CASE_1_CASE_NUMBER_REQUIRED", "SELF_LINK",
             "DUPLICATE_MAPPING", "DUPLICATE_MAPPING", "INVALID_COLUMN_COUNT", "INVALID_COLUMN_COUNT");
         assertThat(response.getFailures()).extracting(failure -> failure.getRowNumber()).containsExactly(2, 3, 4, 5, 7, 8, 9, 10);
@@ -261,7 +261,11 @@ class AdminCaseControllerIntTest extends PostgresIntegrationBase {
         assertThat(caseRepository.findByCaseNumberAndCourthouse("CP_OK", courthouse)).isPresent();
         assertThat(linkedCaseRepository.findAll()).hasSize(1).extracting(CaseLinkedCaseEntity::getId).doesNotContainNull();
         var failure = resultRepository.findByImportIdAndStatusIdOrderByRowNumber(response.getImportId(), CaseLinkResultStatus.FAILED.getId()).getFirst();
-        assertThat(failure.getErrorCode()).isEqualTo(apiFailure ? "INVALID_REQUEST" : "ROW_PROCESSING_FAILED");
+        assertThat(failure.getErrorCode()).isEqualTo("ROW_PROCESSING_FAILED");
+        assertThat(response.getFailures()).singleElement().satisfies(rowFailure -> {
+            assertThat(rowFailure.getErrorCode().getValue()).isEqualTo("ROW_PROCESSING_FAILED");
+            assertThat(rowFailure.getErrorMessage()).isEqualTo(failure.getErrorMessage());
+        });
         assertThat(failure.getCase2Id()).isNull();
         assertThat(failure.isCase2Created()).isFalse();
         assertThat(failure.getLinkedCaseId()).isNull();

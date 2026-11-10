@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkImportStatus;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkResultStatus;
 import uk.gov.hmcts.darts.cases.model.CaseLinkImportFailure;
+import uk.gov.hmcts.darts.cases.model.CaseLinkImportFailureCode;
 import uk.gov.hmcts.darts.cases.model.CaseLinkImportResponse;
 import uk.gov.hmcts.darts.cases.service.CaseLinkImportSummaryService;
 import uk.gov.hmcts.darts.common.entity.CaseLinkImportEntity;
@@ -41,7 +43,7 @@ public class CaseLinkImportSummaryServiceImpl implements CaseLinkImportSummarySe
         failure.setCase1CaseNumber(row.getCase1CaseNumber());
         failure.setCase1Courthouse(row.getCase1Courthouse());
         failure.setCase2CaseNumber(row.getCase2CaseNumber());
-        failure.setErrorCode(row.getErrorCode());
+        failure.setErrorCode(EnumUtils.getEnum(CaseLinkImportFailureCode.class, row.getErrorCode(), CaseLinkImportFailureCode.ROW_PROCESSING_FAILED));
         failure.setErrorMessage(row.getErrorMessage());
         return failure;
     }
