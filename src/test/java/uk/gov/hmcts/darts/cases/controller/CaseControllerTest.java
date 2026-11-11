@@ -35,8 +35,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CaseControllerTest {
-
-
+    
     @Mock
     private CaseService caseService;
     @Mock
@@ -47,7 +46,7 @@ class CaseControllerTest {
     private CaseController caseController;
 
     @Test
-    void casesSearchPost_whenProvidedWithStandardData_dataShouldBeMapepdCorrectly() {
+    void casesSearchPost_whenProvidedWithStandardData_dataShouldBeMappedCorrectly() {
         AdvancedSearchRequest advancedSearchRequest = new AdvancedSearchRequest();
         advancedSearchRequest.setCaseNumber(" caseNumber ");
         advancedSearchRequest.setCourtroom(" courtroom ");
@@ -81,7 +80,7 @@ class CaseControllerTest {
     }
 
     @Test
-    void casesSearchPost_whenProvidedWithDataThatHasNulls_dataShouldBeMapepdCorrectly() {
+    void casesSearchPost_whenProvidedWithDataThatHasNulls_dataShouldBeMappedCorrectly() {
         AdvancedSearchRequest advancedSearchRequest = new AdvancedSearchRequest();
         advancedSearchRequest.setCaseNumber(null);
         advancedSearchRequest.setCourtroom(null);

@@ -55,7 +55,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
     @MockitoBean
     private CurrentTimeHelper currentTimeHelper;
 
-    public static final String ENDPOINT_URL = "/retentions";
+    private static final String ENDPOINT_URL = "/retentions";
 
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_CASE_NUMBER = "12345";
