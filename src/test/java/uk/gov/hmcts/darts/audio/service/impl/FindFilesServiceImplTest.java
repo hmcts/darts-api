@@ -47,7 +47,7 @@ class FindFilesServiceImplTest {
         try (LogCaptor logCaptor = LogCaptor.forClass(FindFilesServiceImpl.class)) {
             service.findFiles(1000);
 
-            assertThat(logCaptor.getInfoLogs()).containsExactly(
+            assertThat(logCaptor.getInfoLogs()).extracting(String::stripTrailing).containsExactly(
                 "FindFilesFromCVPAndCAR job: current time UTC " + START_TIME,
                 "FindFilesFromCVPAndCAR job: last successful run time UTC " + (previousRunExists ? PREVIOUS_TIME : "none"),
                 "FindFilesFromCVPAndCAR job: batch size 1000");
