@@ -12,7 +12,7 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AbstractAutomatedTaskConfig;
-import uk.gov.hmcts.darts.task.config.FindFilesFromCvpAndCarAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.FindFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.Duration;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class FindFilesFromCvpAndCarAutomatedTaskTest {
+class FindFilesAutomatedTaskTest {
 
     @Mock
     private AutomatedTaskRepository repository;
@@ -40,17 +40,17 @@ class FindFilesFromCvpAndCarAutomatedTaskTest {
     @Mock
     private FindFilesService service;
 
-    private FindFilesFromCvpAndCarAutomatedTask task;
+    private FindFilesAutomatedTask task;
     private AutomatedTaskEntity taskDetails;
 
     @BeforeEach
     void setUp() {
-        FindFilesFromCvpAndCarAutomatedTaskConfig config = new FindFilesFromCvpAndCarAutomatedTaskConfig();
+        FindFilesAutomatedTaskConfig config = new FindFilesAutomatedTaskConfig();
         AbstractAutomatedTaskConfig.Lock lock = new AbstractAutomatedTaskConfig.Lock();
         lock.setAtLeastFor(Duration.ofMinutes(1));
         lock.setAtMostFor(Duration.ofMinutes(9));
         config.setLock(lock);
-        task = spy(new FindFilesFromCvpAndCarAutomatedTask(repository, config, logApi, lockService, service));
+        task = spy(new FindFilesAutomatedTask(repository, config, logApi, lockService, service));
         task.setLastCronExpression("0 */10 * * * *");
         taskDetails = new AutomatedTaskEntity();
         taskDetails.setTaskName("FindFilesFromCVPAndCAR");

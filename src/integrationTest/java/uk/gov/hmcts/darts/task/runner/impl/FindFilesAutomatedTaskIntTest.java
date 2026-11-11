@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.entity.JobLastSuccessfulRunTimeEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.JobLastSuccessfulRunTimeRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.task.config.FindFilesFromCvpAndCarAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.FindFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.Duration;
@@ -20,10 +20,10 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase {
+class FindFilesAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     @Autowired
-    private FindFilesFromCvpAndCarAutomatedTask task;
+    private FindFilesAutomatedTask task;
     @Autowired
     private FindFilesService service;
     @Autowired
@@ -33,7 +33,7 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
     @Autowired
     private UserAccountRepository userAccountRepository;
     @Autowired
-    private FindFilesFromCvpAndCarAutomatedTaskConfig config;
+    private FindFilesAutomatedTaskConfig config;
 
     @Test
     void given_migration_when_taskLoaded_then_scheduleAndUserAndLocksMatch() {

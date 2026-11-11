@@ -23,7 +23,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 @Execution(ExecutionMode.SAME_THREAD)
-class FindFilesFromCvpAndCarAutomatedTaskFailureIntTest extends PostgresIntegrationBase {
+class FindFilesAutomatedTaskFailureIntTest extends PostgresIntegrationBase {
 
     private static final String JOB_NAME = "find_files";
     private static final Instant PREVIOUS_RUN_TIME = Instant.parse("2026-11-06T10:00:00Z");
@@ -33,7 +33,7 @@ class FindFilesFromCvpAndCarAutomatedTaskFailureIntTest extends PostgresIntegrat
     @MockitoSpyBean
     private JobLastSuccessfulRunTimeRepository lastRunRepository;
     @MockitoSpyBean
-    private FindFilesFromCvpAndCarAutomatedTask task;
+    private FindFilesAutomatedTask task;
 
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
