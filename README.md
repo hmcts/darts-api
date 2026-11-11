@@ -406,6 +406,38 @@ This repo contains overrides for the default dev environment configuration, cont
 | enable_darts_portal    | Deploys a DARTS portal instance alongside the API in the dev environment                         |
 | enable_darts_fullstack | Not yet supported, but will deploy the full DARTS stack alongside the API in the dev environment |
 
+All API PRs, including Renovate PRs, use the `ApiAzure…` credentials configured in `values.dev.template.yaml`.
+The callback workflows use these GitHub repository secrets for the target app registrations:
+
+| Repository secret | Client ID matching the Key Vault secret in the Helm overlay |
+|---------------------|----------------------------------------------------------------|
+| `SP_APP_ID_API` | `ApiAzureADClientIdJustice` |
+| `SP_APP_ID_API_B2C` | `ApiAzureAdB2CClientId` |
+
+Azure login uses the following GitHub credentials:
+
+| Environment | Login type | Client ID secret | Secret key secret |
+|-------------|------------|------------------|-------------------|
+| API | Internal Entra | `SP_CLIENT_ID_PORTAL` | `SP_SECRET_KEY_PORTAL` |
+| API | External B2C | `SP_CLIENT_ID_B2C` | `SP_SECRET_KEY_B2C` |
+
+The tenant secrets remain `SP_TENANT_ID` for internal Entra and `SP_TENANT_ID_B2C` for external B2C.
+Each service principal must be able to read and update its corresponding app registration.
+The login client ID identifies the service principal managing callbacks; the target app ID identifies the app registration used by Helm.
+External B2C callbacks in both repositories use one management service principal.
+Make `SP_CLIENT_ID_B2C` and `SP_SECRET_KEY_B2C` available to both repositories with the same values;
+the principal must be able to read and update both external app registrations.
+Keep `SP_TENANT_ID_B2C` as the external tenant ID and retain separate target IDs:
+`SP_APP_ID_API_B2C` in `hmcts/darts-api` and `SP_APP_ID_PORTAL_B2C` in `hmcts/darts-portal`.
+The target IDs still match the deployed application client IDs; runtime Helm credentials do not change.
+The previous per-repository B2C login client ID and secret variables are no longer used by the callback workflows.
+Callback registration runs on PR opening, reopening, or a new push. Callbacks are removed from the same API registrations when the PR closes.
+
+Staging API pods use `PortalAzure…` authentication secrets from `values.stg.template.yaml`.
+The B2C tenant, client ID, and client secret use `PortalAzureAdB2C…`; internal Justice authentication uses `PortalAzureAD…Justice`.
+The portal workflow target secrets `SP_APP_ID_PORTAL` and `SP_APP_ID_PORTAL_B2C` must match
+`PortalAzureADClientIdJustice` and `PortalAzureAdB2CClientId`, respectively.
+
 ## OpenAPI Validation
 
 The application uses OpenAPI validation to ensure that incoming requests and outgoing responses conform to the OpenAPI specification. To install the IBM OpenAPI
