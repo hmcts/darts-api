@@ -861,11 +861,94 @@ class TranscriptionServiceImplTest {
     }
 
     @Test
+    void givenStandardUser_whenGettingHubTranscription_thenAccessIsDenied() {
+        // given
+        var transcriptionId = 1L;
+        var transcription = new TranscriptionEntity();
+        transcription.setIsCurrent(true);
+        transcription.setRequestingSecurityGroup(createHubSecurityGroup());
+        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
+
+        // when / then
+        assertThatThrownBy(() -> transcriptionService.getTranscription(transcriptionId))
+            .isExactlyInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
+    }
+
+    @Test
+    void givenStandardUser_whenGettingNonHubTranscription_thenAccessIsAllowed() {
+        // given
+        var transcriptionId = 1L;
+        var transcription = new TranscriptionEntity();
+        transcription.setId(transcriptionId);
+        transcription.setIsCurrent(true);
+        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
+        when(transcriptionResponseMapper.mapToTranscriptionResponse(transcription)).thenReturn(new GetTranscriptionByIdResponse());
+
+        // when
+        transcriptionService.getTranscription(transcriptionId);
+
+        // then
+        verify(transcriptionResponseMapper).mapToTranscriptionResponse(transcription);
+    }
+
+    @Test
+    void givenExistingGlobalUser_whenGettingHubTranscription_thenAccessIsAllowed() {
+        // given
+        var transcriptionId = 1L;
+        var transcription = new TranscriptionEntity();
+        transcription.setId(transcriptionId);
+        transcription.setIsCurrent(true);
+        transcription.setRequestingSecurityGroup(createHubSecurityGroup());
+        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
+        when(transcriptionResponseMapper.mapToTranscriptionResponse(transcription)).thenReturn(new GetTranscriptionByIdResponse());
+        stubExistingGlobalUser();
+
+        // when
+        transcriptionService.getTranscription(transcriptionId);
+
+        // then
+        verify(transcriptionResponseMapper).mapToTranscriptionResponse(transcription);
+    }
+
+    @Test
+    void givenExistingGlobalUser_whenGettingNonHubTranscription_thenAccessIsAllowed() {
+        // given
+        var transcriptionId = 1L;
+        var transcription = new TranscriptionEntity();
+        transcription.setId(transcriptionId);
+        transcription.setIsCurrent(true);
+        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
+        when(transcriptionResponseMapper.mapToTranscriptionResponse(transcription)).thenReturn(new GetTranscriptionByIdResponse());
+        stubExistingGlobalUser();
+
+        // when
+        transcriptionService.getTranscription(transcriptionId);
+
+        // then
+        verify(transcriptionResponseMapper).mapToTranscriptionResponse(transcription);
+    }
+
+    @Test
     void givenHubOnlyUser_whenUpdatingNonHubTranscription_thenAccessIsDenied() {
         // given
         var transcriptionId = 1L;
         when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(new TranscriptionEntity()));
         stubHubOnlyUser();
+
+        // when / then
+        assertThatThrownBy(() -> transcriptionService.updateTranscription(transcriptionId, new UpdateTranscriptionRequest(), false))
+            .isExactlyInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
+    }
+
+    @Test
+    void givenStandardUser_whenUpdatingHubTranscription_thenAccessIsDenied() {
+        // given
+        var transcriptionId = 1L;
+        var transcription = new TranscriptionEntity();
+        transcription.setRequestingSecurityGroup(createHubSecurityGroup());
+        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
 
         // when / then
         assertThatThrownBy(() -> transcriptionService.updateTranscription(transcriptionId, new UpdateTranscriptionRequest(), false))
@@ -1017,6 +1100,12 @@ class TranscriptionServiceImplTest {
     private void stubHubOnlyUser() {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB))).thenReturn(true);
         when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER, DARTS))).thenReturn(false);
+    }
+
+    private void stubExistingGlobalUser() {
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN))).thenReturn(false);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB))).thenReturn(false);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER, DARTS))).thenReturn(true);
     }
 
     private void stubValidManualTranscriptionRequest() {

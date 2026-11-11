@@ -219,7 +219,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
-        validateHubUserAccess(transcriptionEntity);
+        validateTranscriptionRequestGroupAccess(transcriptionEntity);
         validateUpdateTranscription(transcriptionEntity, updateTranscription, allowSelfApprovalOrRejection, false);
 
         final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
@@ -403,15 +403,24 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             .findFirst();
     }
 
-    private void validateHubUserAccess(TranscriptionEntity transcription) {
-        if (isHubUserOnly() && !isHubTranscription(transcription)) {
+    private void validateTranscriptionRequestGroupAccess(TranscriptionEntity transcription) {
+        boolean hubTranscription = isHubTranscription(transcription);
+        if ((isHubUserOnly() && !hubTranscription) || (isStandardUserWithoutGlobalAccess() && hubTranscription)) {
             throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
         }
     }
 
     private boolean isHubUserOnly() {
         return userIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB))
-            && !userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER, DARTS));
+            && !hasExistingGlobalAccess();
+    }
+
+    private boolean isStandardUserWithoutGlobalAccess() {
+        return !isHubUserOnly() && !hasExistingGlobalAccess();
+    }
+
+    private boolean hasExistingGlobalAccess() {
+        return userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER, DARTS));
     }
 
     private boolean isHubTranscription(TranscriptionEntity transcription) {
@@ -645,7 +654,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
             .filter(TranscriptionEntity::getIsCurrent)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
-        validateHubUserAccess(transcription);
+        validateTranscriptionRequestGroupAccess(transcription);
 
         // Only SUPER_ADMIN users are allowed to view transcription requests with hidden documents
         if (!userIsSuperAdmin
