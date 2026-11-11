@@ -89,6 +89,6 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.number }}
           SP_APP_ID: ${{ secrets.SP_APP_ID_API_B2C }}
-          SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID_API_B2C }}
-          SP_SECRET_KEY: ${{ secrets.SP_SECRET_KEY_API_B2C }}
+          SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID_B2C }}
+          SP_SECRET_KEY: ${{ secrets.SP_SECRET_KEY_B2C }}
           SP_TENANT_ID: ${{ secrets.SP_TENANT_ID_B2C }}
