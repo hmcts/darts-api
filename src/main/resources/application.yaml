@@ -636,8 +636,8 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT59M
-      find-files:
-        system-user-email: system_FindFilesAutomatedTask@hmcts.net
+      find-files-from-cvp-and-car:
+        system-user-email: system_FindFilesFromCVPAndCARAutomatedTask@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT9M

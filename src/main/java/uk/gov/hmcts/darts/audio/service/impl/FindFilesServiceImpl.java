@@ -32,8 +32,9 @@ public class FindFilesServiceImpl implements FindFilesService {
                 return newLastRun;
             });
         Instant lastSuccessfulRunTime = lastRun.getLastSuccessfulRunTimestampUtc();
-        log.info("Find files job: current time UTC {}, last successful run time UTC {}, batch size {}",
-                 jobStartTime, lastSuccessfulRunTime == null ? "none" : lastSuccessfulRunTime, batchSize);
+        log.info("FindFilesFromCVPAndCAR job: current time UTC {}", jobStartTime);
+        log.info("FindFilesFromCVPAndCAR job: last successful run time UTC {}", lastSuccessfulRunTime == null ? "none" : lastSuccessfulRunTime);
+        log.info("FindFilesFromCVPAndCAR job: batch size {}", batchSize);
 
         // Future file discovery belongs here, before advancing the successful run timestamp.
 

@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.entity.JobLastSuccessfulRunTimeEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.JobLastSuccessfulRunTimeRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.task.config.FindFilesAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.FindFilesFromCvpAndCarAutomatedTaskConfig;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.Duration;
@@ -20,10 +20,10 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-class FindFilesAutomatedTaskIntTest extends PostgresIntegrationBase {
+class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase {
 
     @Autowired
-    private FindFilesAutomatedTask task;
+    private FindFilesFromCvpAndCarAutomatedTask task;
     @Autowired
     private FindFilesService service;
     @Autowired
@@ -33,11 +33,14 @@ class FindFilesAutomatedTaskIntTest extends PostgresIntegrationBase {
     @Autowired
     private UserAccountRepository userAccountRepository;
     @Autowired
-    private FindFilesAutomatedTaskConfig config;
+    private FindFilesFromCvpAndCarAutomatedTaskConfig config;
 
     @Test
     void given_migration_when_taskLoaded_then_scheduleAndUserAndLocksMatch() {
-        AutomatedTaskEntity taskDetails = automatedTaskRepository.findByTaskName("FindFiles").orElseThrow();
+        AutomatedTaskEntity taskDetails = automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow();
+        assertThat(taskDetails.getTaskDescription()).isEqualTo(
+            "Find files from the CVP and CAR containers in the cvp-recordings blob store, store their location, and record the last successful run time");
+        assertThat(automatedTaskRepository.findByTaskName("FindFiles")).isEmpty();
         assertThat(taskDetails.getTaskEnabled()).isFalse();
         assertThat(taskDetails.getBatchSize()).isEqualTo(1000);
         CronExpression cron = CronExpression.parse(taskDetails.getCronExpression());

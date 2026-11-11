@@ -48,8 +48,9 @@ class FindFilesServiceImplTest {
             service.findFiles(1000);
 
             assertThat(logCaptor.getInfoLogs()).containsExactly(
-                "Find files job: current time UTC " + START_TIME + ", last successful run time UTC "
-                    + (previousRunExists ? PREVIOUS_TIME : "none") + ", batch size 1000");
+                "FindFilesFromCVPAndCAR job: current time UTC " + START_TIME,
+                "FindFilesFromCVPAndCAR job: last successful run time UTC " + (previousRunExists ? PREVIOUS_TIME : "none"),
+                "FindFilesFromCVPAndCAR job: batch size 1000");
         }
         ArgumentCaptor<JobLastSuccessfulRunTimeEntity> savedRun = ArgumentCaptor.forClass(JobLastSuccessfulRunTimeEntity.class);
         verify(repository).save(savedRun.capture());
