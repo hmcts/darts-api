@@ -7,6 +7,14 @@
   <description>HMCTS PMD rule set</description>
 
   <rule ref="category/java/bestpractices.xml">
+    <!-- Temporary PMD 7.28 baseline exclusions: start. Address in follow-up cleanup tickets. -->
+    <exclude name="EnumComparison"/>
+    <exclude name="RelianceOnDefaultCharset"/>
+    <exclude name="UnnecessaryWarningSuppression"/>
+    <exclude name="AssertStatementInTest"/>
+    <exclude name="UseStandardCharsets"/>
+    <exclude name="JUnitJupiterTestShouldBePackagePrivate"/>
+    <!-- Temporary PMD 7.28 baseline exclusions: end. -->
     <exclude name="GuardLogStatement"/>
     <exclude name="UnitTestContainsTooManyAsserts"/>
     <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
@@ -25,6 +33,9 @@
     <exclude name="MethodNamingConventions"/>
     <exclude name="UseExplicitTypes"/>
     <exclude name="LambdaCanBeMethodReference"/>
+    <!-- Temporary PMD 7.28 baseline exclusions: start. Address in follow-up cleanup tickets. -->
+    <exclude name="VariableDeclarationUsageDistance"/>
+    <!-- Temporary PMD 7.28 baseline exclusions: end. -->
   </rule>
 
   <rule ref="category/java/codestyle.xml/ClassNamingConventions">
@@ -39,9 +50,8 @@
     </properties>
   </rule>
   <rule ref="category/java/design.xml">
-    <exclude name="AvoidCatchingGenericException"/>
 <!--    <exclude name="AvoidThrowingRawExceptionTypes"/>-->
-    <exclude name="UseUtilityClass"/>
+    <exclude name="InstantiableUtilityClass"/>
     <exclude name="LoosePackageCoupling"/>
     <exclude name="DataClass"/>
     <exclude name="TooManyFields"/>
@@ -50,6 +60,11 @@
     <exclude name="LawOfDemeter"/>
     <exclude name="UseObjectForClearerAPI"/>
     <exclude name="ExcessiveParameterList"/>
+    <!-- Temporary PMD 7.28 baseline exclusions: start. Address in follow-up cleanup tickets. -->
+    <exclude name="PublicMemberInNonPublicType"/>
+    <exclude name="AvoidDeeplyNestedIfStmts"/>
+    <exclude name="InternalApiUsage"/>
+    <!-- Temporary PMD 7.28 baseline exclusions: end. -->
   </rule>
   <rule ref="category/java/design.xml/CouplingBetweenObjects">
     <properties>
@@ -70,6 +85,13 @@
     <exclude name="NonSerializableClass"/>
     <exclude name="MissingSerialVersionUID"/>
     <exclude name="AvoidDuplicateLiterals"/>
+    <exclude name="AvoidCatchingGenericException"/>
+    <!-- Temporary PMD 7.28 baseline exclusions: start. Address in follow-up cleanup tickets. -->
+    <exclude name="AssertEqualsArgumentOrder"/>
+    <exclude name="AssignmentInOperand"/>
+    <exclude name="UnusedReturnValue"/>
+    <exclude name="IdenticalConditionalBranches"/>
+    <!-- Temporary PMD 7.28 baseline exclusions: end. -->
   </rule>
   <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
     <properties>

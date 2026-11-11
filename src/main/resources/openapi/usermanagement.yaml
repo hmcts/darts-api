@@ -673,8 +673,20 @@ components:
       allOf:
         - $ref: '#/components/schemas/SecurityGroup'
     SecurityGroupPostRequest:
-      allOf:
-        - $ref: '#/components/schemas/SecurityGroup'
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/SecurityGroupName'
+        display_name:
+          $ref: '#/components/schemas/SecurityGroupDisplayName'
+        description:
+          $ref: '#/components/schemas/SecurityGroupDescription'
+        security_role_id:
+          $ref: '#/components/schemas/RoleId'
+      required:
+        - name
+        - display_name
+        - security_role_id
     SecurityGroup:
       type: object
       properties:
