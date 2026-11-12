@@ -13,14 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionHubRequestEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -38,6 +37,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionHubRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -95,10 +95,8 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DARTS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaDataNames.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.transcriptions.auditing.TranscriptionUpdateAuditActivityProvider.auditActivitiesFor;
@@ -162,6 +160,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final TranscriptionResponseMapper transcriptionResponseMapper;
     private final TranscriptionDownloader transcriptionDownloader;
     private final TranscriptionLinkedCaseRepository transcriptionLinkedCaseRepository;
+    private final TranscriptionHubRequestRepository transcriptionHubRequestRepository;
 
     @Value("${darts.manual-deletion.enabled:false}")
     @Getter(AccessLevel.PACKAGE)
@@ -187,6 +186,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             getTranscriptionUrgencyById(transcriptionRequestDetails.getTranscriptionUrgencyId()),
             isManual
         );
+
+        if (isTranscriptionHubUser()) {
+            transcriptionHubRequestRepository.save(new TranscriptionHubRequestEntity(transcription.getId()));
+        }
 
         transcriptionLinkedCaseRepository.save(
             TranscriptionLinkedCaseEntity.builder()
@@ -219,7 +222,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
-        validateTranscriptionRequestGroupAccess(transcriptionEntity);
         validateUpdateTranscription(transcriptionEntity, updateTranscription, allowSelfApprovalOrRejection, false);
 
         final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
@@ -350,8 +352,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setHideRequestFromRequestor(false);
         transcription.setIsCurrent(true);
         transcription.setRequestedBy(userAccount);
-        getHubSecurityGroup(userAccount).ifPresent(transcription::setRequestingSecurityGroup);
-
         if (nonNull(transcriptionRequestDetails.getHearingId())) {
             HearingEntity hearing = hearingsService.getHearingByIdWithValidation(transcriptionRequestDetails.getHearingId());
             transcription.addHearing(hearing);
@@ -397,37 +397,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return userIdentity.getUserAccount();
     }
 
-    private Optional<SecurityGroupEntity> getHubSecurityGroup(UserAccountEntity userAccount) {
-        return userAccount.getSecurityGroupEntities().stream()
-            .filter(securityGroup -> HMCTS_TRANSCRIPTION_HUB.getId().equals(securityGroup.getSecurityRoleEntity().getId()))
-            .findFirst();
-    }
-
-    private void validateTranscriptionRequestGroupAccess(TranscriptionEntity transcription) {
-        boolean hubTranscription = isHubTranscription(transcription);
-        if ((isHubUserOnly() && !hubTranscription) || (isStandardUserWithoutGlobalAccess() && hubTranscription)) {
-            throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
-        }
-    }
-
-    private boolean isHubUserOnly() {
-        return userIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB))
-            && !hasExistingGlobalAccess();
-    }
-
-    private boolean isStandardUserWithoutGlobalAccess() {
-        return !isHubUserOnly() && !hasExistingGlobalAccess();
-    }
-
-    private boolean hasExistingGlobalAccess() {
-        return userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER, DARTS));
-    }
-
-    private boolean isHubTranscription(TranscriptionEntity transcription) {
-        return Optional.ofNullable(transcription.getRequestingSecurityGroup())
-            .map(SecurityGroupEntity::getSecurityRoleEntity)
-            .filter(securityRole -> HMCTS_TRANSCRIPTION_HUB.getId().equals(securityRole.getId()))
-            .isPresent();
+    private boolean isTranscriptionHubUser() {
+        return userIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB));
     }
 
     private TranscriptionUrgencyEntity getTranscriptionUrgencyById(Integer urgencyId) {
@@ -654,8 +625,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
             .filter(TranscriptionEntity::getIsCurrent)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
-        validateTranscriptionRequestGroupAccess(transcription);
-
         // Only SUPER_ADMIN users are allowed to view transcription requests with hidden documents
         if (!userIsSuperAdmin
             && !transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcription.getId()).isEmpty()) {

@@ -17,16 +17,14 @@ import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionHubRequestEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -42,6 +40,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionHubRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -90,12 +89,11 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DARTS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
@@ -137,6 +135,8 @@ class TranscriptionServiceImplTest {
     private TranscriptionUrgencyRepository mockTranscriptionUrgencyRepository;
     @Mock
     private TranscriptionWorkflowRepository mockTranscriptionWorkflowRepository;
+    @Mock
+    private TranscriptionHubRequestRepository mockTranscriptionHubRequestRepository;
 
     @Mock
     private TranscriptionCommentRepository mockTranscriptionCommentRepository;
@@ -201,6 +201,9 @@ class TranscriptionServiceImplTest {
 
     @Captor
     private ArgumentCaptor<TranscriptionLinkedCaseEntity> transcriptionLinkedCaseEntityArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<TranscriptionHubRequestEntity> transcriptionHubRequestEntityArgumentCaptor;
 
     @InjectMocks
     private TranscriptionServiceImpl transcriptionService;
@@ -391,6 +394,27 @@ class TranscriptionServiceImplTest {
         verify(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
+    @Test
+    void saveTranscriptionRequest_createsHubRequestMarker_whenUserHasHubRole() {
+        stubValidManualTranscriptionRequest();
+        when(mockTranscription.getId()).thenReturn(123L);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB))).thenReturn(true);
+
+        transcriptionService.saveTranscriptionRequest(createValidTranscriptionRequestDetails(), true);
+
+        verify(mockTranscriptionHubRequestRepository).save(transcriptionHubRequestEntityArgumentCaptor.capture());
+        assertThat(transcriptionHubRequestEntityArgumentCaptor.getValue().getTranscriptionId()).isEqualTo(123L);
+    }
+
+    @Test
+    void saveTranscriptionRequest_doesNotCreateHubRequestMarker_whenUserDoesNotHaveHubRole() {
+        stubValidManualTranscriptionRequest();
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB))).thenReturn(false);
+
+        transcriptionService.saveTranscriptionRequest(createValidTranscriptionRequestDetails(), true);
+
+        verifyNoInteractions(mockTranscriptionHubRequestRepository);
+    }
 
     @Test
     void saveTranscriptionRequestWithValidValuesNullHearingAndCourtLogTypeReturnSuccess() {
@@ -794,21 +818,6 @@ class TranscriptionServiceImplTest {
     }
 
     @Test
-    void givenHubUser_whenSavingTranscriptionRequest_thenStoresRequestingHubSecurityGroup() {
-        // given
-        var hubSecurityGroup = createHubSecurityGroup();
-        testUser.setSecurityGroupEntities(Set.of(hubSecurityGroup));
-        stubValidManualTranscriptionRequest();
-
-        // when
-        transcriptionService.saveTranscriptionRequest(createValidTranscriptionRequestDetails(), true);
-
-        // then
-        verify(mockTranscriptionRepository).saveAndFlush(transcriptionEntityArgumentCaptor.capture());
-        assertThat(transcriptionEntityArgumentCaptor.getValue().getRequestingSecurityGroup()).isEqualTo(hubSecurityGroup);
-    }
-
-    @Test
     void getTranscriptionHubYourTranscripts_returnsHubRequesterAndApproverTranscriptions() {
         // given
         var userId = 1;
@@ -823,137 +832,6 @@ class TranscriptionServiceImplTest {
         // then
         assertThat(result.getRequesterTranscriptions()).isEqualTo(requesterTranscriptions);
         assertThat(result.getApproverTranscriptions()).isEqualTo(approverTranscriptions);
-    }
-
-    @Test
-    void givenHubOnlyUser_whenGettingNonHubTranscription_thenAccessIsDenied() {
-        // given
-        var transcriptionId = 1L;
-        var transcription = new TranscriptionEntity();
-        transcription.setIsCurrent(true);
-        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN))).thenReturn(false);
-        stubHubOnlyUser();
-
-        // when / then
-        assertThatThrownBy(() -> transcriptionService.getTranscription(transcriptionId))
-            .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
-    }
-
-    @Test
-    void givenHubOnlyUser_whenGettingHubTranscription_thenAccessIsAllowed() {
-        // given
-        var transcriptionId = 1L;
-        var transcription = new TranscriptionEntity();
-        transcription.setIsCurrent(true);
-        transcription.setRequestingSecurityGroup(createHubSecurityGroup());
-        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
-        when(transcriptionResponseMapper.mapToTranscriptionResponse(transcription)).thenReturn(new GetTranscriptionByIdResponse());
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN))).thenReturn(false);
-        stubHubOnlyUser();
-
-        // when
-        transcriptionService.getTranscription(transcriptionId);
-
-        // then
-        verify(transcriptionResponseMapper).mapToTranscriptionResponse(transcription);
-    }
-
-    @Test
-    void givenStandardUser_whenGettingHubTranscription_thenAccessIsDenied() {
-        // given
-        var transcriptionId = 1L;
-        var transcription = new TranscriptionEntity();
-        transcription.setIsCurrent(true);
-        transcription.setRequestingSecurityGroup(createHubSecurityGroup());
-        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
-
-        // when / then
-        assertThatThrownBy(() -> transcriptionService.getTranscription(transcriptionId))
-            .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
-    }
-
-    @Test
-    void givenStandardUser_whenGettingNonHubTranscription_thenAccessIsAllowed() {
-        // given
-        var transcriptionId = 1L;
-        var transcription = new TranscriptionEntity();
-        transcription.setId(transcriptionId);
-        transcription.setIsCurrent(true);
-        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
-        when(transcriptionResponseMapper.mapToTranscriptionResponse(transcription)).thenReturn(new GetTranscriptionByIdResponse());
-
-        // when
-        transcriptionService.getTranscription(transcriptionId);
-
-        // then
-        verify(transcriptionResponseMapper).mapToTranscriptionResponse(transcription);
-    }
-
-    @Test
-    void givenExistingGlobalUser_whenGettingHubTranscription_thenAccessIsAllowed() {
-        // given
-        var transcriptionId = 1L;
-        var transcription = new TranscriptionEntity();
-        transcription.setId(transcriptionId);
-        transcription.setIsCurrent(true);
-        transcription.setRequestingSecurityGroup(createHubSecurityGroup());
-        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
-        when(transcriptionResponseMapper.mapToTranscriptionResponse(transcription)).thenReturn(new GetTranscriptionByIdResponse());
-        stubExistingGlobalUser();
-
-        // when
-        transcriptionService.getTranscription(transcriptionId);
-
-        // then
-        verify(transcriptionResponseMapper).mapToTranscriptionResponse(transcription);
-    }
-
-    @Test
-    void givenExistingGlobalUser_whenGettingNonHubTranscription_thenAccessIsAllowed() {
-        // given
-        var transcriptionId = 1L;
-        var transcription = new TranscriptionEntity();
-        transcription.setId(transcriptionId);
-        transcription.setIsCurrent(true);
-        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
-        when(transcriptionResponseMapper.mapToTranscriptionResponse(transcription)).thenReturn(new GetTranscriptionByIdResponse());
-        stubExistingGlobalUser();
-
-        // when
-        transcriptionService.getTranscription(transcriptionId);
-
-        // then
-        verify(transcriptionResponseMapper).mapToTranscriptionResponse(transcription);
-    }
-
-    @Test
-    void givenHubOnlyUser_whenUpdatingNonHubTranscription_thenAccessIsDenied() {
-        // given
-        var transcriptionId = 1L;
-        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(new TranscriptionEntity()));
-        stubHubOnlyUser();
-
-        // when / then
-        assertThatThrownBy(() -> transcriptionService.updateTranscription(transcriptionId, new UpdateTranscriptionRequest(), false))
-            .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
-    }
-
-    @Test
-    void givenStandardUser_whenUpdatingHubTranscription_thenAccessIsDenied() {
-        // given
-        var transcriptionId = 1L;
-        var transcription = new TranscriptionEntity();
-        transcription.setRequestingSecurityGroup(createHubSecurityGroup());
-        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
-
-        // when / then
-        assertThatThrownBy(() -> transcriptionService.updateTranscription(transcriptionId, new UpdateTranscriptionRequest(), false))
-            .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
     }
 
     @ParameterizedTest
@@ -1077,14 +955,6 @@ class TranscriptionServiceImplTest {
         return transcriptionRequestDetails;
     }
 
-    private SecurityGroupEntity createHubSecurityGroup() {
-        var securityRole = new SecurityRoleEntity();
-        securityRole.setId(HMCTS_TRANSCRIPTION_HUB.getId());
-        var securityGroup = new SecurityGroupEntity();
-        securityGroup.setSecurityRoleEntity(securityRole);
-        return securityGroup;
-    }
-
     private TranscriptionRequestDetails createValidTranscriptionRequestDetails() {
         return createTranscriptionRequestDetails(
             1,
@@ -1095,17 +965,6 @@ class TranscriptionServiceImplTest {
             CommonTestDataUtil.createOffsetDateTime(START_TIME),
             CommonTestDataUtil.createOffsetDateTime(END_TIME)
         );
-    }
-
-    private void stubHubOnlyUser() {
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB))).thenReturn(true);
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER, DARTS))).thenReturn(false);
-    }
-
-    private void stubExistingGlobalUser() {
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN))).thenReturn(false);
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB))).thenReturn(false);
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER, DARTS))).thenReturn(true);
     }
 
     private void stubValidManualTranscriptionRequest() {
@@ -1122,6 +981,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
         when(mockTranscription.getIsManualTranscription()).thenReturn(true);
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
+        when(mockTranscription.getTranscriptionWorkflowEntities()).thenReturn(new ArrayList<>());
     }
 
     private void verifyNotification() {

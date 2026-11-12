@@ -12,7 +12,6 @@ import java.math.BigInteger;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 
 @Component
@@ -279,7 +278,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription_workflow trw
                 JOIN darts.transcription tra ON trw.tra_id = tra.tra_id
-                JOIN darts.security_group request_group ON tra.requesting_group_id = request_group.grp_id
+                JOIN darts.transcription_hub_request hub_request ON tra.tra_id = hub_request.tra_id
                 JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
                 JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
                 JOIN darts.court_case cas ON hea.cas_id = cas.cas_id
@@ -289,7 +288,6 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
                 WHERE trw.workflow_actor = :usr_id
                 AND trw.trs_id = 1
-                AND request_group.rol_id = :rol_id
                 AND tra.trs_id <> 7
                 AND (:include_hidden_from_requester OR tra.hide_request_from_requestor = false)
                 AND (
@@ -324,7 +322,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 3) as approved_ts
                 FROM darts.transcription_workflow trw
                 JOIN darts.transcription tra ON trw.tra_id = tra.tra_id
-                JOIN darts.security_group request_group ON tra.requesting_group_id = request_group.grp_id
+                JOIN darts.transcription_hub_request hub_request ON tra.tra_id = hub_request.tra_id
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
                 JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
                 JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id
@@ -333,7 +331,6 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
                 WHERE trw.workflow_actor = :usr_id
                 AND trw.trs_id = 1
-                AND request_group.rol_id = :rol_id
                 AND tra.trs_id <> 7
                 AND NOT EXISTS (
                     SELECT 1
@@ -361,7 +358,6 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 """,
             new MapSqlParameterSource()
                 .addValue(USR_ID, userId)
-                .addValue(ROL_ID, HMCTS_TRANSCRIPTION_HUB.getId())
                 .addValue(INCLUDE_HIDDEN_FROM_REQUESTOR, includeHiddenFromRequester)
                 .addValue(MAX_RESULT_SIZE, maxResultSize),
             yourTranscriptsSummaryRequesterRowMapper
@@ -386,7 +382,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.priority_order as transcription_urgency_priority_order,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts
                 FROM darts.transcription tra
-                JOIN darts.security_group request_group ON tra.requesting_group_id = request_group.grp_id
+                JOIN darts.transcription_hub_request hub_request ON tra.tra_id = hub_request.tra_id
                 JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
                 JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
                 JOIN darts.court_case cas ON hea.cas_id = cas.cas_id
@@ -397,7 +393,6 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 JOIN darts.transcription_workflow trw ON tra.tra_id = trw.tra_id
                 AND trw.trs_id = 1
                 WHERE tra.trs_id = :trs_id
-                AND request_group.rol_id = :rol_id
                 AND trw.workflow_actor <> :usr_id
                 AND (
                     EXISTS (
@@ -429,7 +424,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.priority_order as transcription_urgency_priority_order,
                     (SELECT MIN(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts
                 FROM darts.transcription tra
-                JOIN darts.security_group request_group ON tra.requesting_group_id = request_group.grp_id
+                JOIN darts.transcription_hub_request hub_request ON tra.tra_id = hub_request.tra_id
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
                 JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
                 JOIN darts.courthouse cth ON cas.cth_id = cth.cth_id
@@ -439,7 +434,6 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 JOIN darts.transcription_workflow trw ON tra.tra_id = trw.tra_id
                 AND trw.trs_id = 1
                 WHERE tra.trs_id = :trs_id
-                AND request_group.rol_id = :rol_id
                 AND trw.workflow_actor <> :usr_id
                 AND NOT EXISTS (
                     SELECT 1
@@ -465,7 +459,6 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 LIMIT :max_result_size
                 """,
             new MapSqlParameterSource("usr_id", userId)
-                .addValue(ROL_ID, HMCTS_TRANSCRIPTION_HUB.getId())
                 .addValue(TRANSCRIPTION_STATUS_ID, AWAITING_AUTHORISATION.getId())
                 .addValue(MAX_RESULT_SIZE, maxResultSize),
             yourTranscriptsSummaryRowMapper
