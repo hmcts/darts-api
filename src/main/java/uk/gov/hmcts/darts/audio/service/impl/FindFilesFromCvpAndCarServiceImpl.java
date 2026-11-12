@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audio.service.FindFilesService;
+import uk.gov.hmcts.darts.audio.service.FindFilesFromCvpAndCarService;
 import uk.gov.hmcts.darts.common.entity.JobLastSuccessfulRunTimeEntity;
 import uk.gov.hmcts.darts.common.repository.JobLastSuccessfulRunTimeRepository;
 
@@ -14,16 +14,16 @@ import java.time.Instant;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class FindFilesServiceImpl implements FindFilesService {
+public class FindFilesFromCvpAndCarServiceImpl implements FindFilesFromCvpAndCarService {
 
-    private static final String JOB_NAME = "find_files";
+    private static final String JOB_NAME = "find-files-from-cvp-and-car";
 
     private final JobLastSuccessfulRunTimeRepository jobLastSuccessfulRunTimeRepository;
     private final Clock clock;
 
     @Override
     @Transactional
-    public void findFiles(int batchSize) {
+    public void findFilesFromCvpAndCar(int batchSize) {
         Instant jobStartTime = clock.instant();
         JobLastSuccessfulRunTimeEntity lastRun = jobLastSuccessfulRunTimeRepository.findById(JOB_NAME)
             .orElseGet(() -> {
@@ -32,10 +32,11 @@ public class FindFilesServiceImpl implements FindFilesService {
                 return newLastRun;
             });
         Instant lastSuccessfulRunTime = lastRun.getLastSuccessfulRunTimestampUtc();
-        log.info("FindFilesFromCVPAndCAR job: current time UTC {} ", jobStartTime);
-        log.info("FindFilesFromCVPAndCAR job: last successful run time UTC {} ", lastSuccessfulRunTime == null ? "none" : lastSuccessfulRunTime);
-        log.info("FindFilesFromCVPAndCAR job: batch size {} ", batchSize);
-
+        log.info("FindFilesFromCVPAndCAR job: current time UTC is {}, "
+                     + "last successful run time UTC is {}, and batch size is {}",
+                 jobStartTime,
+                 lastSuccessfulRunTime == null ? "none" : lastSuccessfulRunTime,
+                 batchSize);
         // Future file discovery belongs here, before advancing the successful run timestamp.
 
         lastRun.setLastSuccessfulRunTimestampUtc(jobStartTime);

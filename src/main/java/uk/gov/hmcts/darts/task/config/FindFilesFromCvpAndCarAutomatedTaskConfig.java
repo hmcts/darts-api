@@ -9,5 +9,5 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-public class FindFilesAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
+public class FindFilesFromCvpAndCarAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
 }

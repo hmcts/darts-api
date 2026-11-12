@@ -11,13 +11,13 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audio.service.FindFilesService;
+import uk.gov.hmcts.darts.audio.service.FindFilesFromCvpAndCarService;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.JobLastSuccessfulRunTimeEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.JobLastSuccessfulRunTimeRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.task.config.FindFilesAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.FindFilesFromCvpAndCarAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
@@ -35,9 +35,9 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 @Execution(ExecutionMode.SAME_THREAD)
-class FindFilesAutomatedTaskIntTest extends PostgresIntegrationBase {
+class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase {
 
-    private static final String JOB_NAME = "find_files";
+    private static final String JOB_NAME = "find-files-from-cvp-and-car";
     private static final Instant PREVIOUS_RUN_TIME = Instant.parse("2026-11-06T10:00:00Z");
 
     @Autowired
@@ -45,14 +45,14 @@ class FindFilesAutomatedTaskIntTest extends PostgresIntegrationBase {
     @MockitoSpyBean
     private JobLastSuccessfulRunTimeRepository lastRunRepository;
     @MockitoSpyBean
-    private FindFilesAutomatedTask task;
+    private FindFilesFromCvpAndCarAutomatedTask task;
 
     @Autowired
-    private FindFilesService service;
+    private FindFilesFromCvpAndCarService service;
     @Autowired
     private UserAccountRepository userAccountRepository;
     @Autowired
-    private FindFilesAutomatedTaskConfig config;
+    private FindFilesFromCvpAndCarAutomatedTaskConfig config;
 
     @Test
     @Transactional
@@ -79,7 +79,7 @@ class FindFilesAutomatedTaskIntTest extends PostgresIntegrationBase {
 
         task.runTask();
 
-        assertThat(lastRunRepository.findById("find_files").orElseThrow().getLastSuccessfulRunTimestampUtc())
+        assertThat(lastRunRepository.findById("find-files-from-cvp-and-car").orElseThrow().getLastSuccessfulRunTimestampUtc())
             .isBetween(before, Instant.now());
     }
 
@@ -87,15 +87,15 @@ class FindFilesAutomatedTaskIntTest extends PostgresIntegrationBase {
     @Transactional
     void given_previousRun_when_findFiles_then_updateSingleRow() {
         JobLastSuccessfulRunTimeEntity previous = new JobLastSuccessfulRunTimeEntity();
-        previous.setJobName("find_files");
+        previous.setJobName("find-files-from-cvp-and-car");
         previous.setLastSuccessfulRunTimestampUtc(Instant.EPOCH);
         lastRunRepository.saveAndFlush(previous);
         Instant before = Instant.now();
 
-        service.findFiles(1000);
+        service.findFilesFromCvpAndCar(1000);
         lastRunRepository.flush();
 
-        assertThat(lastRunRepository.findById("find_files").orElseThrow().getLastSuccessfulRunTimestampUtc())
+        assertThat(lastRunRepository.findById("find-files-from-cvp-and-car").orElseThrow().getLastSuccessfulRunTimestampUtc())
             .isBetween(before, Instant.now());
         assertThat(lastRunRepository.count()).isEqualTo(1);
     }
@@ -107,7 +107,7 @@ class FindFilesAutomatedTaskIntTest extends PostgresIntegrationBase {
 
         task.run(false);
 
-        assertThat(lastRunRepository.findById("find_files")).isEmpty();
+        assertThat(lastRunRepository.findById("find-files-from-cvp-and-car")).isEmpty();
     }
 
     @ParameterizedTest
