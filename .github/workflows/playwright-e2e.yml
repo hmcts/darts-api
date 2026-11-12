@@ -14,8 +14,6 @@ on:
 
 permissions:
   contents: read
-  issues: read
-  pull-requests: read
 
 jobs:
   playwright:
@@ -30,23 +28,29 @@ jobs:
           EVENT_PR_NUMBER: ${{ github.event.pull_request.number }}
           EVENT_BRANCH: ${{ github.ref_name }}
           PULL_REQUEST_NUMBER: ${{ inputs.pull_request_number }}
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
           if [[ "$EVENT_NAME" == "push" ]]; then
-            pull_request_number=$(gh api "repos/${GITHUB_REPOSITORY}/pulls" \
-              -f state=open \
-              -f head="${GITHUB_REPOSITORY_OWNER}:${EVENT_BRANCH}" \
-              --jq '.[0].number // empty')
+            pull_request_number=$(curl --fail --silent --show-error --retry 2 \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls?state=open&head=${GITHUB_REPOSITORY_OWNER}%3A${EVENT_BRANCH}&per_page=100" \
+              | jq -r '.[0].number // empty')
             if [[ -z "$pull_request_number" ]]; then
               echo "No open pull request found for branch $EVENT_BRANCH." >&2
               exit 1
             fi
-            labels=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${pull_request_number}/labels" --jq '.[].name')
+            labels=$(curl --fail --silent --show-error --retry 2 \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${pull_request_number}/labels?per_page=100" \
+              | jq -r '.[].name')
             echo "pull_request_number=$pull_request_number" >> "$GITHUB_OUTPUT"
           elif [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
-            labels=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PULL_REQUEST_NUMBER}/labels" --jq '.[].name')
+            if [[ ! "$PULL_REQUEST_NUMBER" =~ ^[0-9]+$ ]]; then
+              echo "A valid pull request number is required." >&2
+              exit 1
+            fi
+            labels=$(curl --fail --silent --show-error --retry 2 \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PULL_REQUEST_NUMBER}/labels?per_page=100" \
+              | jq -r '.[].name')
             pull_request_number="$PULL_REQUEST_NUMBER"
             echo "pull_request_number=$pull_request_number" >> "$GITHUB_OUTPUT"
           else
