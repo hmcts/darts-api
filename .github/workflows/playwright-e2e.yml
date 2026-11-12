@@ -1,0 +1,84 @@
+name: Playwright E2E
+
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      pull_request_number:
+        description: Pull request number whose pw_e2e label should be checked
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  playwright:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.label.name, 'pw_e2e')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find Playwright branch from label
+        id: branch
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_LABEL: ${{ github.event.label.name }}
+          EVENT_PR_NUMBER: ${{ github.event.pull_request.number }}
+          PULL_REQUEST_NUMBER: ${{ inputs.pull_request_number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            labels=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PULL_REQUEST_NUMBER}/labels" --jq '.[].name')
+            matching_label=$(printf '%s\n' "$labels" | grep -E '^pw_e2e:[0-9]+$' | head -n 1 || true)
+            if [[ -z "$matching_label" ]]; then
+              matching_label=$(printf '%s\n' "$labels" | grep -Fx 'pw_e2e' | head -n 1 || true)
+            fi
+            echo "pull_request_number=$PULL_REQUEST_NUMBER" >> "$GITHUB_OUTPUT"
+          else
+            matching_label="$EVENT_LABEL"
+            echo "pull_request_number=$EVENT_PR_NUMBER" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ "$matching_label" == "pw_e2e" ]]; then
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+          elif [[ "$matching_label" =~ ^pw_e2e:([0-9]+)$ ]]; then
+            echo "ref=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "No supported pw_e2e label found on the pull request." >&2
+            exit 1
+          fi
+
+      - name: Wait for PR API deployment
+        env:
+          PULL_REQUEST_NUMBER: ${{ steps.branch.outputs.pull_request_number }}
+        run: |
+          set -euo pipefail
+
+          api_url="https://darts-api-pr-${PULL_REQUEST_NUMBER}.dev.platform.hmcts.net/health"
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --output /dev/null --max-time 10 "$api_url"; then
+              echo "PR API is responding at $api_url"
+              exit 0
+            fi
+
+            echo "Waiting for PR API deployment ($attempt/60)..."
+            sleep 20
+          done
+
+          echo "PR API did not become healthy within 30 minutes: $api_url" >&2
+          exit 1
+
+      - name: Check out Playwright automation repo
+        uses: actions/checkout@v4
+        with:
+          repository: hmcts/darts-automation-playwright
+          ref: ${{ steps.branch.outputs.ref }}
+          path: playwright
+          persist-credentials: false
+
+      - name: Echo selected Playwright branch
+        run: |
+          echo "Would run Playwright tests from branch: ${{ steps.branch.outputs.ref }}"
