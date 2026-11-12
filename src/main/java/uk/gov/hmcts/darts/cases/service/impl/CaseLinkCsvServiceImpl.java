@@ -1,8 +1,10 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.csv.CSVException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.cases.config.CaseLinkImportConfiguration;
@@ -16,6 +18,8 @@ import uk.gov.hmcts.darts.util.CsvFileUtil;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -50,9 +54,18 @@ public class CaseLinkCsvServiceImpl implements CaseLinkCsvService {
                 throw new DartsApiException(CaseApiError.EMPTY_FILE);
             }
             return rows;
-        } catch (IOException | IllegalArgumentException | java.io.UncheckedIOException exception) {
+        } catch (IOException | UncheckedIOException exception) {
+            throw csvReadFailure(exception);
+        } catch (IllegalArgumentException exception) {
             throw new DartsApiException(CaseApiError.MALFORMED_CSV, exception);
         }
+    }
+
+    private DartsApiException csvReadFailure(Exception exception) {
+        CaseApiError error = ExceptionUtils.indexOfType(exception, CSVException.class) >= 0
+            || ExceptionUtils.indexOfType(exception, CharacterCodingException.class) >= 0
+            ? CaseApiError.MALFORMED_CSV : CaseApiError.FILE_READ_FAILED;
+        return new DartsApiException(error, exception);
     }
 
     private void validateDataRecord(CSVRecord record, int bufferedRowCount) {

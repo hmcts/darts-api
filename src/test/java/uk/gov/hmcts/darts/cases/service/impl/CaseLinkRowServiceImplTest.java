@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +45,8 @@ class CaseLinkRowServiceImplTest {
     private CaseLinkedCaseRepository linkedCaseRepository;
     @Mock
     private CaseLinkImportResultRepository resultRepository;
+    @Mock
+    private EntityManager entityManager;
     @InjectMocks
     private CaseLinkRowServiceImpl service;
 
@@ -93,7 +97,9 @@ class CaseLinkRowServiceImplTest {
         assertThat(row.getCase2Id()).isEqualTo(2);
         assertThat(row.getLinkedCaseId()).isEqualTo(10);
         assertThat(row.getStatus().getId()).isEqualTo(CaseLinkResultStatus.SUCCESS.getId());
-        verify(resultRepository).saveAndFlush(row);
+        var persistenceOrder = inOrder(resultRepository, entityManager);
+        persistenceOrder.verify(resultRepository).saveAndFlush(row);
+        persistenceOrder.verify(entityManager).clear();
     }
 
     @Test

@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,8 +23,10 @@ import uk.gov.hmcts.darts.common.repository.CaseLinkImportResultRepository;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,11 +41,13 @@ class CaseLinkImportAuditServiceImplTest {
     private CaseLinkImportResultRepository resultRepository;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
+    @Mock
+    private EntityManager entityManager;
     private CaseLinkImportAuditService service;
 
     @BeforeEach
     void setUp() {
-        service = new CaseLinkImportAuditServiceImpl(importRepository, resultRepository, currentTimeHelper);
+        service = new CaseLinkImportAuditServiceImpl(importRepository, resultRepository, currentTimeHelper, entityManager);
     }
 
     @Test
@@ -58,6 +64,7 @@ class CaseLinkImportAuditServiceImplTest {
         assertThat(row.getErrorCode()).isEqualTo("ROW_PROCESSING_FAILED");
         assertThat(row.getErrorMessage()).isEqualTo("Failure");
         verify(resultRepository).saveAndFlush(row);
+        verify(entityManager).clear();
     }
 
     @Test
@@ -98,7 +105,9 @@ class CaseLinkImportAuditServiceImplTest {
         assertThat(row.getImportId()).isEqualTo(1L);
         assertThat(row.getCreatedById()).isEqualTo(user.getId());
         assertThat(row.getLastModifiedById()).isEqualTo(user.getId());
-        verify(resultRepository).saveAllAndFlush(rows);
+        var persistenceOrder = inOrder(resultRepository, entityManager);
+        persistenceOrder.verify(resultRepository).saveAllAndFlush(rows);
+        persistenceOrder.verify(entityManager).clear();
     }
 
     @ParameterizedTest
@@ -112,6 +121,38 @@ class CaseLinkImportAuditServiceImplTest {
         assertThat(caseLinkImportEntity.getErrorCode()).isEqualTo("IMPORT_FAILED");
         assertThat(caseLinkImportEntity.getErrorMessage()).isEqualTo("Failure");
         assertThat(caseLinkImportEntity.getProcessingCompletedAt()).isEqualTo(CURRENT_TIME);
+    }
+
+    @DisplayName("""
+        updateCaseLinkImport()
+        SHOULD retain the import and user audit fields on every row
+            AND flush and clear the persistence context after each batch
+        WHEN the staged rows span multiple full batches and a partial final batch
+        """)
+    @Test
+    void updateCaseLinkImport_shouldFlushAndClearEachBatch_whenStagedRowsExceedBatchSize() {
+        CaseLinkImportEntity caseLinkImportEntity = new CaseLinkImportEntity();
+        List<CaseLinkImportResultEntity> stagedRows = IntStream.range(0, 2001).mapToObj(index -> row()).toList();
+        UserAccountEntity uploadingUser = new UserAccountEntity();
+        uploadingUser.setId(123);
+        when(importRepository.findById(1L)).thenReturn(Optional.of(caseLinkImportEntity));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_TIME);
+
+        service.updateCaseLinkImport(1L, stagedRows, uploadingUser);
+
+        var persistenceOrder = inOrder(resultRepository, entityManager);
+        persistenceOrder.verify(resultRepository).saveAllAndFlush(stagedRows.subList(0, 1000));
+        persistenceOrder.verify(entityManager).clear();
+        persistenceOrder.verify(resultRepository).saveAllAndFlush(stagedRows.subList(1000, 2000));
+        persistenceOrder.verify(entityManager).clear();
+        persistenceOrder.verify(resultRepository).saveAllAndFlush(stagedRows.subList(2000, 2001));
+        persistenceOrder.verify(entityManager).clear();
+        persistenceOrder.verifyNoMoreInteractions();
+        assertThat(stagedRows).allSatisfy(stagedRow -> {
+            assertThat(stagedRow.getImportId()).isEqualTo(1L);
+            assertThat(stagedRow.getCreatedById()).isEqualTo(uploadingUser.getId());
+            assertThat(stagedRow.getLastModifiedById()).isEqualTo(uploadingUser.getId());
+        });
     }
 
     private CaseLinkImportResultEntity row() {
