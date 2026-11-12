@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class CaseLinkRowServiceImpl implements CaseLinkRowService {
     private final CaseCommonService caseCommonService;
     private final CaseLinkedCaseRepository caseLinkedCaseRepository;
     private final CaseLinkImportResultRepository caseLinkImportResultRepository;
+    private final EntityManager entityManager;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
@@ -58,6 +60,7 @@ public class CaseLinkRowServiceImpl implements CaseLinkRowService {
         row.setLinkedCaseId(link.getId());
         row.setStatus(new CaseLinkImportResultStatusEntity(CaseLinkResultStatus.SUCCESS.getId()));
         caseLinkImportResultRepository.saveAndFlush(row);
+        entityManager.clear();
     }
 
     private CaseLinkedCaseEntity createLink(CourtCaseEntity case1, CourtCaseEntity case2, UserAccountEntity user) {

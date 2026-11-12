@@ -10,10 +10,23 @@ import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.service.CaseLinkCsvService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class CaseLinkCsvServiceImplTest {
 
@@ -53,15 +66,77 @@ class CaseLinkCsvServiceImplTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "header\n", "header\nX1,YORK,\"unclosed", "header\nX1,YORK,\"closed\"garbage"})
-    void readCaseLinkCsvFile_shouldRejectFile_whenCsvIsEmptyOrMalformed(String content) {
-        assertThatThrownBy(() -> service.readCaseLinkCsvFile(file(content))).isInstanceOf(DartsApiException.class);
+    @ValueSource(strings = {"", "header\n"})
+    void readCaseLinkCsvFile_shouldRejectFileAsEmpty_whenCsvHasNoDataRows(String content) {
+        assertThatThrownBy(() -> service.readCaseLinkCsvFile(file(content)))
+            .isInstanceOfSatisfying(DartsApiException.class, exception -> assertThat(exception.getError()).isEqualTo(CaseApiError.EMPTY_FILE));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"header\nX1,YORK,\"unclosed", "header\nX1,YORK,\"closed\"garbage"})
+    void readCaseLinkCsvFile_shouldRejectFileAsMalformed_whenCsvSyntaxIsInvalid(String content) {
+        assertThatThrownBy(() -> service.readCaseLinkCsvFile(file(content)))
+            .isInstanceOfSatisfying(DartsApiException.class, exception -> {
+                assertThat(exception.getError()).isEqualTo(CaseApiError.MALFORMED_CSV);
+                assertThat(exception.getCause()).isInstanceOf(UncheckedIOException.class);
+            });
     }
 
     @Test
     void readCaseLinkCsvFile_shouldRejectFile_whenContentIsNotValidUtf8() {
         var file = new MockMultipartFile("file", "cases.csv", "text/csv", new byte[]{(byte) 0xc3, (byte) 0x28});
-        assertThatThrownBy(() -> service.readCaseLinkCsvFile(file)).isInstanceOf(DartsApiException.class);
+        assertThatThrownBy(() -> service.readCaseLinkCsvFile(file))
+            .isInstanceOfSatisfying(DartsApiException.class, exception -> {
+                assertThat(exception.getError()).isEqualTo(CaseApiError.MALFORMED_CSV);
+                assertThat(exception).hasRootCauseInstanceOf(CharacterCodingException.class);
+            });
+    }
+
+    @Test
+    void readCaseLinkCsvFile_shouldPreserveFileReadFailure_whenUploadStreamCannotBeOpened() throws IOException {
+        var uploadedFile = spy(file("header\nX1,YORK,CP1\n"));
+        IOException openingFailure = new IOException("Upload stream unavailable");
+        doThrow(openingFailure).when(uploadedFile).getInputStream();
+
+        assertThatThrownBy(() -> service.readCaseLinkCsvFile(uploadedFile))
+            .isInstanceOfSatisfying(DartsApiException.class, exception -> {
+                assertThat(exception.getError()).isEqualTo(CaseApiError.FILE_READ_FAILED);
+                assertThat(exception.getCause()).isSameAs(openingFailure);
+            });
+    }
+
+    @Test
+    void readCaseLinkCsvFile_shouldPreserveWrappedFileReadFailure_whenUploadStreamReadFails() throws IOException {
+        var uploadedFile = spy(file("header\nX1,YORK,CP1\n"));
+        try (InputStream failingInputStream = mock(InputStream.class)) {
+            IOException readingFailure = new IOException("Upload stream read failed");
+            doReturn(failingInputStream).when(uploadedFile).getInputStream();
+            when(failingInputStream.read(any(byte[].class), anyInt(), anyInt())).thenThrow(readingFailure);
+
+            assertThatThrownBy(() -> service.readCaseLinkCsvFile(uploadedFile))
+                .isInstanceOfSatisfying(DartsApiException.class, exception -> {
+                    assertThat(exception.getError()).isEqualTo(CaseApiError.FILE_READ_FAILED);
+                    assertThat(exception.getCause()).isInstanceOf(UncheckedIOException.class).hasCause(readingFailure);
+                });
+
+            verify(failingInputStream).close();
+        }
+    }
+
+    @Test
+    void readCaseLinkCsvFile_shouldPreserveFileReadFailure_whenUploadStreamCannotBeClosed() throws IOException {
+        byte[] csvContent = "header\nX1,YORK,CP1\n".getBytes(StandardCharsets.UTF_8);
+        var uploadedFile = spy(file("header\nX1,YORK,CP1\n"));
+        InputStream failingInputStream = spy(new ByteArrayInputStream(csvContent));
+        IOException closingFailure = new IOException("Upload stream close failed");
+        doReturn(failingInputStream).when(uploadedFile).getInputStream();
+        doThrow(closingFailure).when(failingInputStream).close();
+
+        assertThatThrownBy(() -> service.readCaseLinkCsvFile(uploadedFile))
+            .isInstanceOfSatisfying(DartsApiException.class, exception -> {
+                assertThat(exception.getError()).isEqualTo(CaseApiError.FILE_READ_FAILED);
+                assertThat(exception.getCause()).isSameAs(closingFailure);
+            });
     }
 
     @Test

@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.ListUtils;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,9 +26,12 @@ import java.util.List;
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class CaseLinkImportAuditServiceImpl implements CaseLinkImportAuditService {
 
+    private static final int AUDIT_BATCH_SIZE = 1000;
+
     private final CaseLinkImportRepository caseLinkImportRepository;
     private final CaseLinkImportResultRepository caseLinkImportResultRepository;
     private final CurrentTimeHelper currentTimeHelper;
+    private final EntityManager entityManager;
 
     @Override
     public CaseLinkImportEntity createCaseLinkImport(String filename, UserAccountEntity user) {
@@ -53,7 +58,11 @@ public class CaseLinkImportAuditServiceImpl implements CaseLinkImportAuditServic
             row.setCreatedBy(user);
             row.setLastModifiedBy(user);
         }
-        caseLinkImportResultRepository.saveAllAndFlush(rows);
+        for (List<CaseLinkImportResultEntity> batch : ListUtils.partition(rows, AUDIT_BATCH_SIZE)) {
+            caseLinkImportResultRepository.saveAllAndFlush(batch);
+            // Open EntityManager in View can retain these entities after this transaction commits.
+            entityManager.clear();
+        }
     }
 
     @Override
@@ -69,6 +78,7 @@ public class CaseLinkImportAuditServiceImpl implements CaseLinkImportAuditServic
         row.setErrorCode(code);
         row.setErrorMessage(message);
         caseLinkImportResultRepository.saveAndFlush(row);
+        entityManager.clear();
     }
 
     @Override
