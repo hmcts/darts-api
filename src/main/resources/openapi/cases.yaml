@@ -664,8 +664,286 @@ paths:
                 type: "CASE_104"
                 title: "The requested case cannot be found"
                 status: 404
+  /admin/case-link-imports:
+    post:
+      operationId: adminCaseLinkImportsPost
+      tags:
+        - CaseLinkImports
+      summary: Import case links from a CSV file as a global Super Admin
+      description: |-
+        Upload a UTF-8 CSV file with a .csv extension, text/csv content type,
+        and positional columns XHIBIT_CASE,XHIBIT_COURTHOUSE,CP_URN.
+        The first CSV row is skipped without inspecting its header names.
+        The maximum number of data records is configurable and defaults to 100,000.
+        Blank and invalid records count towards this limit; the skipped header does not.
+        Files exceeding the record limit are rejected before any data rows are processed.
+        Each logical CSV record, including the skipped header, has a configurable raw character limit of 65,536 by default.
+        Record separators outside quoted fields are excluded; quotes, delimiters and embedded newlines count towards this limit.
+        An over-limit record rejects the whole file before row processing, protecting the parser from excessive allocation.
+        Exactly one file part is accepted; repeated file parts or additional uploaded files are rejected and audited.
+        Both cases use the supplied existing courthouse. Case 1 must exist; case 2 is created if missing.
+        Each data row commits independently. Invalid rows and duplicate or reversed mappings fail individually.
+        Existing database links are successful. Deleted or anonymised cases are linked with audit warnings.
+        Row numbers include the skipped header record, so the first data row is row 2.
+        An import audit is created before validating the file extension, content type, emptiness, size, record count or CSV structure.
+        File validation and file-read failures are audited and reject the file before processing any data rows.
+        The import and row outcomes are stored; summaries are calculated from those outcomes.
+        The response contains the first page of failures, ordered by CSV row number, with pagination metadata.
+        The default and maximum page size are configurable and default to 100 failures per page.
+        All failed rows remain accessible through GET /admin/case-link-imports/{import_id}/failures;
+        there is no separate limit on the total number of failures that can be retrieved.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              additionalProperties: false
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: CSV file with a .csv extension and text/csv content type
+            encoding:
+              file:
+                contentType: text/csv
+      responses:
+        '200':
+          description: Processing completed, possibly with individual row failures
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseLinkImportResponse'
+        '400':
+          description: Missing or malformed multipart request
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '403':
+          description: Requires the global SUPER_ADMIN role
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '413':
+          description: The upload exceeds the server multipart size limit
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '422':
+          description: |-
+            File rejected before any rows are processed. All file validation and file-read failures are audited,
+            including invalid file extensions, unsupported content types, zero-byte files and files above the
+            configured size or data-record limit. Rejection responses include import_id, error_code and error_message from that audit.
+            Validation uses standard API errors:
+            * CASE_109 - INVALID_FILE_TYPE
+            * CASE_110 - INVALID_CONTENT_TYPE
+            * CASE_111 - EMPTY_FILE
+            * CASE_112 - FILE_TOO_LARGE
+            * CASE_113 - MALFORMED_CSV
+            * CASE_114 - FILE_READ_FAILED
+            * CASE_126 - TOO_MANY_ROWS
+            * CASE_128 - CSV_RECORD_TOO_LARGE
+            * CASE_129 - INVALID_FILE_COUNT
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/CaseLinkImportProblem'
+              example:
+                type: "CASE_113"
+                title: "The file must contain well-formed UTF-8 CSV"
+                status: 422
+                import_id: 123
+                error_code: MALFORMED_CSV
+                error_message: "The file must contain well-formed UTF-8 CSV"
+
+  /admin/case-link-imports/{import_id}/failures:
+    get:
+      operationId: adminCaseLinkImportFailuresGet
+      tags:
+        - CaseLinkImports
+      summary: Retrieve a page of audited import failures as a global Super Admin
+      description: |-
+        Returns the full import summary and one page of stored failed rows, ordered by CSV row number.
+        Pagination uses one-based page numbers. All failures can be retrieved across successive pages;
+        there is no limit of 1,000 total results. total_items and total_pages describe the failed rows,
+        while total_rows, successful_rows and failed_rows describe the whole import.
+        The configured failure page size is both the default and maximum page size (100 by default).
+        Pages beyond the last page return an empty failures array with the full counts and pagination metadata.
+        Retrieving failures does not reprocess the uploaded file or create another import audit.
+      parameters:
+        - in: path
+          name: import_id
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - in: query
+          name: page_number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: page_size
+          description: Number of failures per page; defaults to the configured failure page size (100 by default) and cannot exceed it.
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Import summary and the requested page of failed rows
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseLinkImportResponse'
+        '400':
+          description: Invalid path or pagination parameter
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: User does not have the global SUPER_ADMIN role
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '404':
+          description: Import audit does not exist
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: CASE_127
+                title: The requested case link import cannot be found
+                status: 404
+        '422':
+          description: The requested page size exceeds the configured maximum (CASE_103 - INVALID_REQUEST)
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
 components:
   schemas:
+    CaseLinkImportProblem:
+      allOf:
+        - $ref: './problem.yaml'
+        - type: object
+          required:
+            - import_id
+            - error_code
+            - error_message
+          properties:
+            import_id:
+              type: integer
+              format: int64
+              description: Audit ID of the rejected import
+            error_code:
+              $ref: '#/components/schemas/CaseLinkImportRejectionCode'
+            error_message:
+              type: string
+              description: Validation failure message stored in the import audit
+
+    CaseLinkImportRejectionCode:
+      type: string
+      description: |-
+        File-level error recorded in the import audit and returned in the HTTP 422 problem response.
+        The file is rejected before any rows are processed.
+      example: MALFORMED_CSV
+      enum:
+        - INVALID_FILE_TYPE
+        - INVALID_CONTENT_TYPE
+        - EMPTY_FILE
+        - FILE_TOO_LARGE
+        - MALFORMED_CSV
+        - FILE_READ_FAILED
+        - TOO_MANY_ROWS
+        - CSV_RECORD_TOO_LARGE
+        - INVALID_FILE_COUNT
+
+    CaseLinkImportResponse:
+      allOf:
+        - $ref: './common.yaml#/components/schemas/paginated_list_common'
+        - type: object
+          required:
+            - import_id
+            - status
+            - total_rows
+            - successful_rows
+            - failed_rows
+            - failures
+          properties:
+            import_id:
+              type: integer
+              format: int64
+            status:
+              type: string
+              example: COMPLETED_WITH_ERRORS
+            total_rows:
+              type: integer
+              minimum: 0
+            successful_rows:
+              type: integer
+              minimum: 0
+            failed_rows:
+              type: integer
+              minimum: 0
+            failures:
+              type: array
+              items:
+                $ref: '#/components/schemas/CaseLinkImportFailure'
+
+    CaseLinkImportFailure:
+      type: object
+      properties:
+        row_number:
+          type: integer
+          minimum: 2
+          description: CSV record number including the skipped header
+        case_1_case_number:
+          type: string
+          description: Supplied XHIBIT_CASE
+        case_1_courthouse:
+          type: string
+          description: Supplied XHIBIT_COURTHOUSE, used for both cases
+        case_2_case_number:
+          type: string
+          description: Supplied CP_URN
+        error_code:
+          $ref: '#/components/schemas/CaseLinkImportFailureCode'
+        error_message:
+          type: string
+
+    CaseLinkImportFailureCode:
+      type: string
+      description: |-
+        Row-level error recorded in the row audit and returned in the failures array of the HTTP 200 import summary.
+        Processing continues with subsequent rows. Unexpected processing errors use ROW_PROCESSING_FAILED.
+      example: CASE_1_NOT_FOUND
+      enum:
+        - INVALID_COLUMN_COUNT
+        - CASE_1_CASE_NUMBER_REQUIRED
+        - CASE_1_COURTHOUSE_REQUIRED
+        - CASE_2_CASE_NUMBER_REQUIRED
+        - CASE_1_CASE_NUMBER_TOO_LONG
+        - CASE_1_COURTHOUSE_TOO_LONG
+        - CASE_2_CASE_NUMBER_TOO_LONG
+        - DUPLICATE_MAPPING
+        - COURTHOUSE_NOT_FOUND
+        - CASE_1_NOT_FOUND
+        - SELF_LINK
+        - ROW_PROCESSING_FAILED
+
     add_case_request:
       type: object
       required:
@@ -1250,7 +1528,57 @@ components:
         - "CASE_106"
         - "CASE_107"
         - "CASE_108"
-      x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET, HEARINGS_NOT_ACTUAL, CASE_EXPIRED ]
+        - "CASE_109"
+        - "CASE_110"
+        - "CASE_111"
+        - "CASE_112"
+        - "CASE_113"
+        - "CASE_114"
+        - "CASE_115"
+        - "CASE_116"
+        - "CASE_117"
+        - "CASE_118"
+        - "CASE_119"
+        - "CASE_120"
+        - "CASE_121"
+        - "CASE_122"
+        - "CASE_123"
+        - "CASE_124"
+        - "CASE_125"
+        - "CASE_126"
+        - "CASE_127"
+        - "CASE_128"
+        - "CASE_129"
+      x-enum-varnames:
+        - TOO_MANY_RESULTS
+        - NO_CRITERIA_SPECIFIED
+        - CRITERIA_TOO_BROAD
+        - INVALID_REQUEST
+        - CASE_NOT_FOUND
+        - PATCH_CRITERIA_NOT_MET
+        - HEARINGS_NOT_ACTUAL
+        - CASE_EXPIRED
+        - INVALID_FILE_TYPE
+        - INVALID_CONTENT_TYPE
+        - EMPTY_FILE
+        - FILE_TOO_LARGE
+        - MALFORMED_CSV
+        - FILE_READ_FAILED
+        - INVALID_COLUMN_COUNT
+        - CASE_1_CASE_NUMBER_REQUIRED
+        - CASE_1_COURTHOUSE_REQUIRED
+        - CASE_2_CASE_NUMBER_REQUIRED
+        - CASE_1_CASE_NUMBER_TOO_LONG
+        - CASE_1_COURTHOUSE_TOO_LONG
+        - CASE_2_CASE_NUMBER_TOO_LONG
+        - DUPLICATE_MAPPING
+        - COURTHOUSE_NOT_FOUND
+        - CASE_1_NOT_FOUND
+        - SELF_LINK
+        - TOO_MANY_ROWS
+        - CASE_LINK_IMPORT_NOT_FOUND
+        - CSV_RECORD_TOO_LARGE
+        - INVALID_FILE_COUNT
 
     CaseTitleErrors:
       type: string
@@ -1263,7 +1591,57 @@ components:
         - "The request does not contain any values that are supported by the PATCH operation."
         - "The requested case does not contain any actual hearings."
         - "Case has expired."
-      x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET, HEARINGS_NOT_ACTUAL, CASE_EXPIRED ]
+        - "A CSV file is required"
+        - "The declared content type of the CSV file is not allowed"
+        - "The CSV must contain at least one data row"
+        - "The CSV exceeds the configured maximum file size"
+        - "The file must contain well-formed UTF-8 CSV"
+        - "The uploaded file could not be read"
+        - "Each row must contain exactly three columns"
+        - "Case 1 case number is required"
+        - "Case 1 courthouse is required"
+        - "Case 2 case number is required"
+        - "Case 1 case number exceeds the maximum length of 32"
+        - "Case 1 courthouse exceeds the maximum length of 255"
+        - "Case 2 case number exceeds the maximum length of 32"
+        - "The mapping duplicates an earlier row in either case order"
+        - "The supplied courthouse does not exist"
+        - "Case 1 does not exist and must already exist"
+        - "A case cannot be linked to itself"
+        - "The CSV exceeds the configured maximum number of data rows"
+        - "The requested case link import cannot be found"
+        - "The CSV contains a record exceeding the configured maximum number of characters"
+        - "The request must contain exactly one file"
+      x-enum-varnames:
+        - TOO_MANY_RESULTS
+        - NO_CRITERIA_SPECIFIED
+        - CRITERIA_TOO_BROAD
+        - INVALID_REQUEST
+        - CASE_NOT_FOUND
+        - PATCH_CRITERIA_NOT_MET
+        - HEARINGS_NOT_ACTUAL
+        - CASE_EXPIRED
+        - INVALID_FILE_TYPE
+        - INVALID_CONTENT_TYPE
+        - EMPTY_FILE
+        - FILE_TOO_LARGE
+        - MALFORMED_CSV
+        - FILE_READ_FAILED
+        - INVALID_COLUMN_COUNT
+        - CASE_1_CASE_NUMBER_REQUIRED
+        - CASE_1_COURTHOUSE_REQUIRED
+        - CASE_2_CASE_NUMBER_REQUIRED
+        - CASE_1_CASE_NUMBER_TOO_LONG
+        - CASE_1_COURTHOUSE_TOO_LONG
+        - CASE_2_CASE_NUMBER_TOO_LONG
+        - DUPLICATE_MAPPING
+        - COURTHOUSE_NOT_FOUND
+        - CASE_1_NOT_FOUND
+        - SELF_LINK
+        - TOO_MANY_ROWS
+        - CASE_LINK_IMPORT_NOT_FOUND
+        - CSV_RECORD_TOO_LARGE
+        - INVALID_FILE_COUNT
 
     CaseOpenStatusEnum:
       type: string
