@@ -46,7 +46,8 @@ public enum AutomatedTaskName {
     REMOVE_OLD_ARM_RPO_PRODUCTIONS("RemoveOldArmRpoProductions"),
     ARM_RPO_BACKLOG_CATCHUP("ArmRpoBacklogCatchup", Constants.AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE),
     CLEAN_UP_DETS_DATA("CleanUpDetsData"),
-    INBOUND_AUDIO_FAILURE_CORRECTION_TASK_NAME("InboundAudioFailureCorrection");
+    INBOUND_AUDIO_FAILURE_CORRECTION_TASK_NAME("InboundAudioFailureCorrection"),
+    DISABLE_INACTIVE_USER_ACCOUNTS("DisableInactiveUserAccounts");
 
     private final String taskName;
     private final String conditionalOnSpEL;
