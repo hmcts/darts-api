@@ -7,7 +7,8 @@ case "${1:-}" in
 esac
 
 export NVM_DIR=/home/jenkinsssh/.nvm
-source /opt/nvm/nvm.sh
+# Defer activation until install/use below; a fresh agent may not have the .nvmrc version yet.
+source /opt/nvm/nvm.sh --no-use
 export PATH="$HOME/.local/bin:$PATH"
 
 if [[ "$mode" == setup ]]; then
