@@ -14,7 +14,7 @@ import java.time.Duration;
 @Slf4j
 public class ArmLoggerServiceImpl implements ArmLoggerService {
 
-    private static final String ARM_PUSH_SUCCESSFUL = "Successfully pushed object to ARM dropzone: eod_id={}";
+    private static final String ARM_PUSH_SUCCESSFUL = "Successfully submitted ARM manifest: eod_id={}";
     private static final String ARM_PUSHED_FAILED = "Failed to push object to ARM dropzone: eod_id={}";
     private static final String ARCHIVE_TO_ARM_SUCCESSFUL = "Successfully archived object to ARM: eod_id={}";
     private static final String ARCHIVE_TO_ARM_FAILED = "Failed to archive object to ARM: eod_id={}";

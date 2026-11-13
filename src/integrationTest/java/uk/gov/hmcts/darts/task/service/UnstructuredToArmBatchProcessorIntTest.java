@@ -1,8 +1,11 @@
 package uk.gov.hmcts.darts.task.service;
 
+import com.azure.core.util.BinaryData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -19,6 +22,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -366,6 +370,31 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(armDropZoneEodsMedia1.getFirst().getManifestFile()).isEqualTo(manifestFileName);
     }
 
+    @ParameterizedTest
+    @CsvSource({"ARM_MANIFEST_FAILED, 1", "ARM_MANIFEST_FAILED, 2", "ARM_RAW_DATA_PUSHED, 1", "ARM_RAW_DATA_PUSHED, 2"})
+    void processUnstructuredToArm_ShouldReferenceExistingBlobInManifest_WhenRetrying(ObjectRecordStatusEnum previousStatus, int blobAttempt) {
+        // given
+        MediaEntity media = dartsDatabase.getMediaStub().createAndSaveSomeMedias().getFirst();
+        externalObjectDirectoryStub.createAndSaveEod(media, STORED, UNSTRUCTURED);
+        var armEod = externalObjectDirectoryStub.createAndSaveEod(media, previousStatus, ARM, eod -> eod.setTransferAttempts(1));
+        String existingFilename = format("%d_%d_%d", armEod.getId(), media.getId(), blobAttempt);
+        doReturn(List.of("DARTS/submission/" + existingFilename)).when(armDataManagementApi).listSubmissionBlobs(armEod.getId() + "_");
+
+        // when
+        unstructuredToArmProcessor.processUnstructuredToArm(5);
+
+        // then
+        var updatedEod = eodRepository.findById(armEod.getId()).orElseThrow();
+        assertThat(updatedEod.getStatus().getId()).isEqualTo(ARM_DROP_ZONE.getId());
+        assertThat(updatedEod.getTransferAttempts()).isEqualTo(blobAttempt);
+        ArgumentCaptor<BinaryData> manifestCaptor = ArgumentCaptor.forClass(BinaryData.class);
+        verify(armDataManagementApi).saveBlobDataToArm(eq(updatedEod.getManifestFile()), manifestCaptor.capture());
+        String manifest = manifestCaptor.getValue().toString();
+        assertThat(manifest.lines().count()).isEqualTo(2);
+        assertThat(manifest).contains("\"dz_file_name\":\"" + existingFilename + "\"");
+        verify(armDataManagementApi, never()).copyBlobDataToArm(any(), any());
+    }
+
     @Test
     void processUnstructuredToArm_ShouldMovePreviousArmFailedFromUnstructuredToArmStorage() {
 
@@ -376,7 +405,11 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.getFirst(), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setTransferAttempts(2));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
+        var armEodMedia1 = externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
+        String armEodMedia1RawFilename = format("%d_%d_1", armEodMedia1.getId(), medias.get(1).getId());
+        doReturn(List.of("DARTS/submission/" + armEodMedia1RawFilename))
+            .when(armDataManagementApi).listSubmissionBlobs(armEodMedia1.getId() + "_");
+
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), ARM_MANIFEST_FAILED, ARM, eod -> eod.setTransferAttempts(5));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(3), STORED, UNSTRUCTURED);
@@ -384,10 +417,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), ARM_INGESTION, ARM, eod -> eod.setTransferAttempts(1));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
-        var armEod5 = externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_RAW_DATA_PUSHED, ARM, eod -> eod.setTransferAttempts(1));
-
-        when(armDataManagementApi.listSubmissionBlobs(armEod5.getId() + "_"))
-            .thenReturn(List.of(format("%d_%d_1", armEod5.getId(), medias.get(5).getId())));
+        var armEodMedia5 = externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_RAW_DATA_PUSHED, ARM, eod -> eod.setTransferAttempts(1));
+        String armEodMedia5RawFilename = format("%d_%d_1", armEodMedia5.getId(), medias.get(5).getId());
+        doReturn(List.of("DARTS/submission/" + armEodMedia5RawFilename))
+            .when(armDataManagementApi).listSubmissionBlobs(armEodMedia5.getId() + "_");
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm(10);
@@ -421,8 +454,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(manifestFileContent.lines().count()).isEqualTo(8);
         assertThat(manifestFileContent).contains(
             format("_%d_", medias.getFirst().getId()),
-            format("_%d_", medias.get(1).getId())
+            format("_%d_", medias.get(1).getId()),
+            "\"dz_file_name\":\"" + armEodMedia1RawFilename
         );
+        assertThat(manifestFileContent).doesNotContain(format("\"dz_file_name\":\"%d_%d_2", armEodMedia1.getId(), medias.get(1).getId()));
         assertThat(manifestFileContent).doesNotContain(format("_%d_", medias.get(2).getId()));
     }
 
