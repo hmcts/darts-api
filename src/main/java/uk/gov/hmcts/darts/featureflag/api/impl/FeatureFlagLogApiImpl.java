@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.featureflag.config.FeatureFlagLoggingConfig;
 @Service
 @AllArgsConstructor
 public class FeatureFlagLogApiImpl implements FeatureFlagLogApi {
-
+    // test comment
     private FeatureFlagLoggingConfig featureFlagLoggingConfig;
 
     @Override
