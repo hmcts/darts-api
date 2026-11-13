@@ -162,7 +162,9 @@ darts:
       # Provisional file-size limit; tune for the migration before use.
       max-file-size: ${CASE_LINK_IMPORT_MAX_FILE_SIZE:25MB}
       max-rows: ${CASE_LINK_IMPORT_MAX_ROWS:100000}
+      max-record-characters: ${CASE_LINK_IMPORT_MAX_RECORD_CHARACTERS:65536}
       failure-page-size: ${CASE_LINK_IMPORT_FAILURE_PAGE_SIZE:100}
+      audit-batch-size: ${CASE_LINK_IMPORT_AUDIT_BATCH_SIZE:1000}
     admin-search:
       max-results: 1000
   hearings:

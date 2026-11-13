@@ -31,4 +31,28 @@ class CaseLinkImportConfigurationTest {
                 .satisfies(violation -> assertThat(violation.getPropertyPath().toString()).isEqualTo("failurePageSize"));
         }
     }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    void validate_shouldRejectConfiguration_whenMaximumRecordCharactersIsNotPositive(int maxRecordCharacters) {
+        CaseLinkImportConfiguration configuration = new CaseLinkImportConfiguration();
+        configuration.setMaxRecordCharacters(maxRecordCharacters);
+
+        try (var validatorFactory = Validation.buildDefaultValidatorFactory()) {
+            assertThat(validatorFactory.getValidator().validate(configuration)).singleElement()
+                .satisfies(violation -> assertThat(violation.getPropertyPath().toString()).isEqualTo("maxRecordCharacters"));
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    void validate_shouldRejectConfiguration_whenAuditBatchSizeIsNotPositive(int auditBatchSize) {
+        CaseLinkImportConfiguration configuration = new CaseLinkImportConfiguration();
+        configuration.setAuditBatchSize(auditBatchSize);
+
+        try (var validatorFactory = Validation.buildDefaultValidatorFactory()) {
+            assertThat(validatorFactory.getValidator().validate(configuration)).singleElement()
+                .satisfies(violation -> assertThat(violation.getPropertyPath().toString()).isEqualTo("auditBatchSize"));
+        }
+    }
 }

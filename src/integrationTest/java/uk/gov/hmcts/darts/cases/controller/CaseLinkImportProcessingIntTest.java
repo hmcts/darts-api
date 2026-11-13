@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "spring.jpa.open-in-view=true")
+@TestPropertySource(properties = {"spring.jpa.open-in-view=true", "darts.cases.link-import.audit-batch-size=500"})
 class CaseLinkImportProcessingIntTest extends PostgresIntegrationBase {
 
     private static final String ENDPOINT = "/admin/case-link-imports";
@@ -100,8 +100,8 @@ class CaseLinkImportProcessingIntTest extends PostgresIntegrationBase {
         doAnswer(invocation -> {
             Object persistedBatch = repositoryDelegate.answer(invocation);
             List<CaseLinkImportResultEntity> stagedRows = invocation.getArgument(0);
-            assertThat(stagedRows).hasSizeLessThanOrEqualTo(1000);
-            assertThat(entityManager.unwrap(Session.class).getStatistics().getEntityCount()).isLessThanOrEqualTo(1100);
+            assertThat(stagedRows).hasSizeLessThanOrEqualTo(500);
+            assertThat(entityManager.unwrap(Session.class).getStatistics().getEntityCount()).isLessThanOrEqualTo(600);
             stagedBatchCount.incrementAndGet();
             return persistedBatch;
         }).when(resultRepository).saveAllAndFlush(any());
@@ -125,7 +125,7 @@ class CaseLinkImportProcessingIntTest extends PostgresIntegrationBase {
             .andExpect(jsonPath("$.successful_rows").value(400))
             .andExpect(jsonPath("$.failed_rows").value(800));
 
-        assertThat(stagedBatchCount).hasValue(2);
+        assertThat(stagedBatchCount).hasValue(3);
         assertThat(processedRowCount).hasValue(1200);
         assertThat(resultRepository.count()).isEqualTo(1200);
         assertThat(linkedCaseRepository.count()).isEqualTo(400);
@@ -177,5 +177,57 @@ class CaseLinkImportProcessingIntTest extends PostgresIntegrationBase {
             assertThat(linkedCaseRepository.count()).isZero();
             assertThat(caseRepository.findByCaseNumberAndCourthouse("CP1", courthouse)).isEmpty();
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"file", "extra_file"})
+    void adminCaseLinkImportsPost_shouldAuditRejectionWithoutProcessingRows_whenAdditionalFileIsUploaded(String extraPartName) throws Exception {
+        byte[] csvContent = (HEADER + "X1,YORK,CP1\n").getBytes(StandardCharsets.UTF_8);
+        var uploadedFile = new MockMultipartFile("file", "first.csv", "text/csv", csvContent);
+        var extraFile = new MockMultipartFile(extraPartName, "extra.csv", "text/csv", csvContent);
+
+        mockMvc.perform(multipart(ENDPOINT).file(uploadedFile).file(extraFile))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.type").value(CaseApiError.INVALID_FILE_COUNT.getType()))
+            .andExpect(jsonPath("$.title").value(CaseApiError.INVALID_FILE_COUNT.getTitle()))
+            .andExpect(jsonPath("$.error_code").value("INVALID_FILE_COUNT"))
+            .andExpect(jsonPath("$.import_id").isNumber());
+
+        assertThat(importRepository.findAll()).singleElement().satisfies(importAudit -> {
+            assertThat(importAudit.getStatus().getId()).isEqualTo(CaseLinkImportStatus.REJECTED.getId());
+            assertThat(importAudit.getOriginalFilename()).isEqualTo("first.csv");
+            assertThat(importAudit.getErrorCode()).isEqualTo("INVALID_FILE_COUNT");
+            assertThat(importAudit.getFileChecksum()).isNull();
+            assertThat(importAudit.getProcessingCompletedAt()).isNotNull();
+        });
+        assertThat(resultRepository.count()).isZero();
+        assertThat(linkedCaseRepository.count()).isZero();
+        assertThat(caseRepository.findByCaseNumberAndCourthouse("CP1", courthouse)).isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void adminCaseLinkImportsPost_shouldAuditRecordLimitRejection_whenDataOrHeaderRecordIsOversized(boolean oversizedHeader) throws Exception {
+        String oversizedRecord = "a,".repeat(1_000_000) + "\n";
+        String csvContent = oversizedHeader ? oversizedRecord + "X1,YORK,CP1\n" : HEADER + "X1,YORK,CP1\n" + oversizedRecord;
+        byte[] csvBytes = csvContent.getBytes(StandardCharsets.UTF_8);
+        var uploadedFile = new MockMultipartFile("file", "cases.csv", "text/csv", csvBytes);
+
+        mockMvc.perform(multipart(ENDPOINT).file(uploadedFile))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.type").value(CaseApiError.CSV_RECORD_TOO_LARGE.getType()))
+            .andExpect(jsonPath("$.title").value(CaseApiError.CSV_RECORD_TOO_LARGE.getTitle()))
+            .andExpect(jsonPath("$.error_code").value("CSV_RECORD_TOO_LARGE"))
+            .andExpect(jsonPath("$.import_id").isNumber());
+
+        assertThat(importRepository.findAll()).singleElement().satisfies(importAudit -> {
+            assertThat(importAudit.getStatus().getId()).isEqualTo(CaseLinkImportStatus.REJECTED.getId());
+            assertThat(importAudit.getErrorCode()).isEqualTo("CSV_RECORD_TOO_LARGE");
+            assertThat(importAudit.getFileChecksum()).isEqualTo(DigestUtils.md5Hex(csvBytes));
+            assertThat(importAudit.getProcessingCompletedAt()).isNotNull();
+        });
+        assertThat(resultRepository.count()).isZero();
+        assertThat(linkedCaseRepository.count()).isZero();
+        assertThat(caseRepository.findByCaseNumberAndCourthouse("CP1", courthouse)).isEmpty();
     }
 }

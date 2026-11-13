@@ -8,8 +8,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.cases.config.CaseLinkImportConfiguration;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkImportStatus;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkResultStatus;
 import uk.gov.hmcts.darts.cases.service.CaseLinkImportAuditService;
@@ -44,10 +46,11 @@ class CaseLinkImportAuditServiceImplTest {
     @Mock
     private EntityManager entityManager;
     private CaseLinkImportAuditService service;
+    private final CaseLinkImportConfiguration configuration = new CaseLinkImportConfiguration();
 
     @BeforeEach
     void setUp() {
-        service = new CaseLinkImportAuditServiceImpl(importRepository, resultRepository, currentTimeHelper, entityManager);
+        service = new CaseLinkImportAuditServiceImpl(importRepository, resultRepository, currentTimeHelper, entityManager, configuration);
     }
 
     @Test
@@ -129,10 +132,12 @@ class CaseLinkImportAuditServiceImplTest {
             AND flush and clear the persistence context after each batch
         WHEN the staged rows span multiple full batches and a partial final batch
         """)
-    @Test
-    void updateCaseLinkImport_shouldFlushAndClearEachBatch_whenStagedRowsExceedBatchSize() {
+    @ParameterizedTest
+    @ValueSource(ints = {2, 1000})
+    void updateCaseLinkImport_shouldFlushAndClearEachConfiguredBatch_whenStagedRowsExceedBatchSize(int auditBatchSize) {
+        configuration.setAuditBatchSize(auditBatchSize);
         CaseLinkImportEntity caseLinkImportEntity = new CaseLinkImportEntity();
-        List<CaseLinkImportResultEntity> stagedRows = IntStream.range(0, 2001).mapToObj(index -> row()).toList();
+        List<CaseLinkImportResultEntity> stagedRows = IntStream.range(0, auditBatchSize * 2 + 1).mapToObj(index -> row()).toList();
         UserAccountEntity uploadingUser = new UserAccountEntity();
         uploadingUser.setId(123);
         when(importRepository.findById(1L)).thenReturn(Optional.of(caseLinkImportEntity));
@@ -141,11 +146,11 @@ class CaseLinkImportAuditServiceImplTest {
         service.updateCaseLinkImport(1L, stagedRows, uploadingUser);
 
         var persistenceOrder = inOrder(resultRepository, entityManager);
-        persistenceOrder.verify(resultRepository).saveAllAndFlush(stagedRows.subList(0, 1000));
+        persistenceOrder.verify(resultRepository).saveAllAndFlush(stagedRows.subList(0, auditBatchSize));
         persistenceOrder.verify(entityManager).clear();
-        persistenceOrder.verify(resultRepository).saveAllAndFlush(stagedRows.subList(1000, 2000));
+        persistenceOrder.verify(resultRepository).saveAllAndFlush(stagedRows.subList(auditBatchSize, auditBatchSize * 2));
         persistenceOrder.verify(entityManager).clear();
-        persistenceOrder.verify(resultRepository).saveAllAndFlush(stagedRows.subList(2000, 2001));
+        persistenceOrder.verify(resultRepository).saveAllAndFlush(stagedRows.subList(auditBatchSize * 2, auditBatchSize * 2 + 1));
         persistenceOrder.verify(entityManager).clear();
         persistenceOrder.verifyNoMoreInteractions();
         assertThat(stagedRows).allSatisfy(stagedRow -> {
