@@ -353,13 +353,15 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
     @Test
     void getTranscriptionHubTranscriptions_returnsOnlyMarkedHubRequests_andExcludesOwnApproval() {
         var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
-        var hubHearingRequest = createHubRequest(requesterUser, null, hearingEntity, transcriptionDate);
-        var hubLegacyRequest = createHubRequest(requesterUser, courtCaseEntity, null, transcriptionDate.plusMinutes(1));
-        createAwaitingAuthorisationRequest(requesterUser, null, hearingEntity, transcriptionDate.plusMinutes(2));
-        createHubRequest(approverUser, null, hearingEntity, transcriptionDate.plusMinutes(3));
+        var hubRequester = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("hubRequester");
+        var hubApprover = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("hubApprover");
+        var hubHearingRequest = createHubRequest(hubRequester, null, hearingEntity, transcriptionDate);
+        var hubLegacyRequest = createHubRequest(hubRequester, courtCaseEntity, null, transcriptionDate.plusMinutes(1));
+        createAwaitingAuthorisationRequest(hubRequester, null, hearingEntity, transcriptionDate.plusMinutes(2));
+        createHubRequest(hubApprover, null, hearingEntity, transcriptionDate.plusMinutes(3));
 
-        var requesterTranscriptions = yourTranscriptsQuery.getTranscriptionHubRequesterTranscriptions(requesterUser.getId(), false);
-        var approverTranscriptions = yourTranscriptsQuery.getTranscriptionHubApproverTranscriptions(approverUser.getId());
+        var requesterTranscriptions = yourTranscriptsQuery.getTranscriptionHubRequesterTranscriptions(hubRequester.getId(), false);
+        var approverTranscriptions = yourTranscriptsQuery.getTranscriptionHubApproverTranscriptions(hubApprover.getId());
 
         assertThat(requesterTranscriptions)
             .extracting(YourTranscriptsSummary::getTranscriptionId)

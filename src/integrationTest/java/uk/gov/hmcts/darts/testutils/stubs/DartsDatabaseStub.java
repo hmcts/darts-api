@@ -102,6 +102,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionHubRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -209,6 +210,7 @@ public class DartsDatabaseStub {
     private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
+    private final TranscriptionHubRequestRepository transcriptionHubRequestRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
@@ -313,6 +315,7 @@ public class DartsDatabaseStub {
             transcriptionCommentRepository.deleteAllInBatch();
             transcriptionWorkflowRepository.deleteAllInBatch();
             transcriptionDocumentRepository.deleteAllInBatch();
+            transcriptionHubRequestRepository.deleteAllInBatch();
             transcriptionRepository.deleteAllInBatch();
             transientObjectDirectoryRepository.deleteAllInBatch();
             transformedMediaRepository.deleteAllInBatch();
@@ -1190,4 +1193,3 @@ public class DartsDatabaseStub {
             .name();
     }
 }
-
