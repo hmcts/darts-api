@@ -111,4 +111,76 @@ jobs:
 
       - name: Run E2E tests
         working-directory: playwright
-        run: yarn test:e2e --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        env:
+          PLAYWRIGHT_BLOB_OUTPUT_DIR: ${{ github.workspace }}/playwright/blob-report
+        run: yarn test:e2e --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --reporter=list,blob
+
+      - name: Upload shard report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shardIndex }}
+          path: playwright/blob-report
+          if-no-files-found: error
+          retention-days: 1
+
+  merge-reports:
+    name: Combined Playwright report
+    needs: [playwright]
+    if: ${{ !cancelled() && needs.playwright.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Playwright automation repo
+        uses: actions/checkout@v4
+        with:
+          repository: hmcts/darts-automation-playwright
+          ref: dma-264-spike-pr-e2e-testing
+          path: playwright
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install Playwright dependencies
+        working-directory: playwright
+        run: yarn install --immutable
+
+      - name: Download shard reports
+        uses: actions/download-artifact@v4
+        with:
+          path: playwright/all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Merge reports into HTML
+        working-directory: playwright
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: ${{ github.workspace }}/playwright/playwright-report
+          PLAYWRIGHT_HTML_OPEN: never
+        run: yarn playwright merge-reports --reporter=html ./all-blob-reports
+
+      - name: Upload HTML report
+        id: html-report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report-${{ github.run_attempt }}
+          path: playwright/playwright-report
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Link report in workflow summary
+        env:
+          REPORT_URL: ${{ steps.html-report.outputs.artifact-url }}
+        run: |
+          {
+            echo "## Playwright E2E results"
+            echo
+            printf '[Download the combined HTML report](%s)\n' "$REPORT_URL"
+            echo
+            echo 'Extract the download and open index.html to view results from both shards, timings, and failure details.'
+          } >> "$GITHUB_STEP_SUMMARY"
