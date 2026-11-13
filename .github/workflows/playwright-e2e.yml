@@ -78,10 +78,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: hmcts/darts-automation-playwright
-          ref: ${{ steps.branch.outputs.ref }}
+          ref: dma-264-spike-pr-e2e-testing
           path: playwright
           persist-credentials: false
 
-      - name: Echo selected Playwright branch
+      - name: Print E2E folder contents
+        working-directory: playwright
         run: |
-          echo "Would run Playwright tests from branch: ${{ steps.branch.outputs.ref }}"
+          ls -laR e2e
