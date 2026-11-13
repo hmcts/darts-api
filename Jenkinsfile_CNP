@@ -266,6 +266,13 @@ withPipeline(type, product, component) {
     junit testResults: '**/test-results/integration/*.xml'
   }
 
+  // Temporary spike shortcut: exercise E2E before waiting for the image build/deployment.
+  afterSuccess('checkout') {
+    onPR {
+      load('bin/ci/playwright-e2e.groovy').call('stg', 'https://darts-portal-api-pr-3503.dev.platform.hmcts.net')
+    }
+  }
+
   afterAlways('akschartsinstall') {
     if(params.SKIP_TESTS || params.SKIP_SONAR) {
       stage('SKIP_TESTS OR SKIP_SONAR IS TRUE') {
