@@ -164,6 +164,8 @@ darts-portal:
         secrets:
           - redis-connection-string
           - darts-portal-session-secret
+          - LaunchDarklyClientId
+          - LaunchDarklySdkKey
     environment:
       ALLOW_CONFIG_MUTATIONS: true
       DARTS_PORTAL_URL: "https://darts-portal-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
