@@ -17,8 +17,14 @@ permissions:
 
 jobs:
   playwright:
+    name: Playwright shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || startsWith(github.event.label.name, 'pw_e2e')
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2]
+        shardTotal: [2]
     steps:
       - name: Find Playwright branch from label
         id: branch
@@ -105,4 +111,4 @@ jobs:
 
       - name: Run E2E tests
         working-directory: playwright
-        run: yarn test:e2e
+        run: yarn test:e2e --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
