@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionHubRequestEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -39,6 +40,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionHubRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -51,6 +53,7 @@ import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.common.util.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
+import uk.gov.hmcts.darts.transcriptions.component.YourTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
@@ -59,6 +62,7 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.YourTranscriptsSummary;
 import uk.gov.hmcts.darts.transcriptions.validator.TranscriptFileValidator;
 import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
@@ -85,8 +89,10 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
@@ -129,6 +135,8 @@ class TranscriptionServiceImplTest {
     private TranscriptionUrgencyRepository mockTranscriptionUrgencyRepository;
     @Mock
     private TranscriptionWorkflowRepository mockTranscriptionWorkflowRepository;
+    @Mock
+    private TranscriptionHubRequestRepository mockTranscriptionHubRequestRepository;
 
     @Mock
     private TranscriptionCommentRepository mockTranscriptionCommentRepository;
@@ -177,6 +185,9 @@ class TranscriptionServiceImplTest {
     private DuplicateRequestDetector duplicateRequestDetector;
 
     @Mock
+    private YourTranscriptsQuery yourTranscriptsQuery;
+
+    @Mock
     private TranscriptionResponseMapper transcriptionResponseMapper;
 
     @Captor
@@ -190,6 +201,9 @@ class TranscriptionServiceImplTest {
 
     @Captor
     private ArgumentCaptor<TranscriptionLinkedCaseEntity> transcriptionLinkedCaseEntityArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<TranscriptionHubRequestEntity> transcriptionHubRequestEntityArgumentCaptor;
 
     @InjectMocks
     private TranscriptionServiceImpl transcriptionService;
@@ -380,6 +394,27 @@ class TranscriptionServiceImplTest {
         verify(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
+    @Test
+    void saveTranscriptionRequest_createsHubRequestMarker_whenUserHasHubRole() {
+        stubValidManualTranscriptionRequest();
+        when(mockTranscription.getId()).thenReturn(123L);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB))).thenReturn(true);
+
+        transcriptionService.saveTranscriptionRequest(createValidTranscriptionRequestDetails(), true);
+
+        verify(mockTranscriptionHubRequestRepository).save(transcriptionHubRequestEntityArgumentCaptor.capture());
+        assertThat(transcriptionHubRequestEntityArgumentCaptor.getValue().getTranscriptionId()).isEqualTo(123L);
+    }
+
+    @Test
+    void saveTranscriptionRequest_doesNotCreateHubRequestMarker_whenUserDoesNotHaveHubRole() {
+        stubValidManualTranscriptionRequest();
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(HMCTS_TRANSCRIPTION_HUB))).thenReturn(false);
+
+        transcriptionService.saveTranscriptionRequest(createValidTranscriptionRequestDetails(), true);
+
+        verifyNoInteractions(mockTranscriptionHubRequestRepository);
+    }
 
     @Test
     void saveTranscriptionRequestWithValidValuesNullHearingAndCourtLogTypeReturnSuccess() {
@@ -782,6 +817,23 @@ class TranscriptionServiceImplTest {
         verify(mockTranscriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
     }
 
+    @Test
+    void getTranscriptionHubYourTranscripts_returnsHubRequesterAndApproverTranscriptions() {
+        // given
+        var userId = 1;
+        var requesterTranscriptions = List.of(new YourTranscriptsSummary());
+        var approverTranscriptions = List.of(new YourTranscriptsSummary());
+        when(yourTranscriptsQuery.getTranscriptionHubRequesterTranscriptions(userId, false)).thenReturn(requesterTranscriptions);
+        when(yourTranscriptsQuery.getTranscriptionHubApproverTranscriptions(userId)).thenReturn(approverTranscriptions);
+
+        // when
+        var result = transcriptionService.getTranscriptionHubYourTranscripts(userId, false);
+
+        // then
+        assertThat(result.getRequesterTranscriptions()).isEqualTo(requesterTranscriptions);
+        assertThat(result.getApproverTranscriptions()).isEqualTo(approverTranscriptions);
+    }
+
     @ParameterizedTest
     @EnumSource(value = TranscriptionStatusEnum.class,
         mode = EnumSource.Mode.INCLUDE, names = {"REJECTED", "APPROVED"})
@@ -901,6 +953,35 @@ class TranscriptionServiceImplTest {
         transcriptionRequestDetails.setStartDateTime(startDateTime);
         transcriptionRequestDetails.setEndDateTime(endDateTime);
         return transcriptionRequestDetails;
+    }
+
+    private TranscriptionRequestDetails createValidTranscriptionRequestDetails() {
+        return createTranscriptionRequestDetails(
+            1,
+            1,
+            TranscriptionUrgencyEnum.OVERNIGHT.getId(),
+            TranscriptionTypeEnum.COURT_LOG.getId(),
+            TEST_COMMENT,
+            CommonTestDataUtil.createOffsetDateTime(START_TIME),
+            CommonTestDataUtil.createOffsetDateTime(END_TIME)
+        );
+    }
+
+    private void stubValidManualTranscriptionRequest() {
+        doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), anyBoolean());
+        when(mockHearingsService.getHearingByIdWithValidation(1)).thenReturn(mockHearing);
+        when(mockTranscriptionUrgencyRepository.getReferenceById(TranscriptionUrgencyEnum.OVERNIGHT.getId()))
+            .thenReturn(mockTranscriptionUrgency);
+        when(mockTranscriptionTypeRepository.getReferenceById(TranscriptionTypeEnum.COURT_LOG.getId()))
+            .thenReturn(mockTranscriptionType);
+        when(mockTranscriptionStatusRepository.getReferenceById(REQUESTED.getId())).thenReturn(requestedTranscriptionStatus);
+        when(mockTranscriptionStatusRepository.getReferenceById(AWAITING_AUTHORISATION.getId()))
+            .thenReturn(awaitingAuthorisationTranscriptionStatus);
+        when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
+        when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
+        when(mockTranscription.getIsManualTranscription()).thenReturn(true);
+        when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
+        when(mockTranscription.getTranscriptionWorkflowEntities()).thenReturn(new ArrayList<>());
     }
 
     private void verifyNotification() {

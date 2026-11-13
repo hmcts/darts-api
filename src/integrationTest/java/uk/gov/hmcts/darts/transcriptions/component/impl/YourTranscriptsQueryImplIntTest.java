@@ -8,8 +8,10 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionHubRequestEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.TranscriptionHubRequestRepository;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -33,6 +35,9 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
 
     @Autowired
     private YourTranscriptsQueryImpl yourTranscriptsQuery;
+
+    @Autowired
+    private TranscriptionHubRequestRepository transcriptionHubRequestRepository;
 
     private UserAccountEntity transcriberUser;
     private UserAccountEntity requesterUser;
@@ -343,6 +348,41 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
         List<YourTranscriptsSummary> yourTranscriptsSummaries = yourTranscriptsQuery.getApproverTranscriptions(approverUser.getId());
 
         assertThat(yourTranscriptsSummaries).isEmpty();
+    }
+
+    @Test
+    void getTranscriptionHubTranscriptions_returnsOnlyMarkedHubRequests_andExcludesOwnApproval() {
+        var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
+        var hubRequester = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("hubRequester");
+        var hubApprover = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("hubApprover");
+        var hubHearingRequest = createHubRequest(hubRequester, null, hearingEntity, transcriptionDate);
+        var hubLegacyRequest = createHubRequest(hubRequester, courtCaseEntity, null, transcriptionDate.plusMinutes(1));
+        createAwaitingAuthorisationRequest(hubRequester, null, hearingEntity, transcriptionDate.plusMinutes(2));
+        createHubRequest(hubApprover, null, hearingEntity, transcriptionDate.plusMinutes(3));
+
+        var requesterTranscriptions = yourTranscriptsQuery.getTranscriptionHubRequesterTranscriptions(hubRequester.getId(), false);
+        var approverTranscriptions = yourTranscriptsQuery.getTranscriptionHubApproverTranscriptions(hubApprover.getId());
+
+        assertThat(requesterTranscriptions)
+            .extracting(YourTranscriptsSummary::getTranscriptionId)
+            .containsExactlyInAnyOrder(hubHearingRequest.getId().intValue(), hubLegacyRequest.getId().intValue());
+        assertThat(approverTranscriptions)
+            .extracting(YourTranscriptsSummary::getTranscriptionId)
+            .containsExactlyInAnyOrder(hubHearingRequest.getId().intValue(), hubLegacyRequest.getId().intValue());
+    }
+
+    private TranscriptionEntity createHubRequest(UserAccountEntity requester, CourtCaseEntity courtCase,
+                                                 HearingEntity hearing, OffsetDateTime transcriptionDate) {
+        var transcription = createAwaitingAuthorisationRequest(requester, courtCase, hearing, transcriptionDate);
+        transcriptionHubRequestRepository.saveAndFlush(new TranscriptionHubRequestEntity(transcription.getId()));
+        return transcription;
+    }
+
+    private TranscriptionEntity createAwaitingAuthorisationRequest(UserAccountEntity requester, CourtCaseEntity courtCase,
+                                                                    HearingEntity hearing, OffsetDateTime transcriptionDate) {
+        return dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
+            requester, courtCase, hearing, transcriptionDate
+        );
     }
 
     private void createTranscriptionWorkflow(UserAccountEntity userAccount, OffsetDateTime dateTime, TranscriptionStatusEnum transcriptionStatusEnum,
