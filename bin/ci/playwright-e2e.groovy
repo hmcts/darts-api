@@ -17,7 +17,7 @@ def call(String environment, String portalUrl) {
     error('Playwright requires the staging portal or a DARTS API PR portal HTTPS origin')
   }
 
-  // Checkout runs on the general build agent; use an environment agent for network/Key Vault access.
+  // Use the requested environment's agents for network/Key Vault access.
   withEnvironmentAgent(environment, 'darts') {
     runTests(environment, portalUrl)
   }

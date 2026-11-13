@@ -10,6 +10,7 @@ properties([
 
 import uk.gov.hmcts.contino.GradleBuilder
 import uk.gov.hmcts.contino.GithubAPI
+import uk.gov.hmcts.contino.Environment
 
 def type = "java"
 def product = "darts"
@@ -266,12 +267,14 @@ withPipeline(type, product, component) {
     junit testResults: '**/test-results/integration/*.xml'
   }
 
-  // Temporary spike shortcut: exercise E2E before waiting for the image build/deployment.
-  afterSuccess('checkout') {
+  def devEnvironment = new Environment(env).previewName
+  def runPlaywright = {
     onPR {
-      load('bin/ci/playwright-e2e.groovy').call('stg', 'https://darts-portal-api-pr-3503.dev.platform.hmcts.net')
+      load('bin/ci/playwright-e2e.groovy').call('stg', env.DEV_DARTS_PORTAL_URL)
     }
   }
+  afterSuccess("functionalTest:${devEnvironment}", runPlaywright)
+  afterSuccess("fullFunctionalTest:${devEnvironment}", runPlaywright)
 
   afterAlways('akschartsinstall') {
     if(params.SKIP_TESTS || params.SKIP_SONAR) {
