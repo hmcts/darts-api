@@ -109,38 +109,6 @@ jobs:
         working-directory: playwright
         run: yarn playwright install --with-deps
 
-      - name: Load external login credentials from Azure Key Vault
-        env:
-          AZURE_CLIENT_ID: ${{ secrets.SP_CLIENT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.SP_SECRET_KEY }}
-          AZURE_TENANT_ID: ${{ secrets.SP_TENANT_ID }}
-        run: |
-          set -euo pipefail
-          : "${AZURE_CLIENT_ID:?SP_CLIENT_ID must be configured}"
-          : "${AZURE_CLIENT_SECRET:?SP_SECRET_KEY must be configured}"
-          : "${AZURE_TENANT_ID:?SP_TENANT_ID must be configured}"
-
-          az login --service-principal \
-            --username "$AZURE_CLIENT_ID" \
-            --password="$AZURE_CLIENT_SECRET" \
-            --tenant "$AZURE_TENANT_ID" \
-            --allow-no-subscriptions --output none --only-show-errors
-
-          username=$(az keyvault secret show --vault-name darts-stg \
-            --name AutomationTestUserName --query value --output tsv --only-show-errors)
-          echo "::add-mask::$username"
-          password=$(az keyvault secret show --vault-name darts-stg \
-            --name AutomationTestPassword --query value --output tsv --only-show-errors)
-          echo "::add-mask::$password"
-
-          if [[ -z "$username" || -z "$password" ]]; then
-            echo "External automation credentials must not be empty." >&2
-            exit 1
-          fi
-
-          az logout --output none
-          printf 'AUTOMATION_USERNAME=%s\nAUTOMATION_PASSWORD=%s\n' "$username" "$password" >> "$GITHUB_ENV"
-
       - name: Run E2E tests
         working-directory: playwright
         env:
