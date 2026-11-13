@@ -146,6 +146,16 @@ public enum CaseApiError implements DartsApiError {
         CaseErrorCode.CASE_LINK_IMPORT_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
         CaseTitleErrors.CASE_LINK_IMPORT_NOT_FOUND.toString()
+    ),
+    CSV_RECORD_TOO_LARGE(
+        CaseErrorCode.CSV_RECORD_TOO_LARGE.getValue(),
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        CaseTitleErrors.CSV_RECORD_TOO_LARGE.toString()
+    ),
+    INVALID_FILE_COUNT(
+        CaseErrorCode.INVALID_FILE_COUNT.getValue(),
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        CaseTitleErrors.INVALID_FILE_COUNT.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "CASE";

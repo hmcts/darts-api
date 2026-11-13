@@ -7,6 +7,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.cases.config.CaseLinkImportConfiguration;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkImportStatus;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkResultStatus;
 import uk.gov.hmcts.darts.cases.service.CaseLinkImportAuditService;
@@ -26,12 +27,11 @@ import java.util.List;
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class CaseLinkImportAuditServiceImpl implements CaseLinkImportAuditService {
 
-    private static final int AUDIT_BATCH_SIZE = 1000;
-
     private final CaseLinkImportRepository caseLinkImportRepository;
     private final CaseLinkImportResultRepository caseLinkImportResultRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final EntityManager entityManager;
+    private final CaseLinkImportConfiguration configuration;
 
     @Override
     public CaseLinkImportEntity createCaseLinkImport(String filename, UserAccountEntity user) {
@@ -58,7 +58,7 @@ public class CaseLinkImportAuditServiceImpl implements CaseLinkImportAuditServic
             row.setCreatedBy(user);
             row.setLastModifiedBy(user);
         }
-        for (List<CaseLinkImportResultEntity> batch : ListUtils.partition(rows, AUDIT_BATCH_SIZE)) {
+        for (List<CaseLinkImportResultEntity> batch : ListUtils.partition(rows, configuration.getAuditBatchSize())) {
             caseLinkImportResultRepository.saveAllAndFlush(batch);
             // Open EntityManager in View can retain these entities after this transaction commits.
             entityManager.clear();
