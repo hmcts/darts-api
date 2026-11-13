@@ -44,10 +44,10 @@ class ArmLoggerServiceImplTest {
     }
 
     @Test
-    void armPushSuccessful_shouldLogInfoWithEodId_whenProvidedWithEodId() {
+    void armPushSuccessful_ShouldLogManifestSubmission_WhenProvidedWithEodId() {
         armLoggerService.armPushSuccessful(EOD_ID);
 
-        var logEntry = String.format("Successfully pushed object to ARM dropzone: eod_id=%s", EOD_ID);
+        var logEntry = String.format("Successfully submitted ARM manifest: eod_id=%s", EOD_ID);
 
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());

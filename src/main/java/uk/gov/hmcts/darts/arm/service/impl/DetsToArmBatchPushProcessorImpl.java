@@ -332,7 +332,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                                                   armExternalObjectDirectory.getId(), start);
                 featureFlagLogApi.logDetsToArmPush(logMessage);
 
-                log.info("About to push raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
+                log.info("About to push raw data to ARM for DETS: eod_id={}, filename={}", armExternalObjectDirectory.getId(), filename);
                 armDataManagementApi.copyDetsBlobDataToArm(detsExternalObjectDirectory.getExternalLocation(), filename);
                 log.info("Pushed raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
 

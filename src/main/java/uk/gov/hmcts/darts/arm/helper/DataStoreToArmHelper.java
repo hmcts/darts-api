@@ -106,10 +106,11 @@ public class DataStoreToArmHelper {
         int currentNumberOfAttempts = ObjectUtils.firstNonNull(externalObjectDirectoryEntity.getTransferAttempts(), 0);
         int newNumberOfAttempts = currentNumberOfAttempts + 1;
         log.info(
-            "Updating failed transfer attempts from {} to {} for ID {}",
+            "Retrying ARM submission: eod_id={}, previous_status={}, previous_transfer_attempts={}, next_transfer_attempts={}",
+            externalObjectDirectoryEntity.getId(),
+            externalObjectDirectoryEntity.getStatus().getId(),
             currentNumberOfAttempts,
-            newNumberOfAttempts,
-            externalObjectDirectoryEntity.getId()
+            newNumberOfAttempts
         );
         externalObjectDirectoryEntity.setTransferAttempts(newNumberOfAttempts);
     }
@@ -185,7 +186,7 @@ public class DataStoreToArmHelper {
                 Instant start = Instant.now();
                 log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
 
-                log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
+                log.info("About to push raw data to ARM: eod_id={}, filename={}", armExternalObjectDirectory.getId(), filename);
                 armDataManagementApi.copyBlobDataToArm(unstructuredExternalObjectDirectory.getExternalLocation(), filename);
                 log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
 
@@ -264,7 +265,7 @@ public class DataStoreToArmHelper {
 
     public boolean shouldPushRawDataToArm(ArmBatchItem batchItem, String rawFilename, UserAccountEntity userAccount) {
 
-        if (equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus())) {
+        if (equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus(), EodHelper.failedArmRawDataStatus())) {
             return true;
         }
 
@@ -317,6 +318,7 @@ public class DataStoreToArmHelper {
             armEod.setTransferAttempts(attempts);
             externalObjectDirectoryRepository.saveAndFlush(armEod);
         }
+        log.info("Reusing existing ARM submission blob: eod_id={}, filename={}", armEod.getId(), archiveRecordRawFilename);
     }
 
     public boolean shouldAddEntryToManifestFile(ArmBatchItem batchItem) {
