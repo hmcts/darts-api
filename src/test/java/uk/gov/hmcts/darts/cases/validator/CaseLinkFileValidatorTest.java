@@ -1,11 +1,19 @@
 package uk.gov.hmcts.darts.cases.validator;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
+import org.springframework.mock.web.MockPart;
 import org.springframework.util.unit.DataSize;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import uk.gov.hmcts.darts.cases.config.CaseLinkImportConfiguration;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -21,6 +29,18 @@ class CaseLinkFileValidatorTest {
     private final CaseLinkImportConfiguration configuration = new CaseLinkImportConfiguration();
     private final CaseLinkFileValidator validator = new CaseLinkFileValidator(configuration);
     private final byte[] content = "header\nX1,YORK,CP1".getBytes(StandardCharsets.UTF_8);
+    private RequestAttributes originalRequestAttributes;
+
+    @BeforeEach
+    void setUp() {
+        originalRequestAttributes = RequestContextHolder.getRequestAttributes();
+        RequestContextHolder.resetRequestAttributes();
+    }
+
+    @AfterEach
+    void tearDown() {
+        RequestContextHolder.setRequestAttributes(originalRequestAttributes);
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {"cases.csv", "cases.CSV", "cases.CsV"})
@@ -79,5 +99,59 @@ class CaseLinkFileValidatorTest {
         configuration.setMaxFileSize(DataSize.ofBytes(file.getSize() - 1));
         assertThatThrownBy(() -> validator.validate(file))
             .isInstanceOfSatisfying(DartsApiException.class, exception -> assertThat(exception.getError()).isEqualTo(CaseApiError.FILE_TOO_LARGE));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"file", "extra_file"})
+    void validate_shouldRejectFileCount_whenRequestContainsAdditionalUploadedFile(String extraPartName) {
+        var uploadedFile = new MockMultipartFile("file", "cases.csv", "text/csv", content);
+        var multipartRequest = new MockMultipartHttpServletRequest();
+        multipartRequest.addFile(uploadedFile);
+        multipartRequest.addFile(new MockMultipartFile(extraPartName, "extra.csv", "text/csv", content));
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(multipartRequest));
+
+        assertThatThrownBy(() -> validator.validate(uploadedFile))
+            .isInstanceOfSatisfying(DartsApiException.class, exception -> assertThat(exception.getError()).isEqualTo(CaseApiError.INVALID_FILE_COUNT));
+    }
+
+    @Test
+    void validate_shouldAcceptFile_whenMultipartRequestContainsExactlyOneUploadedFile() {
+        var uploadedFile = new MockMultipartFile("file", "cases.csv", "text/csv", content);
+        var multipartRequest = new MockMultipartHttpServletRequest();
+        multipartRequest.addFile(uploadedFile);
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(multipartRequest));
+
+        assertThatCode(() -> validator.validate(uploadedFile)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void validate_shouldRejectFileCount_whenMultipartRequestContainsNoUploadedFiles() {
+        var uploadedFile = new MockMultipartFile("file", "cases.csv", "text/csv", content);
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockMultipartHttpServletRequest()));
+
+        assertThatThrownBy(() -> validator.validate(uploadedFile))
+            .isInstanceOfSatisfying(DartsApiException.class, exception -> assertThat(exception.getError()).isEqualTo(CaseApiError.INVALID_FILE_COUNT));
+    }
+
+    @Test
+    void validate_shouldAcceptProgrammaticFile_whenRequestIsNotMultipart() {
+        var uploadedFile = new MockMultipartFile("file", "cases.csv", "text/csv", content);
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockHttpServletRequest()));
+
+        assertThatCode(() -> validator.validate(uploadedFile)).doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"file", "extra_file"})
+    void validate_shouldRejectFileCount_whenServletRequestHasAdditionalFileParts(String extraPartName) {
+        var uploadedFile = new MockMultipartFile("file", "cases.csv", "text/csv", content);
+        var servletRequest = new MockHttpServletRequest();
+        servletRequest.setContentType("multipart/form-data");
+        servletRequest.addPart(new MockPart("file", "cases.csv", content));
+        servletRequest.addPart(new MockPart(extraPartName, "extra.csv", content));
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(servletRequest));
+
+        assertThatThrownBy(() -> validator.validate(uploadedFile))
+            .isInstanceOfSatisfying(DartsApiException.class, exception -> assertThat(exception.getError()).isEqualTo(CaseApiError.INVALID_FILE_COUNT));
     }
 }

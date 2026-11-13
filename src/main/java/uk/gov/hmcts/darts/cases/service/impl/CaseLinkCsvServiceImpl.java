@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.CaseLinkImportResultEntity;
 import uk.gov.hmcts.darts.common.entity.CaseLinkImportResultStatusEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.util.CsvFileUtil;
+import uk.gov.hmcts.darts.util.CsvRecordLimitReader;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,7 +40,8 @@ public class CaseLinkCsvServiceImpl implements CaseLinkCsvService {
         var decoder = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
             .onUnmappableCharacter(CodingErrorAction.REPORT);
         var format = CSVFormat.DEFAULT.builder().setIgnoreEmptyLines(false).build();
-        try (var reader = new InputStreamReader(file.getInputStream(), decoder);
+        try (var reader = new CsvRecordLimitReader(new InputStreamReader(file.getInputStream(), decoder), configuration.getMaxRecordCharacters(),
+                                                   () -> new DartsApiException(CaseApiError.CSV_RECORD_TOO_LARGE));
              var parser = CsvFileUtil.readCsv(reader, format)) {
 
             List<CaseLinkImportResultEntity> rows = new ArrayList<>();

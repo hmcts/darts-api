@@ -178,6 +178,39 @@ class CaseLinkCsvServiceImplTest {
             .isInstanceOfSatisfying(DartsApiException.class, exception -> assertThat(exception.getError()).isEqualTo(CaseApiError.TOO_MANY_ROWS));
     }
 
+    @Test
+    void readCaseLinkCsvFile_shouldRejectRecordBeforeReadingWholeStream_whenColumnCountIsExtreme() throws IOException {
+        byte[] csvContent = ("header\n" + "a,".repeat(1_000_000) + "\n").getBytes(StandardCharsets.UTF_8);
+        var uploadedFile = spy(new MockMultipartFile("file", "cases.csv", "text/csv", csvContent));
+        var csvInputStream = new ByteArrayInputStream(csvContent);
+        doReturn(csvInputStream).when(uploadedFile).getInputStream();
+
+        assertThatThrownBy(() -> service.readCaseLinkCsvFile(uploadedFile))
+            .isInstanceOfSatisfying(DartsApiException.class, exception -> assertThat(exception.getError()).isEqualTo(CaseApiError.CSV_RECORD_TOO_LARGE));
+
+        assertThat(csvInputStream.available()).isGreaterThan(csvContent.length / 2);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\n", "\r", "\r\n"})
+    void readCaseLinkCsvFile_shouldAcceptRecordAtLimit_whenConfiguredLimitMatchesRawRecordLength(String recordSeparator) {
+        configuration.setMaxRecordCharacters("X1,YORK,CP1".length());
+
+        var caseLinkRows = service.readCaseLinkCsvFile(file("header" + recordSeparator + "X1,YORK,CP1" + recordSeparator));
+
+        assertThat(caseLinkRows).hasSize(1);
+        assertThat(caseLinkRows.getFirst().getCase2CaseNumber()).isEqualTo("CP1");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"header\nX1,YORK,CP1\n", "header\n\"a\nb\nc\",YORK,CP1\n", "oversized header\nX1,YORK,CP1\n"})
+    void readCaseLinkCsvFile_shouldRejectWholeFile_whenDataOrHeaderRecordExceedsConfiguredLimit(String csvContent) {
+        configuration.setMaxRecordCharacters(10);
+
+        assertThatThrownBy(() -> service.readCaseLinkCsvFile(file(csvContent)))
+            .isInstanceOfSatisfying(DartsApiException.class, exception -> assertThat(exception.getError()).isEqualTo(CaseApiError.CSV_RECORD_TOO_LARGE));
+    }
+
     private MockMultipartFile file(String content) {
         return new MockMultipartFile("file", "cases.csv", "text/csv", content.getBytes(StandardCharsets.UTF_8));
     }

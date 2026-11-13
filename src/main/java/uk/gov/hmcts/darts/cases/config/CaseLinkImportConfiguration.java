@@ -23,5 +23,11 @@ public class CaseLinkImportConfiguration {
     private int maxRows = 100_000;
 
     @Min(1)
+    private int maxRecordCharacters = 65_536;
+
+    @Min(1)
     private int failurePageSize = 100;
+
+    @Min(1)
+    private int auditBatchSize = 1000;
 }

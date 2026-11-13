@@ -677,6 +677,10 @@ paths:
         The maximum number of data records is configurable and defaults to 100,000.
         Blank and invalid records count towards this limit; the skipped header does not.
         Files exceeding the record limit are rejected before any data rows are processed.
+        Each logical CSV record, including the skipped header, has a configurable raw character limit of 65,536 by default.
+        Record separators outside quoted fields are excluded; quotes, delimiters and embedded newlines count towards this limit.
+        An over-limit record rejects the whole file before row processing, protecting the parser from excessive allocation.
+        Exactly one file part is accepted; repeated file parts or additional uploaded files are rejected and audited.
         Both cases use the supplied existing courthouse. Case 1 must exist; case 2 is created if missing.
         Each data row commits independently. Invalid rows and duplicate or reversed mappings fail individually.
         Existing database links are successful. Deleted or anonymised cases are linked with audit warnings.
@@ -743,6 +747,8 @@ paths:
             * CASE_113 - MALFORMED_CSV
             * CASE_114 - FILE_READ_FAILED
             * CASE_126 - TOO_MANY_ROWS
+            * CASE_128 - CSV_RECORD_TOO_LARGE
+            * CASE_129 - INVALID_FILE_COUNT
           content:
             application/json+problem:
               schema:
@@ -862,6 +868,8 @@ components:
         - MALFORMED_CSV
         - FILE_READ_FAILED
         - TOO_MANY_ROWS
+        - CSV_RECORD_TOO_LARGE
+        - INVALID_FILE_COUNT
 
     CaseLinkImportResponse:
       allOf:
@@ -1539,6 +1547,8 @@ components:
         - "CASE_125"
         - "CASE_126"
         - "CASE_127"
+        - "CASE_128"
+        - "CASE_129"
       x-enum-varnames:
         - TOO_MANY_RESULTS
         - NO_CRITERIA_SPECIFIED
@@ -1567,6 +1577,8 @@ components:
         - SELF_LINK
         - TOO_MANY_ROWS
         - CASE_LINK_IMPORT_NOT_FOUND
+        - CSV_RECORD_TOO_LARGE
+        - INVALID_FILE_COUNT
 
     CaseTitleErrors:
       type: string
@@ -1598,6 +1610,8 @@ components:
         - "A case cannot be linked to itself"
         - "The CSV exceeds the configured maximum number of data rows"
         - "The requested case link import cannot be found"
+        - "The CSV contains a record exceeding the configured maximum number of characters"
+        - "The request must contain exactly one file"
       x-enum-varnames:
         - TOO_MANY_RESULTS
         - NO_CRITERIA_SPECIFIED
@@ -1626,6 +1640,8 @@ components:
         - SELF_LINK
         - TOO_MANY_ROWS
         - CASE_LINK_IMPORT_NOT_FOUND
+        - CSV_RECORD_TOO_LARGE
+        - INVALID_FILE_COUNT
 
     CaseOpenStatusEnum:
       type: string
