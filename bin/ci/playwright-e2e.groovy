@@ -1,4 +1,3 @@
-import groovy.json.JsonSlurperClassic
 import uk.gov.hmcts.contino.AppPipelineConfig
 import uk.gov.hmcts.contino.GithubAPI
 import uk.gov.hmcts.pipeline.AgentSelector
@@ -118,7 +117,7 @@ def runTests(String environment, String portalUrl) {
           withEnv(['PW_SHARD_TOTAL=2']) {
             sh 'bash .jenkins-run-playwright.sh merge'
           }
-          def results = new JsonSlurperClassic().parseText(readFile('report-results.json'))
+          def results = readJSON(file: 'report-results.json', returnPojo: true)
           def stats = results.stats
           if (stats.expected + stats.unexpected + stats.flaky == 0 || stats.unexpected > 0 || results.errors) {
             shardFailed = true
