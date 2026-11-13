@@ -105,7 +105,7 @@ public class DataStoreToArmHelper {
     public void incrementTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         int currentNumberOfAttempts = ObjectUtils.firstNonNull(externalObjectDirectoryEntity.getTransferAttempts(), 0);
         int newNumberOfAttempts = currentNumberOfAttempts + 1;
-        log.debug(
+        log.info(
             "Updating failed transfer attempts from {} to {} for ID {}",
             currentNumberOfAttempts,
             newNumberOfAttempts,
