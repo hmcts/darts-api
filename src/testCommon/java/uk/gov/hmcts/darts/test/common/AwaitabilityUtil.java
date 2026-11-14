@@ -38,20 +38,6 @@ public final class AwaitabilityUtil {
         return waitingResult.isCriteriaMet();
     }
 
-    @RequiredArgsConstructor
-    @Getter
-    static class WaitingResult implements Callable<Boolean> {
-        public final Callable<Boolean> criteria;
-
-        public boolean criteriaMet;
-
-        @Override
-        public Boolean call() throws Exception {
-            criteriaMet = criteria.call();
-            return criteriaMet;
-        }
-    }
-
     public static void waitForMaxWithOneSecondPoll(Runnable runnable, Duration duration) {
         var awaitAlias = random(4);
         await(awaitAlias).atMost(duration)
@@ -65,5 +51,19 @@ public final class AwaitabilityUtil {
                 }
                 return true;
             });
+    }
+
+    @RequiredArgsConstructor
+    @Getter
+    static class WaitingResult implements Callable<Boolean> {
+        public final Callable<Boolean> criteria;
+
+        public boolean criteriaMet;
+
+        @Override
+        public Boolean call() throws Exception {
+            criteriaMet = criteria.call();
+            return criteriaMet;
+        }
     }
 }
