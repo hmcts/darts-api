@@ -14,7 +14,7 @@ import javax.sql.DataSource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CaseLinkStatusLookupIntTest extends PostgresIntegrationBase {
-    
+
     @Autowired
     private DataSource dataSource;
     @Autowired
