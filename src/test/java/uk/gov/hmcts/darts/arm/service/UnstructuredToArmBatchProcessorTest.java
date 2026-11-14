@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.arm.service;
 
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,15 +74,16 @@ class UnstructuredToArmBatchProcessorTest {
     @Mock
     private LogApi logApi;
 
-    private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
+    private EodHelperMocks eodHelperMocks;
 
-    @AfterAll
-    static void close() {
-        EOD_HELPER_MOCKS.close();
+    @AfterEach
+    void close() {
+        eodHelperMocks.close();
     }
 
     @BeforeEach
     void setUp() throws IOException {
+        eodHelperMocks = new EodHelperMocks();
 
         unstructuredToArmBatchProcessor = new UnstructuredToArmBatchProcessorImpl(
             archiveRecordService,
@@ -119,7 +120,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(10L));
         when(externalObjectDirectoryRepository.findAllById(List.of(10L))).thenReturn(List.of(eod10));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
-        EOD_HELPER_MOCKS.simulateInitWithMockedData();
+        eodHelperMocks.simulateInitWithMockedData();
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(unstructuredToArmProcessorConfiguration.getThreads()).thenReturn(20);
         when(unstructuredToArmProcessorConfiguration.getAsyncTimeout()).thenReturn(Duration.of(100, ChronoUnit.SECONDS));

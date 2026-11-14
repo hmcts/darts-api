@@ -106,6 +106,7 @@ public final class EntityIdPopulator {
                 MethodType.methodType(void.class, entity.getClass(), Integer.class)
             );
 
+            @SuppressWarnings("unchecked") // LambdaMetafactory erases the BiConsumer type parameters.
             BiConsumer<T, Integer> setter = (BiConsumer<T, Integer>) setterSite.getTarget().invokeExact();
             setter.accept(entity, id);
         } catch (Throwable e) {
@@ -127,6 +128,7 @@ public final class EntityIdPopulator {
                 MethodType.methodType(void.class, entity.getClass(), Long.class)
             );
 
+            @SuppressWarnings("unchecked") // LambdaMetafactory erases the BiConsumer type parameters.
             BiConsumer<T, Long> setter = (BiConsumer<T, Long>) setterSite.getTarget().invokeExact();
             setter.accept(entity, id);
         } catch (Throwable e) {

@@ -10,6 +10,7 @@ import static org.apache.commons.codec.digest.DigestUtils.md5;
 
 /**
  * Calculates the file checksum equivalent to "md5 filename" on the command line.
+ *
  * <p>
  * This is not the same as the Azure Blob Storage CONTENT-MD5 tag value as a base64 encoded
  * representation of the binary MD5 hash value. This could be done in Bash e.g. openssl md5 -binary "Test
