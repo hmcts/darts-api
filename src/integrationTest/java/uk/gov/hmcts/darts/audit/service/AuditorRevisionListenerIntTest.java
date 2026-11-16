@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audit.service;
 
+import jakarta.persistence.EntityManager;
 import org.hibernate.SessionFactory;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
@@ -50,23 +51,23 @@ class AuditorRevisionListenerIntTest extends PostgresIntegrationBase {
         userPatch.setFullName("Some Other Name");
         userManagementService.modifyUser(createdUser.getId(), userPatch);
 
-        AuditReader reader = AuditReaderFactory.get(sessionFactory.createEntityManager());
+        try (EntityManager entityManager = sessionFactory.createEntityManager()) {
+            AuditReader reader = AuditReaderFactory.get(entityManager);
+            List<Object[]> audits = reader.createQuery()
+                .forRevisionsOfEntity(UserAccountEntity.class, false, false)
+                .add(AuditEntity.property("id").eq(createdUser.getId()))
+                .getResultList();
 
+            assertThat(audits).hasSize(2);
+            Object[] createAudit = audits.getFirst();
+            Object[] editAudit = audits.get(1);
 
-        List<Object[]> audits = reader.createQuery()
-            .forRevisionsOfEntity(UserAccountEntity.class, false, false)
-            .add(AuditEntity.property("id").eq(createdUser.getId()))
-            .getResultList();
+            RevisionInfo createAuditRevisionInfo = (RevisionInfo) createAudit[1];
+            assertThat(createAuditRevisionInfo.getAuditUser()).isEqualTo(currentUser.getId());
 
-        assertThat(audits).hasSize(2);
-        Object[] createAudit = audits.getFirst();
-        Object[] editAudit = audits.get(1);
-
-        RevisionInfo createAuditRevisionInfo = (RevisionInfo) createAudit[1];
-        assertThat(createAuditRevisionInfo.getAuditUser()).isEqualTo(currentUser.getId());
-
-        RevisionInfo editAuditRevisionInfo = (RevisionInfo) editAudit[1];
-        assertThat(editAuditRevisionInfo.getAuditUser()).isEqualTo(modifiedUser.getId());
+            RevisionInfo editAuditRevisionInfo = (RevisionInfo) editAudit[1];
+            assertThat(editAuditRevisionInfo.getAuditUser()).isEqualTo(modifiedUser.getId());
+        }
 
     }
 }

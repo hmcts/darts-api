@@ -9,12 +9,13 @@ import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -159,7 +160,7 @@ class GlobalExceptionHandlerTest extends IntegrationBase {
     @Test
     void handleMessageNotReadableHandler_shouldReturnBadRequestProblem_whenHttpMessageNotReadableExceptionIsThrown() throws Exception {
         Mockito.when(mockController.test())
-            .thenThrow(new HttpMessageNotReadableException("JSON parse error"));
+            .thenThrow(new HttpMessageNotReadableException("JSON parse error", new MockHttpInputMessage(new byte[0])));
 
         MvcResult response = mockMvc.perform(get(ENDPOINT))
             .andExpect(status().isBadRequest())

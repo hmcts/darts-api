@@ -13,7 +13,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +37,6 @@ import java.util.Set;
 @Table(name = "media")
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = false)
 @SQLRestriction("is_deleted = false")
 public class MediaEntity extends CreatedModifiedBaseEntity
     implements ConfidenceAware, SoftDelete, HasLongId, HasRetention, CanReturnExternalObjectDirectoryEntities {
@@ -123,7 +121,6 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     private String mediaStatus;
 
     @ManyToMany(mappedBy = HearingEntity_.MEDIAS)
-    @EqualsAndHashCode.Exclude
     private Set<HearingEntity> hearings = new HashSet<>();
 
     @Column(name = "retain_until_ts")
@@ -198,6 +195,17 @@ public class MediaEntity extends CreatedModifiedBaseEntity
 
     public boolean isCurrent() {
         return isCurrent != null && isCurrent;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return this == other || other instanceof MediaEntity media && getId() != null && getId().equals(media.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        // Keep hash-based hearing associations stable across persistence and changes to media metadata.
+        return MediaEntity.class.hashCode();
     }
 
     /**

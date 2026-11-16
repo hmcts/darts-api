@@ -44,37 +44,33 @@ class CaseServiceGetTranscriptsIntTest extends IntegrationBase {
         // transcription with 0 docs - should be visible
         // linked to case
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(courtCaseEntity);
-        transcription.setId(1L);
-        transcription.setCreatedDateTime(DATE_TIME);
         transcription.setIsManualTranscription(true);
         dartsDatabase.save(transcription);
+        dartsPersistence.updateCreatedBy(transcription, DATE_TIME.plusMinutes(1));
         createTranscriptionDocs(transcription, List.of());
 
         // transcription with 3 docs, none hidden - should be visible
         // linked to case
         TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(courtCaseEntity);
-        transcription2.setId(1L);
-        transcription2.setCreatedDateTime(DATE_TIME);
         transcription2.setIsManualTranscription(true);
         dartsDatabase.save(transcription2);
+        dartsPersistence.updateCreatedBy(transcription2, DATE_TIME.plusMinutes(2));
         createTranscriptionDocs(transcription2, List.of(false, false, false));
 
         // transcription with 3 docs, 1 hidden - should be visible
         // linked to hearing
         TranscriptionEntity transcription3 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription3.setId(3L);
-        transcription3.setCreatedDateTime(DATE_TIME);
         transcription3.setIsManualTranscription(true);
         dartsDatabase.save(transcription3);
+        dartsPersistence.updateCreatedBy(transcription3, DATE_TIME);
         createTranscriptionDocs(transcription3, List.of(false, true, false));
 
         // transcription with 3 docs, all hidden - should be hidden
         // linked to hearing
         TranscriptionEntity transcription4 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription3.setId(4L);
-        transcription4.setCreatedDateTime(DATE_TIME);
         transcription4.setIsManualTranscription(true);
         dartsDatabase.save(transcription4);
+        dartsPersistence.updateCreatedBy(transcription4, DATE_TIME);
         createTranscriptionDocs(transcription4, List.of(true, true, true));
     }
 

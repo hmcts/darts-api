@@ -17,6 +17,18 @@
 - ffmpeg
 - redis
 
+The application uses Spring Boot 4 with Jackson 2 for application JSON, HTTP messages, Feign clients and Redis cache values.
+Keep application imports and generated Lombok `@Jacksonized` metadata on Jackson 2. The primary API mapper and the case-document mapper intentionally
+have different null-inclusion policies; preserve both when changing serialization configuration.
+`spring.jackson.use-jackson2-defaults=true` changes Jackson 3 defaults; it does not select Jackson 2. Keep the explicit Jackson 2 HTTP mapper selections
+in `application.yaml` and the REST Assured mapper selection in functional tests.
+
+`./gradlew jackson2CompatibilityGuard jackson2ClasspathGuard` runs the standalone HMCTS source and bytecode guards, which also run during `check`.
+Application and HMCTS dependency references to Jackson 3 fail the build. Third-party framework usage is reported for inspection.
+`JsonCompatibilityIntTest` checks the active MVC converter and representative JSON round trips, including nullable fields and enum wire values.
+`RestAssuredCompatibilityTest` verifies request/response mapping and JSONPath locally without deployed-environment credentials.
+See the [HMCTS Boot 4 migration guide](https://github.com/hmcts/dtsse-ccd-config-generator/blob/master/docs/upgrading-to-spring-boot-4.md).
+
 ### Environment variables
 
 To run the functional tests locally, you must set the following environment variables on your machine. The required value of each variable is stored in Azure

@@ -550,8 +550,7 @@ class EventRepositoryIntTest extends PostgresIntegrationBase {
     }
 
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {
-        event.setCreatedDateTime(offsetDateTime);
-        dartsDatabase.save(event);
+        dartsPersistence.updateCreatedBy(event, offsetDateTime);
     }
 
     private EventEntity createEventForHearing(HearingEntity hearingEntity, boolean isCurrent, boolean isLogEntry) {

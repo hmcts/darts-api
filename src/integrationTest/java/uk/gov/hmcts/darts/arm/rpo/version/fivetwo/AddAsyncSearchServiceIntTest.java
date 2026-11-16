@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.rpo.version.fivetwo;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
@@ -35,6 +36,9 @@ class AddAsyncSearchServiceIntTest extends PostgresIntegrationBase {
     @Autowired
     private AddAsyncSearchService addAsyncSearchService;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private static final String TOKEN = "some token";
     private static final String SEARCH_ID = "some search id";
     private static final String MATTER_ID = "some matter id";
@@ -54,8 +58,9 @@ class AddAsyncSearchServiceIntTest extends PostgresIntegrationBase {
         executionDetailEntity.setIndexId(INDEX_ID);
         executionDetailEntity.setSortingField(SORTING_FIELD);
         executionDetailEntity = dartsPersistence.save(executionDetailEntity);
-        executionDetailEntity.setCreatedDateTime(OffsetDateTime.parse("2024-07-31T11:29:00.00000Z"));
-        executionDetailEntity = dartsPersistence.save(executionDetailEntity);
+        // Hibernate-generated creation timestamps require a direct database update for historical fixtures.
+        jdbcTemplate.update("UPDATE darts.arm_rpo_execution_detail SET created_ts = ? WHERE ard_id = ?",
+                            OffsetDateTime.parse("2024-07-31T11:29:00.00000Z"), executionDetailEntity.getId());
 
         Integer executionId = executionDetailEntity.getId();
 
@@ -97,8 +102,8 @@ class AddAsyncSearchServiceIntTest extends PostgresIntegrationBase {
         executionDetailEntity.setIndexId(INDEX_ID);
         executionDetailEntity.setSortingField(SORTING_FIELD);
         executionDetailEntity = dartsPersistence.save(executionDetailEntity);
-        executionDetailEntity.setCreatedDateTime(OffsetDateTime.parse("2024-07-31T12:34:56.101701Z"));
-        executionDetailEntity = dartsPersistence.save(executionDetailEntity);
+        jdbcTemplate.update("UPDATE darts.arm_rpo_execution_detail SET created_ts = ? WHERE ard_id = ?",
+                            OffsetDateTime.parse("2024-07-31T12:34:56.101701Z"), executionDetailEntity.getId());
 
         Integer executionId = executionDetailEntity.getId();
 

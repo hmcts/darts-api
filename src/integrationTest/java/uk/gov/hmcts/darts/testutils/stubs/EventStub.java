@@ -35,6 +35,7 @@ public class EventStub {
     private final CourtroomStub courtroomStub;
     private final UserAccountRepository userAccountRepository;
     private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
+    private final DartsPersistence dartsPersistence;
 
     public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusDays(1);
 
@@ -78,8 +79,9 @@ public class EventStub {
         eventEntity.setEventStatus(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         eventEntity.setEventId(eventId);
         EventEntity savedEvent = dartsDatabaseSaveStub.save(eventEntity);
+        dartsPersistence.updateCreatedBy(savedEvent, eventTimestamp);
         savedEvent.setCreatedDateTime(eventTimestamp);
-        return dartsDatabaseSaveStub.save(savedEvent);
+        return savedEvent;
     }
 
     public EventEntity createEvent(CourtroomEntity courtroom, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName) {

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.cloud.contract.spec.internal.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.OK;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EventMapperFunctionalTest extends FunctionalTest {
@@ -31,7 +31,7 @@ class EventMapperFunctionalTest extends FunctionalTest {
             .get()
             .then()
             .assertThat()
-            .statusCode(OK)
+            .statusCode(OK.value())
             .extract().response();
 
         assertNotNull(response);
@@ -46,7 +46,7 @@ class EventMapperFunctionalTest extends FunctionalTest {
             .get()
             .then()
             .assertThat()
-            .statusCode(OK)
+            .statusCode(OK.value())
             .extract().response();
 
         assertNotNull(response);
@@ -62,7 +62,7 @@ class EventMapperFunctionalTest extends FunctionalTest {
             .get()
             .then()
             .assertThat()
-            .statusCode(OK)
+            .statusCode(OK.value())
             .extract().response();
 
         assertNotNull(response);

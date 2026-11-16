@@ -45,6 +45,7 @@ public class BankHolidayCacheConfig {
             .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer()));
     }
 
+    @SuppressWarnings("removal") // Preserve the existing Jackson 2 Redis wire format during the Boot upgrade.
     private static GenericJackson2JsonRedisSerializer redisSerializer() {
         var serializer = new GenericJackson2JsonRedisSerializer();
         serializer.configure(objectMapper -> {

@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.testutils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.MockitoAnnotations;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Getter
 @SuppressWarnings("PMD.TestClassWithoutTestCases")//This is a test support class
 public class TestBase {
+
+    private AutoCloseable mockitoAnnotations;
 
     @Autowired
     protected DartsDatabaseStub dartsDatabase;
@@ -45,9 +49,18 @@ public class TestBase {
 
     @BeforeEach
     void beforeEach() {
+        mockitoAnnotations = MockitoAnnotations.openMocks(this);
         dartsDatabase.clearDb();
         clearEntityManagerCache();
         evictCache();
+    }
+
+    @AfterEach
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException") // Mockito's annotation scope implements AutoCloseable.
+    void closeMockitoAnnotations() throws Exception {
+        if (mockitoAnnotations != null) {
+            mockitoAnnotations.close();
+        }
     }
 
     protected void evictCache() {

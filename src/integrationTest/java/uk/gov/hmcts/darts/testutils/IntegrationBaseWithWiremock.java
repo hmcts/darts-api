@@ -10,8 +10,10 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
+import org.wiremock.spring.InjectWireMock;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.DartsGatewayStub;
@@ -19,7 +21,7 @@ import uk.gov.hmcts.darts.testutils.stubs.wiremock.DartsGatewayStub;
 import java.time.Duration;
 
 // port = 0 enables random ports as recommended by Wiremock. Tests will be faster and more reliable
-@AutoConfigureWireMock(port = 0, files = "file:src/integrationTest/resources/wiremock")
+@EnableWireMock(@ConfigureWireMock(port = 0, filesUnderDirectory = "src/integrationTest/resources/wiremock"))
 @Slf4j
 public class IntegrationBaseWithWiremock extends IntegrationBase {
 
@@ -29,7 +31,7 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
     @Autowired
     protected DartsGatewayStub dartsGateway;
 
-    @Autowired
+    @InjectWireMock
     protected WireMockServer wireMockServer;
 
     @BeforeEach

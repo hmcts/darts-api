@@ -101,7 +101,7 @@ OpenAPI validation:
 
 ## Coding Style & Naming Conventions
 
-Target Java 25 with Spring Boot 3.5.16 and Lombok. Gradle explicitly runs Checkstyle and PMD, and Java compilation uses `-Xlint:unchecked -Werror`:
+Target Java 25 with Spring Boot 4.0.9 and Lombok. Gradle explicitly runs Checkstyle and PMD, and Java compilation uses `-Xlint:unchecked -Werror`:
 4-space indentation, 160-character lines, fail-fast warnings.
 
 Code style in this repo is effectively:
@@ -127,7 +127,7 @@ associations to eager.
 
 ## Testing Guidelines
 
-JUnit 5 backs unit, integration, functional, and smoke tests. Mirror source packages and name test classes `*Test`.
+JUnit 6 backs unit, integration, functional, and smoke tests. Mirror source packages and name test classes `*Test`.
 
 Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` and the PR description. Before submitting cross-cutting changes, run at minimum:
 

@@ -43,6 +43,7 @@ class DartsApiExceptionHandlerMvcTest {
     private MockMvc mockMvc;
 
     @BeforeEach
+    @SuppressWarnings("removal") // Keep the Problem Details contract tests on the Jackson 2 compatibility converter.
     void setUp() {
         AudioRequestsController audioController = new AudioRequestsController(mediaRequestService, mock(AudioRequestResponseMapper.class));
         mockMvc = MockMvcBuilders.standaloneSetup(audioController, uploadController)

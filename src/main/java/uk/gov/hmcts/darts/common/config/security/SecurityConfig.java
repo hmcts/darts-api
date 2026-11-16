@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -60,7 +61,6 @@ public class SecurityConfig {
     private final InternalAuthConfigurationProperties internalAuthConfigurationProperties;
     private final InternalAuthProviderConfigurationProperties internalAuthProviderConfigurationProperties;
     private final UserIdentity userIdentity;
-    private final JwtDecoder jwtDecoder;
     private static final String TOKEN_BEARER_PREFIX = "Bearer";
 
     private final Map<String, NimbusJwtDecoder> decoderMap = new HashMap<>();
@@ -89,7 +89,7 @@ public class SecurityConfig {
                 "/internal-user/refresh-access-token",
                 "/"
             )
-            .authorizeHttpRequests().anyRequest().permitAll();
+            .authorizeHttpRequests(requests -> requests.anyRequest().permitAll());
 
         return http.build();
     }
@@ -100,9 +100,8 @@ public class SecurityConfig {
         applyCommonConfig(http)
             .addFilterBefore(new AuthorisationTokenExistenceFilter(), OAuth2LoginAuthenticationFilter.class)
             .addFilterAfter(new InactiveUserAuthorisationCheck(mapper), OAuth2LoginAuthenticationFilter.class)
-            .authorizeHttpRequests().anyRequest().authenticated()
-            .and()
-            .oauth2ResourceServer().authenticationManagerResolver(jwtIssuerAuthenticationManagerResolver());
+            .authorizeHttpRequests(requests -> requests.anyRequest().authenticated())
+            .oauth2ResourceServer(resourceServer -> resourceServer.authenticationManagerResolver(jwtIssuerAuthenticationManagerResolver()));
 
         return http.build();
     }
@@ -110,11 +109,10 @@ public class SecurityConfig {
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private HttpSecurity applyCommonConfig(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .csrf().disable()
-            .formLogin().disable()
-            .logout().disable();
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .logout(AbstractHttpConfigurer::disable);
     }
 
     private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() {

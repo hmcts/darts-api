@@ -46,6 +46,10 @@ final class DartsApiProblemDetailFactory {
     }
 
     static void setInstance(ProblemDetail problemDetail, WebRequest request) {
+        // Spring 7 leaves the default type unset; retain the existing error JSON contract.
+        if (problemDetail.getType() == null) {
+            problemDetail.setType(URI.create("about:blank"));
+        }
         if (request instanceof NativeWebRequest nativeWebRequest) {
             problemDetail.setInstance(getNativeRequestUri(nativeWebRequest));
         }

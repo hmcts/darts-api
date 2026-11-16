@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 /**
@@ -22,10 +22,10 @@ public class PostgresIntegrationBase extends TestBase {
      */
     private static final int SERVER_MAX_CONNECTIONS = 50;
 
-    private static final PostgreSQLContainer<?> POSTGRES;
+    private static final PostgreSQLContainer POSTGRES;
 
     static {
-        POSTGRES = new PostgreSQLContainer<>(
+        POSTGRES = new PostgreSQLContainer(
             DockerImageName.parse("hmctsprod.azurecr.io/imported/postgres")
                 .asCompatibleSubstituteFor("postgres")
         ).withDatabaseName("darts")

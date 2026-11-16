@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 @Slf4j
 public class SchedLockConfig {
 
-    @Value("${spring.datasource.schema}")
+    @Value("${darts.database.schema}")
     private String schema;
 
     private final Environment environment;

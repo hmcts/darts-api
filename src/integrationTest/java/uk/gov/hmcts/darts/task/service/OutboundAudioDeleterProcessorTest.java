@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -68,6 +69,9 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
     @MockitoSpyBean
     private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessor;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
 
     @BeforeEach
@@ -614,6 +618,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         );
         transformedMediaEntity.setCreatedDateTime(createdAt);
         TransformedMediaEntity savedTM = dartsDatabase.save(transformedMediaEntity);
+        jdbcTemplate.update("UPDATE darts.transformed_media SET created_ts = ? WHERE trm_id = ?", createdAt, savedTM.getId());
 
         return dartsDatabase.save(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
             savedTM,

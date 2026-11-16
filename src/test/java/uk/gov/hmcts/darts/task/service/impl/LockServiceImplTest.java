@@ -10,8 +10,8 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 
-import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("PMD.ReplaceJavaUtilDate")
 class LockServiceImplTest {
 
     private LockServiceImpl lockService;
@@ -58,10 +57,10 @@ class LockServiceImplTest {
 
     @Test
     void isLockedTrue() {
-        OffsetDateTime someHoursAgo = OffsetDateTime.now().minusHours(5);
+        OffsetDateTime someHoursAgo = OffsetDateTime.parse("2026-11-16T07:00:00Z");
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(someHoursAgo);
 
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        LocalDateTime timestamp = LocalDateTime.parse("2026-11-16T12:00:00");
         when(automatedTaskRepository.findLockedUntilForTask(anyString())).thenReturn(List.of(timestamp));
 
         var taskName = "TestTask";
@@ -73,15 +72,26 @@ class LockServiceImplTest {
 
     @Test
     void isLockedFalse() {
-        OffsetDateTime someHoursAhead = OffsetDateTime.now().plusHours(5);
+        OffsetDateTime someHoursAhead = OffsetDateTime.parse("2026-11-16T17:00:00Z");
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(someHoursAhead);
 
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        LocalDateTime timestamp = LocalDateTime.parse("2026-11-16T12:00:00");
         when(automatedTaskRepository.findLockedUntilForTask(anyString())).thenReturn(List.of(timestamp));
 
         var taskName = "TestTask";
         var automatedTaskEntity = new AutomatedTaskEntity();
         automatedTaskEntity.setTaskName(taskName);
+
+        assertFalse(lockService.isLocked(automatedTaskEntity));
+    }
+
+    @Test
+    void given_lockExpiresAtCurrentInstant_when_clockUsesDifferentOffset_then_treatLockAsExpired() {
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.parse("2026-11-16T14:00:00+02:00"));
+        when(automatedTaskRepository.findLockedUntilForTask(anyString()))
+            .thenReturn(List.of(LocalDateTime.parse("2026-11-16T12:00:00")));
+        var automatedTaskEntity = new AutomatedTaskEntity();
+        automatedTaskEntity.setTaskName("TestTask");
 
         assertFalse(lockService.isLocked(automatedTaskEntity));
     }

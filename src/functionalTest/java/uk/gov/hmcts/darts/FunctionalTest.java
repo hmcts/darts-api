@@ -1,8 +1,11 @@
 package uk.gov.hmcts.darts;
 
 import io.restassured.RestAssured;
+import io.restassured.config.ObjectMapperConfig;
+import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.SneakyThrows;
@@ -116,8 +119,14 @@ public class FunctionalTest {
     }
 
     private void configureRestAssured() {
+        RestAssured.config = jackson2RestAssuredConfig();
         RestAssured.useRelaxedHTTPSValidation();
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+    }
+
+    protected static RestAssuredConfig jackson2RestAssuredConfig() {
+        return RestAssured.config().objectMapperConfig(
+            ObjectMapperConfig.objectMapperConfig().defaultObjectMapperType(ObjectMapperType.JACKSON_2));
     }
 
     public String getContentsFromFile(String filelocation) throws IOException {

@@ -1,4 +1,8 @@
 buildscript {
+  repositories {
+    maven { url = 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1' }
+    mavenCentral()
+  }
   dependencies {
     classpath("org.flywaydb:flyway-database-postgresql:11.20.3")
   }
@@ -11,10 +15,10 @@ plugins {
   id 'jacoco'
   id 'idea'
   id 'io.spring.dependency-management' version '1.1.7'
-  id 'org.springframework.boot' version '3.5.16'
+  id 'org.springframework.boot' version '4.0.9'
   id 'org.owasp.dependencycheck' version '12.2.2'
   id 'io.github.ben-manes.versions' version '0.67.0'
-  id 'org.sonarqube' version '6.3.1.5724'
+  id 'org.sonarqube' version '7.1.0.6387'
   id "io.freefair.lombok" version "9.1.0"
   id "org.openapi.generator" version "7.13.0"
   id "org.flywaydb.flyway" version "11.20.3"
@@ -25,6 +29,10 @@ plugins {
 jacoco {
   toolVersion = "0.8.16"
   reportsDirectory.set(layout.buildDirectory.dir("jacocoHtml"))
+}
+
+lombok {
+  version = '1.18.48'
 }
 
 def buildNumber = System.getenv("RELEASE_VERSION") ?: "DEV-SNAPSHOT"
@@ -222,6 +230,8 @@ tasks.register('integration', Test) {
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
+  // Boot 4 contexts include Hibernate and WireMock; bound retained contexts within the test JVM's 1 GiB heap.
+  systemProperty 'spring.test.context.cache.maxSize', '8'
 }
 
 tasks.register('smoke', Test) {
@@ -413,25 +423,25 @@ ext {
   tomcatEmbedVersion = "11.0.27"
 }
 
-ext['snakeyaml.version'] = '2.0'
-ext['spring-security.version'] = '6.0.7' // https://spring.io/security/cve-2023-20862
-ext["jackson-bom.version"] = "2.16.0"
-
-
 dependencies {
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
+  implementation('org.springframework.boot:spring-boot-starter-webmvc') {
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-jackson'
+  }
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security-oauth2-client'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security-oauth2-resource-server'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aspectj'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-jackson2'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-restclient'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-flyway'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
-  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.19'
+  implementation group: 'org.springframework', name: 'spring-webflux'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.5.8'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server'
 
   implementation group: 'commons-io', name: 'commons-io', version: '2.22.0'
   implementation 'org.apache.commons:commons-collections4:4.6.0'
@@ -443,10 +453,9 @@ dependencies {
   implementation 'javax.validation:validation-api:2.0.1.Final'
   compileOnly 'javax.servlet:servlet-api:2.5'
   implementation 'org.openapitools:jackson-databind-nullable:0.2.13'
-  implementation 'org.zalando:problem-spring-web-starter:0.29.1'
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.10.0'
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.3.3'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '3.0.3'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
   implementation 'org.springframework.retry:spring-retry:2.0.13'
 
   implementation 'net.javacrumbs.shedlock:shedlock-spring:6.10.0'
@@ -466,10 +475,10 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
   implementation 'com.azure:azure-storage-blob-batch'
 
-  implementation group: 'io.rest-assured', name: 'rest-assured'
+  implementation group: 'io.rest-assured', name: 'rest-assured', version: '6.0.0'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '11.20.3'
   implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.20.3'
-  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.16.0'
+  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-71', version: '3.16.0'
 
   //database
   implementation 'org.postgresql:postgresql:42.7.14'
@@ -485,23 +494,23 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.3.3'
-  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.5.13'
-  implementation 'org.hibernate.orm:hibernate-ant:6.6.59.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.6.59.Final'
+  implementation group: 'org.springframework.data', name: 'spring-data-envers'
+  implementation 'org.hibernate.orm:hibernate-ant'
+  implementation 'org.hibernate.orm:hibernate-spatial'
 
   // https://mvnrepository.com/artifact/com.querydsl/querydsl-core
   implementation 'com.querydsl:querydsl-core:5.1.0'
   implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.59.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-processor')
   annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
   implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.18'
 
-  testImplementation 'org.testcontainers:postgresql:1.21.4'
+  testImplementation 'org.testcontainers:testcontainers-postgresql'
   testImplementation 'com.h2database:h2:2.5.252'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.14'
   testImplementation 'org.mockito:mockito-core'
@@ -510,10 +519,11 @@ dependencies {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.3.4'
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
-  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.8.8'
-  testImplementation 'org.springframework.security:spring-security-test:6.5.11'
+  testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+  testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.4.3'
+  testImplementation 'org.junit.jupiter:junit-jupiter'
+  testImplementation group: 'io.projectreactor', name: 'reactor-test'
+  testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.3.0'
@@ -531,6 +541,9 @@ dependencies {
 }
 
 dependencyManagement {
+  imports {
+    mavenBom 'org.springframework.cloud:spring-cloud-dependencies:2025.1.4'
+  }
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
     dependencySet(group: 'io.netty', version: '4.2.20.Final') {
@@ -695,6 +708,8 @@ tasks.register('runAllStyleChecks') {
 // migratePostgresDatabase.dependsOn cleanPostgresDatabase
 processResources.dependsOn updateOpenSpecificationsWithVersion
 assemble.dependsOn openapiJar
+
+apply from: 'gradle/jackson2-compatibility.gradle'
 
 // ensure the openApi specs are processed before building the JAR
 tasks.named('openapiJar') {

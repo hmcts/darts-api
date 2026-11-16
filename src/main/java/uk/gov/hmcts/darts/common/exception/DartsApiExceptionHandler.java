@@ -4,7 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -143,5 +143,13 @@ public class DartsApiExceptionHandler extends ResponseEntityExceptionHandler {
     private static boolean shouldLogException(DartsApiException exception) {
         DartsApiError error = exception.getError();
         return error.shouldLogException() && error.getHttpStatus() != HttpStatus.UNPROCESSABLE_ENTITY;
+    }
+
+    @Override
+    protected ResponseEntity<Object> createResponseEntity(Object body, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        if (body instanceof ProblemDetail problemDetail) {
+            DartsApiProblemDetailFactory.setInstance(problemDetail, request);
+        }
+        return super.createResponseEntity(body, headers, status, request);
     }
 }

@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.audio.util;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.cloud.contract.spec.internal.HttpStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ class StreamingResponseEntityUtilTest {
         try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
             ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList);
 
-            assertEquals(HttpStatus.OK, response.getStatusCode().value());
+            assertEquals(HttpStatus.OK, response.getStatusCode());
             String contentLength = response.getHeaders().get("Content-Length").getFirst();
             assertEquals("3248752", contentLength);
         }
@@ -33,7 +33,7 @@ class StreamingResponseEntityUtilTest {
         try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
             ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList);
 
-            assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode().value());
+            assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode());
             String contentLength = response.getHeaders().get("Content-Length").getFirst();
             assertEquals("3238752", contentLength);
             assertEquals("bytes 10000-3248751/3248752", response.getHeaders().get("Content-Range").getFirst());
@@ -47,7 +47,7 @@ class StreamingResponseEntityUtilTest {
         try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
             ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList);
 
-            assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode().value());
+            assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode());
 
             String contentLength = response.getHeaders().get("Content-Length").getFirst();
 
@@ -64,7 +64,7 @@ class StreamingResponseEntityUtilTest {
         try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
             ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList);
 
-            assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode().value());
+            assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode());
 
             String contentLength = response.getHeaders().get("Content-Length").getFirst();
 
@@ -81,7 +81,7 @@ class StreamingResponseEntityUtilTest {
         try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
             ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList);
 
-            assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode().value());
+            assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode());
 
             assertEquals("3248752", response.getHeaders().get("Content-Length").getFirst());
             assertEquals("bytes 0-3248751/3248752", response.getHeaders().get("Content-Range").getFirst());

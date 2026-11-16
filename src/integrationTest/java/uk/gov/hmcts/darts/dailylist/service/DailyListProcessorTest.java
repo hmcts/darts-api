@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -79,6 +80,9 @@ class DailyListProcessorTest extends IntegrationBase {
 
     @Autowired
     private ProcessDailyListOnDemandTask dailyListAutomatedTask;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private AutomatedTasksApi automatedTasksApi;
@@ -237,9 +241,8 @@ class DailyListProcessorTest extends IntegrationBase {
         dartsDatabase.saveAll(dailyListEntity1, dailyListEntity2);
 
         // set the created dates
-        dailyListEntity1.setCreatedDateTime(createdDateTime.plusSeconds(1));
-        dailyListEntity2.setCreatedDateTime(createdDateTime);
-        dartsDatabase.saveAll(dailyListEntity1, dailyListEntity2);
+        jdbcTemplate.update("UPDATE darts.daily_list SET created_ts = ? WHERE dal_id = ?", createdDateTime.plusSeconds(1), dailyListEntity1.getId());
+        jdbcTemplate.update("UPDATE darts.daily_list SET created_ts = ? WHERE dal_id = ?", createdDateTime, dailyListEntity2.getId());
 
         dailyListProcessor.processAllDailyLists();
 
@@ -280,9 +283,8 @@ class DailyListProcessorTest extends IntegrationBase {
         dartsDatabase.saveAll(dailyListEntity1, dailyListEntity2);
 
         // set the created dates
-        dailyListEntity1.setCreatedDateTime(createdDateTime.plusSeconds(1));
-        dailyListEntity2.setCreatedDateTime(createdDateTime);
-        dartsDatabase.saveAll(dailyListEntity1, dailyListEntity2);
+        jdbcTemplate.update("UPDATE darts.daily_list SET created_ts = ? WHERE dal_id = ?", createdDateTime.plusSeconds(1), dailyListEntity1.getId());
+        jdbcTemplate.update("UPDATE darts.daily_list SET created_ts = ? WHERE dal_id = ?", createdDateTime, dailyListEntity2.getId());
 
         dailyListProcessor.processAllDailyListForListingCourthouse(listingCourthouse);
 

@@ -18,13 +18,25 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 
-public class MediaRepositoryTest extends PostgresIntegrationBase {
+class MediaRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
     private MediaRepository mediaRepository;
 
     @Autowired
     private DartsPersistence dartsPersistence;
+
+    @Test
+    void given_detachedMedia_when_comparingWithHibernateReference_then_useSamePersistentIdentity() {
+        MediaEntity detached = dartsPersistence.save(PersistableFactory.getMediaTestData().someMinimal());
+
+        transactionalUtil.executeInTransaction(() -> {
+            MediaEntity reference = mediaRepository.getReferenceById(detached.getId());
+
+            org.assertj.core.api.Assertions.assertThat(detached).isEqualTo(reference).hasSameHashCodeAs(reference);
+            org.assertj.core.api.Assertions.assertThat(reference).isEqualTo(detached);
+        });
+    }
 
     @Nested
     class FindAllByChronicleIdTest {

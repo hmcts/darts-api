@@ -118,8 +118,7 @@ class TranscriptionRepositoryIntTest extends IntegrationBase {
         TranscriptionEntity transcriptionCompleteOld =
             PersistableFactory.getTranscriptionTestData().minimalRawTranscription(completeTranscriptionStatus);
         transcriptionCompleteOld = dartsDatabase.save(transcriptionCompleteOld);
-        transcriptionCompleteOld.setCreatedDateTime(OffsetDateTime.now().minusHours(2));
-        dartsDatabase.save(transcriptionCompleteOld);
+        dartsPersistence.updateCreatedBy(transcriptionCompleteOld, OffsetDateTime.now().minusHours(2));
 
         TranscriptionEntity transcriptionCompleteNew =
             PersistableFactory.getTranscriptionTestData().minimalRawTranscription(completeTranscriptionStatus);
@@ -128,8 +127,7 @@ class TranscriptionRepositoryIntTest extends IntegrationBase {
         TranscriptionStatusEntity approvedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REQUESTED);
         TranscriptionEntity transcriptionApproved = PersistableFactory.getTranscriptionTestData().minimalRawTranscription(approvedTranscriptionStatus);
         transcriptionApproved = dartsDatabase.save(transcriptionApproved);
-        transcriptionApproved.setCreatedDateTime(OffsetDateTime.now().minusHours(2));
-        dartsDatabase.save(transcriptionApproved);
+        dartsPersistence.updateCreatedBy(transcriptionApproved, OffsetDateTime.now().minusHours(2));
 
         OffsetDateTime createdDateTime = OffsetDateTime.now().minusHours(1);
 

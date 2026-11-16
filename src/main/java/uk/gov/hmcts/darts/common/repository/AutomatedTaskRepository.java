@@ -6,7 +6,7 @@ import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +20,7 @@ public interface AutomatedTaskRepository extends RevisionRepository<AutomatedTas
         WHERE sl.name = :taskName
         """, nativeQuery = true
     )
-    List<Timestamp> findLockedUntilForTask(String taskName);
+    List<LocalDateTime> findLockedUntilForTask(String taskName);
 
     List<AutomatedTaskEntity> findByIdGreaterThanEqual(Integer value);
 }

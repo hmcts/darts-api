@@ -53,8 +53,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         OffsetDateTime retainUntilDate = OffsetDateTime.parse(RETAIN_UNTIL);
 
         CaseRetentionEntity caseRetentionEntity = dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.PENDING, retainUntilDate, false);
-        caseRetentionEntity.setCreatedDateTime(CASE_CLOSED_TIME);
-        caseRetentionRepository.saveAndFlush(caseRetentionEntity);
+        dartsPersistence.updateCreatedBy(caseRetentionEntity, CASE_CLOSED_TIME);
 
         retentionConfidenceCategoryUtil.createAndSaveRetentionConfidenceCategoryMappings();
     }
@@ -121,8 +120,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         OffsetDateTime retainUntilDate = OffsetDateTime.parse(RETAIN_UNTIL);
 
         CaseRetentionEntity caseRetentionEntity = dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.PENDING, retainUntilDate, false);
-        caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now().minusDays(9));
-        caseRetentionRepository.saveAndFlush(caseRetentionEntity);
+        dartsPersistence.updateCreatedBy(caseRetentionEntity, OffsetDateTime.now().minusDays(9));
 
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntities.getFirst().getCurrentState());

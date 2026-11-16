@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -55,6 +57,7 @@ public class AbstractLockableAutomatedTaskTest {
     @ExtendWith(OutputCaptureExtension.class)
     @SuppressWarnings("PMD.SystemPrintln") // System.out.println is used to ensure runnable is executed
     @Isolated
+    @Execution(ExecutionMode.SAME_THREAD)
     class LockedTaskTest {
 
         @Test

@@ -1,3 +1,9 @@
+wiremock:
+  server:
+    # Tests without a WireMock server must still resolve Feign URLs to a local address.
+    # @EnableWireMock overrides this value with the running server's random port.
+    port: 0
+
 spring:
   data-management:
     retention-period:
@@ -7,9 +13,6 @@ spring:
           hours: 24
   security:
     oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: false
       client:
         registration:
           external-azure-ad:
@@ -38,9 +41,9 @@ spring:
             reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
   autoconfigure:
     exclude:
-      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-      - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
-      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+      - org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration
+      - org.springframework.boot.security.autoconfigure.actuate.web.servlet.ManagementWebSecurityAutoConfiguration
+      - org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration
   datasource:
     hikari:
       maximum-pool-size: 10 # Overrides the value in `application.yaml` to a smaller value more appropriate for integration tests, sized below the `max_connections` limit specified in PostgresIntegrationBase.

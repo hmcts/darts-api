@@ -96,6 +96,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Long>,
             (:hearingIds IS NULL OR (:hearingIds IS NOT NULL AND hearing.id in (:hearingIds)))
             AND (cast(:endAt as TIMESTAMP) IS NULL OR (me.end <= :endAt))
             AND (cast(:startAt as TIMESTAMP) IS NULL OR (me.start >= :startAt))
+        ORDER BY me.id
         """)
     List<MediaEntity> findMediaByDetails(List<Integer> hearingIds, OffsetDateTime startAt,
                                          OffsetDateTime endAt);

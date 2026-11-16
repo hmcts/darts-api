@@ -97,8 +97,7 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         eventIdMap.keySet().forEach(
             eventId -> {
                 List<EventEntity> eventEntities = eventIdMap.get(eventId);
-                eventEntities.getFirst().setCreatedDateTime(OffsetDateTime.now().plusDays(1));
-                dartsDatabase.save(eventEntities.getFirst());
+                dartsPersistence.updateCreatedBy(eventEntities.getFirst(), OffsetDateTime.now().plusDays(1));
             }
         );
 

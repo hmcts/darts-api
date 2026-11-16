@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.jackson.nullable.JsonNullableModule;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -44,7 +45,7 @@ public class ObjectMapperConfig {
     }
 
     @Bean
-    public RestTemplate getTemplate() {
-        return new RestTemplate();
+    public RestTemplate getTemplate(RestTemplateBuilder builder) {
+        return builder.build();
     }
 }

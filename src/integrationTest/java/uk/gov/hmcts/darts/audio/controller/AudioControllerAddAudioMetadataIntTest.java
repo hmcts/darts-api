@@ -8,8 +8,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -579,6 +579,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         dartsDatabase.getMediaRepository().saveAndFlush(media3);
         dartsDatabase.getMediaRepository().saveAndFlush(media4);
         dartsDatabase.getMediaRepository().saveAndFlush(media5);
+        List.of(media1, media2, media3, media4, media5).forEach(media -> dartsPersistence.updateCreatedBy(media, media.getCreatedDateTime()));
 
         mockMvc.perform(
                 post(ENDPOINT)

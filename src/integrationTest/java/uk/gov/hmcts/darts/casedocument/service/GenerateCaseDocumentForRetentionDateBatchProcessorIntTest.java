@@ -74,8 +74,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(
             courtCaseEntityWithCaseDocument, uploadedBy);
-        caseDocument.setCreatedDateTime(OffsetDateTime.now().minusDays(30));
-        dartsDatabase.save(caseDocument);
+        dartsPersistence.updateCreatedBy(caseDocument, OffsetDateTime.now().minusDays(30));
 
         // when
         generateCaseDocumentForRetentionDateBatchProcessor.processGenerateCaseDocumentForRetentionDate(2);
@@ -121,8 +120,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
 
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntityWithCaseDocument, uploadedBy);
-        caseDocument.setCreatedDateTime(OffsetDateTime.now().minusDays(30));
-        dartsDatabase.save(caseDocument);
+        dartsPersistence.updateCreatedBy(caseDocument, OffsetDateTime.now().minusDays(30));
 
         // when
         generateCaseDocumentForRetentionDateBatchProcessor.processGenerateCaseDocumentForRetentionDate(2);
@@ -158,8 +156,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         CaseDocumentEntity caseDocument1 = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(
             courtCaseEntityWithCaseDocuments1, uploadedBy);
-        caseDocument1.setCreatedDateTime(OffsetDateTime.now().minusDays(27));
-        dartsDatabase.save(caseDocument1);
+        dartsPersistence.updateCreatedBy(caseDocument1, OffsetDateTime.now().minusDays(27));
 
         CourtCaseEntity courtCaseEntityWithCaseDocument2 = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_2);
 
@@ -221,8 +218,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(
             courtCaseEntityWithCaseDocument, uploadedBy);
-        caseDocument.setCreatedDateTime(OffsetDateTime.now().minusDays(30));
-        dartsDatabase.save(caseDocument);
+        dartsPersistence.updateCreatedBy(caseDocument, OffsetDateTime.now().minusDays(30));
 
         // when
         generateCaseDocumentForRetentionDateBatchProcessor.processGenerateCaseDocumentForRetentionDate(2);

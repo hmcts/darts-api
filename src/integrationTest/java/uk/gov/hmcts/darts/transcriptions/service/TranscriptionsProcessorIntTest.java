@@ -198,6 +198,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             return dartsDatabase.save(transcriptionEntity);
         });
 
+        dartsPersistence.updateCreatedBy(transcription, CREATED_DATE);
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
@@ -258,6 +259,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             return dartsDatabase.save(transcriptionEntity);
         });
 
+        dartsPersistence.updateCreatedBy(transcription, CREATED_DATE);
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());

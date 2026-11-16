@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
@@ -184,7 +185,7 @@ class DartsApiExceptionHandlerTest {
 
     @Test
     void givenHttpMessageNotReadableException_whenHandled_thenReturnsBadRequestProblemDetailWithJsonParseDetail() {
-        HttpMessageNotReadableException exception = new HttpMessageNotReadableException("Original parser message");
+        HttpMessageNotReadableException exception = new HttpMessageNotReadableException("Original parser message", new MockHttpInputMessage(new byte[0]));
 
         ResponseEntity<Object> response = exceptionHandler.handleHttpMessageNotReadable(
             exception,
@@ -223,7 +224,7 @@ class DartsApiExceptionHandlerTest {
 
     @Test
     void givenWebRequestWithoutNativeRequest_whenHandled_thenReturnsProblemDetailWithoutInstance() {
-        HttpMessageNotReadableException exception = new HttpMessageNotReadableException("Original parser message");
+        HttpMessageNotReadableException exception = new HttpMessageNotReadableException("Original parser message", new MockHttpInputMessage(new byte[0]));
 
         ResponseEntity<Object> response = exceptionHandler.handleHttpMessageNotReadable(
             exception,

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -62,7 +62,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         assertEquals(SOME_COURTHOUSE.toUpperCase(Locale.ROOT), courthouseEntity.getCourthouseName());
 
         transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription.setCreatedDateTime(OffsetDateTime.of(2024, 4, 24, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsPersistence.updateCreatedBy(transcription, OffsetDateTime.of(2024, 4, 24, 10, 0, 0, 0, ZoneOffset.UTC));
         transcription.setStartTime(SOME_DATE_TIME);
         transcription.setEndTime(SOME_DATE_TIME);
         transcription = dartsDatabase.getTranscriptionRepository().save(transcription);
@@ -124,7 +124,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription2.setCreatedDateTime(OffsetDateTime.of(2024, 4, 24, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsPersistence.updateCreatedBy(transcription2, OffsetDateTime.of(2024, 4, 24, 10, 0, 0, 0, ZoneOffset.UTC));
         transcription2.setStartTime(SOME_DATE_TIME);
         transcription2.setEndTime(SOME_DATE_TIME);
         transcription2 = dartsDatabase.getTranscriptionRepository().save(transcription2);

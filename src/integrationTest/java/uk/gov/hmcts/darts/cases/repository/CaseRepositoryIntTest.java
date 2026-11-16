@@ -263,8 +263,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(
             courtCaseEntityWithCaseDocument, uploadedBy);
-        caseDocument.setCreatedDateTime(OffsetDateTime.now().minusDays(30));
-        dartsDatabase.save(caseDocument);
+        dartsPersistence.updateCreatedBy(caseDocument, OffsetDateTime.now().minusDays(30));
 
         OffsetDateTime currentTimestamp = OffsetDateTime.now();
 
@@ -302,8 +301,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntityWithCaseDocument, uploadedBy);
-        caseDocument.setCreatedDateTime(OffsetDateTime.now().minusDays(30));
-        dartsDatabase.save(caseDocument);
+        dartsPersistence.updateCreatedBy(caseDocument, OffsetDateTime.now().minusDays(30));
 
         OffsetDateTime currentTimestamp = OffsetDateTime.now();
 
@@ -335,8 +333,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         CaseDocumentEntity caseDocument1 = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(
             courtCaseEntityWithCaseDocuments1, uploadedBy);
-        caseDocument1.setCreatedDateTime(OffsetDateTime.now().minusDays(27));
-        dartsDatabase.save(caseDocument1);
+        dartsPersistence.updateCreatedBy(caseDocument1, OffsetDateTime.now().minusDays(27));
 
         CourtCaseEntity courtCaseEntityWithCaseDocument2 = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_2);
 
@@ -494,8 +491,8 @@ class CaseRepositoryIntTest extends IntegrationBase {
             false
         );
         caseRetention.setRetainUntilAppliedOn(retainUntilAppliedOn);
-        caseRetention.setCreatedDateTime(createdDateTime);
         dartsDatabase.save(caseRetention);
+        dartsPersistence.updateCreatedBy(caseRetention, createdDateTime);
     }
 
     private Long createLinkedTranscriptionDocument(CourtCaseEntity courtCase, OffsetDateTime uploadedAt) {

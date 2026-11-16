@@ -11,15 +11,13 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.service.LockService;
 
-import java.sql.Timestamp;
 import java.time.Duration;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.ReplaceJavaUtilDate")
 @Slf4j
 public class LockServiceImpl implements LockService {
 
@@ -52,17 +50,13 @@ public class LockServiceImpl implements LockService {
 
     @Override
     public boolean isLocked(AutomatedTaskEntity automatedTask) {
-        List<Timestamp> lockedUntil = automatedTaskRepository.findLockedUntilForTask(automatedTask.getTaskName());
+        List<LocalDateTime> lockedUntil = automatedTaskRepository.findLockedUntilForTask(automatedTask.getTaskName());
         log.info("Locked until timestamps for task {}: {}", automatedTask.getTaskName(), lockedUntil);
         return !lockedUntil.isEmpty() && isInFuture(lockedUntil);
     }
 
-    private boolean isInFuture(List<Timestamp> lockedUntil) {
+    private boolean isInFuture(List<LocalDateTime> lockedUntil) {
         // There should only ever be one item in the list as we search by primary key
-        return toOffsetDateTime(lockedUntil.getFirst()).isAfter(currentTimeHelper.currentOffsetDateTime());
-    }
-
-    private OffsetDateTime toOffsetDateTime(Timestamp timestamp) {
-        return timestamp.toLocalDateTime().atOffset(ZoneOffset.UTC);
+        return lockedUntil.getFirst().atOffset(ZoneOffset.UTC).isAfter(currentTimeHelper.currentOffsetDateTime());
     }
 }

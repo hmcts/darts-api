@@ -60,7 +60,7 @@ abstract class TranscriptionSearchGivensBuilder {
         transcription.forEach(t -> {
             t.setCreatedDateTime(
                 toOffsetDateTimeAtMidnight(startDate).plusDays(random.nextInt(1,(int) diffInDays)));
-            dartsDatabase.save(t);
+            dartsDatabase.updateCreatedBy(t, t.getCreatedDateTime());
         });
     }
 
@@ -68,7 +68,7 @@ abstract class TranscriptionSearchGivensBuilder {
         transcription.forEach(t -> {
             t.setCreatedDateTime(
                 toOffsetDateTimeAtMidnight(earliestCreationDate).plusDays(random.nextInt(1,10)));
-            dartsDatabase.save(t);
+            dartsDatabase.updateCreatedBy(t, t.getCreatedDateTime());
         });
     }
 
@@ -76,7 +76,7 @@ abstract class TranscriptionSearchGivensBuilder {
         transcription.forEach(t -> {
             t.setCreatedDateTime(
                 toOffsetDateTimeAtMidnight(latestCreationDate).minusDays(random.nextInt(1,10)));
-            dartsDatabase.save(t);
+            dartsDatabase.updateCreatedBy(t, t.getCreatedDateTime());
         });
     }
 
@@ -94,7 +94,7 @@ abstract class TranscriptionSearchGivensBuilder {
         range(0, quantity).forEach(i -> {
             var transcription = transcriptions.get(i);
             transcription.setCreatedDateTime(toOffsetDateTimeAtMidnight(requestedDates[i]));
-            dartsDatabase.save(transcription);
+            dartsDatabase.updateCreatedBy(transcription, transcription.getCreatedDateTime());
         });
 
         return transcriptions;

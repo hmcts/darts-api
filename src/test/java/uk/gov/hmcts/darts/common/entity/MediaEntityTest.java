@@ -21,6 +21,46 @@ import static org.mockito.Mockito.verify;
 class MediaEntityTest {
 
     @Test
+    void given_mediaInHearing_when_persistingAndChangingMetadata_then_preserveSetMembership() {
+        MediaEntity media = new MediaEntity();
+        HearingEntity hearing = new HearingEntity();
+        hearing.getMedias().add(media);
+
+        media.setId(1L);
+        media.setChecksum("new checksum");
+        media.setIsCurrent(false);
+        media.getMediaLinkedCaseList().add(new MediaLinkedCaseEntity());
+
+        assertThat(hearing.getMedias().contains(media)).isTrue();
+        assertThat(hearing.getMedias().remove(media)).isTrue();
+        assertThat(hearing.getMedias()).isEmpty();
+    }
+
+    @Test
+    void given_distinctTransientMedia_when_comparing_then_keepBothInSet() {
+        MediaEntity first = new MediaEntity();
+        MediaEntity second = new MediaEntity();
+
+        assertThat(first).isEqualTo(first).isNotEqualTo(second).isNotEqualTo(null).isNotEqualTo("media");
+        assertThat(new HashSet<>(List.of(first, second))).hasSize(2);
+    }
+
+    @Test
+    void given_samePersistentId_when_comparingDifferentMetadata_then_usePersistentIdentity() {
+        MediaEntity first = new MediaEntity();
+        first.setId(1L);
+        MediaEntity second = new MediaEntity();
+        second.setId(1L);
+        second.setChecksum("different checksum");
+
+        assertThat(first).isEqualTo(second).hasSameHashCodeAs(second);
+        assertThat(second).isEqualTo(first);
+
+        second.setId(2L);
+        assertThat(first).isNotEqualTo(second);
+    }
+
+    @Test
     void getObjectAdminAction_shouldReturnEmptyOptional_whenNoAdminActionsAreSet() {
         MediaEntity media = PersistableFactory.getMediaTestData().someMinimalBuilder()
             .build()

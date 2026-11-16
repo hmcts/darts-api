@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.shutdown;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.health.contributor.Health;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -4,7 +4,8 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurationProperties;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -129,6 +131,25 @@ class TokenValidatorTest extends IntegrationBaseWithWiremock {
 
         mockMvc.perform(get(ENDPOINT_URL).header("Authorization", "Bearer " + tokenDetails.getToken()))
             .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    void given_validBearerTokenWithoutCsrfToken_when_postingMalformedJson_then_reachRequestValidation() throws Exception {
+        DartsTokenGenerator token = DartsTokenGenerator.builder().useGlobalKey(true).issuer(configurationProperties.getIssuerUri())
+            .audience(configurationProperties.getClientId()).build();
+        DartsTokenAndJwksKey tokenDetails = token.fetchTokenWithGlobalUser();
+        tokenStub.stubExternalJwksKeys(tokenDetails.getJwksKey());
+
+        mockMvc.perform(post(ENDPOINT_URL).header("Authorization", "Bearer " + tokenDetails.getToken())
+                .contentType(MediaType.APPLICATION_JSON).content("{"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void given_invalidBearerToken_when_posting_then_rejectBeforeRequestValidation() throws Exception {
+        mockMvc.perform(post(ENDPOINT_URL).header("Authorization", "Bearer invalid-token")
+                .contentType(MediaType.APPLICATION_JSON).content("{"))
+            .andExpect(status().isUnauthorized());
     }
 
     // TODO: We need to enable audience checking in our security layer
