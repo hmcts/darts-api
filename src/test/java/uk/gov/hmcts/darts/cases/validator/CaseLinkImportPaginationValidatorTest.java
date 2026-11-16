@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.validator;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.darts.cases.config.CaseLinkImportConfiguration;
@@ -18,6 +19,11 @@ class CaseLinkImportPaginationValidatorTest {
 
     private final CaseLinkImportConfiguration configuration = new CaseLinkImportConfiguration();
     private final CaseLinkImportPaginationValidator validator = new CaseLinkImportPaginationValidator(configuration);
+
+    @BeforeEach
+    void setUp() {
+        configuration.setFailurePageSize(100);
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 25, 100})

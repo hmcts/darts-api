@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,6 +33,12 @@ class CaseLinkCsvServiceImplTest {
 
     private final CaseLinkImportConfiguration configuration = new CaseLinkImportConfiguration();
     private final CaseLinkCsvService service = new CaseLinkCsvServiceImpl(configuration);
+
+    @BeforeEach
+    void setUp() {
+        configuration.setMaxRows(100_000);
+        configuration.setMaxRecordCharacters(65_536);
+    }
 
     @DisplayName("""
         readCaseLinkCsvFile()
@@ -146,7 +153,7 @@ class CaseLinkCsvServiceImplTest {
     }
 
     @Test
-    void readCaseLinkCsvFile_shouldAcceptRows_whenDataRowCountEqualsDefaultMaximum() {
+    void readCaseLinkCsvFile_shouldAcceptRows_whenDataRowCountEqualsConfiguredMaximum() {
         var caseLinkRows = service.readCaseLinkCsvFile(file("header\n" + "X1,YORK,CP1\n".repeat(100_000)));
 
         assertThat(caseLinkRows).hasSize(100_000);
@@ -155,7 +162,7 @@ class CaseLinkCsvServiceImplTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"X1,YORK,CP1\n", "\n"})
-    void readCaseLinkCsvFile_shouldRejectFile_whenDataRowCountExceedsDefaultMaximum(String dataRow) {
+    void readCaseLinkCsvFile_shouldRejectFile_whenDataRowCountExceedsConfiguredMaximum(String dataRow) {
         assertThatThrownBy(() -> service.readCaseLinkCsvFile(file("header\n" + dataRow.repeat(100_001))))
             .isInstanceOfSatisfying(DartsApiException.class, exception -> assertThat(exception.getError()).isEqualTo(CaseApiError.TOO_MANY_ROWS));
     }
