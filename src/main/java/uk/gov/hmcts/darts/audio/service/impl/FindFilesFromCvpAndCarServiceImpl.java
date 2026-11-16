@@ -32,8 +32,7 @@ public class FindFilesFromCvpAndCarServiceImpl implements FindFilesFromCvpAndCar
                 return newLastRun;
             });
         Instant lastSuccessfulRunTime = lastRun.getLastSuccessfulRunTimestampUtc();
-        log.info("FindFilesFromCVPAndCAR job: current time UTC is {}, "
-                     + "last successful run time UTC is {}, and batch size is {}",
+        log.info("FindFilesFromCVPAndCAR job: current time UTC is {}, last successful run time UTC is {}, and batch size is {}",
                  jobStartTime,
                  lastSuccessfulRunTime == null ? "none" : lastSuccessfulRunTime,
                  batchSize);

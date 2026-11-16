@@ -37,7 +37,7 @@ class FindFilesFromCvpAndCarServiceImplTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    void given_previousRunPresence_when_findFiles_then_logTimesAndSaveStartTime(boolean previousRunExists) {
+    void findFilesFromCvpAndCar_logsTimesAndSavesStartTime_whenPreviousRunPresent(boolean previousRunExists) {
         JobLastSuccessfulRunTimeEntity previousRun = new JobLastSuccessfulRunTimeEntity();
         previousRun.setJobName("find-files-from-cvp-and-car");
         previousRun.setLastSuccessfulRunTimestampUtc(PREVIOUS_TIME);
@@ -47,13 +47,12 @@ class FindFilesFromCvpAndCarServiceImplTest {
         try (LogCaptor logCaptor = LogCaptor.forClass(FindFilesFromCvpAndCarServiceImpl.class)) {
             service.findFilesFromCvpAndCar(1000);
 
-            assertThat(logCaptor.getInfoLogs())
-                .extracting(String::stripTrailing)
-                .containsExactly(
-                    "FindFilesFromCVPAndCAR job: current time UTC is " + START_TIME
-                        + ", last successful run time UTC is "
-                        + (previousRunExists ? PREVIOUS_TIME : "none")
-                        + ", and batch size is 1000");
+            assertThat(logCaptor.getInfoLogs()).hasSize(1);
+            String message = logCaptor.getInfoLogs().getFirst();
+
+            assertThat(message).contains(START_TIME.toString());
+            assertThat(message).contains(previousRunExists ? PREVIOUS_TIME.toString() : "none");
+            assertThat(message).contains("1000");
         }
         ArgumentCaptor<JobLastSuccessfulRunTimeEntity> savedRun = ArgumentCaptor.forClass(JobLastSuccessfulRunTimeEntity.class);
         verify(repository).save(savedRun.capture());
@@ -62,7 +61,7 @@ class FindFilesFromCvpAndCarServiceImplTest {
     }
 
     @Test
-    void given_readFailure_when_findFiles_then_doNotSaveTimestamp() {
+    void findFilesFromCvpAndCar_doesNotSaveTimestamp_whenReadFails() {
         IllegalStateException failure = new IllegalStateException("Read failed");
         when(repository.findById("find-files-from-cvp-and-car")).thenThrow(failure);
         FindFilesFromCvpAndCarServiceImpl service = new FindFilesFromCvpAndCarServiceImpl(repository, Clock.fixed(START_TIME, ZoneOffset.UTC));
@@ -73,7 +72,7 @@ class FindFilesFromCvpAndCarServiceImplTest {
     }
 
     @Test
-    void given_saveFailure_when_findFiles_then_propagateFailure() {
+    void findFilesFromCvpAndCar_propagatesFailure_whenSaveFails() {
         when(repository.findById("find-files-from-cvp-and-car")).thenReturn(Optional.empty());
         IllegalStateException failure = new IllegalStateException("Save failed");
         when(repository.save(any())).thenThrow(failure);

@@ -5,6 +5,8 @@ import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.service.FindFilesFromCvpAndCarService;
@@ -60,7 +62,7 @@ class FindFilesFromCvpAndCarAutomatedTaskTest {
     }
 
     @Test
-    void given_enabledTask_when_scheduledRun_then_requestLockedExecution() {
+    void runTask_requestsLockedExecution_whenEnabled() {
         doNothing().when(task).preRunTask();
         taskDetails.setTaskEnabled(true);
         when(lockService.getLockingTaskExecutor()).thenReturn(lockingTaskExecutor);
@@ -72,7 +74,7 @@ class FindFilesFromCvpAndCarAutomatedTaskTest {
     }
 
     @Test
-    void given_disabledTask_when_scheduledRun_then_doNotRequestExecution() {
+    void runTask_doesNotRequestExecution_whenDisabled() {
         doNothing().when(task).preRunTask();
         taskDetails.setTaskEnabled(false);
         when(lockService.getLockAtMostFor()).thenReturn(Duration.ofMinutes(9));
@@ -83,10 +85,13 @@ class FindFilesFromCvpAndCarAutomatedTaskTest {
         verifyNoInteractions(service);
     }
 
-    @Test
-    void given_configuredBatchSize_when_runTask_then_delegateWithBatchSize() {
+    @ParameterizedTest
+    @ValueSource(ints = {100, 1000})
+    void runTask_delegatesWithBatchSize_whenBatchSizeConfigured(int batchSize) {
+        taskDetails.setBatchSize(batchSize);
+
         task.runTask();
 
-        verify(service).findFilesFromCvpAndCar(1000);
+        verify(service).findFilesFromCvpAndCar(batchSize);
     }
 }

@@ -26,12 +26,12 @@ public class FindFilesFromCvpAndCarAutomatedTask extends AbstractLockableAutomat
     }
 
     @Override
-    protected void runTask() {
-        findFilesFromCvpAndCarService.findFilesFromCvpAndCar(getAutomatedTaskBatchSize());
+    public AutomatedTaskName getAutomatedTaskName() {
+        return AutomatedTaskName.FIND_FILES_FROM_CVP_AND_CAR_TASK_NAME;
     }
 
     @Override
-    public AutomatedTaskName getAutomatedTaskName() {
-        return AutomatedTaskName.FIND_FILES_FROM_CVP_AND_CAR_TASK_NAME;
+    protected void runTask() {
+        findFilesFromCvpAndCarService.findFilesFromCvpAndCar(getAutomatedTaskBatchSize());
     }
 }
