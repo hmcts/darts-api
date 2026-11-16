@@ -106,7 +106,7 @@ public class DataStoreToArmHelper {
         int currentNumberOfAttempts = ObjectUtils.firstNonNull(externalObjectDirectoryEntity.getTransferAttempts(), 0);
         int newNumberOfAttempts = currentNumberOfAttempts + 1;
         log.info(
-            "Retrying ARM submission: eod_id={}, previous_status={}, previous_transfer_attempts={}, next_transfer_attempts={}",
+            "Updating ARM transfer attempts: eod_id={}, current_status={}, previous_attempts={}, new_attempts={}",
             externalObjectDirectoryEntity.getId(),
             externalObjectDirectoryEntity.getStatus().getId(),
             currentNumberOfAttempts,
@@ -274,6 +274,7 @@ public class DataStoreToArmHelper {
         List<String> submissionBlobs = armDataManagementApi.listSubmissionBlobs(prefix);
         Optional<String> archiveRecordRawFilename = getArchiveRecordRawFilename(armEod, rawFilename, submissionBlobs);
         if (archiveRecordRawFilename.isPresent()) {
+            // Reuse the existing blob's actual filename in the manifest and skip uploading the raw file again.
             updateBatchItemWithExistingSubmissionBlob(batchItem, archiveRecordRawFilename.get(), userAccount);
             return false;
         }
