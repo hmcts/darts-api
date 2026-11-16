@@ -33,6 +33,7 @@ class CaseLinkFileValidatorTest {
 
     @BeforeEach
     void setUp() {
+        configuration.setMaxFileSize(DataSize.ofMegabytes(1));
         originalRequestAttributes = RequestContextHolder.getRequestAttributes();
         RequestContextHolder.resetRequestAttributes();
     }

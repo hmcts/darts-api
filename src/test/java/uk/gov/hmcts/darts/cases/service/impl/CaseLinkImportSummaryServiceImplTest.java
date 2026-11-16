@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,6 +56,11 @@ class CaseLinkImportSummaryServiceImplTest {
     private CaseLinkImportPaginationValidator paginationValidator;
     @InjectMocks
     private CaseLinkImportSummaryServiceImpl service;
+
+    @BeforeEach
+    void setUp() {
+        configuration.setFailurePageSize(100);
+    }
 
     @DisplayName("""
         getSummary()

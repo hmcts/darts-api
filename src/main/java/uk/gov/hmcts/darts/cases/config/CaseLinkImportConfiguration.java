@@ -17,17 +17,17 @@ import org.springframework.validation.annotation.Validated;
 public class CaseLinkImportConfiguration {
 
     @NotNull
-    private DataSize maxFileSize = DataSize.ofMegabytes(25);
+    private DataSize maxFileSize;
 
     @Min(1)
-    private int maxRows = 100_000;
+    private int maxRows;
 
     @Min(1)
-    private int maxRecordCharacters = 65_536;
+    private int maxRecordCharacters;
 
     @Min(1)
-    private int failurePageSize = 100;
+    private int failurePageSize;
 
     @Min(1)
-    private int auditBatchSize = 1000;
+    private int auditBatchSize;
 }

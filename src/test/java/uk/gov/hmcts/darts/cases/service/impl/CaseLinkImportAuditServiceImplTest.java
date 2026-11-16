@@ -50,6 +50,7 @@ class CaseLinkImportAuditServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        configuration.setAuditBatchSize(2);
         service = new CaseLinkImportAuditServiceImpl(importRepository, resultRepository, currentTimeHelper, entityManager, configuration);
     }
 
