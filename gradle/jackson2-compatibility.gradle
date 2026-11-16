@@ -1,0 +1,103 @@
+buildscript {
+  repositories {
+    maven { url = 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1' }
+    mavenCentral()
+  }
+  dependencies {
+    classpath('com.github.hmcts.rse-cft-lib:ccd-gradle-plugin:8.0.0') { transitive = false }
+    classpath('org.ow2.asm:asm:9.11.1')
+  }
+}
+
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
+import uk.gov.hmcts.ccd.sdk.JacksonClasspathCompatibilityCheck
+import uk.gov.hmcts.ccd.sdk.JacksonCompatibilityCheck
+
+// Register the upstream HMCTS verification tasks without applying the CCD SDK plugin.
+def sourceGuard = tasks.register('jackson2CompatibilityGuard', JacksonCompatibilityCheck) {
+  group = 'verification'
+  description = 'Rejects Jackson 3 APIs and mapper configuration in application sources'
+  projectDirectory.set(layout.projectDirectory)
+  reportFile.set(layout.buildDirectory.file('reports/jackson-compatibility/report.txt'))
+  allowedSourceFiles.set([])
+  scanFiles.from(providers.provider {
+    sourceSets.collectMany { sourceSet ->
+      sourceSet.allSource.srcDirs.findAll { !it.toPath().startsWith(layout.buildDirectory.get().asFile.toPath()) }.collect { directory ->
+        fileTree(directory) {
+          include '**/*.java', '**/*.yaml', '**/*.yml', '**/*.properties', '**/*.xml', '**/lombok.config'
+          exclude '**/build/**'
+        }
+      }
+    }
+  })
+  scanFiles.from(files('build.gradle', 'settings.gradle', 'gradle.properties', 'lombok.config'))
+  scanFiles.from(fileTree('gradle') { include '**/*.gradle' })
+  lombokConfigs.from(providers.provider {
+    def directories = [projectDir] + sourceSets.collectMany { it.allSource.srcDirs }
+    def configs = [] as Set
+    directories.each { directory ->
+      for (File parent = directory; parent != null; parent = parent.parentFile) {
+        File config = new File(parent, 'lombok.config')
+        if (config.exists()) {
+          configs.add(config)
+        }
+      }
+    }
+    configs
+  })
+}
+
+def runtimeArtifacts = providers.provider {
+  def projectOutput = sourceSets.collectMany { it.output.files } as Set
+  sourceSets.collectMany { sourceSet ->
+    configurations[sourceSet.runtimeClasspathConfigurationName].incoming.artifacts.artifacts.toList()
+  }.findAll { !projectOutput.contains(it.file) }.unique { it.file.absolutePath }
+}
+
+def metadataFor = { artifact ->
+  def component = artifact.id.componentIdentifier
+  if (component instanceof ModuleComponentIdentifier) {
+    return "MODULE\t${component.group}:${component.module}:${component.version}\t${component.group}".toString()
+  }
+  if (component instanceof ProjectComponentIdentifier) {
+    return "PROJECT\tproject(${component.buildTreePath})\t".toString()
+  }
+  "OTHER\t${component.displayName}\t".toString()
+}
+
+def classpathGuard = tasks.register('jackson2ClasspathGuard', JacksonClasspathCompatibilityCheck) {
+  group = 'verification'
+  description = 'Rejects Jackson 3 references in compiled application and HMCTS dependency classes'
+  projectComponent.set("project(${project.path})")
+  reportFile.set(layout.buildDirectory.file('reports/jackson-compatibility/classpath-report.txt'))
+  javaVersion.set(java.toolchain.languageVersion.map { it.asInt() })
+  allowedClasses.set([])
+  allowedComponents.set([])
+  firstPartyGroups.set(runtimeArtifacts.map { artifacts ->
+    artifacts.collect { it.id.componentIdentifier }
+      .findAll { it instanceof ModuleComponentIdentifier }
+      .collect { it.group }
+      .findAll { it == 'com.github.hmcts' || it.startsWith('com.github.hmcts.') || it == 'uk.gov.hmcts' || it.startsWith('uk.gov.hmcts.') }
+      .unique().sort()
+  })
+  sourceSets.each { sourceSet ->
+    projectClasses.from(sourceSet.output.classesDirs)
+    dependsOn sourceSet.classesTaskName
+  }
+  dependencyArtifacts.from(runtimeArtifacts.map { artifacts -> artifacts.collect { it.file } })
+  artifactMetadata.set(runtimeArtifacts.map { artifacts ->
+    artifacts.collect { "${metadataFor(it)}\t${it.file.name}".toString() }.unique().sort()
+  })
+  artifactMetadataByPath.set(runtimeArtifacts.map { artifacts ->
+    artifacts.collectEntries { [(it.file.absoluteFile.toPath().normalize().toString()): metadataFor(it)] }
+  })
+}
+
+tasks.named('check') {
+  dependsOn sourceGuard, classpathGuard
+}
+
+tasks.withType(JavaCompile).configureEach {
+  mustRunAfter sourceGuard
+}
