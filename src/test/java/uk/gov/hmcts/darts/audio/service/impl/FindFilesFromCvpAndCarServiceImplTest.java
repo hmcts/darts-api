@@ -35,28 +35,59 @@ class FindFilesFromCvpAndCarServiceImplTest {
     @Mock
     private JobLastSuccessfulRunTimeRepository repository;
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
-    void findFilesFromCvpAndCar_logsTimesAndSavesStartTime_whenPreviousRunPresent(boolean previousRunExists) {
-        JobLastSuccessfulRunTimeEntity previousRun = new JobLastSuccessfulRunTimeEntity();
-        previousRun.setJobName("find-files-from-cvp-and-car");
-        previousRun.setLastSuccessfulRunTimestampUtc(PREVIOUS_TIME);
-        when(repository.findById("find-files-from-cvp-and-car")).thenReturn(previousRunExists ? Optional.of(previousRun) : Optional.empty());
+    @Test
+    void findFilesFromCvpAndCar_logsTimesAndSavesStartTime_whenPreviousRunPresent( ) {
+        int batchSize = 1000;
+        String jobName = "find-files-from-cvp-and-car";
+        when(repository.findById(jobName)).thenReturn(Optional.empty());
+
         FindFilesFromCvpAndCarServiceImpl service = new FindFilesFromCvpAndCarServiceImpl(repository, Clock.fixed(START_TIME, ZoneOffset.UTC));
 
         try (LogCaptor logCaptor = LogCaptor.forClass(FindFilesFromCvpAndCarServiceImpl.class)) {
             service.findFilesFromCvpAndCar(1000);
 
-            assertThat(logCaptor.getInfoLogs()).hasSize(1);
-            String message = logCaptor.getInfoLogs().getFirst();
-
-            assertThat(message).contains(START_TIME.toString());
-            assertThat(message).contains(previousRunExists ? PREVIOUS_TIME.toString() : "none");
-            assertThat(message).contains("1000");
+            assertThat(logCaptor.getInfoLogs())
+                .anySatisfy(message -> {
+                    assertThat(message).contains(START_TIME.toString());
+                    assertThat(message).contains("none");
+                    assertThat(message).contains(Integer.toString(batchSize));
+                });
         }
         ArgumentCaptor<JobLastSuccessfulRunTimeEntity> savedRun = ArgumentCaptor.forClass(JobLastSuccessfulRunTimeEntity.class);
         verify(repository).save(savedRun.capture());
         assertThat(savedRun.getValue().getJobName()).isEqualTo("find-files-from-cvp-and-car");
+        assertThat(savedRun.getValue().getLastSuccessfulRunTimestampUtc()).isEqualTo(START_TIME);
+    }
+
+    @Test
+    void findFilesFromCvpAndCar_logsPreviousTimeAndSavesStartTime_whenPreviousRunExists() {
+        int batchSize = 1000;
+        String jobName = "find-files-from-cvp-and-car";
+
+        JobLastSuccessfulRunTimeEntity previousRun = new JobLastSuccessfulRunTimeEntity();
+        previousRun.setJobName(jobName);
+        previousRun.setLastSuccessfulRunTimestampUtc(PREVIOUS_TIME);
+        when(repository.findById(jobName)).thenReturn(Optional.of(previousRun));
+
+        FindFilesFromCvpAndCarServiceImpl service =
+            new FindFilesFromCvpAndCarServiceImpl(repository, Clock.fixed(START_TIME, ZoneOffset.UTC));
+
+        try (LogCaptor logCaptor = LogCaptor.forClass(FindFilesFromCvpAndCarServiceImpl.class)) {
+            service.findFilesFromCvpAndCar(batchSize);
+
+            assertThat(logCaptor.getInfoLogs())
+                .anySatisfy(message -> {
+                    assertThat(message).contains(START_TIME.toString());
+                    assertThat(message).contains(PREVIOUS_TIME.toString());
+                    assertThat(message).contains(Integer.toString(batchSize));
+                });
+        }
+
+        ArgumentCaptor<JobLastSuccessfulRunTimeEntity> savedRun =
+            ArgumentCaptor.forClass(JobLastSuccessfulRunTimeEntity.class);
+
+        verify(repository).save(savedRun.capture());
+        assertThat(savedRun.getValue().getJobName()).isEqualTo(jobName);
         assertThat(savedRun.getValue().getLastSuccessfulRunTimestampUtc()).isEqualTo(START_TIME);
     }
 

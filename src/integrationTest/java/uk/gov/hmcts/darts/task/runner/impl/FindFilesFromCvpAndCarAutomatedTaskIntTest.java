@@ -64,22 +64,41 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
         when(clock.getZone()).thenReturn(ZoneOffset.UTC);
     }
 
+    @AfterEach
+    void cleanUp() {
+        reset(lastRunRepository);
+        lastRunRepository.deleteById(JOB_NAME);
+
+        AutomatedTaskEntity taskDetails =
+            automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow();
+
+        taskDetails.setTaskEnabled(false);
+        automatedTaskRepository.saveAndFlush(taskDetails);
+    }
+
     @Test
     @Transactional
-    void findByTaskName_returnsDisabledTask_whenFindFilesTaskExists() {
+    void findByTaskName_returnsDisabledTask_whenFindFilesTaskExistsAndDisabled() {
         AutomatedTaskEntity taskDetails =
             automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow();
 
         assertThat(taskDetails.getTaskEnabled()).isFalse();
     }
 
+    @Test
+    @Transactional
+    void findByTaskName_returnsEnabledTask_whenFindFilesTaskExistsAndEnabled() {
+        AutomatedTaskEntity taskDetails =
+            automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow();
+
+        assertThat(taskDetails.getTaskEnabled()).isTrue();
+    }
+
     @ParameterizedTest
     @CsvSource({
-        "2026-11-06T10:00:00, 2026-11-06T10:10:00",
-        "2026-11-06T10:07:00, 2026-11-06T10:10:00",
-        "2026-11-06T10:10:00, 2026-11-06T10:20:00",
-        "2026-11-06T10:50:00, 2026-11-06T11:00:00",
-        "2026-11-06T23:50:00, 2026-11-07T00:00:00"
+        "2026-11-06T23:59:59, 2026-11-07T00:00:00",
+        "2026-11-07T00:00:00, 2026-11-07T00:10:00",
+        "2026-11-07T00:00:01, 2026-11-07T00:10:00"
     })
     @Transactional
     void findByTaskName_returnsTenMinuteSchedule_whenFindFilesTaskExists(
@@ -102,7 +121,7 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
 
     @Test
     @Transactional
-    void runTask_shouldCreateTimestamp_whenNoPreviousRunExists() {
+    void runTask_shouldCreateLastSuccessfulRunTimestamp_whenNoPreviousRunExists() {
         Instant startTime = Instant.parse("2026-11-06T10:00:00Z");
         when(clock.instant()).thenReturn(startTime);
 
@@ -117,7 +136,7 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
 
     @Test
     @Transactional
-    void runTask_shouldUpdateTimestamp_whenPreviousRunExists() {
+    void runTask_shouldUpdateLastSuccessfulRunTimestamp_whenPreviousRunExists() {
         Instant startTime = Instant.parse("2026-11-06T10:00:00Z");
         Instant previousTime = Instant.parse("2026-11-06T09:50:00Z");
         when(clock.instant()).thenReturn(startTime);
@@ -136,7 +155,7 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
 
     @Test
     @Transactional
-    void run_shouldNotCreateTimestamp_whenTaskDisabled() {
+    void run_shouldNotCreateLastSuccessfulRunTimestamp_whenTaskDisabled() {
         AutomatedTaskEntity taskDetails =
             automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow();
 
@@ -150,7 +169,7 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
     }
 
     @Test
-    void run_shouldPreserveCheckpoint_whenReadingFails() {
+    void run_shouldNotUpdateLastSuccessfulRunTimestamp_whenReadingFails() {
         prepareTask();
 
         doThrow(new CannotGetJdbcConnectionException("Simulated read failure"))
@@ -170,7 +189,7 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
     }
 
     @Test
-    void run_shouldPreserveCheckpoint_whenSavingFails() {
+    void run_shouldNotUpdateLastSuccessfulRunTimestamp_whenSavingFails() {
         prepareTask();
 
         doThrow(new CannotGetJdbcConnectionException("Simulated save failure"))
@@ -204,17 +223,5 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
         task.setLastCronExpression(taskDetails.getCronExpression());
         // Avoid waiting one minute between task executions.
         doReturn(Duration.ofMillis(1)).when(task).getLockAtLeastFor();
-    }
-
-    @AfterEach
-    void cleanUp() {
-        reset(lastRunRepository);
-        lastRunRepository.deleteById(JOB_NAME);
-
-        AutomatedTaskEntity taskDetails =
-            automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow();
-
-        taskDetails.setTaskEnabled(false);
-        automatedTaskRepository.saveAndFlush(taskDetails);
     }
 }
