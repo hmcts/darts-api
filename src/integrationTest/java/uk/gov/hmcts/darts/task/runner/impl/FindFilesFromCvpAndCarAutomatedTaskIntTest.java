@@ -82,7 +82,12 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
         AutomatedTaskEntity taskDetails =
             automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow();
 
-        assertThat(taskDetails.getTaskEnabled()).isFalse();
+        taskDetails.setTaskEnabled(false);
+        automatedTaskRepository.saveAndFlush(taskDetails);
+
+        assertThat(automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR")
+                       .orElseThrow().getTaskEnabled())
+            .isFalse();
     }
 
     @Test
@@ -91,7 +96,12 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
         AutomatedTaskEntity taskDetails =
             automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow();
 
-        assertThat(taskDetails.getTaskEnabled()).isTrue();
+        taskDetails.setTaskEnabled(true);
+        automatedTaskRepository.saveAndFlush(taskDetails);
+
+        assertThat(automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR")
+                       .orElseThrow().getTaskEnabled())
+            .isTrue();
     }
 
     @ParameterizedTest

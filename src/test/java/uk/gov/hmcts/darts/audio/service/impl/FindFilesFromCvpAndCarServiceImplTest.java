@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,7 +34,7 @@ class FindFilesFromCvpAndCarServiceImplTest {
     private JobLastSuccessfulRunTimeRepository repository;
 
     @Test
-    void findFilesFromCvpAndCar_logsTimesAndSavesStartTime_whenPreviousRunPresent( ) {
+    void findFilesFromCvpAndCar_logsTimesAndSavesStartTime_whenNoPreviousRunExists() {
         int batchSize = 1000;
         String jobName = "find-files-from-cvp-and-car";
         when(repository.findById(jobName)).thenReturn(Optional.empty());
@@ -44,7 +42,7 @@ class FindFilesFromCvpAndCarServiceImplTest {
         FindFilesFromCvpAndCarServiceImpl service = new FindFilesFromCvpAndCarServiceImpl(repository, Clock.fixed(START_TIME, ZoneOffset.UTC));
 
         try (LogCaptor logCaptor = LogCaptor.forClass(FindFilesFromCvpAndCarServiceImpl.class)) {
-            service.findFilesFromCvpAndCar(1000);
+            service.findFilesFromCvpAndCar(batchSize);
 
             assertThat(logCaptor.getInfoLogs())
                 .anySatisfy(message -> {
@@ -60,7 +58,7 @@ class FindFilesFromCvpAndCarServiceImplTest {
     }
 
     @Test
-    void findFilesFromCvpAndCar_logsPreviousTimeAndSavesStartTime_whenPreviousRunExists() {
+    void findFilesFromCvpAndCar_logsTimesAndSavesStartTime_whenPreviousRunExists() {
         int batchSize = 1000;
         String jobName = "find-files-from-cvp-and-car";
 
