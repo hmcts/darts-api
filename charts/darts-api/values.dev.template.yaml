@@ -162,10 +162,14 @@ darts-portal:
     keyVaults:
       darts:
         secrets:
-          - redis-connection-string
-          - darts-portal-session-secret
-          - LaunchDarklyClientId
-          - LaunchDarklySdkKey
+          - name: redis-connection-string
+            alias: redis-connection-string
+          - name: darts-portal-session-secret
+            alias: darts-portal-session-secret
+          - name: DevLaunchDarklyClientId
+            alias: LaunchDarklyClientId
+          - name: DevLaunchDarklySdkKey
+            alias: LaunchDarklySdkKey
     environment:
       ALLOW_CONFIG_MUTATIONS: true
       DARTS_PORTAL_URL: "https://darts-portal-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
