@@ -42,6 +42,7 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
 
     private static final String JOB_NAME = "find-files-from-cvp-and-car";
     private static final Instant PREVIOUS_RUN_TIME = Instant.parse("2026-11-06T10:00:00Z");
+    private static final Instant NOW_UTC_TIME = Instant.parse("2026-11-06T10:10:00Z");
 
     @Autowired
     private AutomatedTaskRepository automatedTaskRepository;
@@ -60,7 +61,7 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
 
     @BeforeEach
     void setUpClock() {
-        when(clock.instant()).thenReturn(PREVIOUS_RUN_TIME.plusSeconds(600));
+        when(clock.instant()).thenReturn(NOW_UTC_TIME);
         when(clock.getZone()).thenReturn(ZoneOffset.UTC);
     }
 
@@ -85,8 +86,7 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
         taskDetails.setTaskEnabled(false);
         automatedTaskRepository.saveAndFlush(taskDetails);
 
-        assertThat(automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR")
-                       .orElseThrow().getTaskEnabled())
+        assertThat(automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow().getTaskEnabled())
             .isFalse();
     }
 
@@ -99,8 +99,7 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
         taskDetails.setTaskEnabled(true);
         automatedTaskRepository.saveAndFlush(taskDetails);
 
-        assertThat(automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR")
-                       .orElseThrow().getTaskEnabled())
+        assertThat(automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow().getTaskEnabled())
             .isTrue();
     }
 
@@ -132,35 +131,25 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
     @Test
     @Transactional
     void runTask_shouldCreateLastSuccessfulRunTimestamp_whenNoPreviousRunExists() {
-        Instant startTime = Instant.parse("2026-11-06T10:00:00Z");
-        when(clock.instant()).thenReturn(startTime);
-
         assertThat(lastRunRepository.findById(JOB_NAME)).isEmpty();
 
         task.runTask();
         lastRunRepository.flush();
 
         assertThat(lastRunRepository.findById(JOB_NAME).orElseThrow().getLastSuccessfulRunTimestampUtc())
-            .isEqualTo(startTime);
+            .isEqualTo(NOW_UTC_TIME);
     }
 
     @Test
     @Transactional
     void runTask_shouldUpdateLastSuccessfulRunTimestamp_whenPreviousRunExists() {
-        Instant startTime = Instant.parse("2026-11-06T10:00:00Z");
-        Instant previousTime = Instant.parse("2026-11-06T09:50:00Z");
-        when(clock.instant()).thenReturn(startTime);
-
-        JobLastSuccessfulRunTimeEntity previousRun = new JobLastSuccessfulRunTimeEntity();
-        previousRun.setJobName(JOB_NAME);
-        previousRun.setLastSuccessfulRunTimestampUtc(previousTime);
-        lastRunRepository.saveAndFlush(previousRun);
+        savePreviousSuccessfulRun();
 
         task.runTask();
         lastRunRepository.flush();
 
         assertThat(lastRunRepository.findById(JOB_NAME).orElseThrow().getLastSuccessfulRunTimestampUtc())
-            .isEqualTo(startTime);
+            .isEqualTo(NOW_UTC_TIME);
     }
 
     @Test
@@ -180,7 +169,8 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
 
     @Test
     void run_shouldNotUpdateLastSuccessfulRunTimestamp_whenReadingFails() {
-        prepareTask();
+        savePreviousSuccessfulRun();
+        enableTaskAndSetUpForExecution();
 
         doThrow(new CannotGetJdbcConnectionException("Simulated read failure"))
             .when(lastRunRepository).findById(JOB_NAME);
@@ -188,19 +178,19 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
         task.run(false);
 
         assertThat(task.getAutomatedTaskStatus()).isEqualTo(AutomatedTaskStatus.FAILED);
+        verify(lastRunRepository).findById(JOB_NAME);
         verify(lastRunRepository, never()).save(any(JobLastSuccessfulRunTimeEntity.class));
 
         reset(lastRunRepository);
 
-        assertThat(lastRunRepository.findById(JOB_NAME)
-                       .orElseThrow()
-                       .getLastSuccessfulRunTimestampUtc())
+        assertThat(lastRunRepository.findById(JOB_NAME).orElseThrow().getLastSuccessfulRunTimestampUtc())
             .isEqualTo(PREVIOUS_RUN_TIME);
     }
 
     @Test
     void run_shouldNotUpdateLastSuccessfulRunTimestamp_whenSavingFails() {
-        prepareTask();
+        savePreviousSuccessfulRun();
+        enableTaskAndSetUpForExecution();
 
         doThrow(new CannotGetJdbcConnectionException("Simulated save failure"))
             .when(lastRunRepository).save(any(JobLastSuccessfulRunTimeEntity.class));
@@ -212,23 +202,23 @@ class FindFilesFromCvpAndCarAutomatedTaskIntTest extends PostgresIntegrationBase
 
         reset(lastRunRepository);
 
-        assertThat(lastRunRepository.findById(JOB_NAME)
-                       .orElseThrow()
-                       .getLastSuccessfulRunTimestampUtc())
+        assertThat(lastRunRepository.findById(JOB_NAME).orElseThrow().getLastSuccessfulRunTimestampUtc())
             .isEqualTo(PREVIOUS_RUN_TIME);
     }
 
-    private void prepareTask() {
+    private void savePreviousSuccessfulRun() {
+        JobLastSuccessfulRunTimeEntity previousRun = new JobLastSuccessfulRunTimeEntity();
+        previousRun.setJobName(JOB_NAME);
+        previousRun.setLastSuccessfulRunTimestampUtc(PREVIOUS_RUN_TIME);
+        lastRunRepository.saveAndFlush(previousRun);
+    }
+
+    private void enableTaskAndSetUpForExecution() {
         AutomatedTaskEntity taskDetails =
             automatedTaskRepository.findByTaskName("FindFilesFromCVPAndCAR").orElseThrow();
 
         taskDetails.setTaskEnabled(true);
         automatedTaskRepository.saveAndFlush(taskDetails);
-
-        JobLastSuccessfulRunTimeEntity previousRun = new JobLastSuccessfulRunTimeEntity();
-        previousRun.setJobName(JOB_NAME);
-        previousRun.setLastSuccessfulRunTimestampUtc(PREVIOUS_RUN_TIME);
-        lastRunRepository.saveAndFlush(previousRun);
 
         task.setLastCronExpression(taskDetails.getCronExpression());
         // Avoid waiting one minute between task executions.

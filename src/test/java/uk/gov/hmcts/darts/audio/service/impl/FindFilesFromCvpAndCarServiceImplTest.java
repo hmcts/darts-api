@@ -44,12 +44,13 @@ class FindFilesFromCvpAndCarServiceImplTest {
         try (LogCaptor logCaptor = LogCaptor.forClass(FindFilesFromCvpAndCarServiceImpl.class)) {
             service.findFilesFromCvpAndCar(batchSize);
 
-            assertThat(logCaptor.getInfoLogs())
-                .anySatisfy(message -> {
-                    assertThat(message).contains(START_TIME.toString());
-                    assertThat(message).contains("none");
-                    assertThat(message).contains(Integer.toString(batchSize));
-                });
+            assertThat(logCaptor.getInfoLogs()).anySatisfy(message ->
+                   assertThat(message).contains(
+                       "current time UTC is %s".formatted(START_TIME.toString()),
+                       "last successful run time UTC is %s".formatted("none"),
+                       "batch size is %s".formatted(Integer.toString(batchSize))
+                   )
+            );
         }
         ArgumentCaptor<JobLastSuccessfulRunTimeEntity> savedRun = ArgumentCaptor.forClass(JobLastSuccessfulRunTimeEntity.class);
         verify(repository).save(savedRun.capture());
@@ -73,12 +74,13 @@ class FindFilesFromCvpAndCarServiceImplTest {
         try (LogCaptor logCaptor = LogCaptor.forClass(FindFilesFromCvpAndCarServiceImpl.class)) {
             service.findFilesFromCvpAndCar(batchSize);
 
-            assertThat(logCaptor.getInfoLogs())
-                .anySatisfy(message -> {
-                    assertThat(message).contains(START_TIME.toString());
-                    assertThat(message).contains(PREVIOUS_TIME.toString());
-                    assertThat(message).contains(Integer.toString(batchSize));
-                });
+            assertThat(logCaptor.getInfoLogs()).anySatisfy(message ->
+               assertThat(message).contains(
+                   "current time UTC is %s".formatted(START_TIME.toString()),
+                   "last successful run time UTC is %s".formatted(PREVIOUS_TIME.toString()),
+                   "batch size is %s".formatted(Integer.toString(batchSize))
+               )
+            );
         }
 
         ArgumentCaptor<JobLastSuccessfulRunTimeEntity> savedRun =
