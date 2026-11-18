@@ -8,7 +8,8 @@ def call(String environment, String portalUrl, String apiUrl) {
     return
   }
   def githubApi = new GithubAPI(this)
-  if (!githubApi.checkForLabel(env.BRANCH_NAME, 'pw_e2e')
+  String ticket = selectPlaywrightTicket(githubApi.getLabelsbyPattern(env.BRANCH_NAME, 'pw_e2e'))
+  if (!ticket && !githubApi.checkForLabel(env.BRANCH_NAME, 'pw_e2e')
       && !githubApi.checkForLabel(env.BRANCH_NAME, 'pw_e2e_branch')) {
     echo 'No Playwright E2E label: skipping checkout and tests'
     return
@@ -24,8 +25,42 @@ def call(String environment, String portalUrl, String apiUrl) {
 
   // Use the requested environment's agents for network/Key Vault access.
   withEnvironmentAgent(environment, 'darts') {
-    runTests(environment, portalUrl, expectedApi)
+    runTests(environment, portalUrl, expectedApi, ticket)
   }
+}
+
+// Bare labels retain the existing spike branch. A single numbered label opts in
+// to ticket selection; accept the diagram's spelling and the ticket's spelling.
+String selectPlaywrightTicket(Collection labels) {
+  def selectors = labels.findAll { it.startsWith('pw_e2e:') || it.startsWith('pw_e2e_branch:') }
+  if (selectors.size() > 1) {
+    error('Use only one Playwright ticket selector: pw_e2e:<number> or pw_e2e_branch:<number>')
+  }
+  if (!selectors) {
+    return null
+  }
+  String selector = selectors[0]
+  String ticket = selector.substring(selector.indexOf(':') + 1)
+  if (!(ticket ==~ /[1-9][0-9]*/)) {
+    error('Playwright ticket labels require a positive number, for example pw_e2e:264')
+  }
+  return ticket
+}
+
+Map selectPlaywrightRevision(String ticket, String remoteHeads) {
+  // Only complete ticket boundaries match: DMA-264 must not select DMA-2640.
+  def matches = remoteHeads.readLines().collect { line -> line.tokenize() }.findAll { fields ->
+    fields.size() == 2 && fields[1] ==~ /(?i)refs\/heads\/dma-${ticket}(-.+)?/
+  }
+  if (matches.size() != 1) {
+    error("Expected exactly one Playwright branch for DMA-${ticket}; found ${matches.size()}. " +
+          'Keep one dma-<ticket> or dma-<ticket>-<description> branch and retry; no fallback was used.')
+  }
+  String sha = matches[0][0]
+  if (!(sha ==~ /[0-9a-f]{40}/)) {
+    error('Could not resolve a valid Playwright commit from the remote branch')
+  }
+  return [branch: matches[0][1].substring('refs/heads/'.length()), sha: sha]
 }
 
 def checkoutPlaywright(String revision) {
@@ -55,8 +90,8 @@ def executeShard(String index, String environment, String portalUrl, String apiU
   }
 }
 
-def runTests(String environment, String portalUrl, String apiUrl) {
-  // Temporary spike override for both labels; restore mainline/ticket matching afterwards.
+def runTests(String environment, String portalUrl, String apiUrl, String ticket = null) {
+  // Preserve the current bare-label behaviour; numbered labels select a ticket branch.
   String playwrightBranch = 'dma-264-spike-pr-e2e-testing'
   String runner = readFile('bin/ci/run-playwright.sh')
   String firstAgent = env.NODE_NAME
@@ -70,10 +105,23 @@ def runTests(String environment, String portalUrl, String apiUrl) {
       timeout(time: 60, unit: 'MINUTES') {
         String playwrightSha
         stage('Resolve Playwright revision') {
-          checkoutPlaywright("*/${playwrightBranch}")
+          String requestedSha
+          if (ticket) {
+            // The URL and shell command are fixed; PR label text is never shell code.
+            String remoteHeads = sh(
+                script: 'GIT_TERMINAL_PROMPT=0 git ls-remote --heads https://github.com/hmcts/darts-automation-playwright.git',
+                returnStdout: true)
+            def revision = selectPlaywrightRevision(ticket, remoteHeads)
+            playwrightBranch = revision.branch
+            requestedSha = revision.sha
+          }
+          checkoutPlaywright(requestedSha ?: "*/${playwrightBranch}")
           playwrightSha = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
           if (!(playwrightSha ==~ /[0-9a-f]{40}/)) {
             error('Could not resolve a Playwright commit for both shards')
+          }
+          if (requestedSha && playwrightSha != requestedSha) {
+            error('Checked-out Playwright commit differs from the selected ticket branch revision')
           }
           echo "Playwright branch: ${playwrightBranch}; commit: ${playwrightSha}; portal: ${portalUrl}; API: ${apiUrl}"
         }
