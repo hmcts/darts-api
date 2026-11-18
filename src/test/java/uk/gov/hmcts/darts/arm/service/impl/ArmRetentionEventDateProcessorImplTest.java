@@ -7,8 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
@@ -28,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.lenient;
@@ -39,7 +38,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData.TEST_EXTERNAL_OBJECT_DIRECTORY_ID;
 
-@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
+@ExtendWith(MockitoExtension.class)
 class ArmRetentionEventDateProcessorImplTest {
 
     private static final OffsetDateTime MEDIA_RETENTION_DATE_TIME =
@@ -137,7 +136,8 @@ class ArmRetentionEventDateProcessorImplTest {
     }
 
     @Test
-    void calculateEventDates_throwsInterruptedException(CapturedOutput output) {
+    @SuppressWarnings("PMD.DoNotUseThreads")
+    void calculateEventDates_throwsInterruptedException() {
         // given
         List<Long> eods = List.of(TEST_EXTERNAL_OBJECT_DIRECTORY_ID, TEST_EXTERNAL_OBJECT_DIRECTORY_ID + 1);
         when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(
@@ -156,11 +156,15 @@ class ArmRetentionEventDateProcessorImplTest {
             armRetentionEventDateProcessor.calculateEventDates(10_000);
             //Should gracefully handle the exception
             mockedStatic.verify(() -> AsyncUtil.invokeAllAwaitTermination(anyList(), any()));
+            assertThat(Thread.currentThread().isInterrupted()).isTrue();
+        } finally {
+            // Clear the interrupt set by the processor before JUnit reuses this worker thread.
+            Thread.interrupted();
         }
     }
 
     @Test
-    void calculateEventDates_throwsUnexpectedException(CapturedOutput output) {
+    void calculateEventDates_throwsUnexpectedException() {
         // given
         List<Long> eods = List.of(TEST_EXTERNAL_OBJECT_DIRECTORY_ID, TEST_EXTERNAL_OBJECT_DIRECTORY_ID + 1);
         when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(

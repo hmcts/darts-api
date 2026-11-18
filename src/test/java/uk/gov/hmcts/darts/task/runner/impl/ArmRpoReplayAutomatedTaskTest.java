@@ -37,7 +37,7 @@ class ArmRpoReplayAutomatedTaskTest {
     @Mock
     private UserIdentity userIdentity;
 
-    private static EodHelperMocks eodHelperMocks;
+    private EodHelperMocks eodHelperMocks;
 
     private ArmRpoReplayAutomatedTask armRpoReplayAutomatedTask;
 
