@@ -114,7 +114,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {APPROVER, TRANSCRIBER},
-        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS, HMCTS_TRANSCRIPTION_HUB})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Long transcriptionId,
                                                                            UpdateTranscriptionRequest updateTranscription) {
 

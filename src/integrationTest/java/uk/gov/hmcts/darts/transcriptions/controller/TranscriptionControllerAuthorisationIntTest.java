@@ -93,16 +93,22 @@ class TranscriptionControllerAuthorisationIntTest extends IntegrationBase {
     }
 
     @Test
-    void transcriptionEndpoints_shouldAllowDetailsButForbidDocumentDownload_whenUserHasHubRole() throws Exception {
+    void getTranscription_shouldReturnOk_whenUserHasHubRole() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB);
 
         mockMvc.perform(get("/transcriptions/{transcription_id}", transcription.getId())).andExpect(status().isOk());
+    }
+
+    @Test
+    void downloadTranscript_shouldReturnForbidden_whenUserHasHubRole() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB);
+
         mockMvc.perform(get("/transcriptions/{transcription_id}/document", transcription.getId()))
             .andExpect(status().isForbidden());
     }
 
     @Test
-    void transcriptionHubView_shouldAllowAccess_whenUserHasHubRole() throws Exception {
+    void getTranscriptionHubYourTranscripts_shouldReturnOk_whenUserHasHubRole() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB);
 
         mockMvc.perform(get("/transcriptions/transcription-hub-view").header("user_id", 1))
@@ -110,7 +116,7 @@ class TranscriptionControllerAuthorisationIntTest extends IntegrationBase {
     }
 
     @Test
-    void transcriptionHubView_shouldForbidAccess_whenUserDoesNotHaveHubRole() throws Exception {
+    void getTranscriptionHubYourTranscripts_shouldReturnForbidden_whenUserDoesNotHaveHubRole() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.APPROVER);
 
         mockMvc.perform(get("/transcriptions/transcription-hub-view").header("user_id", 1))

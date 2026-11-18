@@ -110,6 +110,9 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity implements Ha
     @Column(name = "is_manual_transcription", nullable = false)
     private Boolean isManualTranscription;
 
+    @Column(name = "is_hub_transcription", nullable = false)
+    private boolean isHubTranscription;
+
     @NotAudited
     @Column(name = "is_current")
     private Boolean isCurrent;

@@ -25,6 +25,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
@@ -351,7 +352,7 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
     }
 
     @Test
-    void getTranscriptionHubTranscriptions_returnsOnlyMarkedHubRequests_andExcludesOwnApproval() {
+    void getTranscriptionHubRequesterAndApproverTranscriptions_shouldReturnOnlyMarkedHubRequestsAndExcludeApproversOwnRequest_whenHubAndStandardRequestsExist() {
         var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
         var hubRequester = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("hubRequester");
         var hubApprover = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("hubApprover");
@@ -369,6 +370,29 @@ class YourTranscriptsQueryImplIntTest extends IntegrationBase {
         assertThat(approverTranscriptions)
             .extracting(YourTranscriptsSummary::getTranscriptionId)
             .containsExactlyInAnyOrder(hubHearingRequest.getId().intValue(), hubLegacyRequest.getId().intValue());
+    }
+
+    @Test
+    void getTranscriptionHubRequesterTranscriptions_shouldExcludeHiddenAndClosedRequests_whenHubRequestsAreHiddenOrClosed() {
+        var transcriptionDate = OffsetDateTime.parse("2025-03-20T09:00:00Z");
+        var hubRequester = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("hubRequester");
+        var visibleRequest = createHubRequest(hubRequester, null, hearingEntity, transcriptionDate);
+        var hiddenRequest = createHubRequest(hubRequester, null, hearingEntity, transcriptionDate.plusMinutes(1));
+        hiddenRequest.setHideRequestFromRequestor(true);
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(hiddenRequest);
+        var closedRequest = createHubRequest(hubRequester, null, hearingEntity, transcriptionDate.plusMinutes(2));
+        closedRequest.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(CLOSED));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(closedRequest);
+
+        var hiddenExcluded = yourTranscriptsQuery.getTranscriptionHubRequesterTranscriptions(hubRequester.getId(), false);
+        var hiddenIncluded = yourTranscriptsQuery.getTranscriptionHubRequesterTranscriptions(hubRequester.getId(), true);
+
+        assertThat(hiddenExcluded)
+            .extracting(YourTranscriptsSummary::getTranscriptionId)
+            .containsExactly(visibleRequest.getId().intValue());
+        assertThat(hiddenIncluded)
+            .extracting(YourTranscriptsSummary::getTranscriptionId)
+            .containsExactlyInAnyOrder(visibleRequest.getId().intValue(), hiddenRequest.getId().intValue());
     }
 
     private TranscriptionEntity createHubRequest(UserAccountEntity requester, CourtCaseEntity courtCase,
