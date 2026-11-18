@@ -44,28 +44,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/medias";
-
-    @Autowired
-    MockMvc mockMvc;
-    @Autowired
-    SuperAdminUserStub superAdminUserStub;
-    @Autowired
-    UserAccountStub userAccountStub;
-    @MockitoBean
-    UserIdentity userIdentity;
-    @Autowired
-    MediaRequestStub mediaRequestStub;
-    @Autowired
-    MediaStub mediaStub;
-    @Autowired
-    TransformedMediaRepository transformedMediaRepository;
-
-    TransformedMediaEntity transformedMedia;
-
-
     private static final int DATE_BEFORE_INDEX = 0;
     private static final int DATE_NOW_INDEX = 1;
     private static final int DATE_AFTER_INDEX = 2;
+
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private SuperAdminUserStub superAdminUserStub;
+    @Autowired
+    private UserAccountStub userAccountStub;
+    @MockitoBean
+    private UserIdentity userIdentity;
+    @Autowired
+    private MediaRequestStub mediaRequestStub;
+    @Autowired
+    private MediaStub mediaStub;
+    @Autowired
+    private TransformedMediaRepository transformedMediaRepository;
+
+    private TransformedMediaEntity transformedMedia;
 
     @Test
     void getMediaIsSuccessfulWithTransformedMediaId() throws Exception {
