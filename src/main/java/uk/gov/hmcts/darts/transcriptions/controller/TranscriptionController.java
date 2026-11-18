@@ -139,6 +139,7 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    // HMCTS_TRANSCRIPTION_HUB is intentionally excluded until Hub-specific access checks are implemented.
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, TRANSLATION_QA, RCJ_APPEALS, JUDICIAL_CONDUCT})
@@ -190,6 +191,7 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    // HMCTS_TRANSCRIPTION_HUB is intentionally excluded until Hub-specific access checks are implemented.
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDICIARY, APPROVER, REQUESTER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS, JUDICIAL_CONDUCT})
