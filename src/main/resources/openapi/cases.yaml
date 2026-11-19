@@ -14,6 +14,7 @@ servers:
 paths:
   /cases:
     get:
+      operationId: casesGet
       tags:
         - Cases
       summary: Allows the retrieval of all scheduled cases/hearings for a given courthouse, courtroom and date
@@ -81,6 +82,7 @@ paths:
                 $ref: './problem.yaml'
   /cases/addCase:
     post:
+      operationId: casesAddCasePost
       tags:
         - Cases
       summary: Allows user to add case or if the case exists update the details.
@@ -128,6 +130,7 @@ paths:
                 $ref: './problem.yaml'
   /cases/addDocument:
     post:
+      operationId: casesAddDocumentPost
       tags:
         - Cases
       summary: Allows user to add case or if the case exists update the details.
@@ -177,6 +180,7 @@ paths:
 
   /cases/{case_id}:
     get:
+      operationId: casesCaseIdGet
       tags:
         - Cases
       summary: Allows the retrieval of a single case using a given case_id
@@ -227,6 +231,7 @@ paths:
                 status: 404
   /cases/{case_id}/hearings:
     get:
+      operationId: casesCaseIdHearingsGet
       tags:
         - Cases
       summary: Allows the retrieval of hearings for a given case_id
@@ -274,6 +279,7 @@ paths:
 
   /cases/{case_id}/events:
     get:
+      operationId: casesCaseIdEventsGet
       tags:
         - Cases
       summary: Allows the retrieval of events for a given case_id
@@ -373,6 +379,7 @@ paths:
 
   /cases/{case_id}/transcripts:
     get:
+      operationId: casesCaseIdTranscriptsGet
       tags:
         - Cases
       summary: Allows the retrieval of transcripts for a given case_id
@@ -430,6 +437,7 @@ paths:
 
   /cases/search:
     post:
+      operationId: casesSearchPost
       tags:
         - Cases
       summary: |-
@@ -509,6 +517,7 @@ paths:
 
   /admin/cases/search:
     post:
+      operationId: adminCasesSearchPost
       tags:
         - Cases
       summary: |-
@@ -541,6 +550,7 @@ paths:
 
   /admin/cases/{id}:
     get:
+      operationId: adminCasesIdGet
       tags:
         - Cases
       summary: |-
@@ -583,6 +593,7 @@ paths:
 
   /admin/cases/{id}/audios:
     get:
+      operationId: adminCasesIdAudiosGet
       tags:
         - Cases
       summary: |-

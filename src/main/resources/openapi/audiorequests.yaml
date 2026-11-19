@@ -847,10 +847,11 @@ components:
           description: 'The case number'
           maxLength: 32
         courthouse_display_name:
-          type: String
+          type: string
           description: 'The courthouse display name'
         hearing_date:
-          type: date
+          type: string
+          format: date
           description: 'The hearing date'
         owner:
           type: string
@@ -861,10 +862,12 @@ components:
           description: 'The person that requested the media'
           maxLength: 2000
         requested_at_from:
-          type: date
+          type: string
+          format: date
           description: 'The start date range that the media was requested'
         requested_at_to:
-          type: date
+          type: string
+          format: date
           description: 'The end date range that the media was requested'
 
     SearchTransformedMediaResponse:
@@ -926,7 +929,8 @@ components:
               type: integer
               description: 'The hearing id'
             hearing_date:
-              type: date
+              type: string
+              format: date
               description: 'The hearing date'
         last_accessed_at:
           type: string

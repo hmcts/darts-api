@@ -17,7 +17,7 @@ public final class CsvFileUtil {
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
             .setHeader()
             .setSkipHeaderRecord(true)
-            .build();
+            .get();
 
         return csvFormat.parse(reader);
     }

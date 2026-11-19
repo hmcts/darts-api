@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import static java.time.OffsetDateTime.now;
-import static org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
@@ -23,7 +23,7 @@ public final class CaseTestData implements Persistable<TestCourtCaseEntity.TestC
     }
 
     public CourtCaseEntity createSomeMinimalCase() {
-        var postfix = random(10, false, true);
+        var postfix = secure().next(10, false, true);
         var courtCaseEntity = new CourtCaseEntity();
         courtCaseEntity.setCourthouse(someMinimalCourthouse());
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
@@ -117,7 +117,7 @@ public final class CaseTestData implements Persistable<TestCourtCaseEntity.TestC
         TestCourtCaseEntity.TestCourtCaseBuilderRetrieve retrieve
             = new TestCourtCaseEntity.TestCourtCaseBuilderRetrieve();
 
-        var postfix = random(10, false, true);
+        var postfix = secure().next(10, false, true);
         retrieve.getBuilder().courthouse(someMinimalCourthouse())
             .caseNumber("case-1-" + postfix)
             .closed(false)
