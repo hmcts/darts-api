@@ -1,11 +1,7 @@
 {
-  "violations": [
-    {
-      "field": "courthouse",
-      "message": "must not be null"
-    }
-  ],
-  "type": "https://zalando.github.io/problem/constraint-violation",
+  "type": "COMMON_104",
   "status": 400,
-  "title": "Constraint Violation"
+  "title": "Invalid request",
+  "instance": "<instance>",
+  "courthouse": "must not be null"
 }

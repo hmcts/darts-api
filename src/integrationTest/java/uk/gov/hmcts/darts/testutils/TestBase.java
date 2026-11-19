@@ -56,34 +56,42 @@ public class TestBase {
     }
 
     public void assertStandardErrorJsonResponse(MvcResult mvcResult, DartsApiError dartsApiError) throws UnsupportedEncodingException {
+        String instance = mvcResult.getRequest().getRequestURI();
+        assertThat(instance).isNotNull();
         String expectedJson = """
             {
               "type": "<TYPE>",
               "title": "<TITLE>",
-              "status": <STATUS>
+              "status": <STATUS>,
+              "instance": "<INSTANCE>"
             }
             """
             .replace("<TYPE>", dartsApiError.getType())
             .replace("<TITLE>", dartsApiError.getTitle())
-            .replace("<STATUS>", String.valueOf(dartsApiError.getHttpStatus().value()));
+            .replace("<STATUS>", String.valueOf(dartsApiError.getHttpStatus().value()))
+            .replace("<INSTANCE>", instance);
         String actualJson = mvcResult.getResponse().getContentAsString();
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(dartsApiError.getHttpStatus().value());
     }
 
     public void assertStandardErrorJsonResponse(MvcResult mvcResult, DartsApiError dartsApiError, String detail) throws UnsupportedEncodingException {
+        String instance = mvcResult.getRequest().getRequestURI();
+        assertThat(instance).isNotNull();
         String expectedJson = """
             {
               "type": "<TYPE>",
               "title": "<TITLE>",
               "status": <STATUS>,
-              "detail": "<DETAIL>"
+              "detail": "<DETAIL>",
+              "instance": "<INSTANCE>"
             }
             """
             .replace("<TYPE>", dartsApiError.getType())
             .replace("<TITLE>", dartsApiError.getTitle())
             .replace("<STATUS>", String.valueOf(dartsApiError.getHttpStatus().value()))
-            .replace("<DETAIL>", detail);
+            .replace("<DETAIL>", detail)
+            .replace("<INSTANCE>", instance);
         String actualJson = mvcResult.getResponse().getContentAsString();
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(dartsApiError.getHttpStatus().value());
