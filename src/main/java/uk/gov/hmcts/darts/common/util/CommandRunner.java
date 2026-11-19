@@ -20,7 +20,7 @@ public class CommandRunner implements Callable<String> {
     @Override
     public String call() throws ExecutionException {
         try {
-            Executor executor = new DefaultExecutor();
+            Executor executor = DefaultExecutor.builder().get();
             return String.valueOf(executor.execute(systemCommand));
         } catch (Exception e) {
             log.error("Execution of System Command Failed" + e);

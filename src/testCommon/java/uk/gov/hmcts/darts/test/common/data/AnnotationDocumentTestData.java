@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
-import static org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public final class AnnotationDocumentTestData implements Persistable<TestAnnotationDocumentEntity.TestAnnotationDocumentEntityRetrieve,
@@ -44,7 +44,7 @@ public final class AnnotationDocumentTestData implements Persistable<TestAnnotat
         TestAnnotationDocumentEntity.TestAnnotationDocumentEntityRetrieve retrieve =
             new TestAnnotationDocumentEntity.TestAnnotationDocumentEntityRetrieve();
 
-        var postfix = random(10, false, true);
+        var postfix = secure().next(10, false, true);
         var userAccount = minimalUserAccount();
 
         retrieve.getBuilder().annotation(PersistableFactory.getAnnotationTestData().someMinimal())

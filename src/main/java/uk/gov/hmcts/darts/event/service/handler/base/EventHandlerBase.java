@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.event.service.handler.base;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -42,7 +42,7 @@ public abstract class EventHandlerBase implements EventHandler {
 
     @Override
     public boolean isHandlerFor(String handlerName) {
-        return StringUtils.equals(handlerName, this.getClass().getSimpleName());
+        return Strings.CS.equals(handlerName, this.getClass().getSimpleName());
     }
 
     protected CreatedHearingAndEvent createHearingAndSaveEvent(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {

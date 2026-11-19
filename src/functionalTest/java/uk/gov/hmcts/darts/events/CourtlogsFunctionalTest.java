@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import uk.gov.hmcts.darts.FunctionalTest;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CourtlogsFunctionalTest extends FunctionalTest {
 
     private static final String ENDPOINT_URL = "/courtlogs";
-    private final String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+    private final String courthouseName = "FUNC-SWANSEA-HOUSE-" + secure().nextAlphanumeric(7);
 
     @AfterAll
     void cleanData() {
@@ -31,7 +31,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Order(1)
     void postSuccess() {
 
-        String courtroomName = "FUNC-SWANSEA-ROOM-" + randomAlphanumeric(7);
+        String courtroomName = "FUNC-SWANSEA-ROOM-" + secure().nextAlphanumeric(7);
 
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 

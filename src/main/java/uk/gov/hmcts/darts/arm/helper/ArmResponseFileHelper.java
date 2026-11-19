@@ -4,7 +4,7 @@ import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
@@ -36,7 +36,7 @@ public class ArmResponseFileHelper {
         if (manifestFileName.startsWith(manifestFilePrefix)
             && manifestFileName.endsWith(armBatchCleanupConfiguration.getManifestFileSuffix())) {
             //is a Batch response UI file.
-            String armUuidValue = StringUtils.removeEnd(manifestFileName, armBatchCleanupConfiguration.getManifestFileSuffix());
+            String armUuidValue = Strings.CS.removeEnd(manifestFileName, armBatchCleanupConfiguration.getManifestFileSuffix());
             List<String> matchingInputUploadFiles = armDataManagementApi.listResponseBlobs(armUuidValue);
             if (matchingInputUploadFiles.isEmpty()) {
                 log.error("Cannot find corresponding inputUpload file in ARM for uuid {}.", armUuidValue);

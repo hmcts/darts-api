@@ -6,7 +6,10 @@ import com.nimbusds.jose.proc.SecurityContext;
 import uk.gov.hmcts.darts.authentication.exception.AuthenticationException;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+
+import static java.util.Objects.requireNonNullElse;
 
 public interface AuthProviderConfigurationProperties {
 
@@ -22,11 +25,11 @@ public interface AuthProviderConfigurationProperties {
 
     default JWKSource<SecurityContext> getJwkSource() {
         try {
-            URL jwksUrl = new URL(getJwkSetUri());
+            URL jwksUrl = URI.create(requireNonNullElse(getJwkSetUri(), "")).toURL();
 
             return JWKSourceBuilder.create(jwksUrl).build();
-        } catch (MalformedURLException malformedUrlException) {
-            throw new AuthenticationException("Sorry authentication jwks URL is incorrect", malformedUrlException);
+        } catch (IllegalArgumentException | MalformedURLException exception) {
+            throw new AuthenticationException("Sorry authentication jwks URL is incorrect", exception);
         }
     }
 }

@@ -45,7 +45,7 @@ class ArchiveRecordServiceImplTest {
     private static final long EODID = 1234;
     private static final String FILE_EXTENSION = "a360";
 
-    @Mock(lenient = true)
+    @Mock(strictness = Mock.Strictness.LENIENT)
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;

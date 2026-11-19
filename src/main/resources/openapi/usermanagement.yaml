@@ -264,6 +264,7 @@ paths:
 
   /admin/security-groups:
     get:
+      operationId: adminSecurityGroupsGet
       summary: Get security groups
       parameters:
         - in: query
@@ -296,6 +297,7 @@ paths:
         '200':
           $ref: '#/components/responses/SecurityGroupArraySuccessResponse'
     post:
+      operationId: adminSecurityGroupsPost
       summary: Create security group (transcriber groups only)
       tags:
         - SecurityGroup
@@ -315,6 +317,7 @@ paths:
 
   /admin/security-roles:
     get:
+      operationId: adminSecurityRolesGet
       summary: Get roles
       tags:
         - SecurityRole

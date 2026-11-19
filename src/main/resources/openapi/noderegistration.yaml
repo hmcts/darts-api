@@ -9,6 +9,7 @@ servers:
 paths:
   /register-devices:
     post:
+      operationId: register_devicesPost
       tags:
         - Devices
       summary: Registers a device on the network
@@ -89,6 +90,7 @@ paths:
                 status: 400
   /admin/node-register-management:
     get:
+      operationId: adminNodeRegisterManagementGet
       tags:
         - Devices
       summary: Get node registration details

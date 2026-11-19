@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
 import java.util.Set;
 
-import static org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static uk.gov.hmcts.darts.test.common.data.SecurityRoleTestData.createSecurityRoleFor;
 
 public final class SecurityGroupTestData {
@@ -21,7 +21,7 @@ public final class SecurityGroupTestData {
     }
 
     public static SecurityGroupEntity minimalSecurityGroup(Integer userAccountEntityId) {
-        var postfix = random(10, false, true);
+        var postfix = secure().next(10, false, true);
         var securityGroup = new SecurityGroupEntity();
         securityGroup.setGroupName("some-group-name-" + postfix);
         securityGroup.setGlobalAccess(false);

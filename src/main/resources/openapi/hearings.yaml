@@ -134,6 +134,7 @@ paths:
                 $ref: './problem.yaml'
   /hearings/{hearing_id}/transcripts:
     get:
+      operationId: hearingsHearingIdTranscriptsGet
       tags:
         - Hearings
       summary: Allows the retrieval of transcripts for a given hearing_id
@@ -190,6 +191,7 @@ paths:
                 $ref: './problem.yaml'
   /admin/hearings/search:
     post:
+      operationId: adminHearingsSearchPost
       tags:
         - Hearings
       summary: |-
@@ -223,6 +225,7 @@ paths:
           description: Forbidden Error
   /admin/hearings/{id}:
     get:
+      operationId: adminHearingsIdGet
       tags:
         - Hearings
       summary: |-
@@ -255,6 +258,7 @@ paths:
           description: Forbidden Error
   /admin/hearings/{id}/audios:
     get:
+      operationId: adminHearingsIdAudiosGet
       tags:
         - Hearings
       summary: |-

@@ -7,7 +7,7 @@ import org.hibernate.AssertionFailure;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 
-import static org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static org.awaitility.Awaitility.await;
 
 public final class AwaitabilityUtil {
@@ -27,7 +27,7 @@ public final class AwaitabilityUtil {
     public static boolean waitForMaxWithOneSecondPoll(Callable<Boolean> callable, Duration duration) {
         WaitingResult waitingResult = new WaitingResult(callable);
 
-        var awaitAlias = random(4);
+        var awaitAlias = secure().next(4);
         await(awaitAlias).atMost(duration)
             .with().pollInterval(Duration.ofSeconds(1))
             .until(waitingResult);
@@ -39,7 +39,7 @@ public final class AwaitabilityUtil {
     }
 
     public static void waitForMaxWithOneSecondPoll(Runnable runnable, Duration duration) {
-        var awaitAlias = random(4);
+        var awaitAlias = secure().next(4);
         await(awaitAlias).atMost(duration)
             .with().pollInterval(Duration.ofSeconds(1))
             .until(() -> {

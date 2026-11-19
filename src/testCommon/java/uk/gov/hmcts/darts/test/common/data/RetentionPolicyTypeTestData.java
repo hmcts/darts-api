@@ -4,7 +4,7 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 
 import java.time.OffsetDateTime;
 
-import static org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 
 public final class RetentionPolicyTypeTestData {
 
@@ -13,7 +13,7 @@ public final class RetentionPolicyTypeTestData {
     }
 
     public static RetentionPolicyTypeEntity someMinimalRetentionPolicyType() {
-        var postfix = random(10, false, true);
+        var postfix = secure().next(10, false, true);
         var retentionPolicyType = new RetentionPolicyTypeEntity();
         retentionPolicyType.setFixedPolicyKey("some-fixed-policy-key-" + postfix);
         retentionPolicyType.setPolicyName("some-policy-name-" + postfix);
