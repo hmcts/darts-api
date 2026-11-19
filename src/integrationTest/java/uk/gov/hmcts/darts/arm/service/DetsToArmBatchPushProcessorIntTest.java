@@ -1,8 +1,12 @@
 package uk.gov.hmcts.darts.arm.service;
 
+import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -14,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -21,14 +26,17 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -38,7 +46,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_PUSHED;
@@ -197,8 +204,9 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
 
     }
 
-    @Test
-    void processDetsToArm_ShouldSetDropzoneStatusAndNotCopyToArm_WhenFailedManifestFileStatusArmEod() {
+    @ParameterizedTest
+    @CsvSource({"ARM_MANIFEST_FAILED, 1", "ARM_MANIFEST_FAILED, 2", "ARM_RAW_DATA_PUSHED, 1", "ARM_RAW_DATA_PUSHED, 2"})
+    void processDetsToArm_ShouldReferenceExistingBlobInManifest_WhenRetrying(ObjectRecordStatusEnum previousStatus, int blobAttempt) {
         // given
         ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
             .save(createObjectStateRecordEntity(111L));
@@ -219,7 +227,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            ARM_MANIFEST_FAILED,
+            previousStatus,
             ARM,
             UUID.randomUUID().toString()
         );
@@ -239,6 +247,10 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         objectStateRecordEntity.setArmEodId(armEod.getId());
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
+        String existingFilename = String.format("%d_%d_%d", armEod.getId(), savedMedia.getId(), blobAttempt);
+        when(armDataManagementApi.listSubmissionBlobs(armEod.getId() + "_"))
+            .thenReturn(List.of("DARTS/submission/" + existingFilename));
+
         // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
 
@@ -256,6 +268,12 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
         assertEquals(EodHelper.armDropZoneStatus().getId(), foundArmEod.getStatus().getId());
         assertNotNull(foundArmEod.getOsrUuid());
+        assertThat(foundArmEod.getTransferAttempts()).isEqualTo(blobAttempt);
+        ArgumentCaptor<BinaryData> manifestCaptor = ArgumentCaptor.forClass(BinaryData.class);
+        verify(armDataManagementApi).saveBlobDataToArm(eq(foundArmEod.getManifestFile()), manifestCaptor.capture());
+        String manifest = manifestCaptor.getValue().toString();
+        assertThat(manifest.lines().count()).isEqualTo(2);
+        assertThat(manifest).contains("\"dz_file_name\":\"" + existingFilename + "\"");
 
         verify(armDataManagementApi, never())
             .copyDetsBlobDataToArm(any(), any());
