@@ -97,6 +97,53 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         assertSuccessfull(fullCleanUpData3);
     }
 
+    @Test
+    void cleanUpDetsData_shouldLeaveIneligibleRecordsUnchanged_whenLinksOrLocationsAreMissingOrMismatched() {
+        TestData<?> missingDetsLink = new MediaTestData().createDataThatShouldBeCleanedUp();
+        missingDetsLink.getObjectStateRecordEntity().setEodId(null);
+        TestData<?> missingArmLink = new MediaTestData().createDataThatShouldBeCleanedUp();
+        missingArmLink.getObjectStateRecordEntity().setArmEodId(null);
+        TestData<?> missingDetsLocation = new MediaTestData().createDataThatShouldBeCleanedUp();
+        missingDetsLocation.getObjectStateRecordEntity().setDetsLocation(null);
+        TestData<?> mismatchedDetsLocation = new MediaTestData().createDataThatShouldBeCleanedUp();
+        mismatchedDetsLocation.getObjectStateRecordEntity().setDetsLocation(UUID.randomUUID().toString());
+        List<TestData<?>> ineligibleRecords = List.of(missingDetsLink, missingArmLink, missingDetsLocation, mismatchedDetsLocation);
+        ineligibleRecords.forEach(testData -> dartsPersistence.getObjectStateRecordRepository().saveAndFlush(testData.getObjectStateRecordEntity()));
+        TestData<?> eligibleRecord = new MediaTestData().createDataThatShouldBeCleanedUp();
+
+        cleanUpDetsDataProcessor.processCleanUpDetsData(10, getCleanUpDetsDataAutomatedTaskConfig());
+
+        assertSuccessfull(eligibleRecord);
+        for (TestData<?> testData : ineligibleRecords) {
+            assertThat(dartsPersistence.getExternalObjectDirectoryRepository().existsById(testData.getDetsEod().getId())).isTrue();
+            assertThat(dartsPersistence.getExternalObjectDirectoryRepository().existsById(testData.getArmEod().getId())).isTrue();
+            ObjectStateRecordEntity objectStateRecordEntity = dartsPersistence.getObjectStateRecordRepository()
+                .findById(testData.getObjectStateRecordEntity().getUuid()).orElseThrow();
+            assertThat(objectStateRecordEntity.getEodId()).isEqualTo(testData.getObjectStateRecordEntity().getEodId());
+            assertThat(objectStateRecordEntity.getDateFileDetsCleanup()).isNull();
+            assertThat(objectStateRecordEntity.getFlagFileDetsCleanupStatus()).isNull();
+        }
+    }
+
+    @Test
+    void cleanUpDetsData_shouldRespectBatchLimitAndSkipCompletedRecords_whenProcessingSuccessiveChunks() {
+        TestData<?> firstRecord = new MediaTestData().createDataThatShouldBeCleanedUp();
+        TestData<?> secondRecord = new MediaTestData().createDataThatShouldBeCleanedUp();
+        TestData<?> thirdRecord = new MediaTestData().createDataThatShouldBeCleanedUp();
+        CleanUpDetsDataAutomatedTaskConfig config = getCleanUpDetsDataAutomatedTaskConfig();
+        config.setChunkSize(1);
+
+        cleanUpDetsDataProcessor.processCleanUpDetsData(2, config);
+
+        assertSuccessfull(List.of(firstRecord, secondRecord));
+        assertNoChange(thirdRecord);
+
+        cleanUpDetsDataProcessor.processCleanUpDetsData(2, config);
+
+        assertSuccessfull(List.of(firstRecord, secondRecord, thirdRecord));
+        assertThat(dartsPersistence.getObjectStateRecordRepository().cleanUpDetsDataProcedure(1, OffsetDateTime.now())).isEmpty();
+    }
+
     private void assertNoChange(List<TestData<?>> testDataList) {
         testDataList.forEach(this::assertNoChange);
     }
