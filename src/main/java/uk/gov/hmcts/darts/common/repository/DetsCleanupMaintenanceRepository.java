@@ -15,12 +15,13 @@ public class DetsCleanupMaintenanceRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public void vacuumTables() {
+    public void vacuumTables(int timeoutSeconds) {
         jdbcTemplate.execute((ConnectionCallback<Void>) connection -> {
             boolean autoCommit = connection.getAutoCommit();
             try {
                 connection.setAutoCommit(true);
                 try (Statement statement = connection.createStatement()) {
+                    statement.setQueryTimeout(timeoutSeconds);
                     statement.execute("VACUUM (ANALYZE) darts.external_object_directory, darts.object_state_record");
                     SQLWarning warning = statement.getWarnings();
                     if (warning != null) {

@@ -16,9 +16,9 @@ public class DetsCleanupMaintenanceService {
 
     // PostgreSQL VACUUM must execute outside a transaction, including any caller's transaction.
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void vacuumTables() {
-        log.info("Vacuuming and analysing DETS cleanup tables");
-        detsCleanupMaintenanceRepository.vacuumTables();
+    public void vacuumTables(int timeoutSeconds) {
+        log.info("Vacuuming and analysing DETS cleanup tables with timeout of {} seconds", timeoutSeconds);
+        detsCleanupMaintenanceRepository.vacuumTables(timeoutSeconds);
         log.info("Completed vacuum and analyse of DETS cleanup tables");
     }
 }
