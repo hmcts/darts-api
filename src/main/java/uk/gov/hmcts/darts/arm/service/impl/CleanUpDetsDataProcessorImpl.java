@@ -23,6 +23,7 @@ import java.util.List;
 public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
 
     private final CleanUpDetsDataTransactionalProcessor cleanUpDetsDataTransactionalProcessor;
+    private final DetsCleanupMaintenanceService detsCleanupMaintenanceService;
     private final Clock clock;
 
     @Override
@@ -53,6 +54,9 @@ public class CleanUpDetsDataProcessorImpl implements CleanUpDetsDataProcessor {
                 chunkSize = batchSize - totalProcessed;
             }
             log.info("Processed batch of DETS data clean up. Total processed so far: {}. Batch size: {}", totalProcessed, cleanedUpDetsRecords.size());
+        }
+        if (totalProcessed > 0) {
+            detsCleanupMaintenanceService.vacuumTables();
         }
         log.info("Completed processing clean up of DETS data. Total processed: {}", totalProcessed);
     }
