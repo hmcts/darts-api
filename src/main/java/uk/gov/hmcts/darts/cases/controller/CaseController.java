@@ -199,7 +199,6 @@ public class CaseController implements CasesApi {
     @Authorisation(contextId = CASE_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS, JUDICIAL_CONDUCT})
-    // TODO: Support HMCTS_TRANSCRIPTION_HUB once standard requests can be excluded.
     public ResponseEntity<List<Transcript>> casesCaseIdTranscriptsGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getTranscriptsByCaseId(caseId), HttpStatus.OK);
     }

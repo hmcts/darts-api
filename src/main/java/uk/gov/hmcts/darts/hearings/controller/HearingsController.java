@@ -69,7 +69,6 @@ public class HearingsController implements HearingsApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    // TODO: Support HMCTS_TRANSCRIPTION_HUB once standard requests can be excluded.
     @Authorisation(contextId = HEARING_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, RCJ_APPEALS, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS, JUDICIAL_CONDUCT})
