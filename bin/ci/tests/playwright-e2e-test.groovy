@@ -7,7 +7,6 @@ class AppPipelineConfig { def vaultSecrets }
 class GithubAPI {
   def steps
   GithubAPI(steps) { this.steps = steps }
-  def getLabelsbyPattern(branch, pattern) { steps.labels.findAll { it.startsWith(pattern) } }
   boolean checkForLabel(branch, label) { steps.labels.contains(label) }
 }
 ''')
@@ -28,7 +27,7 @@ int checks = 0
 def pipeline = { List labels = [] ->
   def binding = new Binding([
       labels: labels,
-      env: [BRANCH_NAME: 'PR-3503', CHANGE_ID: '3503', NODE_NAME: 'agent-1'],
+      env: [BRANCH_NAME: 'PR-3503', CHANGE_BRANCH: 'dma-264-api-change', CHANGE_ID: '3503', NODE_NAME: 'agent-1'],
       echo: { message -> },
       error: { message -> throw new IllegalArgumentException(message.toString()) },
       withEnvironmentAgent: { environment, product, body -> body() }
@@ -47,17 +46,20 @@ def rejects = { String message, Closure operation ->
 }
 
 def script = pipeline()
-assert script.selectPlaywrightTicket([]) == null
-assert script.selectPlaywrightTicket(['pw_e2e', 'pw_e2e_branch']) == null
-assert script.selectPlaywrightTicket(['pw_e2e:264']) == '264'
-assert script.selectPlaywrightTicket(['pw_e2e_branch:546']) == '546'
-checks += 4
-['pw_e2e:', 'pw_e2e:0', 'pw_e2e:0264', 'pw_e2e:264;echo unsafe',
- 'pw_e2e_branch:abc', 'pw_e2e:264:extra'].each { label ->
-  rejects('positive number') { script.selectPlaywrightTicket([label]) }
+['dma-264-api-change': '264', 'DMA-123-xyz': '123', 'dma-9': '9',
+ 'dma-12345-long-ticket': '12345'].each { branch, ticket ->
+  assert script.selectPlaywrightTicket(branch) == ticket
+  checks++
 }
-rejects('only one') { script.selectPlaywrightTicket(['pw_e2e:264', 'pw_e2e_branch:546']) }
-rejects('only one') { script.selectPlaywrightTicket(['pw_e2e:264', 'pw_e2e_branch:264']) }
+[null, '', 'PR-3503', 'feature/dma-264-change', 'dma-0-change', 'dma-0264-change',
+ 'dma-2640suffix', 'dma-264', 'dma-264;echo unsafe'].each { branch ->
+  if (branch == 'dma-264') {
+    assert script.selectPlaywrightTicket(branch) == '264'
+    checks++
+  } else {
+    rejects('requires an API source branch') { script.selectPlaywrightTicket(branch) }
+  }
+}
 
 assert script.selectPlaywrightRevision('264', "${sha}\trefs/heads/dma-264-spike\n") ==
     [branch: 'dma-264-spike', sha: sha]
@@ -76,25 +78,26 @@ rejects('valid Playwright commit') { script.selectPlaywrightRevision('264', 'inv
 
 // Exercise the actual entry point: legacy labels, new labels, skip gates and deployment guards.
 [[], ['unrelated'], ['pw_e2e'], ['pw_e2e_branch'], ['pw_e2e:264'],
- ['pw_e2e_branch:264'], ['pw_e2e', 'pw_e2e:264']].each { labels ->
+ ['pw_e2e_branch:264'], ['pw_e2e', 'pw_e2e_branch']].each { labels ->
   def entry = pipeline(labels)
   def calls = []
   entry.metaClass.runTests = { String environment, String portalUrl, String apiUrl, String ticket ->
     calls << [environment, portalUrl, apiUrl, ticket]
   }
   entry.call('stg', portal, api + '/')
-  if (!labels || labels == ['unrelated']) {
+  if (!labels.contains('pw_e2e') && !labels.contains('pw_e2e_branch')) {
     assert calls.empty
   } else {
-    assert calls == [['stg', portal, api, labels.any { it.contains(':') } ? '264' : null]]
+    assert calls == [['stg', portal, api, labels.contains('pw_e2e_branch') ? '264' : null]]
   }
   checks++
 }
-def fork = pipeline(['pw_e2e:invalid'])
+def fork = pipeline(['pw_e2e_branch'])
+fork.env.CHANGE_BRANCH = null
 fork.env.CHANGE_FORK = 'external-contributor'
 fork.call('stg', portal, api) // Fork gate must run before label resolution.
 checks++
-def entry = pipeline(['pw_e2e:264'])
+def entry = pipeline(['pw_e2e_branch'])
 rejects('requires an API pull request number') {
   entry.env.CHANGE_ID = null
   entry.call('stg', portal, api)
@@ -102,6 +105,23 @@ rejects('requires an API pull request number') {
 entry.env.CHANGE_ID = '3503'
 rejects('requires the portal and API for this PR') { entry.call('stg', portal, api.replace('3503', '3504')) }
 rejects('requires the portal and API for this PR') { entry.call('stg', 'https://darts.staging.apps.hmcts.net', api) }
+
+// Source branch validation applies only to branch selection, not to the legacy route.
+def legacy = pipeline(['pw_e2e'])
+legacy.env.CHANGE_BRANCH = 'some-existing-branch'
+legacy.metaClass.runTests = { String environment, String portalUrl, String apiUrl, String ticket ->
+  assert ticket == null
+}
+legacy.call('stg', portal, api)
+checks++
+entry.env.CHANGE_BRANCH = null
+rejects('check CHANGE_BRANCH') { entry.call('stg', portal, api) }
+entry.env.CHANGE_BRANCH = 'dma-12345-api'
+entry.metaClass.runTests = { String environment, String portalUrl, String apiUrl, String ticket ->
+  assert ticket == '12345'
+}
+entry.call('stg', portal, api)
+checks++
 
 // Execute the orchestration with fake Jenkins steps, including both shard checkouts and report merge.
 [null, '264', 'missing', 'ambiguous', 'mismatch'].each { scenario ->

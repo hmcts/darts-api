@@ -8,9 +8,8 @@ def call(String environment, String portalUrl, String apiUrl) {
     return
   }
   def githubApi = new GithubAPI(this)
-  String ticket = selectPlaywrightTicket(githubApi.getLabelsbyPattern(env.BRANCH_NAME, 'pw_e2e'))
-  if (!ticket && !githubApi.checkForLabel(env.BRANCH_NAME, 'pw_e2e')
-      && !githubApi.checkForLabel(env.BRANCH_NAME, 'pw_e2e_branch')) {
+  boolean selectTicketBranch = githubApi.checkForLabel(env.BRANCH_NAME, 'pw_e2e_branch')
+  if (!selectTicketBranch && !githubApi.checkForLabel(env.BRANCH_NAME, 'pw_e2e')) {
     echo 'No Playwright E2E label: skipping checkout and tests'
     return
   }
@@ -22,6 +21,11 @@ def call(String environment, String portalUrl, String apiUrl) {
   if (portalUrl != expectedPortal || apiUrl?.replaceFirst('/$', '') != expectedApi) {
     error('Playwright requires the portal and API for this PR; enable_keep_helm and enable_darts_portal are required')
   }
+  // BRANCH_NAME is PR-3503 in a PR job; CHANGE_BRANCH is the actual source branch.
+  String ticket = selectTicketBranch ? selectPlaywrightTicket(env.CHANGE_BRANCH) : null
+  if (ticket) {
+    echo "Playwright branch selection: pw_e2e_branch; API source branch: ${env.CHANGE_BRANCH}; ticket: DMA-${ticket}"
+  }
 
   // Use the requested environment's agents for network/Key Vault access.
   withEnvironmentAgent(environment, 'darts') {
@@ -29,22 +33,12 @@ def call(String environment, String portalUrl, String apiUrl) {
   }
 }
 
-// Bare labels retain the existing spike branch. A single numbered label opts in
-// to ticket selection; accept the diagram's spelling and the ticket's spelling.
-String selectPlaywrightTicket(Collection labels) {
-  def selectors = labels.findAll { it.startsWith('pw_e2e:') || it.startsWith('pw_e2e_branch:') }
-  if (selectors.size() > 1) {
-    error('Use only one Playwright ticket selector: pw_e2e:<number> or pw_e2e_branch:<number>')
+// Parse the ticket boundary, not a fixed number of characters: DMA-9 and DMA-12345 work.
+String selectPlaywrightTicket(String sourceBranch) {
+  if (!(sourceBranch ==~ /(?i)dma-[1-9][0-9]*(-.+)?/)) {
+    error('pw_e2e_branch requires an API source branch named dma-<ticket> or dma-<ticket>-<description>; check CHANGE_BRANCH')
   }
-  if (!selectors) {
-    return null
-  }
-  String selector = selectors[0]
-  String ticket = selector.substring(selector.indexOf(':') + 1)
-  if (!(ticket ==~ /[1-9][0-9]*/)) {
-    error('Playwright ticket labels require a positive number, for example pw_e2e:264')
-  }
-  return ticket
+  return sourceBranch.split('-')[1]
 }
 
 Map selectPlaywrightRevision(String ticket, String remoteHeads) {
@@ -91,7 +85,7 @@ def executeShard(String index, String environment, String portalUrl, String apiU
 }
 
 def runTests(String environment, String portalUrl, String apiUrl, String ticket = null) {
-  // Preserve the current bare-label behaviour; numbered labels select a ticket branch.
+  // pw_e2e keeps the existing spike branch; pw_e2e_branch selects the source ticket.
   String playwrightBranch = 'dma-264-spike-pr-e2e-testing'
   String runner = readFile('bin/ci/run-playwright.sh')
   String firstAgent = env.NODE_NAME
@@ -107,7 +101,7 @@ def runTests(String environment, String portalUrl, String apiUrl, String ticket 
         stage('Resolve Playwright revision') {
           String requestedSha
           if (ticket) {
-            // The URL and shell command are fixed; PR label text is never shell code.
+            // The URL and shell command are fixed; source branch text is never shell code.
             String remoteHeads = sh(
                 script: 'GIT_TERMINAL_PROMPT=0 git ls-remote --heads https://github.com/hmcts/darts-automation-playwright.git',
                 returnStdout: true)
