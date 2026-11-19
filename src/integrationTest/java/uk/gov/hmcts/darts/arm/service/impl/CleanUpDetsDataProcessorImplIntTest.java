@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -48,8 +52,30 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
     @Autowired
     private Clock clock;
 
+    @Autowired
+    private DetsCleanupMaintenanceService detsCleanupMaintenanceService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
     @MockitoBean
     private DetsApiService detsApiService;
+
+    @Test
+    void vacuumTables_shouldSuspendAndResumeCallerTransaction_whenTransactionIsActive() {
+        new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+            Long transactionId = jdbcTemplate.queryForObject("SELECT txid_current()", Long.class);
+
+            detsCleanupMaintenanceService.vacuumTables();
+
+            assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+            assertThat(jdbcTemplate.queryForObject("SELECT txid_current()", Long.class)).isEqualTo(transactionId);
+            status.setRollbackOnly();
+        });
+    }
 
     @Test
     void cleanUpDetsData_typical() {
