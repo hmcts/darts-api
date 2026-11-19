@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 class DetsCleanupMaintenanceRepositoryTest {
 
     private static final String VACUUM_SQL = "VACUUM (ANALYZE) darts.external_object_directory, darts.object_state_record";
+    private static final int TIMEOUT_SECONDS = 1200;
 
     @Mock
     private DataSource dataSource;
@@ -48,12 +49,13 @@ class DetsCleanupMaintenanceRepositoryTest {
     void vacuumTables_shouldExecuteInAutoCommitAndRestoreConnection_whenVacuumSucceeds(boolean autoCommit) throws SQLException {
         when(connection.getAutoCommit()).thenReturn(autoCommit);
 
-        repository.vacuumTables();
+        repository.vacuumTables(TIMEOUT_SECONDS);
 
         InOrder ordered = inOrder(connection, statement);
         ordered.verify(connection).getAutoCommit();
         ordered.verify(connection).setAutoCommit(true);
         ordered.verify(connection).createStatement();
+        ordered.verify(statement).setQueryTimeout(TIMEOUT_SECONDS);
         ordered.verify(statement).execute(VACUUM_SQL);
         ordered.verify(statement).close();
         ordered.verify(connection).setAutoCommit(autoCommit);
@@ -67,12 +69,13 @@ class DetsCleanupMaintenanceRepositoryTest {
         SQLException failure = new SQLException("Vacuum failed", "XX000");
         when(statement.execute(VACUUM_SQL)).thenThrow(failure);
 
-        assertThatThrownBy(() -> repository.vacuumTables())
+        assertThatThrownBy(() -> repository.vacuumTables(TIMEOUT_SECONDS))
             .isInstanceOf(DataAccessException.class)
             .hasCause(failure);
 
         InOrder ordered = inOrder(connection, statement);
         ordered.verify(connection).setAutoCommit(true);
+        ordered.verify(statement).setQueryTimeout(TIMEOUT_SECONDS);
         ordered.verify(statement).execute(VACUUM_SQL);
         ordered.verify(statement).close();
         ordered.verify(connection).setAutoCommit(autoCommit);
@@ -86,12 +89,13 @@ class DetsCleanupMaintenanceRepositoryTest {
         SQLWarning warning = new SQLWarning("Skipping table: permission denied", "01000");
         when(statement.getWarnings()).thenReturn(warning);
 
-        assertThatThrownBy(() -> repository.vacuumTables())
+        assertThatThrownBy(() -> repository.vacuumTables(TIMEOUT_SECONDS))
             .isInstanceOf(SQLWarningException.class)
             .hasCause(warning);
 
         InOrder ordered = inOrder(connection, statement);
         ordered.verify(connection).setAutoCommit(true);
+        ordered.verify(statement).setQueryTimeout(TIMEOUT_SECONDS);
         ordered.verify(statement).execute(VACUUM_SQL);
         ordered.verify(statement).close();
         ordered.verify(connection).setAutoCommit(autoCommit);
