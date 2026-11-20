@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.hearings.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,13 +62,23 @@ class HearingsControllerAuthorisationIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {
-        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
+        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT",
+        "HMCTS_TRANSCRIPTION_HUB"
     }, mode = EXCLUDE)
     void hearingEndpoints_shouldForbidAccess_whenRoleLacksConfiguredGlobalHearingAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(get("/hearings/{hearing_id}", hearing.getId())).andExpect(status().isForbidden());
         mockMvc.perform(get("/hearings/{hearing_id}/events", hearing.getId())).andExpect(status().isForbidden());
+        mockMvc.perform(get("/hearings/{hearing_id}/transcripts", hearing.getId())).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void hubRole_shouldAccessRequestJourneyHearingEndpointsButNotHearingTranscriptRequests() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB);
+
+        mockMvc.perform(get("/hearings/{hearing_id}", hearing.getId())).andExpect(status().isOk());
+        mockMvc.perform(get("/hearings/{hearing_id}/events", hearing.getId())).andExpect(status().isOk());
         mockMvc.perform(get("/hearings/{hearing_id}/transcripts", hearing.getId())).andExpect(status().isForbidden());
     }
 }
