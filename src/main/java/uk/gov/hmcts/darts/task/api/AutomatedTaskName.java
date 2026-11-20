@@ -47,7 +47,10 @@ public enum AutomatedTaskName {
     ARM_RPO_BACKLOG_CATCHUP("ArmRpoBacklogCatchup", Constants.AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE),
     CLEAN_UP_DETS_DATA("CleanUpDetsData"),
     INBOUND_AUDIO_FAILURE_CORRECTION_TASK_NAME("InboundAudioFailureCorrection"),
-    FIND_FILES_FROM_CVP_AND_CAR_TASK_NAME("FindFilesFromCVPAndCAR");
+    FIND_FILES_FROM_CVP_AND_CAR_TASK_NAME("FindFilesFromCVPAndCAR"),
+    AUDIO_SPIKE_CVP("AudioSpikeCvp"),
+    AUDIO_SPIKE_CAR("AudioSpikeCar"),
+    AUDIO_SPIKE_COMBINED("AudioSpikeCombined");
 
     private final String taskName;
     private final String conditionalOnSpEL;
