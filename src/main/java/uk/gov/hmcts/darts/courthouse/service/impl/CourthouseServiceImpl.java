@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.courthouse.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
@@ -274,7 +275,7 @@ public class CourthouseServiceImpl implements CourthouseService {
             foundCourthouse.setLastModifiedBy(currentUser);
             courthouseRepository.saveAndFlush(foundCourthouse);
         } else {
-            if (!StringUtils.equalsIgnoreCase(foundCourthouse.getCourthouseName(), courthouseNameUpperTrimmed)
+            if (!Strings.CI.equals(foundCourthouse.getCourthouseName(), courthouseNameUpperTrimmed)
                 || (courthouseCode != null && !Objects.equals(courthouseCode, foundCourthouse.getCode()))) {
                 throw new CourthouseCodeNotMatchException(foundCourthouse, courthouseCode, courthouseNameUpperTrimmed);
             }

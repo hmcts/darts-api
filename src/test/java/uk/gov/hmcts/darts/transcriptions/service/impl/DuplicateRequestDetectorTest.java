@@ -138,7 +138,7 @@ class DuplicateRequestDetectorTest {
             eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(false), anyList()))
             .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.APPROVED, 1));
 
-        DartsApiException throwable = catchThrowableOfType(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false), DartsApiException.class);
+        DartsApiException throwable = catchThrowableOfType(DartsApiException.class, () -> duplicateRequestDetector.checkForDuplicate(requestDetails, false));
         assertEquals(throwable.getError(), TranscriptionApiError.DUPLICATE_TRANSCRIPTION);
         assertEquals(0, throwable.getCustomProperties().size());
     }
@@ -151,7 +151,7 @@ class DuplicateRequestDetectorTest {
             eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(true), anyList()))
             .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.WITH_TRANSCRIBER, 1));
 
-        DartsApiException throwable = catchThrowableOfType(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, true), DartsApiException.class);
+        DartsApiException throwable = catchThrowableOfType(DartsApiException.class, () -> duplicateRequestDetector.checkForDuplicate(requestDetails, true));
         assertEquals(throwable.getError(), TranscriptionApiError.DUPLICATE_TRANSCRIPTION);
         assertEquals(0, throwable.getCustomProperties().size());
     }

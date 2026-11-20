@@ -6,6 +6,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
@@ -13,6 +15,7 @@ import uk.gov.service.notify.NotificationClientException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Execution(ExecutionMode.SAME_THREAD)
 class NotificationLoggerServiceTest {
 
     private static final Long NOTIFICATION_ID = 2222L;

@@ -14,6 +14,7 @@ servers:
 paths:
   /retentions:
     get:
+      operationId: retentionsGet
       tags:
         - Retention
       summary: Get retention history for a case
@@ -40,6 +41,7 @@ paths:
                 $ref: './problem.yaml'
 
     post:
+      operationId: retentionsPost
       tags:
         - Retention
       summary: Allow case retention changes to be applied.
@@ -124,6 +126,7 @@ paths:
                 $ref: './problem.yaml'
   /admin/retention-policy-types:
     get:
+      operationId: adminRetentionPolicyTypesGet
       tags:
         - Retention
       summary: Get retention policy types
@@ -147,6 +150,7 @@ paths:
               schema:
                 $ref: './problem.yaml'
     post:
+      operationId: adminRetentionPolicyTypesPost
       summary: Create a retention policy type
       tags:
         - Retention
@@ -201,6 +205,7 @@ paths:
 
   /admin/retention-policy-types/{id}:
     get:
+      operationId: adminRetentionPolicyTypesIdGet
       tags:
         - Retention
       summary: Get retention policy type by id
@@ -224,6 +229,7 @@ paths:
               schema:
                 $ref: './problem.yaml'
     patch:
+      operationId: adminRetentionPolicyTypesIdPatch
       summary: Update a retention policy type
       tags:
         - Retention

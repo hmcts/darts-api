@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
 
 public final class CourtroomTestData implements Persistable<TestCourtroomEntity.TestCourtroomEntityBuilderRetrieve,
@@ -41,7 +41,7 @@ public final class CourtroomTestData implements Persistable<TestCourtroomEntity.
     }
 
     public static CourtroomEntity someMinimalCourtRoom() {
-        var postfix = random(10, false, true);
+        var postfix = secure().next(10, false, true);
         var courtroom = new CourtroomEntity();
         var courthouse = createCourthouseWithName("some-courthouse-" + postfix);
         var courtrooms = new ArrayList<CourtroomEntity>();

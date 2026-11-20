@@ -509,6 +509,7 @@ paths:
 
   /admin/medias/search:
     post:
+      operationId: adminMediasSearchPost
       tags:
         - Audio
       summary: |-
@@ -541,6 +542,7 @@ paths:
 
   /admin/medias/marked-for-deletion:
     get:
+      operationId: adminMediasMarkedForDeletionGet
       tags:
         - Audio
       summary: |-
@@ -1016,7 +1018,6 @@ components:
             type: string
           description: 'List of associated case numbers'
           minItems: 1
-          maxLength: 255
     GetTransformedMediaResponse:
       type: object
       properties:

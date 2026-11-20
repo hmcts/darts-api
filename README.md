@@ -14,7 +14,7 @@
 
 ## Prerequisites
 
-- [Java 21](https://www.oracle.com/java)
+- [Java 25](https://www.oracle.com/java)
 - ffmpeg
 - redis
 
@@ -212,6 +212,20 @@ To build the project execute the following command:
 ```bash
   ./gradlew build
 ```
+
+### Running all local tests and checks
+
+To collect failures across the complete unit and integration suites and static checks, run:
+
+```bash
+FAIL_FAST=false ./gradlew test --no-fail-fast integration --no-fail-fast check --continue
+```
+
+`--no-fail-fast` runs every test in each suite, and `--continue` lets independent Gradle tasks finish after a task fails.
+The build still fails if any tests or checks fail. Compilation errors or a test JVM crash can prevent a suite from completing.
+Functional and smoke tests require their configured target environment and are run separately with `./gradlew functional` and `./gradlew smoke`.
+
+The reports are written to `build/reports/tests/test/index.html` and `build/reports/tests/integration/index.html`.
 
 ### Jacoco Coverage Report
 

@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ExternalObjectDirectoryServiceImplTest {
 
-    @Mock(lenient = true)
+    @Mock(strictness = Mock.Strictness.LENIENT)
     private ExternalObjectDirectoryRepository eodRepository;
     @Mock
     private ArmDataManagementConfiguration armConfig;

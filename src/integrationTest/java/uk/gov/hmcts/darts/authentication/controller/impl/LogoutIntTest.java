@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import java.net.URLEncoder;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,7 +34,7 @@ class LogoutIntTest extends IntegrationBaseWithWiremock {
 
         String expectedUri = "http://localhost:" + wiremockPort + "/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout?id_token_hint=" +
                              accessToken +
-                             "&post_logout_redirect_uri=" + URLEncoder.encode(logoutRedirectUri);
+                             "&post_logout_redirect_uri=" + URLEncoder.encode(logoutRedirectUri, UTF_8);
 
         MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGOUT_ENDPOINT)
             .header("Authorization", "Bearer " + accessToken);

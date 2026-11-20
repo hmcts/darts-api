@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.transcriptions.mapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -158,7 +157,7 @@ public class TranscriptionResponseMapper {
     }
 
     private Comparator<GetTranscriptionWorkflowsResponse> byTranscriptionWorkflowTs() {
-        return Comparator.comparing(workflow -> ObjectUtils.defaultIfNull(workflow.getWorkflowTs(), OffsetDateTime.MIN));
+        return Comparator.comparing(workflow -> Objects.requireNonNullElse(workflow.getWorkflowTs(), OffsetDateTime.MIN));
     }
 
     @SuppressWarnings("java:S1874")//Ticket (DMP-4972) has been raised to remove instances where ManyToMany mappings are being treated as ManyToOne

@@ -6,12 +6,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import uk.gov.hmcts.darts.log.service.AutomatedTaskLoggerService;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Execution(ExecutionMode.SAME_THREAD)
 class AutomatedTaskLoggerServiceTest {
 
     private AutomatedTaskLoggerService automatedTaskLoggerService;

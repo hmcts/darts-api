@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.log.service.impl;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -39,12 +39,12 @@ public class EventLoggerServiceImpl implements EventLoggerService {
             } else if (Integer.parseInt(event.getEventId()) >= 0) {
                 // XHIBIT sends event positive IDs, CPP send negative event IDs
                 source = EventSource.XHB;
-                if (StringUtils.equals(event.getEventText(), xhbDailyTestEventText)) {
+                if (Strings.CS.equals(event.getEventText(), xhbDailyTestEventText)) {
                     isPollCheck = true;
                 }
             } else {
                 source = EventSource.CPP;
-                if (StringUtils.equals(event.getEventText(), cppDailyTestEventText)) {
+                if (Strings.CS.equals(event.getEventText(), cppDailyTestEventText)) {
                     isPollCheck = true;
                 }
             }

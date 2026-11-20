@@ -7,10 +7,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 
+@Execution(ExecutionMode.SAME_THREAD)
 class DailyListLoggerServiceImplTest {
     private static LogCaptor logCaptor;
 

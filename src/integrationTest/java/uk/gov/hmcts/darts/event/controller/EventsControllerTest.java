@@ -291,6 +291,16 @@ class EventsControllerTest extends IntegrationBase {
         Assertions.assertEquals(CommonApiError.NOT_FOUND.getType(), responseResult.getType());
     }
 
+    @Test
+    void adminObfuscateEveByIds_shouldReturnBadRequest_whenEventIdsAreEmpty() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content("{\"eve_ids\":[]}");
+
+        mockMvc.perform(requestBuilder).andExpect(status().isBadRequest());
+    }
+
     private void assertAudit(EventEntity eventEntity) {
         List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
             .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(

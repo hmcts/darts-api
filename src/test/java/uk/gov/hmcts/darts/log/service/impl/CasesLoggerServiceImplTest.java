@@ -6,6 +6,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.log.service.CasesLoggerService;
@@ -16,6 +18,7 @@ import java.util.Locale;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Execution(ExecutionMode.SAME_THREAD)
 class CasesLoggerServiceImplTest {
 
     private static final String SOME_COURTHOUSE = "SOME-CoUrTHoUsE";
