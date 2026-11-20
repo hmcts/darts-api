@@ -15,6 +15,14 @@ public interface CaseLinkedCaseRepository extends JpaRepository<CaseLinkedCaseEn
     JpaSpecificationExecutor<CaseLinkedCaseEntity> {
 
     @Query("""
+        SELECT clc FROM CaseLinkedCaseEntity clc
+        WHERE (clc.courtCase1.id = :case1Id AND clc.courtCase2.id = :case2Id)
+           OR (clc.courtCase1.id = :case2Id AND clc.courtCase2.id = :case1Id)
+        ORDER BY clc.id
+        """)
+    List<CaseLinkedCaseEntity> findByCaseIds(Integer case1Id, Integer case2Id);
+
+    @Query("""
         SELECT clc
         FROM CaseLinkedCaseEntity clc
         WHERE clc.courtCase1 = :courtCase
