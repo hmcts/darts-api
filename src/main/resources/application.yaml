@@ -478,9 +478,11 @@ darts:
         system-user-email: systemCleanUpDetsDataAutomatedTask@hmcts.net
         lock:
           at-least-for: PT1M
-          at-most-for: PT90M
+          at-most-for: PT1H55M
         minimum-stored-age: 7D
         chunk-size: 10000
+        cleanup-timeout: PT1H
+        vacuum-timeout: PT1H55M
         async-timeout: 20M
         threads: 20
       cleanup-arm-response-files:

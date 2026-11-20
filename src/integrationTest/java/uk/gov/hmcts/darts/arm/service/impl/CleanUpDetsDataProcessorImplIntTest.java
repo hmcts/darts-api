@@ -6,7 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.QueryTimeoutException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -19,14 +24,24 @@ import uk.gov.hmcts.darts.dets.service.DetsApiService;
 import uk.gov.hmcts.darts.task.config.CleanUpDetsDataAutomatedTaskConfig;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -46,10 +61,92 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
     private CleanUpDetsDataProcessorImpl cleanUpDetsDataProcessor;
 
     @Autowired
+    private CleanUpDetsDataProcessorImpl.CleanUpDetsDataTransactionalProcessor cleanUpDetsDataTransactionalProcessor;
+
+    @Autowired
     private Clock clock;
+
+    @Autowired
+    private DetsCleanupMaintenanceService detsCleanupMaintenanceService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private DataSource dataSource;
 
     @MockitoBean
     private DetsApiService detsApiService;
+
+    @Test
+    void vacuumTables_shouldSuspendAndResumeCallerTransaction_whenTransactionIsActive() {
+        new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+            Long transactionId = jdbcTemplate.queryForObject("SELECT txid_current()", Long.class);
+
+            detsCleanupMaintenanceService.vacuumTables(30);
+
+            assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+            assertThat(jdbcTemplate.queryForObject("SELECT txid_current()", Long.class)).isEqualTo(transactionId);
+            status.setRollbackOnly();
+        });
+    }
+
+    @Test
+    @SuppressWarnings("PMD.DoNotUseThreads") // A separate connection must run vacuum while the test holds a conflicting lock.
+    void vacuumTables_shouldCancelStatement_whenTableIsLocked() throws SQLException {
+        try (ExecutorService executor = Executors.newSingleThreadExecutor();
+             Connection lockConnection = dataSource.getConnection()) {
+            lockConnection.setAutoCommit(false);
+            try (Statement lockStatement = lockConnection.createStatement()) {
+                lockStatement.execute("LOCK TABLE darts.external_object_directory IN ACCESS EXCLUSIVE MODE");
+                Future<?> vacuum = executor.submit(() -> detsCleanupMaintenanceService.vacuumTables(1));
+
+                assertThatThrownBy(() -> vacuum.get(10, TimeUnit.SECONDS))
+                    .isInstanceOf(ExecutionException.class)
+                    .rootCause()
+                    .isInstanceOfSatisfying(SQLException.class, exception -> assertThat(exception.getSQLState()).isEqualTo("57014"));
+
+                assertThat(jdbcTemplate.queryForObject("""
+                    SELECT count(*) FROM pg_stat_activity
+                    WHERE query LIKE 'VACUUM (ANALYZE)%' AND state = 'active'
+                    """, Integer.class)).isZero();
+            } finally {
+                lockConnection.rollback();
+            }
+        }
+    }
+
+    @Test
+    @SuppressWarnings("PMD.DoNotUseThreads") // Verify server cancellation on a separate connection while holding a conflicting lock.
+    void callDetsCleanUpStoredProcedure_shouldCancelAndPreserveData_whenStatementTimeoutExpires() throws SQLException {
+        TestData<?> validData = new MediaTestData().createDataThatShouldBeCleanedUp();
+        OffsetDateTime minimumStoredAge = OffsetDateTime.now(clock).minus(DEFAULT_TEST_DATA_AGE);
+
+        try (ExecutorService executor = Executors.newSingleThreadExecutor();
+             Connection lockConnection = dataSource.getConnection()) {
+            lockConnection.setAutoCommit(false);
+            try (Statement lockStatement = lockConnection.createStatement()) {
+                lockStatement.execute("LOCK TABLE darts.external_object_directory IN ACCESS EXCLUSIVE MODE");
+                Future<?> cleanup = executor.submit(() ->
+                    cleanUpDetsDataTransactionalProcessor.callDetsCleanUpStoredProcedure(10, minimumStoredAge, 1));
+
+                assertThatThrownBy(() -> cleanup.get(10, TimeUnit.SECONDS))
+                    .isInstanceOf(ExecutionException.class)
+                    .cause().isInstanceOf(QueryTimeoutException.class)
+                    .rootCause()
+                    .isInstanceOfSatisfying(SQLException.class, exception -> assertThat(exception.getSQLState()).isEqualTo("57014"));
+            } finally {
+                lockConnection.rollback();
+            }
+        }
+
+        assertNoChange(validData);
+        assertThat(cleanUpDetsDataTransactionalProcessor.callDetsCleanUpStoredProcedure(10, minimumStoredAge, 30)).hasSize(1);
+        assertSuccessfull(validData);
+    }
 
     @Test
     void cleanUpDetsData_typical() {
@@ -95,6 +192,53 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         cleanUpDetsDataProcessor.processCleanUpDetsData(20, getCleanUpDetsDataAutomatedTaskConfig());
         assertSuccessfull(partialCleanUpData1);
         assertSuccessfull(fullCleanUpData3);
+    }
+
+    @Test
+    void cleanUpDetsData_shouldLeaveIneligibleRecordsUnchanged_whenLinksOrLocationsAreMissingOrMismatched() {
+        TestData<?> missingDetsLink = new MediaTestData().createDataThatShouldBeCleanedUp();
+        missingDetsLink.getObjectStateRecordEntity().setEodId(null);
+        TestData<?> missingArmLink = new MediaTestData().createDataThatShouldBeCleanedUp();
+        missingArmLink.getObjectStateRecordEntity().setArmEodId(null);
+        TestData<?> missingDetsLocation = new MediaTestData().createDataThatShouldBeCleanedUp();
+        missingDetsLocation.getObjectStateRecordEntity().setDetsLocation(null);
+        TestData<?> mismatchedDetsLocation = new MediaTestData().createDataThatShouldBeCleanedUp();
+        mismatchedDetsLocation.getObjectStateRecordEntity().setDetsLocation(UUID.randomUUID().toString());
+        List<TestData<?>> ineligibleRecords = List.of(missingDetsLink, missingArmLink, missingDetsLocation, mismatchedDetsLocation);
+        ineligibleRecords.forEach(testData -> dartsPersistence.getObjectStateRecordRepository().saveAndFlush(testData.getObjectStateRecordEntity()));
+        TestData<?> eligibleRecord = new MediaTestData().createDataThatShouldBeCleanedUp();
+
+        cleanUpDetsDataProcessor.processCleanUpDetsData(10, getCleanUpDetsDataAutomatedTaskConfig());
+
+        assertSuccessfull(eligibleRecord);
+        for (TestData<?> testData : ineligibleRecords) {
+            assertThat(dartsPersistence.getExternalObjectDirectoryRepository().existsById(testData.getDetsEod().getId())).isTrue();
+            assertThat(dartsPersistence.getExternalObjectDirectoryRepository().existsById(testData.getArmEod().getId())).isTrue();
+            ObjectStateRecordEntity objectStateRecordEntity = dartsPersistence.getObjectStateRecordRepository()
+                .findById(testData.getObjectStateRecordEntity().getUuid()).orElseThrow();
+            assertThat(objectStateRecordEntity.getEodId()).isEqualTo(testData.getObjectStateRecordEntity().getEodId());
+            assertThat(objectStateRecordEntity.getDateFileDetsCleanup()).isNull();
+            assertThat(objectStateRecordEntity.getFlagFileDetsCleanupStatus()).isNull();
+        }
+    }
+
+    @Test
+    void cleanUpDetsData_shouldRespectBatchLimitAndSkipCompletedRecords_whenProcessingSuccessiveChunks() {
+        TestData<?> firstRecord = new MediaTestData().createDataThatShouldBeCleanedUp();
+        TestData<?> secondRecord = new MediaTestData().createDataThatShouldBeCleanedUp();
+        TestData<?> thirdRecord = new MediaTestData().createDataThatShouldBeCleanedUp();
+        CleanUpDetsDataAutomatedTaskConfig config = getCleanUpDetsDataAutomatedTaskConfig();
+        config.setChunkSize(1);
+
+        cleanUpDetsDataProcessor.processCleanUpDetsData(2, config);
+
+        assertSuccessfull(List.of(firstRecord, secondRecord));
+        assertNoChange(thirdRecord);
+
+        cleanUpDetsDataProcessor.processCleanUpDetsData(2, config);
+
+        assertSuccessfull(List.of(firstRecord, secondRecord, thirdRecord));
+        assertThat(dartsPersistence.getObjectStateRecordRepository().cleanUpDetsDataProcedure(1, OffsetDateTime.now())).isEmpty();
     }
 
     private void assertNoChange(List<TestData<?>> testDataList) {
@@ -163,6 +307,11 @@ class CleanUpDetsDataProcessorImplIntTest extends PostgresIntegrationBase {
         CleanUpDetsDataAutomatedTaskConfig config = new CleanUpDetsDataAutomatedTaskConfig();
         config.setMinimumStoredAge(DEFAULT_TEST_DATA_AGE);
         config.setChunkSize(10);
+        config.setCleanupTimeout(Duration.ofHours(1));
+        config.setVacuumTimeout(Duration.ofSeconds(30));
+        CleanUpDetsDataAutomatedTaskConfig.Lock lock = new CleanUpDetsDataAutomatedTaskConfig.Lock();
+        lock.setAtMostFor(Duration.ofMinutes(115));
+        config.setLock(lock);
         config.setThreads(2);
         config.setAsyncTimeout(Duration.ofMinutes(5));
         return config;
