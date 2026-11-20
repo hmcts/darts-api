@@ -112,6 +112,11 @@ spring:
             loggerLevel: ${FEIGN_LOG_LEVEL:none}
 
 darts:
+  audio-discovery-spike:
+    connection-string: ${AUDIO_SPIKE_CONNECTION_STRING:}
+    cvp-container: ${AUDIO_SPIKE_CVP_CONTAINER:spike-cvp}
+    car-container: ${AUDIO_SPIKE_CAR_CONTAINER:spike-car}
+    prefix: ${AUDIO_SPIKE_PREFIX:dma16/}
   async:
     enabled: true
   shutdown:
@@ -636,6 +641,21 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT59M
+      audio-spike-cvp:
+        system-user-email: system_AudioSpikeCvpAutomatedTask@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT9M
+      audio-spike-car:
+        system-user-email: system_AudioSpikeCarAutomatedTask@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT9M
+      audio-spike-combined:
+        system-user-email: system_AudioSpikeCombinedAutomatedTask@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT9M
       find-files-from-cvp-and-car:
         system-user-email: system_FindFilesFromCVPAndCARAutomatedTask@hmcts.net
         lock:
