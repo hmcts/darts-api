@@ -1,0 +1,155 @@
+{
+  "document_id": {
+    "document_name": "DailyList_999_20260817121701.xml",
+    "unique_id": "EXAMPLE_DAILY_LIST_001",
+    "document_type": "DL",
+    "time_stamp": "2026-08-17T11:17:01.838Z"
+  },
+  "list_header": {
+    "list_category": "Criminal",
+    "start_date": "2026-08-17",
+    "end_date": "2026-08-17",
+    "version": "NOT VERSIONED",
+    "published_time": "2026-08-17T12:17:01.928Z"
+  },
+  "crown_court": {
+    "court_house_type": "CROWN_COURT",
+    "court_house_code": {
+      "court_house_short_name": "EXAMPLE",
+      "code": 999
+    },
+    "court_house_name": "EXAMPLE CROWN COURT"
+  },
+  "court_lists": [
+    {
+      "court_house": {
+        "court_house_type": "CROWN_COURT",
+        "court_house_code": {
+          "code": 999
+        },
+        "court_house_name": "EXAMPLE CROWN COURT"
+      },
+      "sittings": [
+        {
+          "court_room_number": "1",
+          "sitting_sequence_no": 1,
+          "sitting_at": "10:00:00",
+          "sitting_priority": "T",
+          "judiciary": [
+            {
+              "citizen_name_forename": "Judge",
+              "citizen_name_surname": "Example",
+              "citizen_name_requested_name": "Judge Example"
+            }
+          ],
+          "hearings": [
+            {
+              "hearing_sequence_number": 1,
+              "hearing_details": {
+                "hearing_type": "PLE",
+                "hearing_description": "For Plea",
+                "hearing_date": "2026-08-17"
+              },
+              "time_marking_note": "10:00 AM",
+              "case_number": "T20260001",
+              "prosecution": {
+                "prosecuting_authority": "Example Prosecutor",
+                "prosecuting_reference": "EXAMPLE-PROS-001",
+                "prosecuting_organisation": {
+                  "organisation_name": "Example Prosecuting Organisation"
+                },
+                "advocates": []
+              },
+              "defendants": [
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "Defendant",
+                      "citizen_name_surname": "One",
+                      "citizen_name_requested_name": "Defendant One"
+                    },
+                    "is_masked": false
+                  },
+                  "counsel": [],
+                  "urn": "EXAMPLE-URN-001",
+                  "charges": [
+                    {
+                      "indictment_count_number": 1,
+                      "offence_statement": "Example offence statement"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "hearing_sequence_number": 2,
+              "hearing_details": {
+                "hearing_type": "TNW",
+                "hearing_description": "For Trial (No Witnesses)",
+                "hearing_date": "2026-08-17"
+              },
+              "time_marking_note": "11:00 AM",
+              "case_number": "T20260002",
+              "prosecution": {
+                "prosecuting_authority": "Example Prosecutor",
+                "prosecuting_reference": "EXAMPLE-PROS-002",
+                "prosecuting_organisation": {
+                  "organisation_name": "Example Prosecuting Organisation"
+                },
+                "advocates": []
+              },
+              "defendants": [
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "Defendant",
+                      "citizen_name_surname": "Two",
+                      "citizen_name_requested_name": "Defendant Two"
+                    },
+                    "is_masked": false
+                  },
+                  "counsel": [],
+                  "urn": "EXAMPLE-URN-002",
+                  "charges": [
+                    {
+                      "indictment_count_number": 1,
+                      "offence_statement": "Example offence statement"
+                    }
+                  ]
+                },
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "Defendant",
+                      "citizen_name_surname": "Three",
+                      "citizen_name_requested_name": "Defendant Three"
+                    },
+                    "is_masked": false
+                  },
+                  "counsel": [],
+                  "urn": "EXAMPLE-URN-003",
+                  "charges": [
+                    {
+                      "indictment_count_number": 2,
+                      "offence_statement": "Example offence statement"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "court_house": {
+        "court_house_type": "CROWN_COURT",
+        "court_house_code": {
+          "code": 123
+        },
+        "court_house_name": "COURT 123"
+      },
+      "sittings": []
+    }
+  ]
+}

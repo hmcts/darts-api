@@ -1,0 +1,469 @@
+openapi: 3.0.1
+
+info:
+  version: ${version}
+  title: DARTS Common Platform API
+  contact:
+    name: DARTS team
+  description: |-
+    Draft API for Common Platform to submit daily lists and events to DARTS as JSON.
+    Request formats, retry behaviour and Marketplace configuration remain subject to agreement.
+  x-contract-status: draft
+
+servers:
+  - url: http://localhost:4550
+    description: Local development
+
+tags:
+  - name: CommonPlatform
+    description: Common Platform daily-list and event submissions.
+
+security:
+  - marketplaceOAuth2: [ ]
+    marketplaceSubscriptionKey: [ ]
+
+paths:
+  /external/cp/daily-lists:
+    post:
+      tags:
+        - CommonPlatform
+      operationId: submitCommonPlatformDailyList
+      summary: Submit a Common Platform daily list
+      description: |-
+        Submit a structured JSON daily list in the existing gateway JSON format. The source system is CPP.
+        Success acknowledges receipt, not completion of downstream processing.
+      x-darts-required-role: CPP
+      parameters:
+        - $ref: '#/components/parameters/MessageId'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        description: Complete daily list, not XML or a JSON-encoded string.
+        # TODO: Confirm and enforce the provisional 10 MiB request-byte limit in APIM and DARTS.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonPlatformDailyListRequest'
+            examples:
+              dailyList:
+                summary: Daily list with one hearing and defendant
+                value:
+                  document_id:
+                    document_name: DailyList_999_20260817121701.xml
+                    unique_id: EXAMPLE_DAILY_LIST_001
+                    document_type: DL
+                    time_stamp: '2026-08-17T11:17:01.838Z'
+                  list_header:
+                    list_category: Criminal
+                    start_date: '2026-08-17'
+                    end_date: '2026-08-17'
+                    version: NOT VERSIONED
+                    published_time: '2026-08-17T12:17:01.928Z'
+                  crown_court:
+                    court_house_type: CROWN_COURT
+                    court_house_code:
+                      court_house_short_name: EXAMPLE
+                      code: 999
+                    court_house_name: EXAMPLE CROWN COURT
+                  court_lists:
+                    - court_house:
+                        court_house_type: CROWN_COURT
+                        court_house_code:
+                          code: 999
+                        court_house_name: EXAMPLE CROWN COURT
+                      sittings:
+                        - court_room_number: '1'
+                          sitting_sequence_no: 1
+                          sitting_at: '10:00:00'
+                          sitting_priority: T
+                          judiciary:
+                            - citizen_name_forename: Judge
+                              citizen_name_surname: Example
+                              citizen_name_requested_name: Judge Example
+                          hearings:
+                            - hearing_sequence_number: 1
+                              hearing_details:
+                                hearing_type: PLE
+                                hearing_description: For Plea
+                                hearing_date: '2026-08-17'
+                              time_marking_note: 10:00 AM
+                              case_number: T20260001
+                              prosecution:
+                                prosecuting_authority: Example Prosecutor
+                                prosecuting_reference: EXAMPLE-PROS-001
+                                prosecuting_organisation:
+                                  organisation_name: Example Prosecuting Organisation
+                                advocates: []
+                              defendants:
+                                - personal_details:
+                                    name:
+                                      citizen_name_forename: Defendant
+                                      citizen_name_surname: One
+                                      citizen_name_requested_name: Defendant One
+                                    is_masked: false
+                                  counsel: []
+                                  urn: EXAMPLE-URN-001
+                                  charges:
+                                    - indictment_count_number: 1
+                                      offence_statement: Example offence statement
+      responses:
+        '200':
+          $ref: '#/components/responses/SubmissionReceived'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/BusinessValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /external/cp/events:
+    post:
+      tags:
+        - CommonPlatform
+      operationId: submitCommonPlatformEvent
+      summary: Submit a Common Platform event
+      description: |-
+        Submit a JSON event, with optional retention data.
+        Success acknowledges receipt, not completion of downstream processing.
+      x-darts-required-role: CPP
+      parameters:
+        - $ref: '#/components/parameters/MessageId'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        description: Event details.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonPlatformEventRequest'
+            examples:
+              juryIn:
+                summary: Jury in
+                value:
+                  type: '1000'
+                  sub_type: '1051'
+                  event_id: '12345678'
+                  date_time: '2026-09-16T11:01:34.000Z'
+                  courthouse: EXAMPLE COURT
+                  courtroom: '3'
+                  case_numbers:
+                    - T20260001
+                  event_text: Jury in
+              eventWithRetentionPolicy:
+                summary: Type-only event with retention data
+                value:
+                  type: '3010'
+                  event_id: '12345679'
+                  date_time: '2026-09-16T11:02:00.000Z'
+                  courthouse: EXAMPLE COURT
+                  courtroom: '3'
+                  case_numbers:
+                    - T20260001
+                  event_text: Example event carrying retention information
+                  retention_policy:
+                    case_retention_fixed_policy: '3'
+                    case_total_sentence: 1Y2M0D
+      responses:
+        '201':
+          $ref: '#/components/responses/EventCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/BusinessValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+components:
+  securitySchemes:
+    marketplaceOAuth2:
+      type: oauth2
+      description: |-
+        Application-to-application access using OAuth2 client credentials, mapped to DARTS CPP access.
+        The token URL is a placeholder pending Marketplace configuration.
+      flows:
+        clientCredentials:
+          tokenUrl: https://marketplace-auth.example.invalid/oauth2/v2.0/token
+          scopes: { }
+    marketplaceSubscriptionKey:
+      type: apiKey
+      in: header
+      name: Ocp-Apim-Subscription-Key
+      description: Marketplace subscription key validated by APIM in addition to the bearer access token.
+
+  parameters:
+    MessageId:
+      name: X-Message-Id
+      in: header
+      required: true
+      description: |-
+        Message identifier replacing SOAP messageId. Reuse it when retrying the same submission.
+        Reusing an identifier does not guarantee idempotent handling.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 256
+      example: 00000000-0000-4000-8000-000000000001
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: false
+      description: Identifier for tracing a request across CP, Marketplace and DARTS.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 256
+      example: 00000000-0000-4000-8000-000000000002
+
+  responses:
+    SubmissionReceived:
+      description: Daily list received.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformSubmissionResponse'
+          example:
+            code: '200'
+            message: OK
+    EventCreated:
+      description: Event created.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformSubmissionResponse'
+          example:
+            code: '201'
+            message: CREATED
+    BadRequest:
+      description: Malformed JSON, missing required metadata, or invalid submission data.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+    Unauthenticated:
+      description: |-
+        Missing or invalid bearer token or APIM subscription key.
+      headers:
+        WWW-Authenticate:
+          description: Bearer challenge for missing or invalid bearer authentication; not required for subscription-key failures.
+          schema:
+            type: string
+          example: Bearer
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+    Forbidden:
+      description: The authenticated caller lacks permission to submit CP data.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+    NotFound:
+      description: Courthouse or event handler mapping not found.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+    PayloadTooLarge:
+      description: The request exceeds the payload limit.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+    UnsupportedMediaType:
+      description: The request content type is not supported by the operation.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+    BusinessValidationError:
+      description: The submission failed business validation.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+    TooManyRequests:
+      description: The request rate limit has been exceeded.
+      headers:
+        Retry-After:
+          description: Delay in seconds before retrying.
+          schema:
+            type: integer
+            minimum: 0
+          example: 60
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+    InternalServerError:
+      description: An unexpected DARTS error occurred.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+    ServiceUnavailable:
+      description: The CP integration is temporarily unavailable.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/CommonPlatformProblem'
+
+  schemas:
+    CommonPlatformDailyListRequest:
+      type: object
+      description: Structured daily list using the existing gateway JSON field names.
+      required:
+        - document_id
+        - list_header
+        - crown_court
+        - court_lists
+      properties:
+        document_id:
+          $ref: './dailylist.yaml#/components/schemas/DocumentID'
+        list_header:
+          $ref: './dailylist.yaml#/components/schemas/ListHeader'
+        crown_court:
+          $ref: './dailylist.yaml#/components/schemas/CourtHouse'
+        court_lists:
+          type: array
+          items:
+            $ref: './dailylist.yaml#/components/schemas/CourtList'
+    CommonPlatformEventRequest:
+      type: object
+      description: Event details. Message types are strings.
+      required:
+        - type
+        - event_id
+        - date_time
+        - courthouse
+        - case_numbers
+      properties:
+        type:
+          type: string
+          minLength: 1
+          description: CP message type.
+        sub_type:
+          type: string
+          nullable: true
+          minLength: 1
+          description: Optional CP message subtype; omit or set to null for type-only events.
+        event_id:
+          type: string
+          minLength: 1
+          maxLength: 11
+          pattern: '^-?[0-9]{1,10}$'
+          description: Numeric source event identifier, which may be negative; not an event-handler type or name.
+          example: '-12345678'
+        date_time:
+          type: string
+          format: date-time
+          description: Event timestamp, using the same date_time format as existing DARTS events.
+          example: '2026-09-16T11:01:34.000Z'
+        courthouse:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Courthouse name.
+        courtroom:
+          type: string
+          maxLength: 25
+          description: Courtroom name.
+        case_numbers:
+          type: array
+          minItems: 1
+          description: Case numbers associated with the event.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 25
+        event_text:
+          type: string
+          maxLength: 2000
+          description: Event text.
+        retention_policy:
+          $ref: '#/components/schemas/CommonPlatformRetentionPolicy'
+    CommonPlatformRetentionPolicy:
+      type: object
+      description: |-
+        Optional retention data. Both fields are optional strings, passed unchanged
+        without defaults when omitted.
+      properties:
+        case_retention_fixed_policy:
+          type: string
+          description: Retention policy identifier.
+          example: '3'
+        case_total_sentence:
+          type: string
+          description: Total sentence in the source format.
+          example: 1Y2M0D
+    CommonPlatformSubmissionResponse:
+      type: object
+      description: Submission acknowledgement.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: HTTP success status as a string.
+          enum:
+            - '200'
+            - '201'
+        message:
+          type: string
+          description: HTTP success status name.
+          enum:
+            - OK
+            - CREATED
+    CommonPlatformProblem:
+      type: object
+      description: Problem details for an unsuccessful request.
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          description: URI reference identifying the problem type.
+          example: about:blank
+        title:
+          type: string
+          description: Short summary of the problem type.
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+          description: HTTP response status for this occurrence.
+        detail:
+          type: string
+          description: Explanation of this problem occurrence without sensitive implementation details.
+        instance:
+          type: string
+          format: uri-reference
+          description: URI reference identifying this problem occurrence.
