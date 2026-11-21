@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.commonplatform.controller;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.darts.commonplatform.model.CommonPlatformDailyListRequest;
 import uk.gov.hmcts.darts.commonplatform.model.CommonPlatformEventRequest;
 import uk.gov.hmcts.darts.commonplatform.model.CommonPlatformSubmissionResponse;
 
@@ -16,7 +17,7 @@ class CommonPlatformControllerTest {
     void givenDailyListRequestWithMessageAndCorrelationId_whenSubmittingDailyList_thenReturnsNotImplemented() {
         ResponseEntity<CommonPlatformSubmissionResponse> response = controller.submitCommonPlatformDailyList(
             "message-123",
-            "<DailyList/>",
+            new CommonPlatformDailyListRequest(),
             "correlation-456"
         );
 
@@ -28,7 +29,7 @@ class CommonPlatformControllerTest {
     void givenDailyListRequestWithoutCorrelationId_whenSubmittingDailyList_thenReturnsNotImplemented() {
         ResponseEntity<CommonPlatformSubmissionResponse> response = controller.submitCommonPlatformDailyList(
             "message-123",
-            "<DailyList/>",
+            new CommonPlatformDailyListRequest(),
             null
         );
 
@@ -40,7 +41,7 @@ class CommonPlatformControllerTest {
     void givenDailyListRequestWithBlankMessageId_whenSubmittingDailyList_thenReturnsNotImplemented() {
         ResponseEntity<CommonPlatformSubmissionResponse> response = controller.submitCommonPlatformDailyList(
             "",
-            "<DailyList/>",
+            new CommonPlatformDailyListRequest(),
             "correlation-456"
         );
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.commonplatform.http.api.CommonPlatformApi;
+import uk.gov.hmcts.darts.commonplatform.model.CommonPlatformDailyListRequest;
 import uk.gov.hmcts.darts.commonplatform.model.CommonPlatformEventRequest;
 import uk.gov.hmcts.darts.commonplatform.model.CommonPlatformSubmissionResponse;
 
@@ -31,7 +32,7 @@ public class CommonPlatformController implements CommonPlatformApi {
         globalAccessSecurityRoles = {CPP})
     public ResponseEntity<CommonPlatformSubmissionResponse> submitCommonPlatformDailyList(
         @RequestHeader(value = "X-Message-Id", required = true) String messageId,
-        @RequestBody String body,
+        @RequestBody CommonPlatformDailyListRequest commonPlatformDailyListRequest,
         @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId) {
 
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);

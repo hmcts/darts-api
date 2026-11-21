@@ -6,7 +6,7 @@ info:
   contact:
     name: DARTS team
   description: |-
-    Draft API for Common Platform to submit daily-list XML and JSON events to DARTS.
+    Draft API for Common Platform to submit daily lists and events to DARTS as JSON.
     Request formats, retry behaviour and Marketplace configuration remain subject to agreement.
   x-contract-status: draft
 
@@ -30,7 +30,7 @@ paths:
       operationId: submitCommonPlatformDailyList
       summary: Submit a Common Platform daily list
       description: |-
-        Submit a daily-list XML document without a SOAP envelope. The source system is CPP.
+        Submit a structured JSON daily list in the existing gateway JSON format. The source system is CPP.
         Success acknowledges receipt, not completion of downstream processing.
       x-darts-required-role: CPP
       parameters:
@@ -38,16 +38,74 @@ paths:
         - $ref: '#/components/parameters/CorrelationId'
       requestBody:
         required: true
-        description: Complete daily-list XML document.
+        description: Complete daily list, not XML or a JSON-encoded string.
+        # TODO: Confirm and enforce the provisional 10 MiB request-byte limit in APIM and DARTS.
         content:
-          application/xml:
+          application/json:
             schema:
-              type: string
-              minLength: 1
-              # TODO: Confirm with CP/PlatOps against expected daily-list sizes and deployed request-byte limits.
-              # Provisional character limit; no explicit daily-list limit found in darts-gateway.
-              maxLength: 10485760
-              description: Raw daily-list XML.
+              $ref: '#/components/schemas/CommonPlatformDailyListRequest'
+            examples:
+              dailyList:
+                summary: Daily list with one hearing and defendant
+                value:
+                  document_id:
+                    document_name: DailyList_999_20260817121701.xml
+                    unique_id: EXAMPLE_DAILY_LIST_001
+                    document_type: DL
+                    time_stamp: '2026-08-17T11:17:01.838Z'
+                  list_header:
+                    list_category: Criminal
+                    start_date: '2026-08-17'
+                    end_date: '2026-08-17'
+                    version: NOT VERSIONED
+                    published_time: '2026-08-17T12:17:01.928Z'
+                  crown_court:
+                    court_house_type: CROWN_COURT
+                    court_house_code:
+                      court_house_short_name: EXAMPLE
+                      code: 999
+                    court_house_name: EXAMPLE CROWN COURT
+                  court_lists:
+                    - court_house:
+                        court_house_type: CROWN_COURT
+                        court_house_code:
+                          code: 999
+                        court_house_name: EXAMPLE CROWN COURT
+                      sittings:
+                        - court_room_number: '1'
+                          sitting_sequence_no: 1
+                          sitting_at: '10:00:00'
+                          sitting_priority: T
+                          judiciary:
+                            - citizen_name_forename: Judge
+                              citizen_name_surname: Example
+                              citizen_name_requested_name: Judge Example
+                          hearings:
+                            - hearing_sequence_number: 1
+                              hearing_details:
+                                hearing_type: PLE
+                                hearing_description: For Plea
+                                hearing_date: '2026-08-17'
+                              time_marking_note: 10:00 AM
+                              case_number: T20260001
+                              prosecution:
+                                prosecuting_authority: Example Prosecutor
+                                prosecuting_reference: EXAMPLE-PROS-001
+                                prosecuting_organisation:
+                                  organisation_name: Example Prosecuting Organisation
+                                advocates: []
+                              defendants:
+                                - personal_details:
+                                    name:
+                                      citizen_name_forename: Defendant
+                                      citizen_name_surname: One
+                                      citizen_name_requested_name: Defendant One
+                                    is_masked: false
+                                  counsel: []
+                                  urn: EXAMPLE-URN-001
+                                  charges:
+                                    - indictment_count_number: 1
+                                      offence_statement: Example offence statement
       responses:
         '200':
           $ref: '#/components/responses/SubmissionReceived'
@@ -204,7 +262,7 @@ components:
             code: '201'
             message: CREATED
     BadRequest:
-      description: Malformed XML/JSON, missing required metadata, or invalid submission data.
+      description: Malformed JSON, missing required metadata, or invalid submission data.
       content:
         application/problem+json:
           schema:
@@ -279,6 +337,25 @@ components:
             $ref: '#/components/schemas/CommonPlatformProblem'
 
   schemas:
+    CommonPlatformDailyListRequest:
+      type: object
+      description: Structured daily list using the existing gateway JSON field names.
+      required:
+        - document_id
+        - list_header
+        - crown_court
+        - court_lists
+      properties:
+        document_id:
+          $ref: './dailylist.yaml#/components/schemas/DocumentID'
+        list_header:
+          $ref: './dailylist.yaml#/components/schemas/ListHeader'
+        crown_court:
+          $ref: './dailylist.yaml#/components/schemas/CourtHouse'
+        court_lists:
+          type: array
+          items:
+            $ref: './dailylist.yaml#/components/schemas/CourtList'
     CommonPlatformEventRequest:
       type: object
       description: Event details. Message types are strings.

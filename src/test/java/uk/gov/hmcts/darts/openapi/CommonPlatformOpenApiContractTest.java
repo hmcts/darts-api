@@ -14,10 +14,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 class CommonPlatformOpenApiContractTest {
 
@@ -41,7 +43,7 @@ class CommonPlatformOpenApiContractTest {
 
     @ParameterizedTest
     @MethodSource("validMessageIds")
-    void givenValidMessageIdHeader_whenValidatingRequest_thenAcceptsRequest(String path, String messageId) {
+    void givenValidMessageIdHeader_whenValidatingRequest_thenAcceptsRequest(String path, String messageId) throws IOException {
         Request request = createRequest(path).withHeader("X-Message-Id", messageId).build();
 
         ValidationReport report = VALIDATOR.validateRequest(request);
@@ -51,7 +53,7 @@ class CommonPlatformOpenApiContractTest {
 
     @ParameterizedTest
     @ValueSource(strings = {DAILY_LIST_PATH, EVENT_PATH})
-    void givenMissingMessageIdHeader_whenValidatingRequest_thenRejectsRequest(String path) {
+    void givenMissingMessageIdHeader_whenValidatingRequest_thenRejectsRequest(String path) throws IOException {
         ValidationReport report = VALIDATOR.validateRequest(createRequest(path).build());
 
         assertFalse(report.getMessages().isEmpty(), "Expected a validation error for a missing message ID header");
@@ -59,7 +61,7 @@ class CommonPlatformOpenApiContractTest {
 
     @ParameterizedTest
     @MethodSource("invalidMessageIds")
-    void givenInvalidMessageIdHeader_whenValidatingRequest_thenRejectsRequest(String path, String messageId) {
+    void givenInvalidMessageIdHeader_whenValidatingRequest_thenRejectsRequest(String path, String messageId) throws IOException {
         Request request = createRequest(path).withHeader("X-Message-Id", messageId).build();
 
         ValidationReport report = VALIDATOR.validateRequest(request);
@@ -243,9 +245,10 @@ class CommonPlatformOpenApiContractTest {
             .flatMap(path -> Stream.of("", "a".repeat(257)).map(messageId -> Arguments.of(path, messageId)));
     }
 
-    private static SimpleRequest.Builder createRequest(String path) {
+    private static SimpleRequest.Builder createRequest(String path) throws IOException {
         if (DAILY_LIST_PATH.equals(path)) {
-            return SimpleRequest.Builder.post(path).withContentType("application/xml").withBody("<DailyList/>");
+            return SimpleRequest.Builder.post(path).withContentType("application/json")
+                .withBody(getContentsFromFile("openapi/commonplatform-daily-list.json"));
         }
         return SimpleRequest.Builder.post(path).withContentType("application/json").withBody(EVENT_BODY);
     }
