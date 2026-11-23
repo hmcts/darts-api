@@ -85,6 +85,7 @@ class SecurityRoleRepositoryTest extends PostgresIntegrationBase {
             Arguments.of(XHIBIT),
             Arguments.of(CPP),
             Arguments.of(DAR_PC),
+            Arguments.of(JUDICIAL_CONDUCT),
             Arguments.of(MID_TIER),
             Arguments.of(SUPER_ADMIN),
             Arguments.of(SUPER_USER)
@@ -93,7 +94,6 @@ class SecurityRoleRepositoryTest extends PostgresIntegrationBase {
 
     private static Stream<Arguments> rolesWithoutPermissions() {
         return Stream.of(
-            Arguments.of(JUDICIAL_CONDUCT),
             Arguments.of(HMCTS_TRANSCRIPTION_HUB)
         );
     }
