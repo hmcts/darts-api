@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkResultStatus;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.model.CaseLinkImportResponse;
@@ -182,7 +184,10 @@ class CaseLinkImportPaginationIntTest extends PostgresIntegrationBase {
     void adminCaseLinkImportFailuresGet_shouldForbidAccess_whenGlobalRoleIsNotSuperAdmin(SecurityRoleEnum role) throws Exception {
         givenBuilder.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
-        mockMvc.perform(get(ENDPOINT + "/1/failures")).andExpect(status().isForbidden());
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT + "/1/failures"))
+            .andExpect(status().isForbidden())
+            .andReturn();
+        assertStandardErrorJsonResponse(mvcResult, AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
 
         assertThat(importRepository.count()).isZero();
     }
@@ -191,7 +196,10 @@ class CaseLinkImportPaginationIntTest extends PostgresIntegrationBase {
     void adminCaseLinkImportFailuresGet_shouldForbidAccess_whenSuperAdminIsCourthouseScoped() throws Exception {
         givenBuilder.anAuthenticatedUserWithRoles(courthouse, SUPER_ADMIN);
 
-        mockMvc.perform(get(ENDPOINT + "/1/failures")).andExpect(status().isForbidden());
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT + "/1/failures"))
+            .andExpect(status().isForbidden())
+            .andReturn();
+        assertStandardErrorJsonResponse(mvcResult, AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
 
         assertThat(importRepository.count()).isZero();
     }

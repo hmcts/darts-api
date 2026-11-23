@@ -14,6 +14,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkImportStatus;
 import uk.gov.hmcts.darts.cases.enums.CaseLinkResultStatus;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
@@ -408,14 +410,20 @@ class AdminCaseControllerIntTest extends PostgresIntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = "SUPER_ADMIN", mode = EnumSource.Mode.EXCLUDE)
     void adminCaseLinkImportsPost_shouldForbidAccess_whenGlobalRoleIsNotSuperAdmin(SecurityRoleEnum role) throws Exception {
         givenBuilder.anAuthenticatedUserWithGlobalAccessAndRole(role);
-        mockMvc.perform(multipart(ENDPOINT).file(file("X1,YORK,CP1"))).andExpect(status().isForbidden());
+        MvcResult mvcResult = mockMvc.perform(multipart(ENDPOINT).file(file("X1,YORK,CP1")))
+            .andExpect(status().isForbidden())
+            .andReturn();
+        assertStandardErrorJsonResponse(mvcResult, AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
         assertThat(importRepository.count()).isZero();
     }
 
     @Test
     void adminCaseLinkImportsPost_shouldForbidAccess_whenSuperAdminIsCourthouseScoped() throws Exception {
         givenBuilder.anAuthenticatedUserWithRoles(courthouse, SUPER_ADMIN);
-        mockMvc.perform(multipart(ENDPOINT).file(file("X1,YORK,CP1"))).andExpect(status().isForbidden());
+        MvcResult mvcResult = mockMvc.perform(multipart(ENDPOINT).file(file("X1,YORK,CP1")))
+            .andExpect(status().isForbidden())
+            .andReturn();
+        assertStandardErrorJsonResponse(mvcResult, AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
         assertThat(importRepository.count()).isZero();
     }
 
