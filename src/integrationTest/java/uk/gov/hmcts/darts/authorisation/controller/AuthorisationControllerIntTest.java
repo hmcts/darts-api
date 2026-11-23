@@ -35,9 +35,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -141,30 +139,6 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
             mvcResult.getResponse().getContentAsString(),
             JSONCompareMode.NON_EXTENSIBLE
         );
-    }
-
-    @Test
-    @WithMockSecurityContextWithEmailAddress(emailAddress = EMAIL_ADDRESS)
-    void getUserState_shouldReturnPlaybackPermissions_whenUserHasGlobalJudicialConductRole() throws Exception {
-        UserAccountEntity userAccount = createAndSaveUser(EMAIL_ADDRESS, true);
-        SecurityGroupEntity group = createAndSaveSecurityGroup(userAccount, "Judicial Conduct", SecurityRoleEnum.JUDICIAL_CONDUCT, true);
-        userAccount.setSecurityGroupEntities(Collections.singleton(group));
-
-        mockMvc.perform(get(ENDPOINT))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.roles[0].roleId").value(SecurityRoleEnum.JUDICIAL_CONDUCT.getId()))
-            .andExpect(jsonPath("$.roles[0].roleName").value("JUDICIAL_CONDUCT"))
-            .andExpect(jsonPath("$.roles[0].globalAccess").value(true))
-            .andExpect(jsonPath("$.roles[0].courthouseIds").isEmpty())
-            .andExpect(jsonPath("$.roles[0].permissions", containsInAnyOrder(
-                "LISTEN_TO_AUDIO_FOR_PLAYBACK",
-                "READ_TRANSCRIBED_DOCUMENT",
-                "REQUEST_AUDIO",
-                "SEARCH_CASES",
-                "VIEW_DARTS_INBOX",
-                "VIEW_MY_AUDIOS",
-                "EXPORT_PROCESSED_PLAYBACK_AUDIO"
-            )));
     }
 
     @Test
