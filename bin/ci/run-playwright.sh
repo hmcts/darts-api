@@ -66,7 +66,7 @@ nvm use
 
 if [[ "$mode" == test ]]; then
   export PLAYWRIGHT_BLOB_OUTPUT_DIR="$PWD/shard-$PW_SHARD_INDEX/blob-report"
-  yarn test:e2e --shard="$PW_SHARD_INDEX/$PW_SHARD_TOTAL" \
+  yarn test:e2e --shard="$PW_SHARD_INDEX/$PW_SHARD_TOTAL" --workers=4 \
     --output="$PWD/shard-$PW_SHARD_INDEX/test-results" --reporter=list,blob
   exit 0
 fi
