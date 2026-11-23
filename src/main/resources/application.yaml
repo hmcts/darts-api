@@ -113,10 +113,10 @@ spring:
 
 darts:
   audio-discovery-spike:
-    connection-string: ${AUDIO_SPIKE_CONNECTION_STRING:}
-    cvp-container: ${AUDIO_SPIKE_CVP_CONTAINER:spike-cvp}
-    car-container: ${AUDIO_SPIKE_CAR_CONTAINER:spike-car}
-    prefix: ${AUDIO_SPIKE_PREFIX:dma16/}
+    connection-string: ${AUDIO_SPIKE_CONNECTION_STRING:${AZURE_STORAGE_CONNECTION_STRING:}}
+    cvp-container: ${AUDIO_SPIKE_CVP_CONTAINER:darts-inbound-container}
+    car-container: ${AUDIO_SPIKE_CAR_CONTAINER:darts-unstructured}
+    prefix: ${AUDIO_SPIKE_PREFIX:2026/}
   async:
     enabled: true
   shutdown:

@@ -24,6 +24,7 @@ public class FindAudioFilesPrototype {
     private final BlobServiceClient storage;
 
     public FindAudioFilesPrototype(String connectionString) {
+
         storage = factory.getBlobServiceClient(connectionString);
     }
 
@@ -46,7 +47,13 @@ public class FindAudioFilesPrototype {
             }
             System.out.printf("Container=%s files=%d elapsed_ms=%d%n", containerName, count, (System.nanoTime() - start) / 1_000_000);
         } catch (BlobStorageException exception) {
-            System.err.printf("Container=%s listing failed: status_code=%d%n", containerName, exception.getStatusCode());
+            System.err.printf(
+                "Container=%s status=%d error=%s message=%s%n",
+                containerName,
+                exception.getStatusCode(),
+                exception.getErrorCode(),
+                exception.getServiceMessage()
+            );
         }
     }
 

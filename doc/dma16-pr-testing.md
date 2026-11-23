@@ -9,19 +9,19 @@ version and user IDs against the target branch before merging.
 
 Set these on the PR API deployment using its secret/configuration mechanism:
 
-| Variable | Value |
-| --- | --- |
+| Variable | Value                                                         |
+| --- |---------------------------------------------------------------|
 | AUDIO_SPIKE_CONNECTION_STRING | Secret reference for the dedicated Azure test storage account |
-| AUDIO_SPIKE_CVP_CONTAINER | spike-cvp |
-| AUDIO_SPIKE_CAR_CONTAINER | spike-car |
-| AUDIO_SPIKE_PREFIX | dma16/ |
+| AUDIO_SPIKE_CVP_CONTAINER | darts-inbound-container                                                     |
+| AUDIO_SPIKE_CAR_CONTAINER | darts-unstructured                                                     |
+| AUDIO_SPIKE_PREFIX | 2026/                                                         |
 
 Never commit the connection string. The PR pod must have network access to storage.
 This implementation uses a connection string, not managed identity. No fallback to
 existing ingestion storage is used. No deployment/secret configuration has been
 applied automatically by these source changes.
 
-Upload known samples under dma16/ in both containers. Files are only listed, not
+Upload known samples under 2026/ in both containers. Files are only listed, not
 downloaded, deleted, ingested or saved to the database. Blob names are not logged.
 
 ## Comparison
