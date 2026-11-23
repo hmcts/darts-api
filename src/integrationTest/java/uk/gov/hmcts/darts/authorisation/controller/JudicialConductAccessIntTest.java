@@ -172,6 +172,20 @@ class JudicialConductAccessIntTest extends IntegrationBase {
             .andExpect(status().isNoContent());
     }
 
+    @Test
+    void downloadRequest_shouldForbidAccess_whenUserHasGlobalJudicialConductRole() throws Exception {
+        mockMvc.perform(post("/audio-requests/download")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(createAudioRequestDetails())))
+            .andExpect(status().isForbidden());
+
+        Integer downloadTransformedMediaId = createStoredTransformedMediaFor(createDownloadRequest());
+
+        mockMvc.perform(get("/audio-requests/download")
+                            .queryParam("transformed_media_id", String.valueOf(downloadTransformedMediaId)))
+            .andExpect(status().isForbidden());
+    }
+
     private void addMediaToHearing() {
         var media = PersistableFactory.getMediaTestData()
             .createMediaWith(hearing.getCourtroom(), MEDIA_START_TIME, MEDIA_END_TIME, 1);
@@ -186,6 +200,13 @@ class JudicialConductAccessIntTest extends IntegrationBase {
         return dartsDatabase.getMediaRequestStub()
             .createAndLoadMediaRequestEntity(judicialConductUser, judicialConductUser, hearing, AudioRequestType.PLAYBACK, status,
                                              MEDIA_START_TIME.plusMinutes(40), MEDIA_START_TIME.plusMinutes(50), OffsetDateTime.now());
+    }
+
+    private MediaRequestEntity createDownloadRequest() {
+        return dartsDatabase.getMediaRequestStub()
+            .createAndLoadMediaRequestEntity(judicialConductUser, judicialConductUser, hearing, AudioRequestType.DOWNLOAD,
+                                             MediaRequestStatus.COMPLETED, MEDIA_START_TIME.plusMinutes(40), MEDIA_START_TIME.plusMinutes(50),
+                                             OffsetDateTime.now());
     }
 
     private Integer createStoredTransformedMediaFor(MediaRequestEntity mediaRequest) {
