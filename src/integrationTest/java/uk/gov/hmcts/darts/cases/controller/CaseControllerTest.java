@@ -65,9 +65,9 @@ import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGr
 @AutoConfigureMockMvc
 class CaseControllerTest extends IntegrationBase {
 
-    public static final String EXPECTED_RESPONSE_FILE = "tests/cases/CaseControllerTest/casesGetEndpoint/expectedResponse.json";
-    public static final String HEARING_DATE = "2023-06-20";
-    public static final String BASE_PATH = "/cases";
+    private static final String EXPECTED_RESPONSE_FILE = "tests/cases/CaseControllerTest/casesGetEndpoint/expectedResponse.json";
+    private static final String HEARING_DATE = "2023-06-20";
+    private static final String BASE_PATH = "/cases";
 
     @Autowired
     private transient MockMvc mockMvc;
