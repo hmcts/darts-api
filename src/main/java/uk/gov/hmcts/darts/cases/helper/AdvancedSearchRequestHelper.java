@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static uk.gov.hmcts.darts.cases.service.impl.CaseServiceImpl.MAX_RESULTS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIAL_CONDUCT;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @Component
@@ -210,6 +211,10 @@ public class AdvancedSearchRequestHelper {
         List<Predicate> predicateList = new ArrayList<>();
         if (authorisationApi.userHasOneOfRoles(List.of(TRANSLATION_QA))) {
             predicateList.add(criteriaBuilder.isTrue(
+                caseRoot.get(CourtCaseEntity_.interpreterUsed)
+            ));
+        } else if (authorisationApi.userHasOneOfRoles(List.of(JUDICIAL_CONDUCT))) {
+            predicateList.add(criteriaBuilder.isFalse(
                 caseRoot.get(CourtCaseEntity_.interpreterUsed)
             ));
         }
