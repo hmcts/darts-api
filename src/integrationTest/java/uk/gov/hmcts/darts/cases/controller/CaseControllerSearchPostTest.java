@@ -222,7 +222,9 @@ class CaseControllerSearchPostTest extends IntegrationBase {
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content("""
                                 {
-                                  "case_number": "Case"
+                                  "case_number": "Case",
+                                  "date_from": "2023-05-20",
+                                  "date_to": "2023-05-20"
                                 }
                                 """))
             .andExpect(status().isOk())
