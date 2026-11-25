@@ -71,6 +71,17 @@ class DataManagementAzureClientFactoryImplTest {
     }
 
     @Test
+    void getBlobServiceClientWithIdentity_reusesClient_whenAccountUrlMatches() {
+        String accountUrl = "https://cvp-test.blob.core.windows.net";
+        BlobServiceClient first = dataManagementFactoryImpl.getBlobServiceClientWithIdentity(accountUrl);
+
+        Assertions.assertSame(first, dataManagementFactoryImpl.getBlobServiceClientWithIdentity(accountUrl));
+        Assertions.assertEquals(accountUrl, first.getAccountUrl());
+        Assertions.assertNotSame(first,
+                                dataManagementFactoryImpl.getBlobServiceClientWithIdentity("https://cvp-prod.blob.core.windows.net"));
+    }
+
+    @Test
     void testGetBlobClient() {
         when(blobContainerClient.getBlobClient(String.valueOf(BLOB_ID))).thenReturn(blobClient);
         BlobClient blobClient = dataManagementFactoryImpl.getBlobClient(blobContainerClient, BLOB_ID);

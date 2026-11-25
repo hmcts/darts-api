@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
+import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -35,6 +36,14 @@ public class DataManagementAzureClientFactoryImpl implements DataManagementAzure
     public BlobServiceClient getBlobServiceClient(String containerString) {
         return blobServiceClientMap.computeIfAbsent(containerString, k -> new BlobServiceClientBuilder()
             .connectionString(containerString).buildClient());
+    }
+
+    @Override
+    public BlobServiceClient getBlobServiceClientWithIdentity(String accountUrl) {
+        return blobServiceClientMap.computeIfAbsent("identity:" + accountUrl, key -> new BlobServiceClientBuilder()
+            .endpoint(accountUrl)
+            .credential(new DefaultAzureCredentialBuilder().build())
+            .buildClient());
     }
 
     @Override

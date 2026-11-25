@@ -11,6 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("darts.audio-discovery-spike")
 public class AudioDiscoverySpikeConfig {
     private String connectionString;
+    private String cvpAccountUrl;
+    private String cvpPrefix;
+    private String cvpSourceContainer;
     private String cvpContainer;
     private String carContainer;
     private String prefix;

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
+import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.ListBlobsOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +23,23 @@ public class AudioDiscoverySpikeService {
 
     public void scan(boolean cvp, boolean car, int batchSize) {
         List<String> containers = selectContainers(cvp, car, batchSize);
-        UUID runId = UUID.randomUUID();
         long start = System.nanoTime();
-        var storage = factory.getBlobServiceClient(config.getConnectionString());
-        var options = new ListBlobsOptions().setPrefix(config.getPrefix());
+        scanContainers(containers, factory.getBlobServiceClient(config.getConnectionString()), config.getPrefix(), batchSize, start);
+    }
+
+    public void scanCvp(int batchSize) {
+        if (!StringUtils.hasText(config.getCvpAccountUrl()) || !StringUtils.hasText(config.getCvpPrefix()) || batchSize <= 0) {
+            throw new IllegalArgumentException("Configure the CVP account URL, a non-empty prefix and a positive batch size");
+        }
+        requireContainer(config.getCvpSourceContainer());
+        long start = System.nanoTime();
+        scanContainers(List.of(config.getCvpSourceContainer()),
+                       factory.getBlobServiceClientWithIdentity(config.getCvpAccountUrl()), config.getCvpPrefix(), batchSize, start);
+    }
+
+    private void scanContainers(List<String> containers, BlobServiceClient storage, String prefix, int batchSize, long start) {
+        UUID runId = UUID.randomUUID();
+        var options = new ListBlobsOptions().setPrefix(prefix);
         for (String container : containers) {
             long containerStart = System.nanoTime();
             int count = 0;

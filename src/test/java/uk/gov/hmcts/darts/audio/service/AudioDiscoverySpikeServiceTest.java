@@ -50,6 +50,42 @@ class AudioDiscoverySpikeServiceTest {
     }
 
     @Test
+    void scanCvp_listsNewSourceWithIdentity_whenConfigured() {
+        config.setCvpAccountUrl("https://cvp-test.blob.core.windows.net");
+        config.setCvpSourceContainer("crime-recordings");
+        config.setCvpPrefix("2026/");
+        when(factory.getBlobServiceClientWithIdentity(config.getCvpAccountUrl())).thenReturn(storage);
+        when(factory.getBlobContainerClient("crime-recordings", storage)).thenReturn(container);
+        when(container.listBlobs(any(ListBlobsOptions.class), any(Duration.class))).thenAnswer(invocation -> {
+            org.assertj.core.api.Assertions.assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEqualTo("2026/");
+            return blobs;
+        });
+        when(blobs.iterator()).thenReturn(List.of(new BlobItem()).iterator());
+
+        service.scanCvp(10);
+
+        verify(factory).getBlobServiceClientWithIdentity(config.getCvpAccountUrl());
+        verify(factory, never()).getBlobServiceClient(any());
+        verify(factory, never()).getBlobContainerClient("car", storage);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        ",crime-recordings,2026/,10",
+        "https://cvp-test.blob.core.windows.net,,2026/,10",
+        "https://cvp-test.blob.core.windows.net,crime-recordings,,10",
+        "https://cvp-test.blob.core.windows.net,crime-recordings,2026/,0"
+    })
+    void scanCvp_rejectsBeforeAccessingStorage_whenSettingsInvalid(String accountUrl, String sourceContainer, String prefix, int batchSize) {
+        config.setCvpAccountUrl(accountUrl);
+        config.setCvpSourceContainer(sourceContainer);
+        config.setCvpPrefix(prefix);
+
+        assertThatThrownBy(() -> service.scanCvp(batchSize)).isInstanceOf(IllegalArgumentException.class);
+        verifyNoInteractions(factory);
+    }
+
+    @Test
     void given_missingConnection_when_scan_then_rejectBeforeAccessingStorage() {
         config.setConnectionString("");
         assertThatThrownBy(() -> service.scan(true, false, 10)).isInstanceOf(IllegalArgumentException.class);

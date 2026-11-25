@@ -22,7 +22,7 @@ public class AudioSpikeCvpAutomatedTask extends AbstractLockableAutomatedTask<Au
 
     @Override
     protected void runTask() {
-        service.scan(true, false, getAutomatedTaskBatchSize());
+        service.scanCvp(getAutomatedTaskBatchSize());
     }
 
     @Override
