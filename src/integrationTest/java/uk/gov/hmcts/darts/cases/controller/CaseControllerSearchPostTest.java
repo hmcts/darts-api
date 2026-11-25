@@ -33,12 +33,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.ENDPOINT_URL;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIAL_CONDUCT;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithDifferentNameAndDisplayName;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
@@ -59,6 +61,8 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     private UserAccountRepository userAccountRepository;
     @Autowired
     private transient MockMvc mockMvc;
+    @Autowired
+    private GivenBuilder givenBuilder;
     private CourthouseEntity swanseaCourthouse;
     private CourthouseEntity myCourthouseWithDifferentDisplayName;
     private UserAccountEntity user;
@@ -208,6 +212,22 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponseMultipleCourthouses.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesSearchPost_shouldReturnCasesFromAllCourthouses_whenUserHasGlobalJudicialConductRole() throws Exception {
+        givenBuilder.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIAL_CONDUCT);
+
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content("""
+                                {
+                                  "case_number": "Case"
+                                }
+                                """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[*].case_number", hasItems("Case1", "Case7")))
+            .andExpect(jsonPath("$[*].courthouse", hasItems("SWANSEA", "MyCourthouseDisplayName")));
     }
 
     @Test
