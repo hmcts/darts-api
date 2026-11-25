@@ -18,17 +18,17 @@ class CsvRecordLimitReaderTest {
 
     @DisplayName("""
         read()
-        SHOULD count raw characters within each logical CSV record
-            AND reset the count for each record separator
+        SHOULD count raw characters within each logical CSV csvRecord
+            AND reset the count for each csvRecord separator
             AND preserve quotes, escaped quotes, delimiters and quoted newlines
         WHEN records at the limit are read in small chunks across field boundaries
         """)
     @ParameterizedTest
     @MethodSource("csvRecords")
-    void read_shouldResetLimitAtRecordBoundaries_whenRecordsContainQuotedFieldsAndNewlines(String record) throws IOException {
+    void read_shouldResetLimitAtRecordBoundaries_whenRecordsContainQuotedFieldsAndNewlines(String csvRecord) throws IOException {
         for (String separator : new String[]{"\n", "\r", "\r\n"}) {
-            String csvContent = record + separator + record + separator;
-            try (var reader = limitedReader(csvContent, record.length())) {
+            String csvContent = csvRecord + separator + csvRecord + separator;
+            try (var reader = limitedReader(csvContent, csvRecord.length())) {
                 assertThat(readAll(reader, 2)).isEqualTo(csvContent);
             }
         }
@@ -36,9 +36,9 @@ class CsvRecordLimitReaderTest {
 
     @ParameterizedTest
     @MethodSource("csvRecords")
-    void read_shouldThrowSuppliedException_whenRecordExceedsLimit(String record) throws IOException {
+    void read_shouldThrowSuppliedException_whenRecordExceedsLimit(String csvRecord) throws IOException {
         var limitFailure = new IllegalStateException("Record exceeds limit");
-        try (var reader = new CsvRecordLimitReader(new StringReader(record), record.length() - 1, () -> limitFailure)) {
+        try (var reader = new CsvRecordLimitReader(new StringReader(csvRecord), csvRecord.length() - 1, () -> limitFailure)) {
             assertThatThrownBy(() -> readAll(reader, 2)).isSameAs(limitFailure);
         }
     }

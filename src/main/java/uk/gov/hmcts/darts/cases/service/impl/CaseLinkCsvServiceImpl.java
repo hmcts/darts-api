@@ -40,17 +40,17 @@ public class CaseLinkCsvServiceImpl implements CaseLinkCsvService {
         var decoder = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
             .onUnmappableCharacter(CodingErrorAction.REPORT);
         var format = CSVFormat.DEFAULT.builder().setIgnoreEmptyLines(false).build();
-        try (var reader = new CsvRecordLimitReader(new InputStreamReader(file.getInputStream(), decoder), configuration.getMaxRecordCharacters(),
-                                                   () -> new DartsApiException(CaseApiError.CSV_RECORD_TOO_LARGE));
-             var parser = CsvFileUtil.readCsv(reader, format)) {
+        try (var csvRecordLimitReader = new CsvRecordLimitReader(new InputStreamReader(file.getInputStream(), decoder), configuration.getMaxRecordCharacters(),
+                                                                 () -> new DartsApiException(CaseApiError.CSV_RECORD_TOO_LARGE));
+             var parser = CsvFileUtil.readCsv(csvRecordLimitReader, format)) {
 
             List<CaseLinkImportResultEntity> rows = new ArrayList<>();
-            for (CSVRecord record : parser) {
-                if (record.getRecordNumber() == 1) {
-                    continue; // The first CSV record is always skipped; header names are not inspected.
+            for (CSVRecord csvRecord : parser) {
+                if (csvRecord.getRecordNumber() == 1) {
+                    continue; // The first CSV csvRecord is always skipped; header names are not inspected.
                 }
-                validateDataRecord(record, rows.size());
-                rows.add(createCaseLinkImportResult(record));
+                validateDataRecord(csvRecord, rows.size());
+                rows.add(createCaseLinkImportResult(csvRecord));
             }
             if (rows.isEmpty()) {
                 throw new DartsApiException(CaseApiError.EMPTY_FILE);
@@ -70,23 +70,23 @@ public class CaseLinkCsvServiceImpl implements CaseLinkCsvService {
         return new DartsApiException(error, exception);
     }
 
-    private void validateDataRecord(CSVRecord record, int bufferedRowCount) {
+    private void validateDataRecord(CSVRecord csvRecord, int bufferedRowCount) {
         if (bufferedRowCount >= configuration.getMaxRows()) {
             throw new DartsApiException(CaseApiError.TOO_MANY_ROWS);
         }
-        if (record.stream().anyMatch(value -> value.indexOf(NULL_CHARACTER) >= 0)) {
+        if (csvRecord.stream().anyMatch(value -> value.indexOf(NULL_CHARACTER) >= 0)) {
             throw new DartsApiException(CaseApiError.MALFORMED_CSV);
         }
     }
 
-    private CaseLinkImportResultEntity createCaseLinkImportResult(CSVRecord record) {
+    private CaseLinkImportResultEntity createCaseLinkImportResult(CSVRecord csvRecord) {
         CaseLinkImportResultEntity result = new CaseLinkImportResultEntity();
-        result.setRowNumber(Math.toIntExact(record.getRecordNumber()));
-        result.setColumnCount(record.size());
-        result.setCase1CaseNumber(record.get(0));
-        result.setCase1Courthouse(record.size() > 1 ? record.get(1) : null);
+        result.setRowNumber(Math.toIntExact(csvRecord.getRecordNumber()));
+        result.setColumnCount(csvRecord.size());
+        result.setCase1CaseNumber(csvRecord.get(0));
+        result.setCase1Courthouse(csvRecord.size() > 1 ? csvRecord.get(1) : null);
         result.setCase2Courthouse(result.getCase1Courthouse());
-        result.setCase2CaseNumber(record.size() >= COLUMN_COUNT ? record.get(2) : null);
+        result.setCase2CaseNumber(csvRecord.size() >= COLUMN_COUNT ? csvRecord.get(2) : null);
         result.setStatus(new CaseLinkImportResultStatusEntity(CaseLinkResultStatus.PENDING.getId()));
         return result;
     }
