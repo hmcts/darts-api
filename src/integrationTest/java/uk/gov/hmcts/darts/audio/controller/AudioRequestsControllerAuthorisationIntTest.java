@@ -64,7 +64,7 @@ class AudioRequestsControllerAuthorisationIntTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {
         "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
     }, mode = INCLUDE)
-    void audioRequestEndpoints_shouldAllowAccess_whenRoleHasConfiguredGlobalAccess(SecurityRoleEnum role) throws Exception {
+    void audioRequestEndpoints_shouldAllowAccess_whenUserHasGlobalJudicialConductRole(SecurityRoleEnum role) throws Exception {
         UserAccountEntity user = given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         MediaRequestEntity openPlaybackRequest = createPlaybackRequest(user, MediaRequestStatus.OPEN);
         Integer playbackTransformedMediaId = createStoredTransformedMediaFor(createPlaybackRequest(user, MediaRequestStatus.COMPLETED));
