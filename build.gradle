@@ -450,7 +450,7 @@ dependencies {
   implementation 'org.openapitools:jackson-databind-nullable:0.2.13'
   implementation 'org.zalando:problem-spring-web-starter:0.29.1'
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.10.0'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.10.1'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.3.3'
   implementation 'org.springframework.retry:spring-retry:2.0.13'
 
@@ -516,7 +516,7 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.3.4'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
-  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.8.8'
+  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.9.0'
   testImplementation 'org.springframework.security:spring-security-test:6.5.11'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
