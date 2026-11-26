@@ -113,7 +113,7 @@ spring:
 
 darts:
   audio-discovery-spike:
-    cvp-account-url: ${AUDIO_SPIKE_CVP_ACCOUNT_URL:https://cvprecordingsstgsa.blob.core.windows.net}
+    cvp-account-url: ${AUDIO_SPIKE_CVP_ACCOUNT_URL:https://cvprecordingssboxsa.blob.core.windows.net}
     cvp-prefix: ${AUDIO_SPIKE_CVP_PREFIX:2026/}
     cvp-source-container: ${AUDIO_SPIKE_CVP_SOURCE_CONTAINER:crime-recordings}
     connection-string: ${AUDIO_SPIKE_CONNECTION_STRING:${AZURE_STORAGE_CONNECTION_STRING:}}
