@@ -63,7 +63,7 @@ import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createListO
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGroupForRole;
 
 @AutoConfigureMockMvc
-class CaseControllerTest extends IntegrationBase {
+class CaseControllerIntTest extends IntegrationBase {
 
     public static final String EXPECTED_RESPONSE_FILE = "tests/cases/CaseControllerTest/casesGetEndpoint/expectedResponse.json";
     public static final String HEARING_DATE = "2023-06-20";
@@ -73,63 +73,7 @@ class CaseControllerTest extends IntegrationBase {
     private transient MockMvc mockMvc;
 
     @MockitoBean
-    LogApi logApi;
-
-    private HearingEntity setupHearingForCase1(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
-        var case1 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
-        case1.setCaseNumber("Case0000001");
-        case1.setDefendantList(createListOfDefendantsForCase(2, case1));
-        case1.setDefenceList(createListOfDefenceForCase(2, case1));
-        case1.setProsecutorList(createListOfProsecutor(2, case1));
-
-        var hearingForCase1 = PersistableFactory.getHearingTestData().createHearingWith(case1, swanseaCourtroom1);
-        hearingForCase1.addJudges(createListOfJudges(1, case1));
-        hearingForCase1.setHearingDate(LocalDate.parse("2023-06-20"));
-        hearingForCase1.setScheduledStartTime(LocalTime.parse("09:00"));
-        return hearingForCase1;
-    }
-
-    private HearingEntity setupHearingForCase2(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
-        var case2 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
-        case2.setCaseNumber("Case0000002");
-        case2.setDefendantList(createListOfDefendantsForCase(2, case2));
-        case2.setDefenceList(createListOfDefenceForCase(2, case2));
-        case2.setProsecutorList(createListOfProsecutor(2, case2));
-
-        var hearingForCase2 = PersistableFactory.getHearingTestData().createHearingWith(case2, swanseaCourtroom1);
-        hearingForCase2.addJudges(createListOfJudges(1, case2));
-        hearingForCase2.setHearingDate(LocalDate.parse("2023-06-20"));
-        hearingForCase2.setScheduledStartTime(LocalTime.parse("10:00"));
-        return hearingForCase2;
-    }
-
-    private HearingEntity setupHearingForCase3(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
-        var case3 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
-        case3.setCaseNumber("Case0000003");
-        case3.setDefendantList(createListOfDefendantsForCase(2, case3));
-        case3.setDefenceList(createListOfDefenceForCase(2, case3));
-        case3.setProsecutorList(createListOfProsecutor(2, case3));
-
-        var hearingForCase3 = PersistableFactory.getHearingTestData().createHearingWith(case3, swanseaCourtroom1);
-        hearingForCase3.addJudges(createListOfJudges(1, case3));
-        hearingForCase3.setHearingDate(LocalDate.parse(HEARING_DATE));
-        hearingForCase3.setScheduledStartTime(LocalTime.parse("11:00"));
-        return hearingForCase3;
-    }
-
-    private HearingEntity createCaseWithHearingToday(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
-        var case4 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
-        case4.setCaseNumber("Case0000004");
-        case4.setDefendantList(createListOfDefendantsForCase(2, case4));
-        case4.setDefenceList(createListOfDefenceForCase(2, case4));
-        case4.setProsecutorList(createListOfProsecutor(2, case4));
-
-        var hearingForCase3 = PersistableFactory.getHearingTestData().createHearingWith(case4, swanseaCourtroom1);
-        hearingForCase3.addJudges(createListOfJudges(1, hearingForCase3.getCourtCase()));
-        hearingForCase3.setHearingDate(LocalDate.now());
-        hearingForCase3.setScheduledStartTime(LocalTime.parse("11:00"));
-        return hearingForCase3;
-    }
+    private LogApi logApi;
 
     @BeforeEach
     void setupData() {
@@ -232,7 +176,7 @@ class CaseControllerTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"XHIBIT"}, mode = EXCLUDE)
-    void casesPost_shouldThrowError_whenNotAuthenticatied(SecurityRoleEnum securityRoleEnum) throws Exception {
+    void casesPost_shouldThrowError_whenNotAuthenticated(SecurityRoleEnum securityRoleEnum) throws Exception {
         setupExternalUserForCourhouse(null, securityRoleEnum);
 
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH + "/addDocument")
@@ -258,7 +202,6 @@ class CaseControllerTest extends IntegrationBase {
             super(XHIBIT, "/addDocument");
         }
     }
-
 
     class PostCase {
         private final SecurityRoleEnum securityRoleEnum;
@@ -296,7 +239,8 @@ class CaseControllerTest extends IntegrationBase {
             String actualResponse = response.getResponse().getContentAsString();
 
             String expectedResponse = getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseNumberMissing_400.json");
+                "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseNumberMissing_400.json")
+                .replace("<instance>", BASE_PATH + suffix);
             assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
         }
 
@@ -311,7 +255,8 @@ class CaseControllerTest extends IntegrationBase {
             String actualResponse = response.getResponse().getContentAsString();
 
             String expectedResponse = getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCourthouseMissing_400.json");
+                "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCourthouseMissing_400.json")
+                .replace("<instance>", BASE_PATH + suffix);
             assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
         }
 
@@ -364,7 +309,6 @@ class CaseControllerTest extends IntegrationBase {
             Assertions.assertEquals("1", caseType);
         }
 
-
         @Test
         void casesPostUpdateExistingCase() throws Exception {
             setupExternalUserForCourhouse(null, securityRoleEnum);
@@ -411,4 +355,61 @@ class CaseControllerTest extends IntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createExternalUser(guid, securityGroup, courthouse);
         GivenBuilder.anAuthenticatedUserFor(testUser);
     }
+
+    private HearingEntity setupHearingForCase1(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
+        var case1 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
+        case1.setCaseNumber("Case0000001");
+        case1.setDefendantList(createListOfDefendantsForCase(2, case1));
+        case1.setDefenceList(createListOfDefenceForCase(2, case1));
+        case1.setProsecutorList(createListOfProsecutor(2, case1));
+
+        var hearingForCase1 = PersistableFactory.getHearingTestData().createHearingWith(case1, swanseaCourtroom1);
+        hearingForCase1.addJudges(createListOfJudges(1, case1));
+        hearingForCase1.setHearingDate(LocalDate.parse("2023-06-20"));
+        hearingForCase1.setScheduledStartTime(LocalTime.parse("09:00"));
+        return hearingForCase1;
+    }
+
+    private HearingEntity setupHearingForCase2(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
+        var case2 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
+        case2.setCaseNumber("Case0000002");
+        case2.setDefendantList(createListOfDefendantsForCase(2, case2));
+        case2.setDefenceList(createListOfDefenceForCase(2, case2));
+        case2.setProsecutorList(createListOfProsecutor(2, case2));
+
+        var hearingForCase2 = PersistableFactory.getHearingTestData().createHearingWith(case2, swanseaCourtroom1);
+        hearingForCase2.addJudges(createListOfJudges(1, case2));
+        hearingForCase2.setHearingDate(LocalDate.parse("2023-06-20"));
+        hearingForCase2.setScheduledStartTime(LocalTime.parse("10:00"));
+        return hearingForCase2;
+    }
+
+    private HearingEntity setupHearingForCase3(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
+        var case3 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
+        case3.setCaseNumber("Case0000003");
+        case3.setDefendantList(createListOfDefendantsForCase(2, case3));
+        case3.setDefenceList(createListOfDefenceForCase(2, case3));
+        case3.setProsecutorList(createListOfProsecutor(2, case3));
+
+        var hearingForCase3 = PersistableFactory.getHearingTestData().createHearingWith(case3, swanseaCourtroom1);
+        hearingForCase3.addJudges(createListOfJudges(1, case3));
+        hearingForCase3.setHearingDate(LocalDate.parse(HEARING_DATE));
+        hearingForCase3.setScheduledStartTime(LocalTime.parse("11:00"));
+        return hearingForCase3;
+    }
+
+    private HearingEntity createCaseWithHearingToday(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
+        var case4 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
+        case4.setCaseNumber("Case0000004");
+        case4.setDefendantList(createListOfDefendantsForCase(2, case4));
+        case4.setDefenceList(createListOfDefenceForCase(2, case4));
+        case4.setProsecutorList(createListOfProsecutor(2, case4));
+
+        var hearingForCase3 = PersistableFactory.getHearingTestData().createHearingWith(case4, swanseaCourtroom1);
+        hearingForCase3.addJudges(createListOfJudges(1, hearingForCase3.getCourtCase()));
+        hearingForCase3.setHearingDate(LocalDate.now());
+        hearingForCase3.setScheduledStartTime(LocalTime.parse("11:00"));
+        return hearingForCase3;
+    }
+
 }

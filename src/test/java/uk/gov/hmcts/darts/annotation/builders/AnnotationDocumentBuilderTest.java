@@ -50,5 +50,4 @@ class AnnotationDocumentBuilderTest {
             "some-content-type",
             "some-content".getBytes());
     }
-    
 }

@@ -198,7 +198,8 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
             {
                 "type":"USER_NOT_TRANSCRIBER_113",
                 "title":"User is not a transcriber user",
-                "status":403
+                "status":403,
+                "instance":"/transcriptions/transcriber-counts",
             }
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);

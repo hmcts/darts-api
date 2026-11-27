@@ -37,7 +37,7 @@ import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthConfigurati
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiTrait;
+import uk.gov.hmcts.darts.common.exception.DartsApiErrorResponseWriter;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -182,20 +182,20 @@ public class SecurityConfig {
                     userIdentity.getUserAccount(jwt);
                     filterChain.doFilter(request, response);
                 } catch (Exception exception) {
-                    if (DartsApiTrait.isInactiveUserException(exception)) {
-                        writeError(response, exception);
+                    if (DartsApiErrorResponseWriter.isInactiveUserException(exception)) {
+                        writeError(request, response, exception);
                     } else {
                         // Log the exception and return 401 Unauthorized
                         log.error("User is invalid", exception);
-                        writeError(response, exception);
+                        writeError(request, response, exception);
                     }
                 }
             }
         }
 
-        private void writeError(HttpServletResponse response, Exception exception) {
+        private void writeError(HttpServletRequest request, HttpServletResponse response, Exception exception) {
             try {
-                DartsApiTrait.writeErrorResponse(response, mapper, exception);
+                DartsApiErrorResponseWriter.writeErrorResponse(request, response, mapper, exception);
             } catch (IOException ex) {
                 log.error("Problem parsing the problem", ex);
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
