@@ -9,7 +9,7 @@ servers:
 paths:
   /register-devices:
     post:
-      operationId: register_devicesPost
+      operationId: registerDevicesPost
       tags:
         - Devices
       summary: Registers a device on the network
