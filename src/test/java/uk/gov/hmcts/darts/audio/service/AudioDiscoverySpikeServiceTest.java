@@ -5,6 +5,7 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.ListBlobsOptions;
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureCli
 import java.time.Duration;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,24 +47,25 @@ class AudioDiscoverySpikeServiceTest {
         config.setConnectionString("test-connection");
         config.setCvpContainer("cvp");
         config.setCarContainer("car");
+        config.setCarPrefix("0");
         config.setPrefix("dma16/");
         service = new AudioDiscoverySpikeService(factory, config);
     }
 
     @Test
-    void scanCvp_listsNewSourceWithIdentity_whenConfigured() {
+    void scanCvpExternal_listsNewSourceWithIdentity_whenConfigured() {
         config.setCvpAccountUrl("https://cvp-test.blob.core.windows.net");
         config.setCvpSourceContainer("crime-recordings");
         config.setCvpPrefix("2026/");
         when(factory.getBlobServiceClientWithIdentity(config.getCvpAccountUrl())).thenReturn(storage);
         when(factory.getBlobContainerClient("crime-recordings", storage)).thenReturn(container);
         when(container.listBlobs(any(ListBlobsOptions.class), any(Duration.class))).thenAnswer(invocation -> {
-            org.assertj.core.api.Assertions.assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEqualTo("2026/");
+            assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEqualTo("2026/");
             return blobs;
         });
         when(blobs.iterator()).thenReturn(List.of(new BlobItem()).iterator());
 
-        service.scanCvp(10);
+        service.scanCvpExternal(10);
 
         verify(factory).getBlobServiceClientWithIdentity(config.getCvpAccountUrl());
         verify(factory, never()).getBlobServiceClient(any());
@@ -76,13 +79,93 @@ class AudioDiscoverySpikeServiceTest {
         "https://cvp-test.blob.core.windows.net,crime-recordings,,10",
         "https://cvp-test.blob.core.windows.net,crime-recordings,2026/,0"
     })
-    void scanCvp_rejectsBeforeAccessingStorage_whenSettingsInvalid(String accountUrl, String sourceContainer, String prefix, int batchSize) {
+    void scanCvpExternal_rejectsBeforeAccessingStorage_whenSettingsInvalid(String accountUrl, String sourceContainer, String prefix, int batchSize) {
         config.setCvpAccountUrl(accountUrl);
         config.setCvpSourceContainer(sourceContainer);
         config.setCvpPrefix(prefix);
 
-        assertThatThrownBy(() -> service.scanCvp(batchSize)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.scanCvpExternal(batchSize)).isInstanceOf(IllegalArgumentException.class);
         verifyNoInteractions(factory);
+    }
+
+    @Test
+    void scanCvp_listsEveryInboundBlobWithoutPrefix_whenBatchSizeIsSmallerThanListing() {
+        when(factory.getBlobServiceClient("test-connection")).thenReturn(storage);
+        when(factory.getBlobContainerClient("cvp", storage)).thenReturn(container);
+        when(container.listBlobs(any(ListBlobsOptions.class), any(Duration.class))).thenAnswer(invocation -> {
+            assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEmpty();
+            return blobs;
+        });
+        when(blobs.iterator()).thenReturn(java.util.Collections.nCopies(3, new BlobItem()).iterator());
+
+        try (LogCaptor logs = LogCaptor.forClass(AudioDiscoverySpikeService.class)) {
+            service.scanCvp(1);
+
+            assertThat(logs.getInfoLogs()).anySatisfy(message -> assertThat(message)
+                .contains("source=CVP", "container=cvp", "count=3", "limitReached=false", "elapsedMs=", "status=SUCCESS"));
+        }
+        verify(factory, never()).getBlobServiceClientWithIdentity(any());
+    }
+
+    @Test
+    void scanCar_listsEveryMatchingBlobWithZeroPrefix_whenBatchSizeIsSmallerThanListing() {
+        when(factory.getBlobServiceClient("test-connection")).thenReturn(storage);
+        when(factory.getBlobContainerClient("car", storage)).thenReturn(container);
+        when(container.listBlobs(any(ListBlobsOptions.class), any(Duration.class))).thenAnswer(invocation -> {
+            assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEqualTo("0");
+            return blobs;
+        });
+        when(blobs.iterator()).thenReturn(java.util.Collections.nCopies(3, new BlobItem()).iterator());
+
+        try (LogCaptor logs = LogCaptor.forClass(AudioDiscoverySpikeService.class)) {
+            service.scanCar(1);
+
+            assertThat(logs.getInfoLogs()).anySatisfy(message -> assertThat(message)
+                .contains("source=CAR", "container=car", "count=3", "limitReached=false", "elapsedMs=", "status=SUCCESS"));
+        }
+    }
+
+    @Test
+    void scanCombinedFaulty_logsFailedCvpAndUnattemptedCar_whenCvpContainerDoesNotExist() {
+        when(factory.getBlobServiceClient("test-connection")).thenReturn(storage);
+        when(factory.getBlobContainerClient("darts-container", storage)).thenReturn(container);
+        var failure = new IllegalStateException("Container unavailable");
+        when(container.listBlobs(any(ListBlobsOptions.class), any(Duration.class))).thenThrow(failure);
+
+        try (LogCaptor logs = LogCaptor.forClass(AudioDiscoverySpikeService.class)) {
+            assertThatThrownBy(() -> service.scanCombinedFaulty(10)).isSameAs(failure);
+
+            assertThat(logs.getWarnLogs()).anySatisfy(message -> assertThat(message)
+                .contains("source=CVP", "container=darts-container", "count=0", "elapsedMs=", "status=FAILED"));
+            assertThat(logs.getWarnLogs()).anySatisfy(message -> assertThat(message)
+                .contains("source=CAR", "container=car", "count=unknown", "status=NOT_ATTEMPTED", "failedSource=CVP"));
+            assertThat(logs.getWarnLogs()).anySatisfy(message -> assertThat(message)
+                .contains("mode=COMBINED_FAULTY", "attempted=1", "elapsedMs=", "status=FAILED"));
+        }
+        verify(factory, never()).getBlobContainerClient("car", storage);
+    }
+
+    @Test
+    void scan_logsSuccessfulCvpAndFailedCar_whenSecondContainerFails() {
+        when(factory.getBlobServiceClient("test-connection")).thenReturn(storage);
+        when(factory.getBlobContainerClient("cvp", storage)).thenReturn(container);
+        when(factory.getBlobContainerClient("car", storage)).thenReturn(container);
+        var failure = new IllegalStateException("CAR unavailable");
+        when(container.listBlobs(any(ListBlobsOptions.class), any(Duration.class)))
+            .thenReturn(blobs).thenThrow(failure);
+        when(blobs.iterator()).thenReturn(List.of(new BlobItem()).iterator());
+
+        try (LogCaptor logs = LogCaptor.forClass(AudioDiscoverySpikeService.class)) {
+            assertThatThrownBy(() -> service.scan(true, true, 10)).isSameAs(failure);
+
+            assertThat(logs.getInfoLogs()).anySatisfy(message -> assertThat(message)
+                .contains("source=CVP", "count=1", "status=SUCCESS"));
+            assertThat(logs.getWarnLogs()).anySatisfy(message -> assertThat(message)
+                .contains("source=CAR", "count=0", "elapsedMs=", "status=FAILED"));
+            assertThat(logs.getWarnLogs()).anySatisfy(message -> assertThat(message)
+                .contains("attempted=2", "status=FAILED"));
+            assertThat(logs.getWarnLogs()).noneMatch(message -> message.contains("status=NOT_ATTEMPTED"));
+        }
     }
 
     @Test
@@ -101,8 +184,8 @@ class AudioDiscoverySpikeServiceTest {
         java.util.Iterator<BlobItem> iterator = List.of(new BlobItem(), new BlobItem()).iterator();
         when(blobs.iterator()).thenReturn(iterator);
         service.scan(cvp, car, 1);
-        org.assertj.core.api.Assertions.assertThat(iterator.next()).isNotNull();
-        org.assertj.core.api.Assertions.assertThat(iterator.hasNext()).isFalse();
+        assertThat(iterator.next()).isNotNull();
+        assertThat(iterator.hasNext()).isFalse();
         verify(factory, never()).getBlobContainerClient(cvp ? "car" : "cvp", storage);
     }
 
@@ -122,7 +205,7 @@ class AudioDiscoverySpikeServiceTest {
         when(factory.getBlobContainerClient("cvp", storage)).thenReturn(container);
         when(factory.getBlobContainerClient("car", storage)).thenReturn(container);
         when(container.listBlobs(any(ListBlobsOptions.class), eq(Duration.ofSeconds(30)))).thenAnswer(invocation -> {
-            org.assertj.core.api.Assertions.assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEqualTo("dma16/");
+            assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEqualTo("dma16/");
             return blobs;
         });
         when(blobs.iterator()).thenAnswer(invocation -> List.of(new BlobItem()).iterator());

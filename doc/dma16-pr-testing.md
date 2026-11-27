@@ -1,61 +1,88 @@
 # DMA-16 PR blob-discovery comparison
 
-Deploy this branch using the normal PR pipeline. This adds three tasks, all disabled
-by migration V1_526: AudioSpikeCvp, AudioSpikeCar and AudioSpikeCombined.
-System users -55, -56 and -57 are reserved by this migration; recheck migration
-version and user IDs against the target branch before merging.
+## Tasks and source settings
 
-## Deployment settings
+| Task | Source | Prefix | Listing limit |
+| --- | --- | --- | --- |
+| AudioSpikeCvpExternal | CVP account, crime-recordings, Azure identity | AUDIO_SPIKE_CVP_PREFIX (default 2026/) | Task batch size (default 1000) |
+| AudioSpikeCvp | Existing DARTS account, darts-inbound-container | None | All blobs |
+| AudioSpikeCar | Existing DARTS account, darts-unstructured | AUDIO_SPIKE_CAR_PREFIX (default 0) | All matching blobs |
+| AudioSpikeCombined | Existing DARTS account, inbound then unstructured | AUDIO_SPIKE_PREFIX (default 0) | Batch size per source |
+| AudioSpikeCombinedFaulty | Existing DARTS account, darts-container then unstructured | None for CVP; 0 for CAR | All matching blobs if reached |
 
-Set these on the PR API deployment using its secret/configuration mechanism:
+All reads list metadata only. No downloads, uploads, copies, database checkpoints or
+blob-name logging are performed. "All CAR files" means all names starting with 0,
+not all names in the container. Full scans can take longer than the task's nine-minute
+execution limit; cancelled/failed scans do not establish a complete container count.
+A prefix is a case-sensitive blob-name prefix, not a filename extension filter.
 
-| Variable | Value                                                         |
-| --- |---------------------------------------------------------------|
-| AUDIO_SPIKE_CONNECTION_STRING | Secret reference for the dedicated Azure test storage account |
-| AUDIO_SPIKE_CVP_CONTAINER | darts-inbound-container                                                     |
-| AUDIO_SPIKE_CAR_CONTAINER | darts-unstructured                                                     |
-| AUDIO_SPIKE_PREFIX | 2026/                                                         |
+## Deployment and migration
 
-Never commit the connection string. The PR pod must have network access to storage.
-This implementation uses a connection string, not managed identity. No fallback to
-existing ingestion storage is used. No deployment/secret configuration has been
-applied automatically by these source changes.
+V1_526 remains unchanged. New migration V1_527 renames the old AudioSpikeCvp task to
+AudioSpikeCvpExternal and renames its existing system user (-55), preserving identity
+access configuration. It adds the new internal AudioSpikeCvp (-58) and
+AudioSpikeCombinedFaulty (-59), both disabled. The renamed external task is disabled
+too. CAR and combined registrations retain their schedules and existing settings.
+Recheck migration version and reserved negative IDs against the target branch before
+merging. The source identity is the pod's Azure identity, not the database system user.
 
-Upload known samples under 2026/ in both containers. Files are only listed, not
-downloaded, deleted, ingested or saved to the database. Blob names are not logged.
+Deploy the branch through the PR pipeline using enable_keep_helm and
+enable_darts_portal. These are normal automated tasks, not KEDA workers. After the
+migration, confirm all five names appear in task administration. Schedules are every
+ten minutes; leave every spike task disabled after testing.
 
-## Comparison
+Internal tasks reuse AZURE_STORAGE_CONNECTION_STRING unless the existing
+AUDIO_SPIKE_CONNECTION_STRING override is supplied. Container overrides remain
+AUDIO_SPIKE_CVP_CONTAINER and AUDIO_SPIKE_CAR_CONTAINER. The deliberately nonexistent
+CVP container for the faulty variant is fixed to darts-container and must stay absent
+for the failure experiment to be meaningful.
 
-1. Confirm all three tasks appear inactive in the PR portal.
-2. Use Run task for AudioSpikeCombined. Record counts, per-container times and total.
-3. Run AudioSpikeCvp and AudioSpikeCar separately. Record counts and timings.
-4. Repeat with the same sample. Counts should agree; batch size limits each source
-   to 1000 by default. limitReached=true means the sample may be truncated; increase
-   the task batch size to cover the sample. Listings always restart at the prefix.
-5. Compare schedules by enabling only the combined task, then disabling it and
-   enabling the two separate tasks. Cron is every ten minutes, with separate locks.
-   Separate tasks are independently schedulable but simultaneous execution is not
-   guaranteed by this spike.
-6. Change only the CVP spike container setting to a nonexistent name and redeploy.
-   Combined fails before scanning CAR. CAR-only still succeeds. Restore the setting.
-7. Leave all three tasks inactive after testing.
+External CVP retains AUDIO_SPIKE_CVP_ACCOUNT_URL (sandbox URL by default),
+AUDIO_SPIKE_CVP_SOURCE_CONTAINER (crime-recordings) and AUDIO_SPIKE_CVP_PREFIX (2026/).
+It uses DefaultAzureCredential, not a source account key or connection-string fallback.
+Confirm the approved pod identity, container read permissions, federation and network
+access. A 403 AuthorizationPermissionMismatch is a permission issue; a listing timeout
+needs network/identity investigation and does not establish successful authorisation.
+No Azure role, federation or firewall changes are made by this spike.
 
-Application Insights query (replace PR-NUMBER):
+## Run manually
+
+1. Confirm each task's enabled state and avoid overlapping scheduled runs during comparisons.
+2. Run internal CVP and CAR individually. Record counts and elapsedMs; their scans are
+   not truncated by the task batch size. Counts are blob counts, not ingested files.
+3. Run combined. Its configured 0 filter and batch cap are intentionally unchanged,
+   so its counts are not directly comparable to the broader individual scans.
+4. Run combined-faulty. Expect CVP/darts-container FAILED, CAR NOT_ATTEMPTED and the
+   overall run FAILED. It deliberately stops at the first exception, like combined.
+   A skipped source has count=unknown; that is not an empty-listing result.
+5. Run CAR separately after the faulty combined run to show it can succeed independently.
+6. Run external CVP separately after confirming source access. Different accounts and
+   data volumes prevent direct timing comparisons with internal sources.
+7. Repeat normal scans with stable data, equal filters/limits where a fair performance
+   comparison is intended, and comparable warm-up conditions. These are not controlled
+   benchmark measurements. Listing-page counts are not currently recorded.
+8. For schedule tests, enable only the desired variant(s), observe at least two ten-minute
+   intervals, then disable them. Separate schedules do not guarantee simultaneous execution.
+
+## Application Insights
 
 ```kusto
 traces
 | where timestamp > ago(24h)
-| where cloud_RoleInstance contains "darts-api-pr-PR-NUMBER-api"
+| where cloud_RoleInstance contains "darts-api-pr-PR-NUMBER"
 | where message contains "AudioDiscoverySpike"
 | project timestamp, cloud_RoleInstance, message
 | order by timestamp asc
 ```
 
-The service uses a run UUID to correlate container and total timings. Failed listing
-propagates to the existing framework; there is no successful total for a partial run.
-Combined runs list CVP then CAR sequentially. Timing includes client/listing overhead;
-this is not a controlled benchmark. Repeat and account for network/cache variability.
+Replace PR-NUMBER. Every run has a run UUID and mode. Every source logs STARTED and
+then SUCCESS or FAILED with container, source label, count and elapsedMs. Failed
+counts are partial counts only. A failed combined scan logs NOT_ATTEMPTED for each
+remaining source with the failedSource and reason, followed by an overall FAILED
+duration. Success has an overall SUCCESS duration. Error logs include exception type
+and stack trace. Configuration errors before scanning remain framework failures.
+The 30-second Azure listing-call timeout is separate from the task execution limit.
 
-This spike does not implement new-file tracking, the 30-minute delay, audio processing,
-managed identity or persisted scan checkpoints. It does not change the existing
-FindFilesFromCVPAndCAR task. Live PR deployment and evidence remain outstanding.
+Source labels are CVP, CAR and CVP_EXTERNAL. Use mode=COMBINED versus
+mode=COMBINED_FAULTY to distinguish the combined experiments. Full listings report
+limitReached=false; bounded scans reporting true may be truncated.

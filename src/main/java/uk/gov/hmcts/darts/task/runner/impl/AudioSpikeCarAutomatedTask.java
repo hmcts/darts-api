@@ -22,7 +22,7 @@ public class AudioSpikeCarAutomatedTask extends AbstractLockableAutomatedTask<Au
 
     @Override
     protected void runTask() {
-        service.scan(false, true, getAutomatedTaskBatchSize());
+        service.scanCar(getAutomatedTaskBatchSize());
     }
 
     @Override

@@ -16,5 +16,6 @@ public class AudioDiscoverySpikeConfig {
     private String cvpSourceContainer;
     private String cvpContainer;
     private String carContainer;
+    private String carPrefix;
     private String prefix;
 }
