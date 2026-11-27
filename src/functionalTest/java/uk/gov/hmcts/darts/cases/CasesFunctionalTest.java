@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CasesFunctionalTest extends FunctionalTest {
     private static final String CASES_PATH = "/cases";
     private static final String EVENTS_PATH = "/events";
-    private static final String CASE_NUMBER = "FUNC-CASE-" + randomAlphanumeric(7);
+    private static final String CASE_NUMBER = "FUNC-CASE-" + secure().nextAlphanumeric(7);
     private static final String COURTHOUSE = "SWANSEA";
     private static final String COURTROOM = "FUNC-CASE-1";
     private static int caseId;

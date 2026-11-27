@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.task.runner.HasLongId;
+import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
@@ -540,17 +541,18 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskVersionFiveTwoIntTest exten
     }
 
 
-    private <T> void assignExternalObjectDirectory(
+    private <T extends HasRetention> void assignExternalObjectDirectory(
         T entity, TriFunction<T, ObjectRecordStatusEnum, ExternalLocationTypeEnum, ExternalObjectDirectoryEntity> externalLocationTypeEnumConsumer,
         boolean assignArm, boolean storeArm) {
 
+        OffsetDateTime eventDate = entity.getRetainUntilTs().minusYears(100);
         ExternalObjectDirectoryEntity inbound = externalLocationTypeEnumConsumer.apply(entity, ObjectRecordStatusEnum.STORED, ExternalLocationTypeEnum.INBOUND);
-        inbound.setEventDateTs(OffsetDateTime.now().minusDays(1).minusYears(100));
+        inbound.setEventDateTs(eventDate);
         dartsDatabase.save(inbound);
 
         ExternalObjectDirectoryEntity unstructured = externalLocationTypeEnumConsumer
             .apply(entity, ObjectRecordStatusEnum.STORED, ExternalLocationTypeEnum.UNSTRUCTURED);
-        unstructured.setEventDateTs(OffsetDateTime.now().minusDays(1).minusYears(100));
+        unstructured.setEventDateTs(eventDate);
         dartsDatabase.save(unstructured);
 
         if (assignArm) {
@@ -558,7 +560,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskVersionFiveTwoIntTest exten
                 entity,
                 storeArm ? ObjectRecordStatusEnum.STORED : ObjectRecordStatusEnum.FAILURE,
                 ExternalLocationTypeEnum.ARM);
-            arm.setEventDateTs(OffsetDateTime.now().minusDays(1).minusYears(100));
+            arm.setEventDateTs(eventDate);
             dartsDatabase.save(arm);
 
         }

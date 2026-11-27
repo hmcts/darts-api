@@ -44,34 +44,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/medias";
-
-    @Autowired
-    MockMvc mockMvc;
-    @Autowired
-    SuperAdminUserStub superAdminUserStub;
-    @Autowired
-    UserAccountStub userAccountStub;
-    @MockitoBean
-    UserIdentity userIdentity;
-    @Autowired
-    MediaRequestStub mediaRequestStub;
-    @Autowired
-    MediaStub mediaStub;
-    @Autowired
-    TransformedMediaRepository transformedMediaRepository;
-
-    TransformedMediaEntity transformedMedia;
-
-
     private static final int DATE_BEFORE_INDEX = 0;
     private static final int DATE_NOW_INDEX = 1;
     private static final int DATE_AFTER_INDEX = 2;
+
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private SuperAdminUserStub superAdminUserStub;
+    @Autowired
+    private UserAccountStub userAccountStub;
+    @MockitoBean
+    private UserIdentity userIdentity;
+    @Autowired
+    private MediaRequestStub mediaRequestStub;
+    @Autowired
+    private MediaStub mediaStub;
+    @Autowired
+    private TransformedMediaRepository transformedMediaRepository;
 
     @Test
     void getMediaIsSuccessfulWithTransformedMediaId() throws Exception {
 
         // given
-        transformedMedia = setupData();
+        TransformedMediaEntity transformedMedia = setupData();
         MediaEntity mediaEntity = setupMediaBeforeAndAfter(transformedMedia).get(DATE_NOW_INDEX);
 
         // when
@@ -95,7 +91,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     @Test
     void getMediaIsUnprocessableEntityFailureAllParameters() throws Exception {
 
-        transformedMedia = setupData();
+        TransformedMediaEntity transformedMedia = setupData();
         setupMediaBeforeAndAfter(transformedMedia).get(DATE_NOW_INDEX);
 
         // when
@@ -117,7 +113,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     @Test
     void getMediaIsUnprocessableEntityFailureNoParameters() throws Exception {
 
-        transformedMedia = setupData();
+        TransformedMediaEntity transformedMedia = setupData();
         setupMediaBeforeAndAfter(transformedMedia).get(DATE_NOW_INDEX);
 
         // when
@@ -134,7 +130,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     void getMediaIsSuccessfulWithHearingId() throws Exception {
 
         // given
-        transformedMedia = setupData();
+        TransformedMediaEntity transformedMedia = setupData();
         List<MediaEntity> mediaEntitiesLst = setupMediaBeforeAndAfter(transformedMedia);
         MediaEntity preMediaEntityBefore = mediaEntitiesLst.get(DATE_BEFORE_INDEX);
         MediaEntity preMediaEntityNow = mediaEntitiesLst.get(DATE_NOW_INDEX);
@@ -183,7 +179,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     void getMediaIsSuccessfulWithMediaStartDate() throws Exception {
 
         // given
-        transformedMedia = setupData();
+        TransformedMediaEntity transformedMedia = setupData();
 
         List<MediaEntity> mediaEntitiesLst = setupMediaBeforeAndAfter(transformedMedia);
         MediaEntity mediaEntityNowBefore = mediaEntitiesLst.get(DATE_NOW_INDEX);
@@ -230,7 +226,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     void getMediaIsSuccessfulWithMediaEndDate() throws Exception {
 
         // given
-        transformedMedia = setupData();
+        TransformedMediaEntity transformedMedia = setupData();
         List<MediaEntity> mediaEntitiesLst = setupMediaBeforeAndAfter(transformedMedia);
         MediaEntity preMediaEntityBefore = mediaEntitiesLst.get(DATE_BEFORE_INDEX);
         MediaEntity preMediaEntityNow = mediaEntitiesLst.get(DATE_NOW_INDEX);
@@ -286,7 +282,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     void getMediaIsSuccessfulWithMediaStartDateAndEndDate() throws Exception {
 
         // given
-        transformedMedia = setupData();
+        TransformedMediaEntity transformedMedia = setupData();
         MediaEntity preMediaEntityNow = setupMediaBeforeAndAfter(transformedMedia).get(DATE_NOW_INDEX);
 
         // when
@@ -322,7 +318,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     void getMediaIsSuccessfulWithMediaOutsideDateRange() throws Exception {
 
         // given
-        transformedMedia = setupData();
+        TransformedMediaEntity transformedMedia = setupData();
         MediaEntity mediaEntityAfter = setupMediaBeforeAndAfter(transformedMedia).get(DATE_AFTER_INDEX);
         OffsetDateTime endDateNoResults = mediaEntityAfter.getEnd().plusDays(1);
 

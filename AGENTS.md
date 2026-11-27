@@ -1,12 +1,14 @@
 # Repository Guidelines
 
+These guidelines incorporate DARTS Best Practices (Backend) alongside the existing HMCTS standards and repository conventions.
+
 ## Project Structure & Module Organization
 
 `src/main/java` houses the Spring Boot app (root package `uk.gov.hmcts.darts`) across the standard layers:
 
 - `**/controller` / `**/api`: HTTP entry points.
 - `**/service`: business logic / orchestration.
-- `**/repository`: persistence (Spring Data / JDBC).
+- `common/repository`: shared persistence (Spring Data / JDBC); keep JPA repositories under `uk.gov.hmcts.darts.common.repository`.
 - `**/entity`: JPA entities.
 - `**/config`: Spring configuration.
 - `**/util`: shared helpers (check before adding new utilities).
@@ -41,7 +43,7 @@ Operational assets stay in `charts/`, `config/`, and `infrastructure/`. Helper s
 
 Prerequisites (see `README.md` for full detail):
 
-- Java 21
+- Java 25
 - ffmpeg
 - redis
 - Optional: Azurite for local Azure Storage testing
@@ -101,7 +103,7 @@ OpenAPI validation:
 
 ## Coding Style & Naming Conventions
 
-Target Java 21 with Spring Boot 3.5.16 and Lombok. Gradle explicitly runs Checkstyle and PMD, and Java compilation uses `-Xlint:unchecked -Werror`:
+Target Java 25 with Spring Boot 3.5.16 and Lombok. Gradle explicitly runs Checkstyle and PMD, and Java compilation uses `-Xlint:unchecked -Werror`:
 4-space indentation, 160-character lines, fail-fast warnings.
 
 Code style in this repo is effectively:
@@ -109,9 +111,14 @@ Code style in this repo is effectively:
 - 4-space indentation for Java.
 - Preferred max line length is **160** (see `config/checkstyle/checkstyle.xml` and `.idea/codeStyles/project.xml`).
 - Avoid wildcard imports; keep imports ordered per IntelliJ scheme.
+- Prefer explicit types when a value's type is not obvious. Use `var` thoughtfully where the type is clear from a constructor or literal; avoid hiding the
+  return type of a method or builder call when that makes the code harder to understand.
+- Use Java streams for straightforward transformations and filtering. Prefer ordinary control flow for complex, multi-line logic when it improves
+  readability and debugging.
 
-Use constructor injection and `@Slf4j` for logging. Packages use lowercase dot notation (root `uk.gov.hmcts.darts`); classes/enums stay PascalCase and beans end
-with `Service`, `Controller`, or `Repository`.
+Use final collaborators with constructor injection, preferably Lombok's `@RequiredArgsConstructor`, and `@Slf4j` for logging. Avoid dependency field injection
+in production classes; `@Autowired` field injection is acceptable in Spring tests. Packages use lowercase dot notation (root `uk.gov.hmcts.darts`);
+classes/enums stay PascalCase and beans end with `Service`, `Controller`, or `Repository`.
 
 For DTO/entity mapping, prefer existing MapStruct mappers under `**/mapper` with `@Mapper(componentModel = "spring")` over hand-written conversion logic.
 
@@ -124,6 +131,19 @@ code so formatting, imports, and annotations align with what CI enforces.
 
 ORM entities should default to `FetchType.LAZY`; when richer graphs are required, define JPA entity graphs or DTO projections rather than flipping
 associations to eager.
+
+Repository lookups returning a single entity or projection should return `Optional<>`; collection queries should return empty collections when no rows match.
+Use `getReferenceById()` when constructing a relationship from an existing ID without inspecting or changing the referenced entity. Use `findById()` when
+the entity's state must be read or changed, and remember that obtaining a reference does not check whether the ID exists.
+
+## OpenAPI Design
+
+- Choose the narrowest datatype that models the input, such as a boolean for a flag or an enum for a fixed set of values.
+- Declare input types, formats, allowed values, and size constraints in OpenAPI so validation can run before the controller method executes. Base constraints
+  on the API contract rather than inventing limits.
+- Use `minItems` / `maxItems` for array sizes and `minLength` / `maxLength` for string lengths. Represent dates as `type: string` with the appropriate `date`
+  or `date-time` format.
+- Reuse generated validation and the global HMCTS handlers instead of duplicating those checks in application code.
 
 ## Testing Guidelines
 
@@ -139,8 +159,18 @@ Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` an
 - Skip trivial getters/setters, data records, generated OpenAPI models/clients, or one-line delegators with no decision logic.
 - Target branch coverage for decision-heavy code; use parameterised tests for boundaries, property tests for round-trip mappers, and cover both happy/unhappy
   paths.
-- Mock external dependencies (repos, clients, UUID/time sources) to keep tests fast and deterministic, and name tests
-  `given_<precondition>_when_<action>_then_<outcome>`.
+- Mock external dependencies (repos, clients, UUID/time sources) to keep tests fast and deterministic.
+- Name tests `methodName_shouldExpectedBehaviour_whenConditions`, following DARTS Backend Best Practices. Start with the entry point being tested, then state
+  the expected behaviour and conditions, separating the BDD sections with underscores. For example:
+  `getJwkSource_shouldThrowAuthenticationException_whenJwkSetUriIsInvalid`.
+- Keep test names consistent with what the test actually does. For complex scenarios, use a concise BDD method name and a descriptive BDD `@DisplayName`,
+  preferably a multiline text block. The display name must capture the entry point, expectations, and conditions because reports may hide the method name.
+- Instantiate the class under test explicitly with its constructor and mocked collaborators. `@Mock` fields are fine; prefer explicit construction over
+  `@InjectMocks` so missing constructor dependencies are caught at compile time.
+- For asynchronous assertions, use bounded Awaitility polling or the existing `AwaitabilityUtil` helpers instead of fixed `Thread.sleep()` calls. Prefer
+  polling for a positive completion condition over waiting to prove that something has not happened.
+- Populate a clean database with only the state required for each integration test. Prefer `IntegrationBase` or its existing specialised subclasses and reuse
+  their database and external-system stubbing facilities. Add general-purpose helpers to shared support; keep scenario-specific setup local to the test.
 
 ## Code Review Guidance for Agents
 
@@ -165,6 +195,8 @@ Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` an
 - Push work to the data layer: use repository queries with pagination or projections instead of loading entire tables into memory.
 - Reuse Spring-managed clients (`JdbcTemplate`, `WebClient`, `ObjectMapper`) rather than creating per-request instances; close any manual resources via
   `try-with-resources`.
+- Prefer `java.io` streams and stream-capable SDK methods for large audio or binary payloads instead of loading complete files into memory. When changing
+  large-file flows, profile representative large files locally to confirm intermediate libraries do not buffer the entire payload.
 - Avoid chatty remote calls—reuse the Spring Cache layer (Redis when enabled, ConcurrentMap fallback locally) for reference data instead of inventing bespoke
   caches.
 - Mark read flows as `@Transactional(readOnly = true)` and prefer async event handling over busy polling to reduce locking and CPU usage.
@@ -186,6 +218,7 @@ Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` an
 - Each class owns one responsibility you can describe in a sentence; keep members cohesive and extract collaborators when logic diverges.
 - Prefer classes under ~500 lines and methods under ~50 lines; when code grows, extract expressive helpers.
 - Maintain the layer flow `controller → service → repository → domain/DTO`; only annotate beans that belong in each layer and avoid ad-hoc `@Autowired` usage.
+- Expose reusable feature functionality through the owning feature's non-HTTP API interface rather than coupling other features directly to its internals.
 - Limit `@Transactional` to service methods that set a boundary, keeping scopes small and purposeful.
 - Log deliberately: DEBUG for flow, INFO for lifecycle or key state changes, WARN/ERROR for problems; omit sensitive payloads.
 - Reuse utilities via dedicated helpers instead of cloning logic; inspect existing `.util` packages for candidates before writing new code, and when a method
@@ -196,6 +229,9 @@ Keep Jacoco coverage green in Sonar; justify any exclusions in `build.gradle` an
 Follow the repo log style: prefix messages with a ticket or imperative (`PO-896`, `fix(deps)`, `refactor:`) and keep them concise. Squash WIP commits so each
 change set is coherent and self-explanatory. PRs need a short description, linked Jira reference, and a tests-evidence checklist; include screenshots or API
 traces when responses or docs change. Confirm CI (Gradle, Sonar, Docker) is green before requesting review.
+
+For major and minor Renovate upgrades, review the release notes and inspect the affected code for compatibility. Before merging, log into the PR's deployed
+preview and exercise the flows affected by the dependency changes. Record the validation evidence in the PR.
 
 ## Security & Configuration Tips
 

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NodeRegistrationFunctionalTest extends FunctionalTest {
@@ -15,8 +15,8 @@ class NodeRegistrationFunctionalTest extends FunctionalTest {
 
     @Test
     void testRegisterDevice() {
-        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
-        String courtroomName = "FUNC-SWANSEA-ROOM-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + secure().nextAlphanumeric(7);
+        String courtroomName = "FUNC-SWANSEA-ROOM-" + secure().nextAlphanumeric(7);
 
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 

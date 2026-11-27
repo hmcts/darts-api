@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HearingsGetEventsFunctionalTest extends FunctionalTest {
@@ -28,12 +28,12 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
 
     @Test
     void success() {
-        String courtroomName = "FUNC-SWANSEA-ROOM-" + randomAlphanumeric(7);
+        String courtroomName = "FUNC-SWANSEA-ROOM-" + secure().nextAlphanumeric(7);
 
         createCourtroomAndCourthouse(COURTHOUSE, courtroomName);
 
         String randomCaseNumber = randomCaseNumber();
-        String randomEventText1 = randomAlphanumeric(15);
+        String randomEventText1 = secure().nextAlphanumeric(15);
         String requestBody = String.format(
             """
                 {
@@ -60,7 +60,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
             .post();
 
 
-        String randomEventText2 = randomAlphanumeric(15);
+        String randomEventText2 = secure().nextAlphanumeric(15);
         requestBody = String.format(
             """
                 {
@@ -87,7 +87,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
             .post();
 
 
-        String versionedEventText3 = randomAlphanumeric(15);
+        String versionedEventText3 = secure().nextAlphanumeric(15);
         requestBody = String.format(
             """
                 {

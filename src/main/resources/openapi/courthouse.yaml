@@ -9,6 +9,7 @@ servers:
 paths:
   /admin/courthouses:
     post:
+      operationId: adminCourthousesPost
       tags:
         - Courthouses
       summary: Adds a courthouse record with supplied details.
@@ -35,6 +36,7 @@ paths:
           description: Internal Server Error
   /courthouses:
     get:
+      operationId: courthousesGet
       tags:
         - Courthouses
       summary: Gets all courthouse records.
@@ -49,6 +51,7 @@ paths:
           description: Internal Server Error
   /admin/regions:
     get:
+      operationId: adminRegionsGet
       tags:
         - Courthouses
       summary: Gets all regions
@@ -63,6 +66,7 @@ paths:
           description: Internal Server Error
   /admin/courthouses/{courthouse_id}:
     get:
+      operationId: adminCourthousesCourthouseIdGet
       tags:
         - Courthouses
       summary: Get a courthouse record with specified id.

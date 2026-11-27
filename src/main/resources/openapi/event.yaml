@@ -13,6 +13,7 @@ servers:
 paths:
   /events:
     post:
+      operationId: eventsPost
       tags:
         - Event
       summary: An Endpoint which allows users to request and submit events.
@@ -112,6 +113,7 @@ paths:
 
   /courtlogs:
     get:
+      operationId: courtlogsGet
       tags:
         - Event
       summary: An Endpoint which allows users to request event courtlogs
@@ -166,6 +168,7 @@ paths:
 
 
     post:
+      operationId: courtlogsPost
       tags:
         - Event
       summary: An Endpoint which allows users to create a court log event.
@@ -621,8 +624,12 @@ paths:
               schema:
                 allOf:
                   - $ref: '#/components/schemas/AdminGetEventResponseDetails'
-                  - $ref: '#/components/schemas/AdminGetEventResponseDetailsCases'
-                  - $ref: '#/components/schemas/AdminGetEventResponseDetailsHearings'
+                  - type: object
+                    properties:
+                      cases:
+                        $ref: '#/components/schemas/AdminGetEventResponseDetailsCases/properties/cases'
+                      hearings:
+                        $ref: '#/components/schemas/AdminGetEventResponseDetailsHearings/properties/hearings'
 
         '404':
           description: Not Found - Event id
@@ -677,7 +684,7 @@ paths:
                 - eve_ids
               properties:
                 eve_ids:
-                  minLength: 1
+                  minItems: 1
                   type: array
                   items:
                     type: integer

@@ -29,7 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 
 @SpringBootTest(
     classes = {AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class,
@@ -132,7 +132,7 @@ public class FunctionalTest {
     }
 
     protected static String randomCaseNumber() {
-        return "FUNC-CASE-" + randomAlphanumeric(7);
+        return "FUNC-CASE-" + secure().nextAlphanumeric(7);
     }
 
     protected void createCourtroomAndCourthouse(String courthouseName, String courtroomName) {

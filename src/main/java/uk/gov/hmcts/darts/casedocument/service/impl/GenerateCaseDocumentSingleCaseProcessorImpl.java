@@ -30,7 +30,7 @@ import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 import java.time.Duration;
 import java.time.Instant;
 
-import static org.apache.commons.lang3.CharEncoding.UTF_8;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
 @RequiredArgsConstructor

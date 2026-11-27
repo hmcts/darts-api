@@ -14,6 +14,7 @@ servers:
 paths:
   /dailylists:
     post:
+      operationId: dailylistsPost
       tags:
         - DailyLists
       summary: Send Daily List
@@ -56,6 +57,7 @@ paths:
                 $ref: './problem.yaml'
 
     patch:
+      operationId: dailylistsPatch
       tags:
         - DailyLists
       summary: Update existing DailyList
@@ -79,6 +81,7 @@ paths:
 
   /dailylists/run:
     post:
+      operationId: dailylistsRunPost
       tags:
         - DailyLists
       summary: Runs dailylist processing task asynchronously.

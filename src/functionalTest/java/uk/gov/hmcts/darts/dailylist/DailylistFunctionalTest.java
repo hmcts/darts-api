@@ -21,7 +21,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -49,15 +49,15 @@ class DailylistFunctionalTest extends FunctionalTest {
     @ParameterizedTest
     @EnumSource(names = {"CPP", "XHB"})
     void postDailyList(SourceType sourceType) throws IOException {
-        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
-        String courtroomName = "FUNC-SWANSEA-ROOM-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + secure().nextAlphanumeric(7);
+        String courtroomName = "FUNC-SWANSEA-ROOM-" + secure().nextAlphanumeric(7);
 
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         String xmlDocument = getContentsFromFile("DailyList-Document.xml");
 
-        String uniqueId = "FUNC-UNIQUE-ID-" + randomAlphanumeric(7);
-        String messageId = "FUNC-UNIQUE-ID-" + randomAlphanumeric(7);
+        String uniqueId = "FUNC-UNIQUE-ID-" + secure().nextAlphanumeric(7);
+        String messageId = "FUNC-UNIQUE-ID-" + secure().nextAlphanumeric(7);
 
         PostDailyListRequest request = new PostDailyListRequest();
         request.setSourceSystem(sourceType.toString());
