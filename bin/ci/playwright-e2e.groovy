@@ -72,6 +72,9 @@ def executeShard(String index, String environment, String portalUrl, String apiU
     config.vaultSecrets = ['darts-${env}': [
         [secretType: 'Secret', name: 'AutomationTestUserName', version: '', envVariable: 'AUTOMATION_USERNAME'],
         [secretType: 'Secret', name: 'AutomationTestPassword', version: '', envVariable: 'AUTOMATION_PASSWORD'],
+        [secretType: 'Secret', name: 'DartsAdminUserName', version: '', envVariable: 'DARTS_ADMIN_USERNAME'],
+        [secretType: 'Secret', name: 'DartsTranscriberTestUsername', version: '', envVariable: 'AUTOMATION_TRANSCRIBER_USERNAME'],
+        [secretType: 'Secret', name: 'DartsExternalUsersTestPassword', version: '', envVariable: 'AUTOMATION_EXTERNAL_PASSWORD'],
         [secretType: 'Secret', name: 'AzureAdB2CFuncTestROPCClientId', version: '', envVariable: 'AAD_B2C_ROPC_CLIENT_ID'],
         [secretType: 'Secret', name: 'AzureAdB2CFuncTestROPCClientSecret', version: '', envVariable: 'AAD_B2C_ROPC_CLIENT_SECRET'],
         [secretType: 'Secret', name: 'AzureAdB2CFuncTestROPCGlobalUsername', version: '', envVariable: 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'],
