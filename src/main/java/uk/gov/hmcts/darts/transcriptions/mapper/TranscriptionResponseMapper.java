@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
@@ -62,6 +63,10 @@ import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil.getRequestedById;
 import static uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil.getRequestedByName;
@@ -201,12 +206,16 @@ public class TranscriptionResponseMapper {
             TranscriptionStatusEnum.REQUESTED
         ));
         transcriptionResponse.setRejectionReason(TranscriptionUtil.getTranscriptionCommentAtStatus(transcriptionEntity, TranscriptionStatusEnum.REJECTED));
+        transcriptionResponse.setIsArchived(false);
 
         final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
             .stream()
             .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime));
         latestTranscriptionDocumentEntity.ifPresent(
-            transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
+            transcriptionDocumentEntity -> {
+                transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName());
+                transcriptionResponse.setIsArchived(isArchived(transcriptionDocumentEntity));
+            });
 
         if (CollectionUtils.isNotEmpty(transcriptionEntity.getHearings())) {
             HearingEntity hearing = transcriptionEntity.getHearing();
@@ -247,6 +256,18 @@ public class TranscriptionResponseMapper {
         transcriptionResponse.setApproved(mapToTranscriptionWorkflowsApprovedTimestamp(transcriptionEntity.getTranscriptionWorkflowEntities()));
 
         return transcriptionResponse;
+    }
+
+    private boolean isArchived(TranscriptionDocumentEntity transcriptionDocumentEntity) {
+        List<ExternalObjectDirectoryEntity> storedEodEntities = transcriptionDocumentEntity.getExternalObjectDirectoryEntities().stream()
+            .filter(eodEntity -> eodEntity.getStatusId() == STORED.getId())
+            .toList();
+
+        boolean storedInArm = storedEodEntities.stream().anyMatch(eodEntity -> eodEntity.isForLocationType(ARM));
+        boolean storedLocally = storedEodEntities.stream()
+            .anyMatch(eodEntity -> eodEntity.isForLocationType(UNSTRUCTURED) || eodEntity.isForLocationType(DETS));
+
+        return storedInArm && !storedLocally;
     }
 
     private void mapReportingRestrictions(CourtCaseEntity courtCase, GetTranscriptionByIdResponse transcriptionResponse) {

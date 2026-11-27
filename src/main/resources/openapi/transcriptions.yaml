@@ -248,7 +248,6 @@ paths:
                 type: "TRANSCRIPTION_101"
                 title: "The requested transcription cannot be found"
                 status: 404
-
     patch:
       tags:
         - Transcription
@@ -444,6 +443,23 @@ paths:
                 type: "TRANSCRIPTION_101"
                 title: "The requested transcription cannot be found"
                 status: 404
+        '503':
+          description: ARM is unavailable for maintenance
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: './common.yaml#/components/schemas/ArmErrorCode'
+              example:
+                type: "ARM_DOWN_FOR_MAINTENTANCE_100"
+                title: "ARM is down for maintenance"
+                status: 503
     post:
       tags:
         - Transcription
@@ -1520,6 +1536,8 @@ components:
         - UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM
     GetTranscriptionByIdResponse:
       type: object
+      required:
+        - is_archived
       properties:
         legacy_comments:
           type: array
@@ -1574,6 +1592,10 @@ components:
         transcript_file_name:
           type: string
           example: file001.docx
+        is_archived:
+          type: boolean
+          description: Whether the latest transcript document is stored only in ARM.
+          example: false
         hearing_date:
           type: string
           format: date
