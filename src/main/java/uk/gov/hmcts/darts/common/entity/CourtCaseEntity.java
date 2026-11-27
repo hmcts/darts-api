@@ -63,7 +63,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements HasInt
     private Integer id;
 
     /**
-     * The reporting restriction maps to the EventHandlerEntity.event_name
+     * The reporting restriction maps to the EventHandlerEntity.event_name.
      */
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = EVH_ID)

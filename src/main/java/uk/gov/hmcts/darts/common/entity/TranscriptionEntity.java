@@ -197,6 +197,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity implements Ha
     /**
      * Get the court case associated with this transcription, using hearing as the preferred route.
      * If no hearings as associated, check for a directly related court case.
+     *
      * <p>
      * This is detailed further in <a href="https://tools.hmcts.net/jira/browse/DMP-2157">DMP-2157</a>
      * A potential enhancement for officially supporting this many-to-many is detailed in

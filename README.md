@@ -14,7 +14,7 @@
 
 ## Prerequisites
 
-- [Java 21](https://www.oracle.com/java)
+- [Java 25](https://www.oracle.com/java)
 - ffmpeg
 - redis
 

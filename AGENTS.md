@@ -41,7 +41,7 @@ Operational assets stay in `charts/`, `config/`, and `infrastructure/`. Helper s
 
 Prerequisites (see `README.md` for full detail):
 
-- Java 21
+- Java 25
 - ffmpeg
 - redis
 - Optional: Azurite for local Azure Storage testing
@@ -101,7 +101,7 @@ OpenAPI validation:
 
 ## Coding Style & Naming Conventions
 
-Target Java 21 with Spring Boot 3.5.16 and Lombok. Gradle explicitly runs Checkstyle and PMD, and Java compilation uses `-Xlint:unchecked -Werror`:
+Target Java 25 with Spring Boot 3.5.16 and Lombok. Gradle explicitly runs Checkstyle and PMD, and Java compilation uses `-Xlint:unchecked -Werror`:
 4-space indentation, 160-character lines, fail-fast warnings.
 
 Code style in this repo is effectively:

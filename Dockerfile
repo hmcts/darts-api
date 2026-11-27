@@ -15,7 +15,7 @@ RUN cp -p azcopy*/azcopy /usr/bin
 RUN chmod 777 /usr/bin/azcopy
 
  # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
-FROM hmctsprod.azurecr.io/base/java:21-distroless
+FROM hmctsprod.azurecr.io/base/java:25-distroless
 COPY --from=build /usr/bin/ffmpeg /usr/bin
 COPY --from=build /usr/bin/azcopy /usr/bin
 

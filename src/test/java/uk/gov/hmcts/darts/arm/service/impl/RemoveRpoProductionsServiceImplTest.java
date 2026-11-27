@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,11 +54,12 @@ class RemoveRpoProductionsServiceImplTest {
     private static final Integer EXECUTION_ID = 1;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
 
-    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+    private ArmRpoHelperMocks armRpoHelperMocks;
     private final Duration waitDuration = Duration.ofDays(30);
     
     @BeforeEach
     void setUp() {
+        armRpoHelperMocks = new ArmRpoHelperMocks();
         removeRpoProductionsService = new RemoveRpoProductionsServiceImpl(
               logApi, userIdentity, armRpoService, armRpoUtil, armRpoApi);
 
@@ -68,12 +70,17 @@ class RemoveRpoProductionsServiceImplTest {
         armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         lenient().when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
     }
+
+    @AfterEach
+    void tearDown() {
+        armRpoHelperMocks.close();
+    }
     
     @Test
     void removeOldArmRpoProductions_ShouldRemoveProductions_WhenRemovableExecutionsExist() {
         // given
         when(armRpoService.findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(
-            eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
+            eq(armRpoHelperMocks.getFailedRpoStatus()),
             any(OffsetDateTime.class)
         )).thenReturn(java.util.List.of(EXECUTION_ID));
         when(armRpoUtil.getBearerToken(any())).thenReturn(BEARER_TOKEN);
@@ -90,8 +97,8 @@ class RemoveRpoProductionsServiceImplTest {
     void removeOldArmRpoProductions_ShouldNotRemoveProductions_WhenNoRemovableExecutionsExist() {
         // given
         var currentTime = OffsetDateTime.now();
-        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
-        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getRemoveProductionRpoState());
+        armRpoExecutionDetailEntity.setArmRpoStatus(armRpoHelperMocks.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(armRpoHelperMocks.getRemoveProductionRpoState());
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         armRpoExecutionDetailEntity.setLastModifiedDateTime(
             currentTime.minusDays(20)
@@ -109,7 +116,7 @@ class RemoveRpoProductionsServiceImplTest {
     void removeOldArmRpoProductions_ShouldHandleException_WhenRpoServiceThrowsException() {
         // given
         when(armRpoService.findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(
-            eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
+            eq(armRpoHelperMocks.getFailedRpoStatus()),
             any(OffsetDateTime.class)
         )).thenThrow(new RuntimeException("Mocked RuntimeException"));
 
@@ -127,7 +134,7 @@ class RemoveRpoProductionsServiceImplTest {
     void removeOldArmRpoProductions_ShouldHandleException_WhenArmApiServiceThrowsException() {
         // given
         when(armRpoService.findIdsByStatusWithProductionIdAndLastModifiedDateTimeAfter(
-            eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()),
+            eq(armRpoHelperMocks.getFailedRpoStatus()),
             any(OffsetDateTime.class)
         )).thenReturn(java.util.List.of(EXECUTION_ID));
         
