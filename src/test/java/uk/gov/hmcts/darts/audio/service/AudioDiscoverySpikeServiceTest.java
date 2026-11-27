@@ -47,8 +47,8 @@ class AudioDiscoverySpikeServiceTest {
         config.setConnectionString("test-connection");
         config.setCvpContainer("cvp");
         config.setCarContainer("car");
-        config.setCarPrefix("0");
-        config.setPrefix("dma16/");
+        config.setCarPrefix("");
+        config.setPrefix("");
         service = new AudioDiscoverySpikeService(factory, config);
     }
 
@@ -108,11 +108,11 @@ class AudioDiscoverySpikeServiceTest {
     }
 
     @Test
-    void scanCar_listsEveryMatchingBlobWithZeroPrefix_whenBatchSizeIsSmallerThanListing() {
+    void scanCar_listsEveryBlobWithoutPrefix_whenBatchSizeIsSmallerThanListing() {
         when(factory.getBlobServiceClient("test-connection")).thenReturn(storage);
         when(factory.getBlobContainerClient("car", storage)).thenReturn(container);
         when(container.listBlobs(any(ListBlobsOptions.class), any(Duration.class))).thenAnswer(invocation -> {
-            assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEqualTo("0");
+            assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEmpty();
             return blobs;
         });
         when(blobs.iterator()).thenReturn(java.util.Collections.nCopies(3, new BlobItem()).iterator());
@@ -200,12 +200,12 @@ class AudioDiscoverySpikeServiceTest {
     }
 
     @Test
-    void given_combinedScan_when_successful_then_scanBothContainersWithPrefix() {
+    void scan_scansBothContainersWithoutPrefix_whenSuccessful() {
         when(factory.getBlobServiceClient("test-connection")).thenReturn(storage);
         when(factory.getBlobContainerClient("cvp", storage)).thenReturn(container);
         when(factory.getBlobContainerClient("car", storage)).thenReturn(container);
         when(container.listBlobs(any(ListBlobsOptions.class), eq(Duration.ofSeconds(30)))).thenAnswer(invocation -> {
-            assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEqualTo("dma16/");
+            assertThat(((ListBlobsOptions) invocation.getArgument(0)).getPrefix()).isEmpty();
             return blobs;
         });
         when(blobs.iterator()).thenAnswer(invocation -> List.of(new BlobItem()).iterator());

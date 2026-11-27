@@ -25,12 +25,9 @@ public class AudioDiscoverySpikeService {
     private final DataManagementAzureClientFactory factory;
     private final AudioDiscoverySpikeConfig config;
 
-    // Retains the combined task's existing prefixes, sequence and batch limits.
+    // Scans the configured containers sequentially using the task batch limit.
     public void scan(boolean cvp, boolean car, int batchSize) {
         validateSettings(config.getConnectionString(), batchSize);
-        if (!StringUtils.hasText(config.getPrefix())) {
-            throw new IllegalArgumentException("Configure the combined scan prefix");
-        }
         if (!cvp && !car) {
             throw new IllegalArgumentException("Select at least one source");
         }

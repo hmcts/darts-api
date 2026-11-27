@@ -119,8 +119,8 @@ darts:
     connection-string: ${AUDIO_SPIKE_CONNECTION_STRING:${AZURE_STORAGE_CONNECTION_STRING:}}
     cvp-container: ${AUDIO_SPIKE_CVP_CONTAINER:darts-inbound-container}
     car-container: ${AUDIO_SPIKE_CAR_CONTAINER:darts-unstructured}
-    car-prefix: ${AUDIO_SPIKE_CAR_PREFIX:0}
-    prefix: ${AUDIO_SPIKE_PREFIX:0}
+    car-prefix: ${AUDIO_SPIKE_CAR_PREFIX:}
+    prefix: ${AUDIO_SPIKE_PREFIX:}
   async:
     enabled: true
   shutdown:
