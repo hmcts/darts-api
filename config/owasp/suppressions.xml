@@ -9,6 +9,19 @@
   </suppress>
 
   <!--Please add all the false positives under the below section-->
+  <suppress until="2027-01-08Z">
+    <notes>
+      Review this suppression by 8 January 2027, after the festive deployment freeze.
+      CVE-2026-33117 affects local cryptographic verification in com.azure:azure-security-keyvault-keys before 4.10.6.
+      These Azure core, HTTP transport and JSON artifacts do not contain the affected Key Vault cryptography code.
+      Scope this suppression to these artifacts so azure-security-keyvault-keys remains checked if introduced.
+      https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-33117
+      https://github.com/Azure/azure-sdk-for-java/pull/48476
+      https://github.com/advisories/GHSA-97jf-46m3-8953
+    </notes>
+    <packageUrl regex="true">^pkg:maven/com\.azure/(azure-core|azure-core-http-netty|azure-json)@.*$</packageUrl>
+    <cve>CVE-2026-33117</cve>
+  </suppress>
   <suppress>
     <notes>False Positive
       https://nvd.nist.gov/vuln/detail/CVE-2023-34047 affects GraphQL library, which is unused in this project.
