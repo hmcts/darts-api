@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.cases.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,8 @@ class CaseControllerAuthorisationIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {
-        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
+        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT",
+        "HMCTS_TRANSCRIPTION_HUB"
     }, mode = EXCLUDE)
     void caseEndpoints_shouldForbidAccess_whenRoleLacksConfiguredGlobalCaseAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
@@ -73,6 +75,18 @@ class CaseControllerAuthorisationIntTest extends IntegrationBase {
         mockMvc.perform(get("/cases/{case_id}/events", hearing.getCourtCase().getId())
                             .queryParam("page_number", "1").queryParam("page_size", "25"))
             .andExpect(status().isForbidden());
+        mockMvc.perform(get("/cases/{case_id}/transcripts", hearing.getCourtCase().getId())).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void hubRole_shouldAccessRequestJourneyCaseEndpointsButNotCaseTranscriptRequests() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.HMCTS_TRANSCRIPTION_HUB);
+
+        mockMvc.perform(get("/cases/{case_id}", hearing.getCourtCase().getId())).andExpect(status().isOk());
+        mockMvc.perform(get("/cases/{case_id}/hearings", hearing.getCourtCase().getId())).andExpect(status().isOk());
+        mockMvc.perform(get("/cases/{case_id}/events", hearing.getCourtCase().getId())
+                            .queryParam("page_number", "1").queryParam("page_size", "25"))
+            .andExpect(status().isOk());
         mockMvc.perform(get("/cases/{case_id}/transcripts", hearing.getCourtCase().getId())).andExpect(status().isForbidden());
     }
 }

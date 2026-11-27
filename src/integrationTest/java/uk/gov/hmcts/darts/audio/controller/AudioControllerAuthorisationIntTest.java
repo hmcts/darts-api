@@ -37,7 +37,8 @@ class AudioControllerAuthorisationIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {
-        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
+        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT",
+        "HMCTS_TRANSCRIPTION_HUB"
     }, mode = INCLUDE)
     void audioEndpoint_shouldAllowAccess_whenRoleHasConfiguredGlobalAudioAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
@@ -48,7 +49,8 @@ class AudioControllerAuthorisationIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {
-        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT"
+        "JUDICIARY", "SUPER_ADMIN", "SUPER_USER", "RCJ_APPEALS", "TRANSLATION_QA", "DARTS", "JUDICIAL_CONDUCT",
+        "HMCTS_TRANSCRIPTION_HUB"
     }, mode = EXCLUDE)
     void audioEndpoint_shouldForbidAccess_whenRoleLacksConfiguredGlobalAudioAccess(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
