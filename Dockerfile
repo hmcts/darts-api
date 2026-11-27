@@ -25,4 +25,5 @@ COPY lib/applicationinsights.json /opt/app/
 COPY build/libs/darts-api.jar /opt/app/
 
 EXPOSE 4550
+# Native access for Netty/Tomcat classpath consumers; see README.md.
 ENTRYPOINT ["java","--enable-native-access=ALL-UNNAMED","-Duser.timezone=UTC","-jar","/opt/app/darts-api.jar"]

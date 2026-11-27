@@ -192,11 +192,11 @@ tasks.withType(JavaCompile).configureEach {
 // https://github.com/gradle/gradle/issues/16791
 tasks.withType(JavaExec).configureEach {
   javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-  jvmArgs '--enable-native-access=ALL-UNNAMED'
 }
 
 tasks.withType(Test).configureEach {
   useJUnitPlatform()
+  // Tests exercise the same classpath dependencies, plus native test tooling.
   jvmArgs '--enable-native-access=ALL-UNNAMED'
 
   maxHeapSize = '1G'
@@ -564,7 +564,11 @@ dependencyManagement {
   }
 }
 
-mainClassName = 'uk.gov.hmcts.darts.Application'
+application {
+  mainClass = 'uk.gov.hmcts.darts.Application'
+  // Native access for Netty/Tomcat in bootRun, run and distribution scripts; see README.md.
+  applicationDefaultJvmArgs = ['--enable-native-access=ALL-UNNAMED']
+}
 
 bootJar {
   archiveFileName = "darts-api.jar"
