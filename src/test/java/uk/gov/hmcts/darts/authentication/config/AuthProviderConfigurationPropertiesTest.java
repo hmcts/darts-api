@@ -19,9 +19,8 @@ class AuthProviderConfigurationPropertiesTest {
         var properties = new ExternalAuthProviderConfigurationProperties();
         properties.setJwkSetUri("https://example.com/.well-known/jwks.json");
 
-        try (var source = (Closeable) properties.getJwkSource()) {
-            assertThat(source).isNotNull();
-        }
+        var source = properties.getJwkSource();
+        assertThat(source).isNotNull();
     }
 
     @ParameterizedTest
