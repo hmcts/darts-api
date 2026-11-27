@@ -33,10 +33,10 @@ public class AudioDiscoverySpikeService {
         }
         var sources = new ArrayList<Source>();
         if (cvp) {
-            sources.add(new Source(CVP, config.getCvpContainer(), config.getPrefix(), true));
+            sources.add(new Source(CVP, config.getCvpContainer(), config.getPrefix(), false));
         }
         if (car) {
-            sources.add(new Source(CAR, config.getCarContainer(), config.getPrefix(), true));
+            sources.add(new Source(CAR, config.getCarContainer(), config.getPrefix(), false));
         }
         run("COMBINED", sources, () -> factory.getBlobServiceClient(config.getConnectionString()), batchSize);
     }
