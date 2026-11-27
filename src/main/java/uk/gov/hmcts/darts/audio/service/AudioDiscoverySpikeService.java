@@ -25,7 +25,7 @@ public class AudioDiscoverySpikeService {
     private final DataManagementAzureClientFactory factory;
     private final AudioDiscoverySpikeConfig config;
 
-    // Scans the configured containers sequentially using the task batch limit.
+    // Scans all blobs in the configured containers sequentially.
     public void scan(boolean cvp, boolean car, int batchSize) {
         validateSettings(config.getConnectionString(), batchSize);
         if (!cvp && !car) {

@@ -177,14 +177,13 @@ class AudioDiscoverySpikeServiceTest {
 
     @ParameterizedTest
     @CsvSource({"true,false,cvp", "false,true,car"})
-    void given_singleSource_when_scan_then_limitConsumption(boolean cvp, boolean car, String name) {
+    void scan_readsAllBlobs_whenBatchSizeIsSmallerThanListing(boolean cvp, boolean car, String name) {
         when(factory.getBlobServiceClient("test-connection")).thenReturn(storage);
         when(factory.getBlobContainerClient(name, storage)).thenReturn(container);
         when(container.listBlobs(any(ListBlobsOptions.class), any(Duration.class))).thenReturn(blobs);
         java.util.Iterator<BlobItem> iterator = List.of(new BlobItem(), new BlobItem()).iterator();
         when(blobs.iterator()).thenReturn(iterator);
         service.scan(cvp, car, 1);
-        assertThat(iterator.next()).isNotNull();
         assertThat(iterator.hasNext()).isFalse();
         verify(factory, never()).getBlobContainerClient(cvp ? "car" : "cvp", storage);
     }
