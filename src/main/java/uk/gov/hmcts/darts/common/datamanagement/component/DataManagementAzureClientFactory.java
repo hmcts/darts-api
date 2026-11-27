@@ -11,5 +11,7 @@ public interface DataManagementAzureClientFactory {
 
     BlobServiceClient getBlobServiceClient(String containerString);
 
+    BlobServiceClient getBlobServiceClientWithIdentity(String accountUrl);
+
     BlobServiceClient getBlobServiceClientWithSasEndpoint(String sasEndpoint);
 }

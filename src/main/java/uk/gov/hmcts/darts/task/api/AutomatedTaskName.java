@@ -9,6 +9,7 @@ import java.util.Map;
  * The task names map directly to the task names in the table automated_tasks, so there should only be one task per name.
  */
 @Getter
+@SuppressWarnings("PMD.ExcessivePublicCount") // Each registered automated task requires a public enum constant.
 public enum AutomatedTaskName {
     PROCESS_DAILY_LIST_TASK_NAME("ProcessDailyList"),
     CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME("CloseOldUnfinishedTranscriptions"),
@@ -47,7 +48,12 @@ public enum AutomatedTaskName {
     ARM_RPO_BACKLOG_CATCHUP("ArmRpoBacklogCatchup", Constants.AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE),
     CLEAN_UP_DETS_DATA("CleanUpDetsData"),
     INBOUND_AUDIO_FAILURE_CORRECTION_TASK_NAME("InboundAudioFailureCorrection"),
-    FIND_FILES_FROM_CVP_AND_CAR_TASK_NAME("FindFilesFromCVPAndCAR");
+    FIND_FILES_FROM_CVP_AND_CAR_TASK_NAME("FindFilesFromCVPAndCAR"),
+    AUDIO_SPIKE_CVP("AudioSpikeCvp"),
+    AUDIO_SPIKE_CAR("AudioSpikeCar"),
+    AUDIO_SPIKE_COMBINED("AudioSpikeCombined"),
+    AUDIO_SPIKE_CVP_EXTERNAL("AudioSpikeCvpExternal"),
+    AUDIO_SPIKE_COMBINED_FAULTY("AudioSpikeCombinedFaulty");
 
     private final String taskName;
     private final String conditionalOnSpEL;
